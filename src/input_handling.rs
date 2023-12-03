@@ -37,7 +37,7 @@ fn move_tile(
     mut commands: Commands,
     cursor_position: Res<CursorPosition>,
     mouse: Res<Input<MouseButton>>,
-    mut target: Query<&GridLocation, With<Tile>>
+    mut target: Query<&GridLocation, With<TileType>>
 ) {
     if !mouse.pressed(MouseButton::Left) {
         return;
