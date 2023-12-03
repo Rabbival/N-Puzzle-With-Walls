@@ -12,6 +12,7 @@ impl Plugin for AssetLoaderPlugin{
     }
 }
 
+#[derive(Component)]
 pub enum TileSprite{
     One,
     Two,
@@ -77,7 +78,7 @@ fn add_sprite_to_indexable<T: Component + IndexableSprite>(
     atlas: Res<T::AtlasHandleWrapper>,
 ) {
     for character in &sprites {
-        let handle = atlas.deref().deref();
+        let handle = *atlas;
         commands.entity(character).insert((
             handle.clone(),
             TextureAtlasSprite {

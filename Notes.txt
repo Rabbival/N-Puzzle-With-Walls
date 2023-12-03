@@ -1,2 +1,5 @@
 *A solvable puzzle began as a solved one
-*Don't forget to do unit tests
+*Unit tests for moving tiles (in input_handler): 
+	-check that a tile can't be moved to an occupied space
+	-check that clicking outside of the grid space throws an error
+	-

@@ -1,0 +1,1 @@
+for<'a, 'b, 'c, 'd, 'e> fn(bevy::prelude::Commands<'a, 'b>, bevy::prelude::Query<'c, 'd, bevy::prelude::Entity, (bevy::prelude::Added<TileSprite>, bevy::prelude::Without<bevy::prelude::TextureAtlasSprite>)>, bevy::prelude::Res<'e, <TileSprite as IndexableSprite>::AtlasHandleWrapper>) {add_sprite_to_indexable::<TileSprite>}
