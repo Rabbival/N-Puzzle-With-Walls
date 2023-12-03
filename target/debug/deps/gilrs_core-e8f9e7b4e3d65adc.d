@@ -1,0 +1,10 @@
+D:\Rust\fifteen_puzzle\target\debug\deps\gilrs_core-e8f9e7b4e3d65adc.rmeta: C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\lib.rs C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\mod.rs C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\windows_wgi\mod.rs C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\windows_wgi\ff.rs C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\windows_wgi\gamepad.rs C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\utils.rs
+
+D:\Rust\fifteen_puzzle\target\debug\deps\gilrs_core-e8f9e7b4e3d65adc.d: C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\lib.rs C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\mod.rs C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\windows_wgi\mod.rs C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\windows_wgi\ff.rs C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\windows_wgi\gamepad.rs C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\utils.rs
+
+C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\lib.rs:
+C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\mod.rs:
+C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\windows_wgi\mod.rs:
+C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\windows_wgi\ff.rs:
+C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\platform\windows_wgi\gamepad.rs:
+C:\Users\rabbi\.cargo\registry\src\index.crates.io-6f17d22bba15001f\gilrs-core-0.5.9\src\utils.rs:
