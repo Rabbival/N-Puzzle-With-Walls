@@ -1,3 +1,3 @@
 fn main() {
-    playground_with_astar::prelude::main();
+    fifteen_puzzle::prelude::main();
 }

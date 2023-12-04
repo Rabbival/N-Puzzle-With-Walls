@@ -1,25 +1,17 @@
-use std::{
-    collections::HashSet,
-    ops::{Index,IndexMut},
-};
+use std::ops::{Index,IndexMut};
 
 use bevy::{prelude::*, utils::HashMap};
 
-use crate::prelude::{TileType, BasicDirection};
+use crate::prelude::{Tile, TileType, BasicDirection};
 
 pub const GRID_SIZE: u32 = 4;
 
 #[derive(Resource)]
 pub struct Grid {
-    pub tile_entities: [[TileType; GRID_SIZE as usize]; GRID_SIZE as usize]
+    pub tiles: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize]
 }
 
-#[derive(Resource)]
-pub struct ConnectedComponents {
-    pub components: Vec<HashSet<GridLocation>>,
-}
-
-#[derive(Component, Eq, PartialEq, Hash, Clone, Debug, Deref, DerefMut)]
+#[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug, Deref, DerefMut)]
 pub struct GridLocation(pub IVec2);
 
 pub struct BoardPlugin;
@@ -33,17 +25,25 @@ impl Plugin for BoardPlugin {
 impl Default for Grid {
     fn default() -> Self {
         Self {
-            tile_entities: [[TileType::Empty; GRID_SIZE as usize]; GRID_SIZE as usize],
+            tiles: [[Tile::default(); GRID_SIZE as usize]; GRID_SIZE as usize],
         }
     }
 }
 
 impl Grid {
-    pub fn get_all_direct_neighbors(&self, location: &GridLocation) -> HashMap<BasicDirection, TileType>{
-        let mut valid_neighbors:HashMap<BasicDirection, TileType>=HashMap::new();
+    pub fn switch_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation){
+        let temp_tile=self[first];
+        self[first]=self[second];
+        self[second]=temp_tile;
+    }
+
+    pub fn get_all_direct_neighbor_locations(&self, location: &GridLocation) 
+        -> HashMap<BasicDirection, GridLocation>
+    {
+        let mut valid_neighbors:HashMap<BasicDirection, GridLocation>=HashMap::new();
         for dir in BasicDirection::get_directions_as_vec(){
             if let Some(neighbor_location) = self.neighbor_location(&location, &dir){
-                valid_neighbors.insert(dir,self[location]);
+                valid_neighbors.insert(dir,neighbor_location);
             }
         }
         valid_neighbors
@@ -64,7 +64,7 @@ impl Grid {
     }
 
     pub fn occupied(&self, location: &GridLocation) -> bool {
-        match self[location]{
+        match self[location].tile_type{
             TileType::Empty=>false,
             TileType::Numbered(_)=>Grid::valid_index(location)
         }
@@ -79,18 +79,19 @@ impl Grid {
 }
 
 impl Index<&GridLocation> for Grid {
-    type Output = TileType;
+    type Output = Tile;
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
-        &self.tile_entities[index.x as usize][index.y as usize]
+        &self.tiles[index.x as usize][index.y as usize]
     }
 }
 
 impl IndexMut<&GridLocation> for Grid {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
-        &mut self.tile_entities[index.x as usize][index.y as usize]
+        &mut self.tiles[index.x as usize][index.y as usize]
     }
 }
+
 
 impl GridLocation {
     pub fn new(x: i32, y: i32) -> Self {

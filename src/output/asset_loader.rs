@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::ops::Deref;
 
 #[derive(Resource, Deref, DerefMut)]
 pub struct SpriteAtlas(Handle<TextureAtlas>);
@@ -78,7 +79,7 @@ fn add_sprite_to_indexable<T: Component + IndexableSprite>(
     atlas: Res<T::AtlasHandleWrapper>,
 ) {
     for character in &sprites {
-        let handle = *atlas;
+        let handle = atlas.deref().deref();
         commands.entity(character).insert((
             handle.clone(),
             TextureAtlasSprite {
@@ -89,16 +90,8 @@ fn add_sprite_to_indexable<T: Component + IndexableSprite>(
     }
 }
 
-fn update_indexable_sprite<T: Component + IndexableSprite>(
-    mut sprites: Query<(&T, &mut TextureAtlasSprite)>,
-) {
-    for (indexable, mut sprite) in sprites.iter_mut() {
-        sprite.index = indexable.index();
-    }
-}
-
 pub trait IndexableSprite {
-    type AtlasHandleWrapper: Resource + std::ops::Deref<Target = Handle<TextureAtlas>>;
+    type AtlasHandleWrapper: Resource + Deref<Target = Handle<TextureAtlas>>;
 
     fn index(&self) -> usize;
 }

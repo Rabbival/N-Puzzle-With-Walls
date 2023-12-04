@@ -30,7 +30,8 @@ pub fn main() {
         InputHandlerPlugin,
         AssetLoaderPlugin,
         BoardManagerPlugin,
-        BoardPlugin
+        BoardPlugin,
+        GraphicsPlugin
     ))
     ;
 

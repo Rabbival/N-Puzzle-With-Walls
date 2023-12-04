@@ -2,7 +2,7 @@ use enum_iterator::{all, Sequence};
 
 pub const BASIC_DIRECTION_COUNT:u8=4;
 
-#[derive(Debug, Sequence, PartialEq, Eq, Hash, PartialOrd)]
+#[derive(Debug, Sequence, PartialEq, Eq, Hash, PartialOrd, Clone, Copy)]
 pub enum BasicDirection{
     Up,
     Right,
@@ -15,7 +15,7 @@ impl BasicDirection {
         *self as u8
     }
 
-    pub fn opposite_direction(&self) -> Self{
+    pub fn opposite_direction(&self) -> Option<Self>{
         Self::index_to_dir(self.opposite_direction_index())
     }
     
@@ -27,12 +27,13 @@ impl BasicDirection {
 
 //static functions
 impl BasicDirection{
-    pub fn index_to_dir(index: u8) -> Self{
+    pub fn index_to_dir(index: u8) -> Option<Self>{
         match index{
-            0=>BasicDirection::Up,
-            1=>BasicDirection::Right,
-            2=>BasicDirection::Down,
-            3=>BasicDirection::Left
+            0=>Some(BasicDirection::Up),
+            1=>Some(BasicDirection::Right),
+            2=>Some(BasicDirection::Down),
+            3=>Some(BasicDirection::Left),
+            _=>None
         }
     }
 

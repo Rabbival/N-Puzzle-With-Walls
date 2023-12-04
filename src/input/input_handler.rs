@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, logic::board_manager};
 
 #[derive(Resource, Default)]
 pub struct CursorPosition {
@@ -11,7 +11,7 @@ pub struct InputHandlerPlugin;
 impl Plugin for InputHandlerPlugin {
     fn build(&self, app: &mut App) {
         app
-        .add_systems(Update, (move_tile, update_cursor));
+        .add_systems(Update, (update_cursor, move_tile_input).chain());
     }
 }
 
@@ -33,22 +33,16 @@ pub fn update_cursor(
     }
 }
 
-fn move_tile(
-    mut commands: Commands,
+fn move_tile_input(
     cursor_position: Res<CursorPosition>,
     mouse: Res<Input<MouseButton>>,
-    mut target: Query<&GridLocation, With<TileType>>
+    board_grid: Res<Grid>,
 ) {
     if !mouse.pressed(MouseButton::Left) {
         return;
     }
 
     if let Some(location) = GridLocation::from_world(cursor_position.world_position) {
-        if !board_grid.occupied(&location) {
-            return;
-        }
-        
-        //check if there's an empty space next to it (in straight line)
-        //if there is, move it and update the grid
+        board_manager::move_tile_logic(location, board_grid);
     }
 }
