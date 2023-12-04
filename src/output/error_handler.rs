@@ -8,5 +8,4 @@ pub enum InputHandlerError{
 pub enum BoardGenerationError{
     DirectionCouldntBeFlipped,
     DirectionNotFoundInMap,
-    BoardAlreadySolved
 }

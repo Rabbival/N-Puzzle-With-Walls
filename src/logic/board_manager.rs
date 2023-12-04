@@ -1,7 +1,7 @@
 use crate::{prelude::*, output::{error_handler, print_to_console}};
 use rand::Rng;
 
-const LOCATION_SHIFT_BOUNDS:(u8, u8) = (3, 5);
+const LOCATION_SHIFT_BOUNDS:(u8, u8) = (8, 22);
 const BOARD_GENERATION_ATTEMPTS:u8=5;
 
 pub struct BoardManagerPlugin;
@@ -20,7 +20,6 @@ fn generate_board_or_panic(mut commands: Commands){
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
         let attempt_result=generate_board(
             &mut commands,
-            &solved_board,
             (empty_tile_location.clone(), solved_board.clone())
         );
         if let Ok(()) = attempt_result { return; } //generation successful
@@ -32,23 +31,31 @@ fn generate_board_or_panic(mut commands: Commands){
 /// would always be solvable (if we shift in reverse)
 fn generate_board(
     commands: &mut Commands,
-    solved_board: &Board,
     (mut empty_tile_location, mut board): (GridLocation, Board)
 ) -> Result<(), error_handler::BoardGenerationError>
 {
     let mut rng = rand::thread_rng();
-    let location_shift_count=rng.gen_range(LOCATION_SHIFT_BOUNDS.0..LOCATION_SHIFT_BOUNDS.1);
+    let mut location_shift_count=rng.gen_range(LOCATION_SHIFT_BOUNDS.0..LOCATION_SHIFT_BOUNDS.1);
+    //preventing the generation of a solved board
+    if location_shift_count%2 == 0 {
+        location_shift_count+=1;
+    }
 
     let mut shift_direction_sequence:Vec<BasicDirection> = vec!();
     //we'll never shift with the location below on the first shift since there's none
     let mut previous_shift_direction = BasicDirection::Up; 
     for _shift in 0..location_shift_count{
-        let optional_directions=
+        let mut optional_directions=
             board.get_all_direct_neighbor_locations(&empty_tile_location);
+
         //don't want to shift back and forth
-        if let None = previous_shift_direction.opposite_direction(){
+        let opposite_of_previous_shift=previous_shift_direction.opposite_direction();
+        if let None = opposite_of_previous_shift{
             return Err(error_handler::BoardGenerationError::DirectionCouldntBeFlipped);
         }
+        optional_directions.remove(&opposite_of_previous_shift.unwrap());
+
+        //choose, register, update board
         let valid_directions:Vec<&BasicDirection>=optional_directions.keys().clone().collect(); 
         let chosen_shift_index=rng.gen_range(0..optional_directions.len());
         let chosen_direction=valid_directions[chosen_shift_index];
@@ -59,14 +66,12 @@ fn generate_board(
         let chosen_location=chosen_location_option.unwrap();
         board.switch_tiles_by_location(&empty_tile_location, chosen_location);
         
+        //get ready for next choice
         empty_tile_location=chosen_location.clone();
         shift_direction_sequence.push(*chosen_direction);
         previous_shift_direction=*chosen_direction;
     }
-    if board == *solved_board{
-        return Err(error_handler::BoardGenerationError::BoardAlreadySolved);
-    }
-    
+
     //generation was successful
     let reveresed_shift_order=shift_direction_sequence
         .iter()
