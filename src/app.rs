@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
-pub const WIDTH: f32 = 960.0;
-pub const HEIGHT: f32 = 540.0;
+pub const WINDOW_SIZE: f32 = GRID_SIZE as f32 * ATLAS_CELL_SQUARE_SIZE / CAMERA_ZOOM;
 
 #[bevy_main]
 pub fn main() {
@@ -11,7 +10,7 @@ pub fn main() {
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    resolution: (WIDTH, HEIGHT).into(),
+                    resolution: (WINDOW_SIZE, WINDOW_SIZE).into(),
                     resizable: false,
                     ..default()
                 }),

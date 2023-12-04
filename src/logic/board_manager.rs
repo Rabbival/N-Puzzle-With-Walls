@@ -1,7 +1,7 @@
-use crate::{prelude::*, output::error_handler};
+use crate::{prelude::*, output::{error_handler, print_to_console}};
 use rand::Rng;
 
-const LOCATION_SHIFT_BOUNDS:(u8, u8) = (18, 32);
+const LOCATION_SHIFT_BOUNDS:(u8, u8) = (3, 5);
 const BOARD_GENERATION_ATTEMPTS:u8=5;
 
 pub struct BoardManagerPlugin;
@@ -25,7 +25,7 @@ fn generate_board_or_panic(mut commands: Commands){
         );
         if let Ok(()) = attempt_result { return; } //generation successful
     }
-    panic!("couldn't generate board");
+    print_to_console::couldnt_generate_board();
 }
 
 /// a permutation that was made from shifts in a solved board 
@@ -67,6 +67,13 @@ fn generate_board(
         return Err(error_handler::BoardGenerationError::BoardAlreadySolved);
     }
 
+    //generation was successful
+    let reveresed_shift_order=shift_direction_sequence
+        .iter()
+        .map(|direction| -> BasicDirection {
+            direction.opposite_direction().unwrap()
+        });
+    print_to_console::print_possible_solution(reveresed_shift_order);
     commands.insert_resource(board);
     Ok(())
 }

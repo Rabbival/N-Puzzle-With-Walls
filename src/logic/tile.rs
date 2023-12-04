@@ -19,4 +19,11 @@ impl Tile{
             Some(number)=>TileType::Numbered(number)
         } }
     }
+
+    pub fn to_index(&self) -> usize{
+        match self.tile_type{
+            TileType::Empty => 15,
+            TileType::Numbered(num) => num as usize,
+        }
+    }
 }

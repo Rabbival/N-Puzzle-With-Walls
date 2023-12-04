@@ -14,7 +14,8 @@ pub mod prelude {
         camera::*,
         asset_loader::*,
         error_handler::*,
-        graphics::*
+        graphics::*,
+        print_to_console::*,
     };
     pub use crate::logic::{
         board::*,
