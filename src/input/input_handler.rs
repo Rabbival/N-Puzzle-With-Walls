@@ -36,16 +36,19 @@ pub fn update_cursor(
 fn move_tile_input(
     mouse: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,
-    board: Res<Board>,
+    board: ResMut<Board>,
 ) {
-    if !mouse.pressed(MouseButton::Left) {
+    if !mouse.just_pressed(MouseButton::Left) {
         return;
     }
     if let Err(input_err) = 
         forward_location_to_board_manager(cursor_position, board)
     {
         match input_err{
-            InputHandlerError::GridLocationOccupied(message)=>{
+            InputHandlerError::NoEmptyNeighbor(message)=>{
+                error!(message);
+            },
+            InputHandlerError::PressedEmptySlot(message)=>{
                 error!(message);
             },
             InputHandlerError::IndexOutOfGridBounds(message)=>{
@@ -57,11 +60,12 @@ fn move_tile_input(
 
 fn forward_location_to_board_manager(
     cursor_position: Res<CursorPosition>,
-    board: Res<Board>,
+    board: ResMut<Board>,
 ) -> Result<(), error_handler::InputHandlerError>
 {
     if let Some(location) = GridLocation::from_world(cursor_position.world_position) {
-        board_manager::move_tile_logic(location, board)
+        game_log(GameLog::TileClicked(location));
+        return board_manager::move_tile_logic(location, board);
     }else{
         Err(InputHandlerError::IndexOutOfGridBounds(String::from("grid location occupied!")))
     }

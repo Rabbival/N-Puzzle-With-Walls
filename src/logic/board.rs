@@ -2,7 +2,7 @@ use std::ops::{Index,IndexMut};
 
 use bevy::{prelude::*, utils::HashMap};
 
-use crate::prelude::{Tile, TileType, BasicDirection};
+use crate::prelude::{Tile, TileType, BasicDirection, ATLAS_CELL_SQUARE_SIZE};
 
 pub const GRID_SIZE: u32 = 4;
 
@@ -40,29 +40,48 @@ impl Board {
         self[second]=temp_tile;
     }
 
-    pub fn get_all_direct_neighbor_locations(&self, location: &GridLocation) 
+    pub fn get_empty_neighbor(&mut self, origin: &GridLocation) -> Option<GridLocation>{
+        for dir in BasicDirection::get_directions_as_vec(){
+            let neighbor_location = self.neighbor_location(origin, &dir);
+            if Board::valid_index(&neighbor_location) && !self.occupied(&neighbor_location){
+                return Some(neighbor_location);
+            }
+        }
+        None
+    }
+
+    pub fn get_all_direct_neighbor_locations(&self, origin: &GridLocation) 
         -> HashMap<BasicDirection, GridLocation>
     {
         let mut valid_neighbors:HashMap<BasicDirection, GridLocation>=HashMap::new();
         for dir in BasicDirection::get_directions_as_vec(){
-            if let Some(neighbor_location) = self.neighbor_location(&location, &dir){
+            if let Some(neighbor_location) = self.occupied_neighbor_location(origin, &dir){
                 valid_neighbors.insert(dir,neighbor_location);
             }
         }
         valid_neighbors
     }
 
-    pub fn neighbor_location(&self, origin: &GridLocation, dir: &BasicDirection) -> Option<GridLocation>{
-        let neighbor_location=match dir{
-            BasicDirection::Up=>GridLocation::new(origin.row-1, origin.col),
-            BasicDirection::Right=>GridLocation::new(origin.row, origin.col+1),
-            BasicDirection::Down=>GridLocation::new(origin.row+1, origin.col),
-            BasicDirection::Left=>GridLocation::new(origin.row, origin.col-1)
-        };
+    pub fn occupied_neighbor_location(
+            &self, 
+            origin: &GridLocation, 
+            dir: &BasicDirection
+        ) -> Option<GridLocation>
+        {
+        let neighbor_location = self.neighbor_location(origin, dir);
         if self.occupied(&neighbor_location){
             Some(neighbor_location)
         }else{
             None
+        }
+    }
+
+    pub fn neighbor_location(&self, origin: &GridLocation, dir: &BasicDirection) -> GridLocation{
+        match dir{
+            BasicDirection::Up=>GridLocation::new(origin.row-1, origin.col),
+            BasicDirection::Right=>GridLocation::new(origin.row, origin.col+1),
+            BasicDirection::Down=>GridLocation::new(origin.row+1, origin.col),
+            BasicDirection::Left=>GridLocation::new(origin.row, origin.col-1)
         }
     }
 
@@ -109,7 +128,10 @@ impl GridLocation {
 
     pub fn from_world(position: Vec2) -> Option<Self> {
         let position = position + Vec2::splat(0.5);
-        let location = GridLocation{ row: position.y as i32, col: position.x as i32};
+        let location = GridLocation{ 
+            row: (position.y * ATLAS_CELL_SQUARE_SIZE) as i32, 
+            col: (position.x * ATLAS_CELL_SQUARE_SIZE) as i32
+        };
         if Board::valid_index(&location) {
             Some(location)
         } else {

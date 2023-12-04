@@ -102,14 +102,21 @@ fn initialize_to_solved() -> (GridLocation, Board){
 ///  - move its logic tile (using grid)
 pub fn move_tile_logic(
     location: GridLocation, 
-    board: Res<Board>
+    board: ResMut<Board>
 ) -> Result<(), error_handler::InputHandlerError>
 {
     if !board.occupied(&location) {
-        return Ok(());
+        return Err(InputHandlerError::PressedEmptySlot(String::from("pressed an empty slot")));
     }
-    
-    //if there's no empty neighbor throw error_handler::GridLocationOccupied
+    let optional_empty_neighbor= board.clone().get_empty_neighbor(&location);
+    if let None=optional_empty_neighbor{
+        return Err(InputHandlerError::NoEmptyNeighbor(String::from("no empty neighbor")));
+    }
+    let empty_neighbor=optional_empty_neighbor.unwrap();
+
+    board.clone().switch_tiles_by_location(&empty_neighbor, &location);
+
+    //TODO: move entities
 
     return Ok(());
 }

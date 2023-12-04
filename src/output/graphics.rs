@@ -18,9 +18,6 @@ fn draw_board(
     let mut spawn_pos=Vec2::new(0.0,0.0);
     for row in board.grid{
         for tile_from_cell in row{
-
-            info!("spawning tile in {:?}", spawn_pos);
-            
             commands.spawn((
                 SpriteSheetBundle {
                     texture_atlas: atlas_handle.clone(),

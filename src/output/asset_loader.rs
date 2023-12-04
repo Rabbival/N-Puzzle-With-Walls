@@ -29,5 +29,5 @@ fn sprite_atlas_setup(
             )
             , 4, 4, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    atlas.into_inner().0=texture_atlas_handle;
+    atlas.clone().0=texture_atlas_handle;
 }
