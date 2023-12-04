@@ -5,7 +5,8 @@ pub enum InputHandlerError{
 }
 
 #[derive(Debug)]
-pub enum DirectionRelatedError{
+pub enum BoardGenerationError{
     DirectionCouldntBeFlipped,
-    DirectionNotFoundInMap
+    DirectionNotFoundInMap,
+    BoardAlreadySolved
 }

@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
-#[derive(Component, Clone, Copy, Default)]
+#[derive(Component, Clone, Copy, Default, PartialEq, Eq)]
 pub enum TileType {
     #[default]
     Empty,
     Numbered(u32),
 }
 
-#[derive(Component, Clone, Copy, Default)]
+#[derive(Component, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Tile{
     pub tile_type: TileType,
 }

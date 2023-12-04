@@ -20,7 +20,7 @@ impl BasicDirection {
     }
     
     pub fn opposite_direction_index(&self) -> u8{
-        let mut index=self.dir_to_index();
+        let index=self.dir_to_index();
         (index+2)%BASIC_DIRECTION_COUNT
     }
 }

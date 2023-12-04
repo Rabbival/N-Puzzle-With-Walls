@@ -6,7 +6,7 @@ use crate::prelude::{Tile, TileType, BasicDirection};
 
 pub const GRID_SIZE: u32 = 4;
 
-#[derive(Resource)]
+#[derive(Resource, PartialEq, Eq, Clone)]
 pub struct Board {
     pub grid: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize]
 }
@@ -64,10 +64,13 @@ impl Board {
     }
 
     pub fn occupied(&self, location: &GridLocation) -> bool {
-        match self[location].tile_type{
-            TileType::Empty=>false,
-            TileType::Numbered(_)=>Board::valid_index(location)
+        if Board::valid_index(location){
+            match self[location].tile_type{
+                TileType::Empty=> {return false;},
+                TileType::Numbered(_)=> {return true;}
+            }
         }
+        false
     }
 
     pub fn valid_index(location: &GridLocation) -> bool {
