@@ -10,15 +10,14 @@ pub struct AssetLoaderPlugin;
 impl Plugin for AssetLoaderPlugin{
     fn build(&self, app: &mut App){
         app
-            .init_resource::<SpriteAtlas>()
-            .add_systems(Startup, sprite_atlas_setup);
+            .add_systems(PreStartup, sprite_atlas_setup);
     }
 }
 
 fn sprite_atlas_setup(
-    atlas: ResMut<SpriteAtlas>,
+    mut commands: Commands, 
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>
 ) {
     let texture_handle = asset_server.load("sprite_atlas.png");
     let texture_atlas =
@@ -29,5 +28,5 @@ fn sprite_atlas_setup(
             )
             , 4, 4, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    atlas.clone().0=texture_atlas_handle;
+    commands.insert_resource(SpriteAtlas(texture_atlas_handle));
 }
