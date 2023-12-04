@@ -1,11 +1,11 @@
 #[derive(Debug)]
-pub enum InputHandlerErrors{
-    IndexOutOfGridBounds,
-    GridLocationOccupied,
+pub enum InputHandlerError{
+    IndexOutOfGridBounds (String),
+    GridLocationOccupied (String),
 }
 
 #[derive(Debug)]
-pub enum DirectionRelatedErrors{
+pub enum DirectionRelatedError{
     DirectionCouldntBeFlipped,
     DirectionNotFoundInMap
 }

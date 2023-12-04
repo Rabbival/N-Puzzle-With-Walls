@@ -7,8 +7,8 @@ use crate::prelude::{Tile, TileType, BasicDirection};
 pub const GRID_SIZE: u32 = 4;
 
 #[derive(Resource)]
-pub struct Grid {
-    pub tiles: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize]
+pub struct Board {
+    pub grid: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize]
 }
 
 #[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug, Deref, DerefMut)]
@@ -18,19 +18,19 @@ pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<Grid>();
+        app.init_resource::<Board>();
     }
 }
 
-impl Default for Grid {
+impl Default for Board {
     fn default() -> Self {
         Self {
-            tiles: [[Tile::default(); GRID_SIZE as usize]; GRID_SIZE as usize],
+            grid: [[Tile::default(); GRID_SIZE as usize]; GRID_SIZE as usize],
         }
     }
 }
 
-impl Grid {
+impl Board {
     pub fn switch_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation){
         let temp_tile=self[first];
         self[first]=self[second];
@@ -50,14 +50,14 @@ impl Grid {
     }
 
     pub fn neighbor_location(&self, origin: &GridLocation, dir: &BasicDirection) -> Option<GridLocation>{
-        let optional_neighbor_location=match dir{
+        let neighbor_location=match dir{
             BasicDirection::Up=>GridLocation::new(origin.x, origin.y+1),
             BasicDirection::Right=>GridLocation::new(origin.x+1, origin.y),
             BasicDirection::Down=>GridLocation::new(origin.x, origin.y-1),
             BasicDirection::Left=>GridLocation::new(origin.x-1, origin.y)
         };
-        if self.occupied(&optional_neighbor_location){
-            Some(optional_neighbor_location)
+        if self.occupied(&neighbor_location){
+            Some(neighbor_location)
         }else{
             None
         }
@@ -66,7 +66,7 @@ impl Grid {
     pub fn occupied(&self, location: &GridLocation) -> bool {
         match self[location].tile_type{
             TileType::Empty=>false,
-            TileType::Numbered(_)=>Grid::valid_index(location)
+            TileType::Numbered(_)=>Board::valid_index(location)
         }
     }
 
@@ -78,17 +78,17 @@ impl Grid {
     }
 }
 
-impl Index<&GridLocation> for Grid {
+impl Index<&GridLocation> for Board {
     type Output = Tile;
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
-        &self.tiles[index.x as usize][index.y as usize]
+        &self.grid[index.x as usize][index.y as usize]
     }
 }
 
-impl IndexMut<&GridLocation> for Grid {
+impl IndexMut<&GridLocation> for Board {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
-        &mut self.tiles[index.x as usize][index.y as usize]
+        &mut self.grid[index.x as usize][index.y as usize]
     }
 }
 
@@ -101,7 +101,7 @@ impl GridLocation {
     pub fn from_world(position: Vec2) -> Option<Self> {
         let position = position + Vec2::splat(0.5);
         let location = GridLocation(IVec2::new(position.x as i32, position.y as i32));
-        if Grid::valid_index(&location) {
+        if Board::valid_index(&location) {
             Some(location)
         } else {
             None

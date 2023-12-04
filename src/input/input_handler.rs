@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::board_manager};
+use crate::{prelude::*, logic::board_manager, output::error_handler};
 
 #[derive(Resource, Default)]
 pub struct CursorPosition {
@@ -34,15 +34,35 @@ pub fn update_cursor(
 }
 
 fn move_tile_input(
-    cursor_position: Res<CursorPosition>,
     mouse: Res<Input<MouseButton>>,
-    board_grid: Res<Grid>,
+    cursor_position: Res<CursorPosition>,
+    board: Res<Board>,
 ) {
     if !mouse.pressed(MouseButton::Left) {
         return;
     }
+    if let Err(input_err) = 
+        forward_location_to_board_manager(cursor_position, board)
+    {
+        match input_err{
+            InputHandlerError::GridLocationOccupied(message)=>{
+                error!(message);
+            },
+            InputHandlerError::IndexOutOfGridBounds(message)=>{
+                error!(message);
+            }
+        }
+    };
+}
 
+fn forward_location_to_board_manager(
+    cursor_position: Res<CursorPosition>,
+    board: Res<Board>,
+) -> Result<(), error_handler::InputHandlerError>
+{
     if let Some(location) = GridLocation::from_world(cursor_position.world_position) {
-        board_manager::move_tile_logic(location, board_grid);
+        board_manager::move_tile_logic(location, board)
+    }else{
+        Err(InputHandlerError::IndexOutOfGridBounds(String::from("grid location occupied!")))
     }
 }

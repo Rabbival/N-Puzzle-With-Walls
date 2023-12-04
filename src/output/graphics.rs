@@ -10,22 +10,24 @@ impl Plugin for GraphicsPlugin {
     }
 }
 
-fn spawn_board(mut commands: Commands){
-    /*
-    draft:
+fn spawn_board(
+    mut commands: Commands,
+    board: Res<Board>
+){
+    for row in board.grid{
+        for tile_from_cell in row{
+            commands.spawn((
+                SpatialBundle::default(),
+                GridLocation::new(10, 10),
+                tile_from_cell,
+                
+                //spirte?
+            ));
+        }
+    }
 
-    commands.spawn((
-        SpatialBundle::default(),
-        Target {
-            use_offset: IVec2 { x: 0, y: -1 },
-        },
-        LockToGrid,
-        GridLocation::new(10, 10),
-        //Tile::     ///depending on what's in there
-    ));
-         */
 }
 
-pub fn move_tile_to_empty(tile: Entity, from: &GridLocation, to: &GridLocation){
+pub fn move_tile_entity(tile: Entity, from: &GridLocation, to: &GridLocation){
 
 }
