@@ -11,8 +11,11 @@ pub struct Board {
     pub grid: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize]
 }
 
-#[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug, Deref, DerefMut)]
-pub struct GridLocation(pub IVec2);
+#[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug)]
+pub struct GridLocation{
+    pub row: i32,
+    pub col: i32
+}
 
 pub struct BoardPlugin;
 
@@ -51,10 +54,10 @@ impl Board {
 
     pub fn neighbor_location(&self, origin: &GridLocation, dir: &BasicDirection) -> Option<GridLocation>{
         let neighbor_location=match dir{
-            BasicDirection::Up=>GridLocation::new(origin.x, origin.y+1),
-            BasicDirection::Right=>GridLocation::new(origin.x+1, origin.y),
-            BasicDirection::Down=>GridLocation::new(origin.x, origin.y-1),
-            BasicDirection::Left=>GridLocation::new(origin.x-1, origin.y)
+            BasicDirection::Up=>GridLocation::new(origin.row-1, origin.col),
+            BasicDirection::Right=>GridLocation::new(origin.row, origin.col+1),
+            BasicDirection::Down=>GridLocation::new(origin.row+1, origin.col),
+            BasicDirection::Left=>GridLocation::new(origin.row, origin.col-1)
         };
         if self.occupied(&neighbor_location){
             Some(neighbor_location)
@@ -74,10 +77,10 @@ impl Board {
     }
 
     pub fn valid_index(location: &GridLocation) -> bool {
-        location.x >= 0
-            && location.y >= 0
-            && location.x < GRID_SIZE as i32
-            && location.y < GRID_SIZE as i32
+        location.col >= 0
+            && location.row >= 0
+            && location.col < GRID_SIZE as i32
+            && location.row < GRID_SIZE as i32
     }
 }
 
@@ -85,25 +88,28 @@ impl Index<&GridLocation> for Board {
     type Output = Tile;
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
-        &self.grid[index.x as usize][index.y as usize]
+        &self.grid[index.row as usize][index.col as usize]
     }
 }
 
 impl IndexMut<&GridLocation> for Board {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
-        &mut self.grid[index.x as usize][index.y as usize]
+        &mut self.grid[index.row as usize][index.col as usize]
     }
 }
 
 
 impl GridLocation {
-    pub fn new(x: i32, y: i32) -> Self {
-        GridLocation(IVec2::new(x as i32, y as i32))
+    pub fn new(row: i32, col: i32) -> Self {
+        GridLocation{
+            row,
+            col
+        }
     }
 
     pub fn from_world(position: Vec2) -> Option<Self> {
         let position = position + Vec2::splat(0.5);
-        let location = GridLocation(IVec2::new(position.x as i32, position.y as i32));
+        let location = GridLocation{ row: position.y as i32, col: position.x as i32};
         if Board::valid_index(&location) {
             Some(location)
         } else {
@@ -114,6 +120,9 @@ impl GridLocation {
 
 impl From<IVec2> for GridLocation {
     fn from(value: IVec2) -> Self {
-        GridLocation(value)
+        GridLocation{
+            row: value.y,
+            col: value.x
+        }
     }
 }

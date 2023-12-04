@@ -19,7 +19,7 @@ fn draw_board(
     for row in board.grid{
         for tile_from_cell in row{
 
-            //info!("spawning tile in {:?}", spawn_pos);
+            info!("spawning tile in {:?}", spawn_pos);
             
             commands.spawn((
                 SpriteSheetBundle {

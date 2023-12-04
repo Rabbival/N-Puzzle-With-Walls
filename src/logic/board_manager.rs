@@ -42,7 +42,7 @@ fn generate_board(
     let mut shift_direction_sequence:Vec<BasicDirection> = vec!();
     //we'll never shift with the location below on the first shift since there's none
     let mut previous_shift_direction = BasicDirection::Up; 
-    for _shift in 1..location_shift_count{
+    for _shift in 0..location_shift_count{
         let optional_directions=
             board.get_all_direct_neighbor_locations(&empty_tile_location);
         //don't want to shift back and forth
@@ -66,7 +66,7 @@ fn generate_board(
     if board == *solved_board{
         return Err(error_handler::BoardGenerationError::BoardAlreadySolved);
     }
-
+    
     //generation was successful
     let reveresed_shift_order=shift_direction_sequence
         .iter()
