@@ -7,7 +7,7 @@ pub struct GraphicsPlugin;
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, draw_board)
+            .add_systems(PostStartup, draw_board)
             ;
     }
 }
@@ -15,11 +15,11 @@ impl Plugin for GraphicsPlugin {
 fn draw_board(
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
-    board: Res<Board>
+    board_query: Query<&Board, With<GameBoard>>
 ){
     let texture_atlas_handle=sprite_atlas.clone().0;
     let mut spawn_pos=Vec2::new(0.0,0.0);
-    for row in board.grid{
+    for row in board_query.single().grid{
         for mut tile_from_cell in row{
             commands.spawn((
                 SpriteSheetBundle {

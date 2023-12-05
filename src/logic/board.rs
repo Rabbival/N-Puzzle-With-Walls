@@ -6,9 +6,10 @@ use crate::prelude::{Tile, TileType, BasicDirection, ATLAS_CELL_SQUARE_SIZE};
 
 pub const GRID_SIZE: u32 = 4;
 
-#[derive(Resource, PartialEq, Eq, Clone)]
+#[derive(Component, PartialEq, Eq, Clone)]
 pub struct Board {
     pub grid: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize],
+    pub empty_tile_location: GridLocation,
     pub locked: bool
 }
 
@@ -18,18 +19,11 @@ pub struct GridLocation{
     pub col: i32
 }
 
-pub struct BoardPlugin;
-
-impl Plugin for BoardPlugin {
-    fn build(&self, app: &mut App) {
-        app.init_resource::<Board>();
-    }
-}
-
 impl Default for Board {
     fn default() -> Self {
         Self {
             grid: [[Tile::default(); GRID_SIZE as usize]; GRID_SIZE as usize],
+            empty_tile_location: GridLocation::default(),
             locked: true
         }
     }

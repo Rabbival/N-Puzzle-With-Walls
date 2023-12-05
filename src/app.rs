@@ -29,7 +29,6 @@ pub fn main() {
         MouseInputHandlerPlugin,
         AssetLoaderPlugin,
         BoardManagerPlugin,
-        BoardPlugin,
         GraphicsPlugin
     ))
     ;

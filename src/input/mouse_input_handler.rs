@@ -35,13 +35,15 @@ fn update_cursor(
 fn move_tile_input(
     mouse: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,
-    board: ResMut<Board>,
+    mut board_query: Query<&mut Board, With<GameBoard>>
 ) {
     if !mouse.just_pressed(MouseButton::Left) {
         return;
     }
     if let Err(input_err) = 
-        forward_location_to_board_manager(cursor_position.world_position, board.into_inner())
+        forward_location_to_board_manager(
+            cursor_position.world_position, 
+            board_query.single_mut().into_inner())
     {
         match input_err{
             InputHandlerError::BoardLocked(message)=>{

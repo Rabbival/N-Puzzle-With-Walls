@@ -4,42 +4,69 @@ use rand::Rng;
 const LOCATION_SHIFT_BOUNDS:(u8, u8) = (8, 22);
 const BOARD_GENERATION_ATTEMPTS:u8=5;
 
+#[derive(Component)]
+pub struct SolvedBoard;
+#[derive(Component)]
+pub struct GameBoard;
+
 pub struct BoardManagerPlugin;
 
 impl Plugin for BoardManagerPlugin {
     fn build(&self, app: &mut App) {
         app    
             //important to run before we draw it in graphics.rs
-            .add_systems(PreStartup, generate_board_or_panic)
+            .add_systems(PreStartup, spawn_solved_board)
+            .add_systems(Startup, spawn_game_board)
             ;
     }
 }
 
-fn generate_board_or_panic(mut commands: Commands){
-    let (empty_tile_location, solved_board)=initialize_to_solved();
+fn spawn_solved_board(mut commands: Commands){
+    commands.spawn((generate_solved_board(), SolvedBoard));
+}
+
+fn generate_solved_board() -> Board{
+    let mut solved_board = Board::default();
+    for i in 0..GRID_SIZE as u32 {
+        for j in 0..GRID_SIZE as u32 {
+            let location = GridLocation::new(i as i32, j as i32);
+            solved_board[&location] = Tile::new(Some(i*GRID_SIZE+j+1));
+        }
+    }
+    let empty_tile_location=GridLocation::new((GRID_SIZE-1) as i32, (GRID_SIZE-1) as i32);
+    solved_board[&empty_tile_location] = Tile::new(None);
+    solved_board.empty_tile_location=empty_tile_location;
+    solved_board.locked=true;
+    solved_board
+}
+
+fn spawn_game_board(mut commands: Commands, query: Query<&Board, With<SolvedBoard>>){
+    let solved_board=query.single();
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
-        let attempt_result=generate_board(
-            &mut commands,
-            (empty_tile_location.clone(), solved_board.clone())
-        );
-        if let Ok(()) = attempt_result { return; } //generation successful
+        let attempt_result=generate_game_board(solved_board.clone());
+         //generation successful
+        if let Ok(board) = attempt_result { 
+            commands.spawn((
+                board,
+                GameBoard
+            ));
+            return; 
+        }
     }
     print_to_console::couldnt_generate_board();
 }
 
 /// a permutation that was made from shifts in a solved board 
 /// would always be solvable (if we shift in reverse)
-fn generate_board(
-    commands: &mut Commands,
-    (mut empty_tile_location, mut board): (GridLocation, Board)
-) -> Result<(), error_handler::BoardGenerationError>
+fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGenerationError>
 {
     let mut rng = rand::thread_rng();
     let mut location_shift_count=rng.gen_range(LOCATION_SHIFT_BOUNDS.0..LOCATION_SHIFT_BOUNDS.1);
-    //preventing the generation of a solved board
+    //prevents the generation of another solved board
     if location_shift_count%2 == 0 {
         location_shift_count+=1;
     }
+    let mut empty_tile_location=board.empty_tile_location;
 
     let mut shift_direction_sequence:Vec<BasicDirection> = vec!();
     //we'll never shift with the location below on the first shift since there's none
@@ -80,21 +107,7 @@ fn generate_board(
         });
     print_to_console::print_possible_solution(reveresed_shift_order);
     board.locked=false;
-    commands.insert_resource(board);
-    Ok(())
-}
-
-fn initialize_to_solved() -> (GridLocation, Board){
-    let mut solved_board = Board::default();
-    for i in 0..GRID_SIZE as u32 {
-        for j in 0..GRID_SIZE as u32 {
-            let location = GridLocation::new(i as i32, j as i32);
-            solved_board[&location] = Tile::new(Some(i*GRID_SIZE+j+1));
-        }
-    }
-    let empty_tile_location=GridLocation::new((GRID_SIZE-1) as i32, (GRID_SIZE-1) as i32);
-    solved_board[&empty_tile_location] = Tile::new(None);
-    (empty_tile_location, solved_board)
+    Ok(board)
 }
 
 /// check if there's an empty space next to it (in straight line)
@@ -164,19 +177,13 @@ mod tests {
     }
 
     fn test_no_empty_neighbor()-> bool{
-        let (empty_tile_location, mut board)=initialize_to_solved();
-        board[&empty_tile_location]=Tile::new(Some(16));
-
-        for row in board.grid{
-            for mut tile_from_cell in row{
-                println!("{:?}", tile_from_cell);
-            }
-        }
-
+        let mut solved_board=generate_solved_board();
+        let empty_tile_location=solved_board.empty_tile_location;
+        solved_board[&empty_tile_location]=Tile::new(Some(16));
         let location_search_outcome=
             move_tile_logic(
                 empty_tile_location, 
-                &mut board //locked be default
+                &mut solved_board //locked be default
             );
         match location_search_outcome{
                 Err(InputHandlerError::NoEmptyNeighbor(_))=> true,
