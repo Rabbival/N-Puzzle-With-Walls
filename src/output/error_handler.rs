@@ -2,6 +2,7 @@ use crate::prelude::TileType;
 
 #[derive(Debug)]
 pub enum InputHandlerError{
+    BoardLocked (String),
     IndexOutOfGridBounds (String),
     NoEmptyNeighbor (String),
     PressedEmptySlot (String)
@@ -14,6 +15,7 @@ pub enum BoardGenerationError{
 }
 
 #[derive(Debug)]
-pub enum InitializationError{
-    NoTileTranslationConfigured (TileType)
+pub enum SearchError{
+    TileNotFound (TileType),
+    TilesNotFound (TileType, TileType),
 }

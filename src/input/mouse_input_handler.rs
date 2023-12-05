@@ -15,7 +15,7 @@ impl Plugin for MouseInputHandlerPlugin {
     }
 }
 
-pub fn update_cursor(
+fn update_cursor(
     mut cursor: ResMut<CursorPosition>,
     windows: Query<&Window>,
     camera: Query<(&Camera, &GlobalTransform)>,
@@ -45,6 +45,9 @@ fn move_tile_input(
         forward_location_to_board_manager(cursor_position, board)
     {
         match input_err{
+            InputHandlerError::BoardLocked(message)=>{
+                warn!(message);
+            },
             InputHandlerError::NoEmptyNeighbor(message)=>{
                 warn!(message);
             },

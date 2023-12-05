@@ -11,6 +11,7 @@ pub mod prelude {
     pub use crate::app::*;
     pub use crate::input::{
         mouse_input_handler::*,
+        keyboard_input_handler::*
     };
     pub use crate::output::{
         camera::*,

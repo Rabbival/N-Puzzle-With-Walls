@@ -10,7 +10,6 @@ pub enum TileType {
 #[derive(Component, Clone, Copy, Default)]
 pub struct Tile{
     pub tile_type: TileType,
-    pub translation: Option<Vec2>
 }
 
 impl PartialEq for Tile {
@@ -27,7 +26,6 @@ impl Tile{
                 None=>TileType::Empty,
                 Some(number)=>TileType::Numbered(number)
             },
-            translation: None
         }
     }
 

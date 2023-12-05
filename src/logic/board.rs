@@ -8,7 +8,8 @@ pub const GRID_SIZE: u32 = 4;
 
 #[derive(Resource, PartialEq, Eq, Clone)]
 pub struct Board {
-    pub grid: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize]
+    pub grid: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize],
+    pub locked: bool
 }
 
 #[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug)]
@@ -29,6 +30,7 @@ impl Default for Board {
     fn default() -> Self {
         Self {
             grid: [[Tile::default(); GRID_SIZE as usize]; GRID_SIZE as usize],
+            locked: true
         }
     }
 }
@@ -136,6 +138,13 @@ impl GridLocation {
         } else {
             None
         }
+    }
+
+    pub fn to_world(&self) -> Vec2{
+        Vec2::new(
+            (self.col as f32-0.5)*ATLAS_CELL_SQUARE_SIZE , 
+            -1.0 * (self.row as f32-0.5)*ATLAS_CELL_SQUARE_SIZE
+        )
     }
 }
 

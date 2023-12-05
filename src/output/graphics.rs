@@ -35,8 +35,6 @@ fn draw_board(
                 },
                 tile_from_cell
             ));
-            tile_from_cell.translation=Some(spawn_pos);
-
             spawn_pos.x+=ATLAS_CELL_SQUARE_SIZE;
         }
         spawn_pos.y-=ATLAS_CELL_SQUARE_SIZE;
@@ -46,27 +44,38 @@ fn draw_board(
 }
 
 pub fn switch_tile_entity_positions(
-    board: Res<Board>,
-    first: &GridLocation, 
-    second: &GridLocation
-) -> Result<(),error_handler::InitializationError>
+    query: Query<&mut Transform, With<Tile>>,
+    first_grid_location: &GridLocation, 
+    second_grid_location: &GridLocation,
+) -> Result<(),error_handler::SearchError>
 {
-    let mut first_tile_translation=get_tile_translation(board.clone(), first)?;
-    let mut second_tile_translation=get_tile_translation(board.clone(), second)?;
-    let temp_translation=first_tile_translation
-
-    Ok(())
-}
-
-fn get_tile_translation(board: Board, tile_location: &GridLocation) 
--> Result<Vec2,error_handler::InitializationError>{
-    let tile=board[tile_location];
-    match tile.translation{
-        None => {
-            Err(InitializationError::NoTileTranslationConfigured(tile.tile_type))
+    let mut first_tile_translation=Vec3::default();
+    let mut second_tile_translation=Vec3::default();
+    let (first_world_position, mut first_found)=(first_grid_location.to_world(), false);
+    let (second_world_position, mut second_found)=(second_grid_location.to_world(), false);
+    for mut transform in query.iter(){
+        let current_tile_world_pos = Vec2::new(
+            transform.translation.x,
+            transform.translation.y
+        );
+        if current_tile_world_pos == first_world_position {
+            first_tile_translation=transform.translation;
+            first_found=true;
+            if second_found {
+                break;
+            }
         }
-        Some(translation) => {
-            Ok(translation)
+        if current_tile_world_pos == second_world_position {
+            second_tile_translation=transform.translation;
+            second_found=true;
+            if first_found {
+                break;
+            }
         }
     }
+    let temp_translation=first_tile_translation;
+    first_tile_translation=second_tile_translation;
+    second_tile_translation=temp_translation;
+    
+    Ok(())
 }

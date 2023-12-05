@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::{error_handler, print_to_console}};
+use crate::{prelude::*, output::{error_handler, print_to_console, graphics}};
 use rand::Rng;
 
 const LOCATION_SHIFT_BOUNDS:(u8, u8) = (8, 22);
@@ -79,6 +79,7 @@ fn generate_board(
             direction.opposite_direction().unwrap()
         });
     print_to_console::print_possible_solution(reveresed_shift_order);
+    board.locked=false;
     commands.insert_resource(board);
     Ok(())
 }
@@ -105,6 +106,9 @@ pub fn move_tile_logic(
     board: ResMut<Board>
 ) -> Result<(), error_handler::InputHandlerError>
 {
+    if board.locked{
+        return Err(InputHandlerError::BoardLocked(String::from("board locked")));
+    }
     if !board.occupied(&location) {
         return Err(InputHandlerError::PressedEmptySlot(String::from("pressed an empty slot")));
     }
@@ -114,9 +118,9 @@ pub fn move_tile_logic(
     }
     let empty_neighbor=optional_empty_neighbor.unwrap();
 
-    board.clone().switch_tiles_by_location(&empty_neighbor, &location);
-
-    //TODO: move entities
+    board.into_inner().switch_tiles_by_location(&empty_neighbor, &location);
+    
+    //graphics::switch_tile_entity_positions(query, &location, &empty_neighbor);
 
     return Ok(());
 }
