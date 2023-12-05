@@ -27,7 +27,7 @@ fn draw_board(
 ){
     let tiles_spawned_value = tiles_spawned.into_inner();
     if *tiles_spawned_value == TilesSpawned::First {
-        spawn_tiles(commands, sprite_atlas.clone().0, board_query.single().clone());
+        spawn_tiles(commands, sprite_atlas.clone().0, &board_query.single());
         *tiles_spawned_value = TilesSpawned::NotFirst;
     } else{
         move_existing_tiles(board_query.single().clone(), tiles);
@@ -37,7 +37,7 @@ fn draw_board(
 fn spawn_tiles(
     mut commands: Commands,
     atlas_handle: Handle<TextureAtlas>,
-    board: Board
+    board: &Board
 ){
     let mut spawn_pos=Vec2::new(0.0,0.0);
     for row in board.grid{
@@ -79,26 +79,15 @@ pub fn switch_tile_entity_positions(
     second_grid_location: &GridLocation
 ) -> Result<(),TileMoveError>
 {
-    let temp_position_first;
-    let temp_position_second;
-
     let first_tile_entity=extract_tile_entity(board, first_grid_location)?;
     let second_tile_entity=extract_tile_entity( board, second_grid_location)?;
-    if let Ok(first_transform_immutable) = tiles.get(first_tile_entity) {
-        temp_position_first=first_transform_immutable.translation;
+    if let Ok(second_tile_transform) = tiles.get_mut(second_tile_entity) {
+        second_tile_transform.into_inner().translation=first_grid_location.to_world();
     }else{
         return Err(TileMoveError::EntityNotInQuery);
     }
-    if let Ok(transform) = tiles.get_mut(second_tile_entity) {
-        let second_tile_transform=transform.into_inner();
-        temp_position_second=second_tile_transform.translation;
-        second_tile_transform.translation=temp_position_first;
-    }else{
-        return Err(TileMoveError::EntityNotInQuery);
-    }
-    if let Ok(transform) = tiles.get_mut(first_tile_entity) {
-        let first_tile_transform=transform.into_inner();
-        first_tile_transform.translation=temp_position_second;
+    if let Ok(first_tile_transform) = tiles.get_mut(first_tile_entity) {
+        first_tile_transform.into_inner().translation=first_grid_location.to_world();
     }else{
         return Err(TileMoveError::EntityNotInQuery);
     }

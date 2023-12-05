@@ -26,10 +26,11 @@ impl GridLocation {
         }
     }
 
-    pub fn to_world(&self) -> Vec2{
-        Vec2::new(
+    pub fn to_world(&self) -> Vec3{
+        Vec3::new(
             (self.col as f32-0.5)*ATLAS_CELL_SQUARE_SIZE , 
-            -1.0 * (self.row as f32-0.5)*ATLAS_CELL_SQUARE_SIZE
+            -1.0 * (self.row as f32-0.5)*ATLAS_CELL_SQUARE_SIZE,
+            0.0
         )
     }
 }
