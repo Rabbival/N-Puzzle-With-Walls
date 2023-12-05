@@ -41,3 +41,17 @@ impl BasicDirection{
         all::<BasicDirection>().collect::<Vec<_>>()
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn flipped_directions() {
+        assert_eq!(BasicDirection::Up.opposite_direction().unwrap(), BasicDirection::Down);
+        assert_eq!(BasicDirection::Right.opposite_direction().unwrap(), BasicDirection::Left);
+        assert_eq!(BasicDirection::Down.opposite_direction().unwrap(), BasicDirection::Up);
+        assert_eq!(BasicDirection::Left.opposite_direction().unwrap(), BasicDirection::Right);
+    }
+}

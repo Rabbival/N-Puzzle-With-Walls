@@ -2,7 +2,7 @@ use crate::prelude::TileType;
 
 #[derive(Debug)]
 pub enum InputHandlerError{
-    BoardLocked (String),
+    BoardFrozenToPlayer (String),
     IndexOutOfGridBounds (String),
     NoEmptyNeighbor (String),
     PressedEmptySlot (String)

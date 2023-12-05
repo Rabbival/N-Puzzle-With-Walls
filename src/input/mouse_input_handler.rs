@@ -46,7 +46,7 @@ fn move_tile_input(
             board_query.single_mut().into_inner())
     {
         match input_err{
-            InputHandlerError::BoardLocked(message)=>{
+            InputHandlerError::BoardFrozenToPlayer(message)=>{
                 warn!(message);
             },
             InputHandlerError::NoEmptyNeighbor(message)=>{

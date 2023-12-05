@@ -20,7 +20,7 @@ fn draw_board(
     let texture_atlas_handle=sprite_atlas.clone().0;
     let mut spawn_pos=Vec2::new(0.0,0.0);
     for row in board_query.single().grid{
-        for mut tile_from_cell in row{
+        for tile_from_cell in row{
             commands.spawn((
                 SpriteSheetBundle {
                     texture_atlas: texture_atlas_handle.clone(),

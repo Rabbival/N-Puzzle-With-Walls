@@ -120,7 +120,7 @@ pub fn move_tile_logic(
 ) -> Result<(), error_handler::InputHandlerError>
 {
     if board.ignore_player_input{
-        return Err(InputHandlerError::BoardLocked(String::from("board locked")));
+        return Err(InputHandlerError::BoardFrozenToPlayer(String::from("board locked")));
     }
     if !board.occupied(&location) {
         return Err(InputHandlerError::PressedEmptySlot(String::from("pressed an empty slot")));
@@ -171,7 +171,7 @@ mod tests {
                 &mut Board::default() //locked be default
             );
         match location_search_outcome{
-                Err(InputHandlerError::BoardLocked(_))=> true,
+                Err(InputHandlerError::BoardFrozenToPlayer(_))=> true,
                 _ => false
             }
     }
@@ -182,7 +182,7 @@ mod tests {
         let location_search_outcome=
             move_tile_logic(
                 GridLocation::default(), 
-                &mut board //locked be default
+                &mut board
             );
         match location_search_outcome{
                 Err(InputHandlerError::PressedEmptySlot(_))=> true,
@@ -191,13 +191,14 @@ mod tests {
     }
 
     fn test_no_empty_neighbor()-> bool{
-        let mut solved_board=generate_solved_board();
-        let empty_tile_location=solved_board.empty_tile_location;
-        solved_board[&empty_tile_location]=Tile::new(Some(16));
+        let mut board=generate_solved_board();
+        board.ignore_player_input=false;
+        let empty_tile_location=board.empty_tile_location;
+        board[&empty_tile_location]=Tile::new(Some(16));
         let location_search_outcome=
             move_tile_logic(
-                empty_tile_location, 
-                &mut solved_board //locked be default
+                GridLocation { row: 0, col: 0 }, 
+                &mut board
             );
         match location_search_outcome{
                 Err(InputHandlerError::NoEmptyNeighbor(_))=> true,
