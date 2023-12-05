@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::board_manager, output::error_handler};
+use crate::{prelude::*, output::{print_to_console, error_handler}, logic::board_manager};
 
 #[derive(Resource, Default)]
 pub struct CursorPosition {
@@ -51,7 +51,7 @@ fn move_tile_mouse_input(
             Some(tiles)
         )
     {
-        print_input_error(input_error);
+        print_to_console::print_input_error(input_error);
     }
 }
 
@@ -65,7 +65,8 @@ fn forward_location_to_board_manager(
 ) -> Result<(), error_handler::TileMoveError>
 {
     if let Some(optional_occupied_tile_location) = GridLocation::from_world(cursor_position) {
-        game_log(GameLog::TileClicked(game_board[&optional_occupied_tile_location].tile_type));
+        print_to_console::game_log
+            (GameLog::TileClicked(game_board[&optional_occupied_tile_location].tile_type));
         return board_manager::move_tile_logic(
             optional_occupied_tile_location, 
             optional_tiles,
@@ -73,7 +74,7 @@ fn forward_location_to_board_manager(
             solved_board
         );
     }else{
-        Err(TileMoveError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
+        Err(error_handler::TileMoveError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
     }
 }
 
@@ -97,7 +98,7 @@ mod tests {
                 None
             );
         match location_search_outcome{
-                Err(TileMoveError::IndexOutOfGridBounds(_))=> true,
+                Err(error_handler::TileMoveError::IndexOutOfGridBounds(_))=> true,
                 _ => false
             }
     }

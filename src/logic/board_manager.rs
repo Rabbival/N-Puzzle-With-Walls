@@ -122,15 +122,15 @@ pub fn move_tile_logic(
 ) -> Result<(), error_handler::TileMoveError>
 {
     if game_board.ignore_player_input{
-        return Err(TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
+        return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
     }
     if !game_board.occupied(&occupied_tile_location) {
-        return Err(TileMoveError::PressedEmptySlot(String::from("pressed an empty slot")));
+        return Err(error_handler::TileMoveError::PressedEmptySlot(String::from("pressed an empty slot")));
     }
     let optional_empty_neighbor_location= 
         game_board.get_empty_neighbor(&occupied_tile_location);
     if let None=optional_empty_neighbor_location{
-        return Err(TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor")));
+        return Err(error_handler::TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor")));
     }
     let empty_neighbor_location=optional_empty_neighbor_location.unwrap();
     
@@ -141,7 +141,7 @@ pub fn move_tile_logic(
             &occupied_tile_location, 
             &empty_neighbor_location
         )?;
-        game_log(GameLog::TilesMoved(empty_neighbor_location))
+        print_to_console::game_log(GameLog::TilesMoved(empty_neighbor_location))
     }
 
     // it's important that we do it after moving the entities so that graphic transition code is more readable
@@ -154,24 +154,24 @@ pub fn move_tile_logic(
 
 fn check_if_solved(game_board: &mut Board, solved_board: &Board){
     if game_board == solved_board {
-        game_log(GameLog::Victory);
+        print_to_console::game_log(GameLog::Victory);
         game_board.ignore_player_input=true;
     }
 }
 
 pub fn reset_board(
     solved_board: &Board,
-    game_board: &mut Board
+    game_board: &mut Board,
+    mut tiles: Query<&mut Transform, With<Tile>> 
 ){
-    game_board.ignore_player_input=true;
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
         let attempt_result=generate_game_board(solved_board.clone());
          //generation successful
         if let Ok(board) = attempt_result { 
-            /* 
-            graphics::
-            return; 
-            */
+            game_board.empty_tile_location=board.empty_tile_location;
+            game_board.grid=board.grid;
+            graphics::move_existing_tiles_after_reset(&board, tiles);
+            return;
         }
     }
     print_to_console::couldnt_generate_board();

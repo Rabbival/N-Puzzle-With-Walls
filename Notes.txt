@@ -1,5 +1,4 @@
 TODO
-Take care of graphics
 R to restart
 	-move entities instead of spawning them
 

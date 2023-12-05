@@ -40,16 +40,6 @@ fn spawn_tiles(
     }
 }
 
-fn move_existing_tiles(
-    //board: &Board,
-    debug_tiles: Query<&Tile>
-    //tiles: Query<&mut Transform, With<Tile>>
-){
-    for tile in debug_tiles.iter(){
-        info!("{:?}", tile)
-    }
-}
-
 pub fn switch_tile_entity_positions(
     mut tiles: Query<&mut Transform, With<Tile>>,
     board: &Board,
@@ -80,5 +70,14 @@ fn extract_tile_entity(
     match board[grid_location].tile_entity{
         None=> {Err(TileMoveError::NoEntity)},
         Some(entity)=> {Ok(entity)}
+    }
+}
+
+pub fn move_existing_tiles_after_reset(
+    board: &Board,
+    tiles: Query<&mut Transform, With<Tile>>
+){
+    for transform in tiles.iter(){
+        info!("{:?}", transform)
     }
 }
