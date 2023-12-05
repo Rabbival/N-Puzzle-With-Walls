@@ -1,50 +1,25 @@
 use crate::prelude::*;
 
-#[derive(Resource, Default, PartialEq, Eq)]
-pub enum TilesSpawned{
-    #[default]
-    First,
-    NotFirst
-}
-
 pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
-            .init_resource::<TilesSpawned>()
-            .add_systems(PostStartup, draw_board)
-            ;
-    }
-}
-
-fn draw_board(
-    tiles_spawned: ResMut<TilesSpawned>,
-    commands: Commands,
-    sprite_atlas: Res<SpriteAtlas>,
-    mut board_query: Query<&mut Board, With<GameBoard>>,
-    tiles: Query<&mut Transform, With<Tile>>
-){
-    let tiles_spawned_value = tiles_spawned.into_inner();
-    if *tiles_spawned_value == TilesSpawned::First {
-        spawn_tiles(commands, sprite_atlas.clone().0, &mut board_query.single_mut().grid);
-        *tiles_spawned_value = TilesSpawned::NotFirst;
-    } else{
-        move_existing_tiles(board_query.single().clone(), tiles);
+            .add_systems(PostStartup, spawn_tiles);
     }
 }
 
 fn spawn_tiles(
     mut commands: Commands,
-    atlas_handle: Handle<TextureAtlas>,
-    grid: &mut [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize]
+    sprite_atlas: Res<SpriteAtlas>,
+    mut board_query: Query<&mut Board, With<GameBoard>>,
 ){
     let mut spawn_pos=Vec2::new(0.0,0.0);
-    for row in grid{
+    for row in &mut board_query.single_mut().grid{
         for tile_from_cell in row{
             let entity_id=commands.spawn((
                 SpriteSheetBundle {
-                    texture_atlas: atlas_handle.clone(),
+                    texture_atlas: sprite_atlas.clone().0.clone(),
                     sprite: TextureAtlasSprite::new(tile_from_cell.to_atlas_index()),
                     transform: Transform::from_translation(
                         Vec3::new(
@@ -66,10 +41,13 @@ fn spawn_tiles(
 }
 
 fn move_existing_tiles(
-    board: Board,
-    tiles: Query<&mut Transform, With<Tile>>
+    //board: &Board,
+    debug_tiles: Query<&Tile>
+    //tiles: Query<&mut Transform, With<Tile>>
 ){
-    //TODO
+    for tile in debug_tiles.iter(){
+        info!("{:?}", tile)
+    }
 }
 
 pub fn switch_tile_entity_positions(

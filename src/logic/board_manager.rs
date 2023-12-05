@@ -159,6 +159,24 @@ fn check_if_solved(game_board: &mut Board, solved_board: &Board){
     }
 }
 
+pub fn reset_board(
+    solved_board: &Board,
+    game_board: &mut Board
+){
+    game_board.ignore_player_input=true;
+    for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
+        let attempt_result=generate_game_board(solved_board.clone());
+         //generation successful
+        if let Ok(board) = attempt_result { 
+            /* 
+            graphics::
+            return; 
+            */
+        }
+    }
+    print_to_console::couldnt_generate_board();
+}
+
 
 #[cfg(test)]
 mod tests {
