@@ -1,7 +1,7 @@
 use crate::{prelude::*, output::{error_handler, print_to_console, graphics}};
 use rand::Rng;
 
-const LOCATION_SHIFT_BOUNDS:(u8, u8) = (8, 22);
+const LOCATION_SHIFT_BOUNDS:(u8, u8) = (18, 22);
 const BOARD_GENERATION_ATTEMPTS:u8=5;
 
 #[derive(Component)]
@@ -102,6 +102,7 @@ fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGe
     //generation was successful
     let reveresed_shift_order=shift_direction_sequence
         .iter()
+        .rev()
         .map(|direction| -> BasicDirection {
             direction.opposite_direction().unwrap()
         });

@@ -43,12 +43,6 @@ fn move_tile_mouse_input(
     if !mouse.just_pressed(MouseButton::Left) {
         return;
     }
-
-    for board in game_board_query.iter(){
-        info!("{:?}", board);
-    }
-
-
     if let Err(input_error) = 
         forward_location_to_board_manager(
             cursor_position.world_position, 
