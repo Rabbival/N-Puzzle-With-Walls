@@ -107,6 +107,7 @@ fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGe
         });
     print_to_console::print_possible_solution(reveresed_shift_order);
     board.ignore_player_input=false;
+    board.empty_tile_location=empty_tile_location;
     Ok(board)
 }
 
