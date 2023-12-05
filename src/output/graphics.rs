@@ -22,12 +22,12 @@ fn draw_board(
     tiles_spawned: ResMut<TilesSpawned>,
     commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
-    board_query: Query<&Board, With<GameBoard>>,
+    mut board_query: Query<&mut Board, With<GameBoard>>,
     tiles: Query<&mut Transform, With<Tile>>
 ){
     let tiles_spawned_value = tiles_spawned.into_inner();
     if *tiles_spawned_value == TilesSpawned::First {
-        spawn_tiles(commands, sprite_atlas.clone().0, &board_query.single());
+        spawn_tiles(commands, sprite_atlas.clone().0, &mut board_query.single_mut().grid);
         *tiles_spawned_value = TilesSpawned::NotFirst;
     } else{
         move_existing_tiles(board_query.single().clone(), tiles);
@@ -37,11 +37,11 @@ fn draw_board(
 fn spawn_tiles(
     mut commands: Commands,
     atlas_handle: Handle<TextureAtlas>,
-    board: &Board
+    grid: &mut [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize]
 ){
     let mut spawn_pos=Vec2::new(0.0,0.0);
-    for row in board.grid{
-        for mut tile_from_cell in row{
+    for row in grid{
+        for tile_from_cell in row{
             let entity_id=commands.spawn((
                 SpriteSheetBundle {
                     texture_atlas: atlas_handle.clone(),
@@ -54,7 +54,7 @@ fn spawn_tiles(
                         )),
                     ..default()
                 },
-                tile_from_cell
+                *tile_from_cell
             )).id();
             tile_from_cell.tile_entity=Some(entity_id);
 
@@ -80,14 +80,14 @@ pub fn switch_tile_entity_positions(
 ) -> Result<(),TileMoveError>
 {
     let first_tile_entity=extract_tile_entity(board, first_grid_location)?;
-    let second_tile_entity=extract_tile_entity( board, second_grid_location)?;
+    let second_tile_entity=extract_tile_entity(board, second_grid_location)?;
     if let Ok(second_tile_transform) = tiles.get_mut(second_tile_entity) {
         second_tile_transform.into_inner().translation=first_grid_location.to_world();
     }else{
         return Err(TileMoveError::EntityNotInQuery);
     }
     if let Ok(first_tile_transform) = tiles.get_mut(first_tile_entity) {
-        first_tile_transform.into_inner().translation=first_grid_location.to_world();
+        first_tile_transform.into_inner().translation=second_grid_location.to_world();
     }else{
         return Err(TileMoveError::EntityNotInQuery);
     }

@@ -132,8 +132,6 @@ pub fn move_tile_logic(
         return Err(TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor")));
     }
     let empty_neighbor_location=optional_empty_neighbor_location.unwrap();
-
-    game_board.switch_tiles_by_location(&empty_neighbor_location, &occupied_tile_location);
     
     if let Some(tiles) = optional_tiles{
         graphics::switch_tile_entity_positions(
@@ -144,6 +142,9 @@ pub fn move_tile_logic(
         )?;
         game_log(GameLog::TilesMoved(empty_neighbor_location))
     }
+
+    // it's important that we do it after moving the entities so that graphic transition code is more readable
+    game_board.switch_tiles_by_location(&empty_neighbor_location, &occupied_tile_location);
 
     check_if_solved(game_board, solved_board);
 
