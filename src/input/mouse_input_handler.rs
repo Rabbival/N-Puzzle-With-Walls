@@ -65,7 +65,7 @@ fn forward_location_to_board_manager(
 ) -> Result<(), error_handler::TileMoveError>
 {
     if let Some(optional_occupied_tile_location) = GridLocation::from_world(cursor_position) {
-        game_log(GameLog::TileClicked(optional_occupied_tile_location));
+        game_log(GameLog::TileClicked(game_board[&optional_occupied_tile_location].tile_type));
         return board_manager::move_tile_logic(
             optional_occupied_tile_location, 
             optional_tiles,

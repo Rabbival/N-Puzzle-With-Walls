@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
 pub enum GameLog{
-    TileClicked(GridLocation),
+    TileClicked(TileType),
+    TilesMoved(GridLocation),
     Victory
 }
 
@@ -36,8 +37,11 @@ pub fn print_possible_solution<T: Iterator<Item = BasicDirection>>(reversed_dire
 
 pub fn game_log(log: GameLog){
     match log{
-        GameLog::TileClicked(location)=>{
-            info!("clicked location: {:?}", location)
+        GameLog::TileClicked(tile_type)=>{
+            info!("clicked tile: {:?}", tile_type);
+        },
+        GameLog::TilesMoved(location)=>{
+            info!("tile moved to: {:?}", location);
         },
         GameLog::Victory=>{
             info!("puzzle solved!");

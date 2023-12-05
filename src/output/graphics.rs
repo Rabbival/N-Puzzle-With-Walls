@@ -110,6 +110,9 @@ fn extract_tile_entity(
     grid_location: &GridLocation
 ) -> Result<Entity,TileMoveError>
 {
+
+    debug!("{:?}",board[grid_location]);
+
     match board[grid_location].tile_entity{
         None=> {Err(TileMoveError::NoEntity)},
         Some(entity)=> {Ok(entity)}

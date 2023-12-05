@@ -141,6 +141,7 @@ pub fn move_tile_logic(
             &occupied_tile_location, 
             &empty_neighbor_location
         )?;
+        game_log(GameLog::TilesMoved(empty_neighbor_location))
     }
 
     check_if_solved(game_board, solved_board);
