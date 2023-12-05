@@ -26,7 +26,7 @@ pub fn main() {
     .init_resource::<CursorPosition>()
     .add_plugins((
         CameraPlugin,
-        InputHandlerPlugin,
+        MouseInputHandlerPlugin,
         AssetLoaderPlugin,
         BoardManagerPlugin,
         BoardPlugin,

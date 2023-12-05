@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use super::error_handler;
+
 pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
@@ -18,7 +20,7 @@ fn draw_board(
     let texture_atlas_handle=sprite_atlas.clone().0;
     let mut spawn_pos=Vec2::new(0.0,0.0);
     for row in board.grid{
-        for tile_from_cell in row{
+        for mut tile_from_cell in row{
             commands.spawn((
                 SpriteSheetBundle {
                     texture_atlas: texture_atlas_handle.clone(),
@@ -33,6 +35,8 @@ fn draw_board(
                 },
                 tile_from_cell
             ));
+            tile_from_cell.translation=Some(spawn_pos);
+
             spawn_pos.x+=ATLAS_CELL_SQUARE_SIZE;
         }
         spawn_pos.y-=ATLAS_CELL_SQUARE_SIZE;
@@ -41,8 +45,28 @@ fn draw_board(
 
 }
 
-/* 
-pub fn move_tile_entity(tile: Entity, from: &GridLocation, to: &GridLocation){
+pub fn switch_tile_entity_positions(
+    board: Res<Board>,
+    first: &GridLocation, 
+    second: &GridLocation
+) -> Result<(),error_handler::InitializationError>
+{
+    let mut first_tile_translation=get_tile_translation(board.clone(), first)?;
+    let mut second_tile_translation=get_tile_translation(board.clone(), second)?;
+    let temp_translation=first_tile_translation
 
+    Ok(())
 }
-*/
+
+fn get_tile_translation(board: Board, tile_location: &GridLocation) 
+-> Result<Vec2,error_handler::InitializationError>{
+    let tile=board[tile_location];
+    match tile.translation{
+        None => {
+            Err(InitializationError::NoTileTranslationConfigured(tile.tile_type))
+        }
+        Some(translation) => {
+            Ok(translation)
+        }
+    }
+}

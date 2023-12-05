@@ -1,1 +1,1 @@
-pub mod input_handler;
+pub mod mouse_input_handler;

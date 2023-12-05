@@ -9,7 +9,9 @@ pub mod prelude {
     pub use bevy::{prelude::*, utils::HashMap};
 
     pub use crate::app::*;
-    pub use crate::input::input_handler::*;
+    pub use crate::input::{
+        mouse_input_handler::*,
+    };
     pub use crate::output::{
         camera::*,
         asset_loader::*,

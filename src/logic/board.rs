@@ -127,10 +127,9 @@ impl GridLocation {
     }
 
     pub fn from_world(position: Vec2) -> Option<Self> {
-        let position = position + Vec2::splat(0.5);
         let location = GridLocation{ 
-            row: (position.y * ATLAS_CELL_SQUARE_SIZE) as i32, 
-            col: (position.x * ATLAS_CELL_SQUARE_SIZE) as i32
+            row: (-1.0*position.y/(ATLAS_CELL_SQUARE_SIZE)+0.5) as i32, 
+            col: (position.x/(ATLAS_CELL_SQUARE_SIZE)+0.5) as i32
         };
         if Board::valid_index(&location) {
             Some(location)

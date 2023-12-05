@@ -1,3 +1,5 @@
+use crate::prelude::TileType;
+
 #[derive(Debug)]
 pub enum InputHandlerError{
     IndexOutOfGridBounds (String),
@@ -9,4 +11,9 @@ pub enum InputHandlerError{
 pub enum BoardGenerationError{
     DirectionCouldntBeFlipped,
     DirectionNotFoundInMap,
+}
+
+#[derive(Debug)]
+pub enum InitializationError{
+    NoTileTranslationConfigured (TileType)
 }

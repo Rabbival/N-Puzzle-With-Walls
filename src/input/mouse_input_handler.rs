@@ -6,9 +6,9 @@ pub struct CursorPosition {
     pub over_ui: bool,
 }
 
-pub struct InputHandlerPlugin;
+pub struct MouseInputHandlerPlugin;
 
-impl Plugin for InputHandlerPlugin {
+impl Plugin for MouseInputHandlerPlugin {
     fn build(&self, app: &mut App) {
         app
         .add_systems(Update, (update_cursor, move_tile_input).chain());
@@ -46,10 +46,10 @@ fn move_tile_input(
     {
         match input_err{
             InputHandlerError::NoEmptyNeighbor(message)=>{
-                error!(message);
+                warn!(message);
             },
             InputHandlerError::PressedEmptySlot(message)=>{
-                error!(message);
+                warn!(message);
             },
             InputHandlerError::IndexOutOfGridBounds(message)=>{
                 error!(message);
@@ -67,6 +67,6 @@ fn forward_location_to_board_manager(
         game_log(GameLog::TileClicked(location));
         return board_manager::move_tile_logic(location, board);
     }else{
-        Err(InputHandlerError::IndexOutOfGridBounds(String::from("grid location occupied!")))
+        Err(InputHandlerError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
     }
 }
