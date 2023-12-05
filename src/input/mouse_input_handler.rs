@@ -10,7 +10,8 @@ pub struct MouseInputHandlerPlugin;
 impl Plugin for MouseInputHandlerPlugin {
     fn build(&self, app: &mut App) {
         app
-        .add_systems(Update, (update_cursor, move_tile_input).chain());
+            .init_resource::<CursorPosition>()
+            .add_systems(Update, (update_cursor, move_tile_mouse_input).chain());
     }
 }
 
@@ -32,50 +33,47 @@ fn update_cursor(
     }
 }
 
-fn move_tile_input(
+fn move_tile_mouse_input(
     mouse: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,
-    mut game_board_query: Query<&mut Board, With<GameBoard>>,
-    solved_board_query: Query<&Board, With<SolvedBoard>>
+    mut game_board_query: Query<&mut Board, (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&Board, (With<SolvedBoard>, Without<GameBoard>)>,
+    tiles: Query<&mut Transform, With<Tile>>
 ) {
     if !mouse.just_pressed(MouseButton::Left) {
         return;
     }
-    if let Err(input_err) = 
+    if let Err(input_error) = 
         forward_location_to_board_manager(
             cursor_position.world_position, 
             game_board_query.single_mut().into_inner(),
-            solved_board_query.single()
+            solved_board_query.single(),
+            Some(tiles)
         )
     {
-        match input_err{
-            InputHandlerError::BoardFrozenToPlayer(message)=>{
-                warn!(message);
-            },
-            InputHandlerError::NoEmptyNeighbor(message)=>{
-                warn!(message);
-            },
-            InputHandlerError::PressedEmptySlot(message)=>{
-                warn!(message);
-            },
-            InputHandlerError::IndexOutOfGridBounds(message)=>{
-                error!(message);
-            }
-        }
-    };
+        print_input_error(input_error);
+    }
 }
 
+/// Had to make the query optional for the sake of testing,
+/// for the sake of the game- it's always there
 fn forward_location_to_board_manager(
     cursor_position: Vec2,
     game_board: &mut Board,
-    solved_board: &Board
-) -> Result<(), error_handler::InputHandlerError>
+    solved_board: &Board,
+    optional_tiles: Option<Query<&mut Transform, With<Tile>>>
+) -> Result<(), error_handler::TileMoveError>
 {
-    if let Some(location) = GridLocation::from_world(cursor_position) {
-        game_log(GameLog::TileClicked(location));
-        return board_manager::move_tile_logic(location, game_board, solved_board);
+    if let Some(optional_occupied_tile_location) = GridLocation::from_world(cursor_position) {
+        game_log(GameLog::TileClicked(optional_occupied_tile_location));
+        return board_manager::move_tile_logic(
+            optional_occupied_tile_location, 
+            optional_tiles,
+            game_board, 
+            solved_board
+        );
     }else{
-        Err(InputHandlerError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
+        Err(TileMoveError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
     }
 }
 
@@ -95,10 +93,11 @@ mod tests {
             forward_location_to_board_manager(
                 position_to_check, 
                 &mut Board::default(),
-                &Board::default()
+                &Board::default(),
+                None
             );
         match location_search_outcome{
-                Err(InputHandlerError::IndexOutOfGridBounds(_))=> true,
+                Err(TileMoveError::IndexOutOfGridBounds(_))=> true,
                 _ => false
             }
     }

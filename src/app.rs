@@ -23,7 +23,6 @@ pub fn main() {
         color: Color::default(),
         brightness: 0.75,
     })
-    .init_resource::<CursorPosition>()
     .add_plugins((
         CameraPlugin,
         MouseInputHandlerPlugin,

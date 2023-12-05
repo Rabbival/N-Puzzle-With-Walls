@@ -1,21 +1,15 @@
-use crate::prelude::TileType;
-
 #[derive(Debug)]
-pub enum InputHandlerError{
+pub enum TileMoveError{
     BoardFrozenToPlayer (String),
     IndexOutOfGridBounds (String),
     NoEmptyNeighbor (String),
-    PressedEmptySlot (String)
+    PressedEmptySlot (String),
+    NoEntity,
+    EntityNotInQuery
 }
 
 #[derive(Debug)]
 pub enum BoardGenerationError{
     DirectionCouldntBeFlipped,
     DirectionNotFoundInMap,
-}
-
-#[derive(Debug)]
-pub enum SearchError{
-    TileNotFound (TileType),
-    TilesNotFound (TileType, TileType),
 }
