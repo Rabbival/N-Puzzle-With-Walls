@@ -116,26 +116,36 @@ fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGe
 ///  - move its logic tile (using grid)
 pub fn move_tile_logic(
     location: GridLocation, 
-    board: &mut Board,
+    game_board: &mut Board,
+    solved_board: &Board,
 ) -> Result<(), error_handler::InputHandlerError>
 {
-    if board.ignore_player_input{
+    if game_board.ignore_player_input{
         return Err(InputHandlerError::BoardFrozenToPlayer(String::from("board locked")));
     }
-    if !board.occupied(&location) {
+    if !game_board.occupied(&location) {
         return Err(InputHandlerError::PressedEmptySlot(String::from("pressed an empty slot")));
     }
-    let optional_empty_neighbor= board.clone().get_empty_neighbor(&location);
+    let optional_empty_neighbor= game_board.get_empty_neighbor(&location);
     if let None=optional_empty_neighbor{
         return Err(InputHandlerError::NoEmptyNeighbor(String::from("no empty neighbor")));
     }
     let empty_neighbor=optional_empty_neighbor.unwrap();
 
-    board.switch_tiles_by_location(&empty_neighbor, &location);
+    game_board.switch_tiles_by_location(&empty_neighbor, &location);
     
     //graphics::switch_tile_entity_positions(query, &location, &empty_neighbor);
 
+    check_if_solved(game_board, solved_board);
+
     return Ok(());
+}
+
+fn check_if_solved(game_board: &mut Board, solved_board: &Board){
+    if game_board == solved_board {
+        game_log(GameLog::Victory);
+        game_board.ignore_player_input=true;
+    }
 }
 
 
@@ -168,7 +178,8 @@ mod tests {
         let location_search_outcome=
             move_tile_logic(
                 GridLocation::default(), 
-                &mut Board::default() //locked be default
+                &mut Board::default(), //locked be default
+                &Board::default()
             );
         match location_search_outcome{
                 Err(InputHandlerError::BoardFrozenToPlayer(_))=> true,
@@ -182,7 +193,8 @@ mod tests {
         let location_search_outcome=
             move_tile_logic(
                 GridLocation::default(), 
-                &mut board
+                &mut board,
+                &Board::default()
             );
         match location_search_outcome{
                 Err(InputHandlerError::PressedEmptySlot(_))=> true,
@@ -198,7 +210,8 @@ mod tests {
         let location_search_outcome=
             move_tile_logic(
                 GridLocation { row: 0, col: 0 }, 
-                &mut board
+                &mut board,
+                &Board::default()
             );
         match location_search_outcome{
                 Err(InputHandlerError::NoEmptyNeighbor(_))=> true,

@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 pub enum GameLog{
     TileClicked(GridLocation),
+    Victory
 }
 
 pub fn couldnt_generate_board(){
@@ -20,5 +21,9 @@ pub fn game_log(log: GameLog){
         GameLog::TileClicked(location)=>{
             info!("clicked location: {:?}", location)
         },
+        GameLog::Victory=>{
+            info!("puzzle solved!");
+            info!("press R to restart");
+        }
     }
 }

@@ -35,7 +35,8 @@ fn update_cursor(
 fn move_tile_input(
     mouse: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,
-    mut board_query: Query<&mut Board, With<GameBoard>>
+    mut game_board_query: Query<&mut Board, With<GameBoard>>,
+    solved_board_query: Query<&Board, With<SolvedBoard>>
 ) {
     if !mouse.just_pressed(MouseButton::Left) {
         return;
@@ -43,7 +44,9 @@ fn move_tile_input(
     if let Err(input_err) = 
         forward_location_to_board_manager(
             cursor_position.world_position, 
-            board_query.single_mut().into_inner())
+            game_board_query.single_mut().into_inner(),
+            solved_board_query.single()
+        )
     {
         match input_err{
             InputHandlerError::BoardFrozenToPlayer(message)=>{
@@ -64,12 +67,13 @@ fn move_tile_input(
 
 fn forward_location_to_board_manager(
     cursor_position: Vec2,
-     board: &mut Board,
+    game_board: &mut Board,
+    solved_board: &Board
 ) -> Result<(), error_handler::InputHandlerError>
 {
     if let Some(location) = GridLocation::from_world(cursor_position) {
         game_log(GameLog::TileClicked(location));
-        return board_manager::move_tile_logic(location, board);
+        return board_manager::move_tile_logic(location, game_board, solved_board);
     }else{
         Err(InputHandlerError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
     }
@@ -90,7 +94,8 @@ mod tests {
         let location_search_outcome=
             forward_location_to_board_manager(
                 position_to_check, 
-                &mut Board::default()
+                &mut Board::default(),
+                &Board::default()
             );
         match location_search_outcome{
                 Err(InputHandlerError::IndexOutOfGridBounds(_))=> true,

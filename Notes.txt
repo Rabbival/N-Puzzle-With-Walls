@@ -1,7 +1,7 @@
 TODO
-Freeze board when you win and print message to console
 Take care of graphics
 R to restart
+	-move entities instead of spawning them
 
 Nice to have:
 Enable moving tiles using arrows/WASD
