@@ -1,7 +1,10 @@
 TODO
+Take care of graphics
+R to restart
+Freeze board when you win and print message to console
 
+Nice to have:
 Enable moving tiles using mouse or arrows/WASD
 
 Unit Tests:
 *Unit test for direciton flipping (assert_eq!)
-*Unit test for checking that the board isn't declared as solved when it's not

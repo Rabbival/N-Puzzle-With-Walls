@@ -6,11 +6,12 @@ use crate::prelude::{Tile, TileType, BasicDirection, ATLAS_CELL_SQUARE_SIZE};
 
 pub const GRID_SIZE: u32 = 4;
 
-#[derive(Component, PartialEq, Eq, Clone)]
+#[derive(Component, PartialEq, Eq, Clone, Debug)]
 pub struct Board {
     pub grid: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize],
     pub empty_tile_location: GridLocation,
-    pub locked: bool
+    ///appear as frozen to player
+    pub ignore_player_input: bool
 }
 
 #[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug)]
@@ -24,7 +25,7 @@ impl Default for Board {
         Self {
             grid: [[Tile::default(); GRID_SIZE as usize]; GRID_SIZE as usize],
             empty_tile_location: GridLocation::default(),
-            locked: true
+            ignore_player_input: true
         }
     }
 }

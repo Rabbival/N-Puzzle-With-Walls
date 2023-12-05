@@ -36,7 +36,7 @@ fn generate_solved_board() -> Board{
     let empty_tile_location=GridLocation::new((GRID_SIZE-1) as i32, (GRID_SIZE-1) as i32);
     solved_board[&empty_tile_location] = Tile::new(None);
     solved_board.empty_tile_location=empty_tile_location;
-    solved_board.locked=true;
+    solved_board.ignore_player_input=true;
     solved_board
 }
 
@@ -106,7 +106,7 @@ fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGe
             direction.opposite_direction().unwrap()
         });
     print_to_console::print_possible_solution(reveresed_shift_order);
-    board.locked=false;
+    board.ignore_player_input=false;
     Ok(board)
 }
 
@@ -119,7 +119,7 @@ pub fn move_tile_logic(
     board: &mut Board,
 ) -> Result<(), error_handler::InputHandlerError>
 {
-    if board.locked{
+    if board.ignore_player_input{
         return Err(InputHandlerError::BoardLocked(String::from("board locked")));
     }
     if !board.occupied(&location) {
@@ -150,6 +150,20 @@ mod tests {
         assert!(test_no_empty_neighbor());
     }
 
+    #[test]
+    fn several_attempts_at_generating_unsolved_boards(){
+        const ATTEMPT_COUNT: u8 = 10;
+        let solved_board=generate_solved_board();
+        for _ in 0..ATTEMPT_COUNT{
+            assert_ne!(solved_board, 
+                match generate_game_board(solved_board.clone()){
+                    Ok(board)=> board,
+                    Err(_)=> panic!()
+                }
+            );
+        }
+    }
+
     fn test_locked_board()-> bool{
         let location_search_outcome=
             move_tile_logic(
@@ -164,7 +178,7 @@ mod tests {
 
     fn test_empty_slot()-> bool{
         let mut board=Board::default();
-        board.locked=false;
+        board.ignore_player_input=false;
         let location_search_outcome=
             move_tile_logic(
                 GridLocation::default(), 
