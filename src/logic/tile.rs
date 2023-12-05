@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Component, Clone, Copy, Default, PartialEq, Eq, Debug)]
+#[derive(Component, Clone, Copy, Default, PartialEq, Eq, Debug, Hash)]
 pub enum TileType {
     #[default]
     Empty,

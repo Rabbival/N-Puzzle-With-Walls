@@ -26,6 +26,7 @@ pub fn main() {
     .add_plugins((
         CameraPlugin,
         MouseInputHandlerPlugin,
+        KeyboardInputHandlerPlugin,
         AssetLoaderPlugin,
         BoardManagerPlugin,
         GraphicsPlugin

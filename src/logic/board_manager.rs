@@ -162,7 +162,7 @@ fn check_if_solved(game_board: &mut Board, solved_board: &Board){
 pub fn reset_board(
     solved_board: &Board,
     game_board: &mut Board,
-    mut tiles: Query<&mut Transform, With<Tile>> 
+    mut tiles: Query<(&mut Transform, &Tile)>
 ){
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
         let attempt_result=generate_game_board(solved_board.clone());
@@ -170,7 +170,7 @@ pub fn reset_board(
         if let Ok(board) = attempt_result { 
             game_board.empty_tile_location=board.empty_tile_location;
             game_board.grid=board.grid;
-            graphics::move_existing_tiles_after_reset(&board, tiles);
+            graphics::move_existing_tiles_after_reset(game_board, tiles);
             return;
         }
     }

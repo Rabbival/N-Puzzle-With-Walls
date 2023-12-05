@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use bevy::{prelude::*, utils::HashMap};
 
 pub struct GraphicsPlugin;
 
@@ -74,10 +75,22 @@ fn extract_tile_entity(
 }
 
 pub fn move_existing_tiles_after_reset(
-    board: &Board,
-    tiles: Query<&mut Transform, With<Tile>>
+    board: &mut Board,
+    mut tiles: Query<(&mut Transform, &Tile)>
 ){
-    for transform in tiles.iter(){
-        info!("{:?}", transform)
+    let mut entity_by_tile_type:HashMap<TileType,Option<Entity>>=HashMap::new();
+    for (_, tile) in tiles.iter(){
+        entity_by_tile_type.insert(tile.tile_type, tile.tile_entity);
+    }
+
+    let mut target_pos=Vec2::new(0.0,0.0);
+    for row in board.grid{
+        for tile_from_cell in row{
+            
+
+            target_pos.x+=ATLAS_CELL_SQUARE_SIZE;
+        }
+        target_pos.y-=ATLAS_CELL_SQUARE_SIZE;
+        target_pos.x=0.0;
     }
 }
