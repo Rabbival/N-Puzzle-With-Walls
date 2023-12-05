@@ -24,7 +24,7 @@ fn draw_board(
             commands.spawn((
                 SpriteSheetBundle {
                     texture_atlas: texture_atlas_handle.clone(),
-                    sprite: TextureAtlasSprite::new(tile_from_cell.to_index()),
+                    sprite: TextureAtlasSprite::new(tile_from_cell.to_atlas_index()),
                     transform: Transform::from_translation(
                         Vec3::new(
                             spawn_pos.x,

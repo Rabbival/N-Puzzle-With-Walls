@@ -89,7 +89,7 @@ fn initialize_to_solved() -> (GridLocation, Board){
     for i in 0..GRID_SIZE as u32 {
         for j in 0..GRID_SIZE as u32 {
             let location = GridLocation::new(i as i32, j as i32);
-            solved_board[&location] = Tile::new(Some(i*GRID_SIZE+j));
+            solved_board[&location] = Tile::new(Some(i*GRID_SIZE+j+1));
         }
     }
     let empty_tile_location=GridLocation::new((GRID_SIZE-1) as i32, (GRID_SIZE-1) as i32);
@@ -103,7 +103,7 @@ fn initialize_to_solved() -> (GridLocation, Board){
 ///  - move its logic tile (using grid)
 pub fn move_tile_logic(
     location: GridLocation, 
-    board: ResMut<Board>
+    board: &mut Board,
 ) -> Result<(), error_handler::InputHandlerError>
 {
     if board.locked{
@@ -118,9 +118,69 @@ pub fn move_tile_logic(
     }
     let empty_neighbor=optional_empty_neighbor.unwrap();
 
-    board.into_inner().switch_tiles_by_location(&empty_neighbor, &location);
+    board.switch_tiles_by_location(&empty_neighbor, &location);
     
     //graphics::switch_tile_entity_positions(query, &location, &empty_neighbor);
 
     return Ok(());
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_move_tile_logic() {
+        assert!(test_locked_board());
+        assert!(test_empty_slot());
+        assert!(test_no_empty_neighbor());
+    }
+
+    fn test_locked_board()-> bool{
+        let location_search_outcome=
+            move_tile_logic(
+                GridLocation::default(), 
+                &mut Board::default() //locked be default
+            );
+        match location_search_outcome{
+                Err(InputHandlerError::BoardLocked(_))=> true,
+                _ => false
+            }
+    }
+
+    fn test_empty_slot()-> bool{
+        let mut board=Board::default();
+        board.locked=false;
+        let location_search_outcome=
+            move_tile_logic(
+                GridLocation::default(), 
+                &mut board //locked be default
+            );
+        match location_search_outcome{
+                Err(InputHandlerError::PressedEmptySlot(_))=> true,
+                _ => false
+            }
+    }
+
+    fn test_no_empty_neighbor()-> bool{
+        let (empty_tile_location, mut board)=initialize_to_solved();
+        board[&empty_tile_location]=Tile::new(Some(16));
+
+        for row in board.grid{
+            for mut tile_from_cell in row{
+                println!("{:?}", tile_from_cell);
+            }
+        }
+
+        let location_search_outcome=
+            move_tile_logic(
+                empty_tile_location, 
+                &mut board //locked be default
+            );
+        match location_search_outcome{
+                Err(InputHandlerError::NoEmptyNeighbor(_))=> true,
+                _ => false
+            }
+    }
 }

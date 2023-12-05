@@ -3,8 +3,5 @@ TODO
 Enable moving tiles using mouse or arrows/WASD
 
 Unit Tests:
-*Unit tests for moving grid (in input_handler): 
-	-check that a tile can't be moved to an occupied space
-	-check that clicking outside of the grid space throws an error
-*Unit test for reversed direction
+*Unit test for direciton flipping (assert_eq!)
 *Unit test for checking that the board isn't declared as solved when it's not

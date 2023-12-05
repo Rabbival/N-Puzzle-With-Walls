@@ -7,7 +7,7 @@ pub enum TileType {
     Numbered(u32),
 }
 
-#[derive(Component, Clone, Copy, Default)]
+#[derive(Component, Clone, Copy, Default, Debug)]
 pub struct Tile{
     pub tile_type: TileType,
 }
@@ -29,10 +29,10 @@ impl Tile{
         }
     }
 
-    pub fn to_index(&self) -> usize{
+    pub fn to_atlas_index(&self) -> usize{
         match self.tile_type{
             TileType::Empty => 15,
-            TileType::Numbered(num) => num as usize,
+            TileType::Numbered(num) => num as usize -1,
         }
     }
 }
