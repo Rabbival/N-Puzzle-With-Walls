@@ -4,6 +4,3 @@ R to restart
 
 Nice to have:
  - Enable moving tiles using arrows/WASD
-
-Only after first export:
- - make the duplicate code on graphics a board function that takes anonymous functions

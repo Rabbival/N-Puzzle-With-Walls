@@ -88,7 +88,8 @@ fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGe
         let chosen_direction=valid_directions[chosen_shift_index];
         let chosen_location_option=optional_directions.get(chosen_direction);
         if let None = chosen_location_option{
-            return Err(error_handler::BoardGenerationError::DirectionNotFoundInMap);
+            return Err(error_handler::BoardGenerationError::ItemNotInMap
+                (ItemNotFoundInMapError::DirectionNotFoundInMap));
         }
         let chosen_location=chosen_location_option.unwrap();
         board.switch_tiles_by_location(&empty_tile_location, chosen_location);

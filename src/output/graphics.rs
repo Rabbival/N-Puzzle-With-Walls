@@ -87,13 +87,19 @@ pub fn move_existing_tiles_after_reset(
     let mut target_pos=Vec3::new(0.0,0.0,0.0);
     for row in board.grid{
         for tile_from_cell in row{
-            match entity_by_tile_type[&tile_from_cell.tile_type]{
-                None=> { return Err(EntityRelatedCustomError::NoEntity); },
-                Some(entity)=> { 
-                    if let Ok((tile_transform,_)) = tiles.get_mut(entity) {
-                        tile_transform.into_inner().translation=target_pos;
-                    }else{
-                        return Err(EntityRelatedCustomError::EntityNotInQuery);
+            match entity_by_tile_type.remove(&tile_from_cell.tile_type){
+                None=> { return Err(EntityRelatedCustomError::ItemNotInMap
+                    (ItemNotFoundInMapError::EntityNotFoundInMap)); },
+                Some(optional_entity)=> { 
+                    match optional_entity{
+                        None=>{return Err(EntityRelatedCustomError::NoEntity);},
+                        Some(entity)=>{
+                            if let Ok((tile_transform,_)) = tiles.get_mut(entity) {
+                                tile_transform.into_inner().translation=target_pos;
+                            }else{
+                                return Err(EntityRelatedCustomError::EntityNotInQuery);
+                            }
+                        }
                     }
                 }
             }
