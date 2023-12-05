@@ -2,11 +2,11 @@ use std::ops::{Index,IndexMut};
 
 use bevy::{prelude::*, utils::HashMap};
 
-use crate::prelude::{Tile, TileType, BasicDirection, ATLAS_CELL_SQUARE_SIZE};
+use crate::prelude::*;
 
 pub const GRID_SIZE: u32 = 4;
 
-#[derive(Component, PartialEq, Eq, Clone, Debug)]
+#[derive(Component, Clone, Debug)]
 pub struct Board {
     pub grid: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize],
     pub empty_tile_location: GridLocation,
@@ -14,11 +14,22 @@ pub struct Board {
     pub ignore_player_input: bool
 }
 
-#[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug)]
-pub struct GridLocation{
-    pub row: i32,
-    pub col: i32
+impl PartialEq for Board {
+    fn eq(&self, other: &Self) -> bool {
+        let mut all_cells_are_equal=true;
+        for row_index in 0..GRID_SIZE{
+            for col_index in 0..GRID_SIZE{
+                let location=GridLocation::new(row_index as i32, col_index as i32);
+                if self[&location].tile_type != other[&location].tile_type{
+                    all_cells_are_equal=false;
+                    break;
+                }
+            }
+        }
+        all_cells_are_equal
+    }
 }
+impl Eq for Board{}
 
 impl Default for Board {
     fn default() -> Self {
@@ -111,43 +122,5 @@ impl Index<&GridLocation> for Board {
 impl IndexMut<&GridLocation> for Board {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
         &mut self.grid[index.row as usize][index.col as usize]
-    }
-}
-
-
-impl GridLocation {
-    pub fn new(row: i32, col: i32) -> Self {
-        GridLocation{
-            row,
-            col
-        }
-    }
-
-    pub fn from_world(position: Vec2) -> Option<Self> {
-        let location = GridLocation{ 
-            row: (-1.0*position.y/(ATLAS_CELL_SQUARE_SIZE)+0.5) as i32, 
-            col: (position.x/(ATLAS_CELL_SQUARE_SIZE)+0.5) as i32
-        };
-        if Board::valid_index(&location) {
-            Some(location)
-        } else {
-            None
-        }
-    }
-
-    pub fn to_world(&self) -> Vec2{
-        Vec2::new(
-            (self.col as f32-0.5)*ATLAS_CELL_SQUARE_SIZE , 
-            -1.0 * (self.row as f32-0.5)*ATLAS_CELL_SQUARE_SIZE
-        )
-    }
-}
-
-impl From<IVec2> for GridLocation {
-    fn from(value: IVec2) -> Self {
-        GridLocation{
-            row: value.y,
-            col: value.x
-        }
     }
 }
