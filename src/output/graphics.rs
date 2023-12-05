@@ -53,12 +53,12 @@ pub fn switch_tile_entity_positions(
     if let Ok(second_tile_transform) = tiles.get_mut(second_tile_entity) {
         second_tile_transform.into_inner().translation=first_grid_location.to_world();
     }else{
-        return Err(TileMoveError::EntityNotInQuery);
+        return Err(TileMoveError::EntityRelated(EntityRelatedCustomError::EntityNotInQuery));
     }
     if let Ok(first_tile_transform) = tiles.get_mut(first_tile_entity) {
         first_tile_transform.into_inner().translation=second_grid_location.to_world();
     }else{
-        return Err(TileMoveError::EntityNotInQuery);
+        return Err(TileMoveError::EntityRelated(EntityRelatedCustomError::EntityNotInQuery));
     }
     Ok(())
 }
@@ -69,7 +69,7 @@ fn extract_tile_entity(
 ) -> Result<Entity,TileMoveError>
 {
     match board[grid_location].tile_entity{
-        None=> {Err(TileMoveError::NoEntity)},
+        None=> {Err(TileMoveError::EntityRelated(EntityRelatedCustomError::NoEntity))},
         Some(entity)=> {Ok(entity)}
     }
 }
@@ -77,20 +77,30 @@ fn extract_tile_entity(
 pub fn move_existing_tiles_after_reset(
     board: &mut Board,
     mut tiles: Query<(&mut Transform, &Tile)>
-){
+)-> Result<(),EntityRelatedCustomError>
+{
     let mut entity_by_tile_type:HashMap<TileType,Option<Entity>>=HashMap::new();
     for (_, tile) in tiles.iter(){
         entity_by_tile_type.insert(tile.tile_type, tile.tile_entity);
     }
 
-    let mut target_pos=Vec2::new(0.0,0.0);
+    let mut target_pos=Vec3::new(0.0,0.0,0.0);
     for row in board.grid{
         for tile_from_cell in row{
-            
-
+            match entity_by_tile_type[&tile_from_cell.tile_type]{
+                None=> { return Err(EntityRelatedCustomError::NoEntity); },
+                Some(entity)=> { 
+                    if let Ok((tile_transform,_)) = tiles.get_mut(entity) {
+                        tile_transform.into_inner().translation=target_pos;
+                    }else{
+                        return Err(EntityRelatedCustomError::EntityNotInQuery);
+                    }
+                }
+            }
             target_pos.x+=ATLAS_CELL_SQUARE_SIZE;
         }
         target_pos.y-=ATLAS_CELL_SQUARE_SIZE;
         target_pos.x=0.0;
     }
+    Ok(())
 }

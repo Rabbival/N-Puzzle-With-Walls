@@ -162,19 +162,21 @@ fn check_if_solved(game_board: &mut Board, solved_board: &Board){
 pub fn reset_board(
     solved_board: &Board,
     game_board: &mut Board,
-    mut tiles: Query<(&mut Transform, &Tile)>
-){
+    tiles: Query<(&mut Transform, &Tile)>
+)-> Result<(),EntityRelatedCustomError>
+{
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
         let attempt_result=generate_game_board(solved_board.clone());
          //generation successful
         if let Ok(board) = attempt_result { 
             game_board.empty_tile_location=board.empty_tile_location;
             game_board.grid=board.grid;
-            graphics::move_existing_tiles_after_reset(game_board, tiles);
-            return;
+            graphics::move_existing_tiles_after_reset(game_board, tiles)?;
+            return Ok(());
         }
     }
     print_to_console::couldnt_generate_board();
+    Ok(()) //here to compile. the line above panics.
 }
 
 

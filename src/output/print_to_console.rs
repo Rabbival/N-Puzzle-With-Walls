@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::prelude::*;
 
 pub enum GameLog{
@@ -25,6 +27,20 @@ pub fn print_input_error(input_error: TileMoveError){
             error!(message);
         },
         _=>{error!("{:?}", input_error)}
+    }
+}
+
+pub enum BevyPrintType{
+    Info, 
+    Warn,
+    Error
+}
+
+pub fn print_debug_deriver<T: Debug>(to_print: T, print_type: BevyPrintType){
+    match print_type{
+        BevyPrintType::Info=> {info!("{:?}", to_print)},
+        BevyPrintType::Warn=> {warn!("{:?}", to_print)},
+        BevyPrintType::Error=> {error!("{:?}", to_print)}
     }
 }
 

@@ -3,4 +3,7 @@ R to restart
 	-move entities instead of spawning them
 
 Nice to have:
-Enable moving tiles using arrows/WASD
+ - Enable moving tiles using arrows/WASD
+
+Only after first export:
+ - make the duplicate code on graphics a board function that takes anonymous functions
