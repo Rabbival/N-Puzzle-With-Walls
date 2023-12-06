@@ -1,3 +1,5 @@
+#![allow(clippy::too_many_arguments, clippy::type_complexity)]
+
 use crate::prelude::*;
 
 pub const WINDOW_SIZE: f32 = GRID_SIZE as f32 * ATLAS_CELL_SQUARE_SIZE / CAMERA_ZOOM;
