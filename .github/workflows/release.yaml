@@ -1,4 +1,4 @@
-name: fifteen_puzzle
+name: release
 
 on:
   push:
