@@ -25,7 +25,8 @@ fn spawn_solved_board(mut commands: Commands){
     commands.spawn((generate_solved_board(), SolvedBoard));
 }
 
-fn generate_solved_board() -> Board{
+/// public for the sake of testing
+pub fn generate_solved_board() -> Board{
     let mut solved_board = Board::default();
     for i in 0..GRID_SIZE as u32 {
         for j in 0..GRID_SIZE as u32 {
@@ -113,40 +114,24 @@ fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGe
     Ok(board)
 }
 
-/// Had to make the query optional for the sake of testing,
-/// for the sake of the game- it's always there
+/// graphics switched before logic for the sake of graphics function readability
 pub fn move_tile_logic(
     occupied_tile_location: GridLocation, 
-    optional_tiles: Option<Query<&mut Transform, With<Tile>>>,
+    empty_tile_location: GridLocation, 
     game_board: &mut Board,
     solved_board: &Board,
+    tiles: Query<&mut Transform, With<Tile>>
 ) -> Result<(), error_handler::TileMoveError>
-{
-    if game_board.ignore_player_input{
-        return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
-    }
-    if !game_board.occupied(&occupied_tile_location) {
-        return Err(error_handler::TileMoveError::PressedEmptySlot(String::from("pressed an empty slot")));
-    }
-    let optional_empty_neighbor_location= 
-        game_board.get_empty_neighbor(&occupied_tile_location);
-    if let None=optional_empty_neighbor_location{
-        return Err(error_handler::TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor")));
-    }
-    let empty_neighbor_location=optional_empty_neighbor_location.unwrap();
-    
-    if let Some(tiles) = optional_tiles{
-        graphics::switch_tile_entity_positions(
-            tiles, 
-            &game_board,
-            &occupied_tile_location, 
-            &empty_neighbor_location
-        )?;
-        print_to_console::game_log(GameLog::TilesMoved(empty_neighbor_location))
-    }
+{    
+    graphics::switch_tile_entity_positions(
+        tiles, 
+        &game_board,
+        &occupied_tile_location, 
+        &empty_tile_location
+    )?;
+    print_to_console::game_log(GameLog::TilesMoved(empty_tile_location));
 
-    // it's important that we do it after moving the entities so that graphic transition code is more readable
-    game_board.switch_tiles_by_location(&empty_neighbor_location, &occupied_tile_location);
+    game_board.switch_tiles_by_location(&empty_tile_location, &occupied_tile_location);
 
     check_if_solved(game_board, solved_board);
 
@@ -185,13 +170,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_move_tile_logic() {
-        assert!(test_locked_board());
-        assert!(test_empty_slot());
-        assert!(test_no_empty_neighbor());
-    }
-
-    #[test]
     fn several_attempts_at_generating_unsolved_boards(){
         const ATTEMPT_COUNT: u8 = 10;
         let solved_board=generate_solved_board();
@@ -203,53 +181,5 @@ mod tests {
                 }
             );
         }
-    }
-
-    fn test_locked_board()-> bool{
-        let location_search_outcome=
-            move_tile_logic(
-                GridLocation::default(), 
-                None,
-                &mut Board::default(), //locked be default
-                &Board::default()
-            );
-        match location_search_outcome{
-                Err(TileMoveError::BoardFrozenToPlayer(_))=> true,
-                _ => false
-            }
-    }
-
-    fn test_empty_slot()-> bool{
-        let mut board=Board::default();
-        board.ignore_player_input=false;
-        let location_search_outcome=
-            move_tile_logic(
-                GridLocation::default(), 
-                None,
-                &mut board,
-                &Board::default()
-            );
-        match location_search_outcome{
-                Err(TileMoveError::PressedEmptySlot(_))=> true,
-                _ => false
-            }
-    }
-
-    fn test_no_empty_neighbor()-> bool{
-        let mut board=generate_solved_board();
-        board.ignore_player_input=false;
-        let empty_tile_location=board.empty_tile_location;
-        board[&empty_tile_location]=Tile::new(Some(16));
-        let location_search_outcome=
-            move_tile_logic(
-                GridLocation { row: 0, col: 0 }, 
-                None,
-                &mut board,
-                &Board::default()
-            );
-        match location_search_outcome{
-                Err(TileMoveError::NoEmptyNeighbor(_))=> true,
-                _ => false
-            }
     }
 }

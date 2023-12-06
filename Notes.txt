@@ -1,4 +1,0 @@
-
-Nice to have:
- - Enable moving tiles using arrows/WASD
- - make graphics.rs better
