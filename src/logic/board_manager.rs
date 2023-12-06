@@ -163,7 +163,7 @@ fn check_if_solved(game_board: &mut Board, solved_board: &Board){
 pub fn reset_board(
     solved_board: &Board,
     game_board: &mut Board,
-    tiles: Query<(&mut Transform, &Tile)>
+    tiles: Query<(Entity, &mut Tile, &mut Transform)>
 )-> Result<(),EntityRelatedCustomError>
 {
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{

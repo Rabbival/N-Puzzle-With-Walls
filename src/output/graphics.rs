@@ -76,11 +76,12 @@ fn extract_tile_entity(
 
 pub fn move_existing_tiles_after_reset(
     board: &mut Board,
-    mut tiles: Query<(&mut Transform, &Tile)>
+    mut tiles: Query<(Entity, &mut Tile, &mut Transform)>
 )-> Result<(),EntityRelatedCustomError>
 {
     let mut entity_by_tile_type:HashMap<TileType,Option<Entity>>=HashMap::new();
-    for (_, tile) in tiles.iter(){
+    for (entity, mut tile, _) in tiles.iter_mut(){
+        tile.tile_entity=Some(entity);
         entity_by_tile_type.insert(tile.tile_type, tile.tile_entity);
     }
 
@@ -94,7 +95,7 @@ pub fn move_existing_tiles_after_reset(
                     match optional_entity{
                         None=>{return Err(EntityRelatedCustomError::NoEntity);},
                         Some(entity)=>{
-                            if let Ok((tile_transform,_)) = tiles.get_mut(entity) {
+                            if let Ok((_,_,tile_transform)) = tiles.get_mut(entity) {
                                 tile_transform.into_inner().translation=target_pos;
                             }else{
                                 return Err(EntityRelatedCustomError::EntityNotInQuery);

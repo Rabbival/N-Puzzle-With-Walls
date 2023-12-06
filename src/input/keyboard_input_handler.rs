@@ -18,7 +18,7 @@ fn move_tiles_with_keyboard(keyboard_input: Res<Input<KeyCode>>){
 fn listen_for_reset(
     solved_board_query: Query<&Board,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut Board,(With<GameBoard>, Without<SolvedBoard>)>,
-    tiles: Query<(&mut Transform, &Tile)>,
+    tiles: Query<(Entity, &mut Tile, &mut Transform)>,
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
