@@ -50,13 +50,9 @@ pub fn switch_tile_entity_positions(
 {
     let first_tile_entity=extract_tile_entity(board, first_grid_location)?;
     let second_tile_entity=extract_tile_entity(board, second_grid_location)?;
-    if let Ok(second_tile_transform) = tiles.get_mut(second_tile_entity) {
-        second_tile_transform.into_inner().translation=first_grid_location.to_world();
-    }else{
-        return Err(TileMoveError::EntityRelated(EntityRelatedCustomError::EntityNotInQuery));
-    }
-    if let Ok(first_tile_transform) = tiles.get_mut(first_tile_entity) {
-        first_tile_transform.into_inner().translation=second_grid_location.to_world();
+    if let Ok([mut transform_first, mut transform_second]) = 
+        tiles.get_many_mut([first_tile_entity, second_tile_entity]) {
+            std::mem::swap(&mut *transform_first, &mut *transform_second);
     }else{
         return Err(TileMoveError::EntityRelated(EntityRelatedCustomError::EntityNotInQuery));
     }
@@ -80,13 +76,12 @@ pub fn move_existing_tiles_after_reset(
 )-> Result<(),EntityRelatedCustomError>
 {
     let mut entity_by_tile_type:HashMap<TileType,Option<Entity>>=HashMap::new();
-    for (entity, mut tile, _) in tiles.iter_mut(){
-        tile.tile_entity=Some(entity);
-        entity_by_tile_type.insert(tile.tile_type, tile.tile_entity);
+    for (entity, tile, _) in tiles.iter_mut(){
+        entity_by_tile_type.insert(tile.tile_type, Some(entity));
     }
 
     let mut target_pos=Vec3::new(0.0,0.0,0.0);
-    for row in board.grid{
+    for row in &mut board.grid{
         for tile_from_cell in row{
             match entity_by_tile_type.remove(&tile_from_cell.tile_type){
                 None=> { return Err(EntityRelatedCustomError::ItemNotInMap
@@ -95,6 +90,7 @@ pub fn move_existing_tiles_after_reset(
                     match optional_entity{
                         None=>{return Err(EntityRelatedCustomError::NoEntity);},
                         Some(entity)=>{
+                            tile_from_cell.tile_entity=optional_entity;
                             if let Ok((_,_,tile_transform)) = tiles.get_mut(entity) {
                                 tile_transform.into_inner().translation=target_pos;
                             }else{

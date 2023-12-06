@@ -170,8 +170,7 @@ pub fn reset_board(
         let attempt_result=generate_game_board(solved_board.clone());
          //generation successful
         if let Ok(board) = attempt_result { 
-            game_board.empty_tile_location=board.empty_tile_location;
-            game_board.grid=board.grid;
+            *game_board=board;
             graphics::move_existing_tiles_after_reset(game_board, tiles)?;
             return Ok(());
         }

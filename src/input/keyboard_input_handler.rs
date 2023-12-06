@@ -25,7 +25,7 @@ fn listen_for_reset(
         if let Err(error) = 
             board_manager::reset_board(
                 solved_board_query.single(),
-                game_board_query.single_mut().into_inner(),
+                &mut game_board_query.single_mut(),
                 tiles
             )
         {
