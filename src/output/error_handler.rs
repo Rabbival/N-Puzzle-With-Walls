@@ -1,3 +1,5 @@
+use crate::logic::basic_direction;
+
 #[derive(Debug)]
 pub enum BoardGenerationError{
     DirectionCouldntBeFlipped,
@@ -16,6 +18,7 @@ pub enum TileMoveError{
     IndexOutOfGridBounds (String),
     NoEmptyNeighbor (String),
     PressedEmptySlot (String),
+    NoOccupiedTileInThatDirection (basic_direction::BasicDirection),
     EntityRelated(EntityRelatedCustomError)
 }
 

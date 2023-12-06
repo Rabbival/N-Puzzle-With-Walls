@@ -3,8 +3,7 @@ use std::fmt::Debug;
 use crate::prelude::*;
 
 pub enum GameLog{
-    TileClicked(TileType),
-    TilesMoved(GridLocation),
+    TilesMoved(TileType, GridLocation),
     Victory
 }
 
@@ -22,6 +21,9 @@ pub fn print_input_error(input_error: TileMoveError){
         },
         TileMoveError::PressedEmptySlot(message)=>{
             warn!(message);
+        },
+        TileMoveError::NoOccupiedTileInThatDirection(direction)=>{
+            warn!("no occupied tile in direction: {:?}", direction);
         },
         TileMoveError::IndexOutOfGridBounds(message)=>{
             error!(message);
@@ -53,11 +55,8 @@ pub fn print_possible_solution<T: Iterator<Item = BasicDirection>>(reversed_dire
 
 pub fn game_log(log: GameLog){
     match log{
-        GameLog::TileClicked(tile_type)=>{
-            info!("clicked tile: {:?}", tile_type);
-        },
-        GameLog::TilesMoved(location)=>{
-            info!("tile moved to: {:?}", location);
+        GameLog::TilesMoved(tile_type, location)=>{
+            info!("{:?} tile moved to {:?}", tile_type, location);
         },
         GameLog::Victory=>{
             info!("puzzle solved!");

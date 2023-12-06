@@ -42,13 +42,24 @@ impl Default for Board {
 }
 
 impl Board {
+    // assumes one is empty
     pub fn switch_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation){
+        if self[first].tile_type==TileType::Empty{
+            self.empty_tile_location=second.clone();
+        }else{
+            self.empty_tile_location=first.clone();
+        }
+
         let temp_tile=self[first];
         self[first]=self[second];
         self[second]=temp_tile;
     }
 
-    pub fn get_empty_neighbor(&mut self, origin: &GridLocation) -> Option<GridLocation>{
+    pub fn get_direct_neighbors_of_empty(&self) -> HashMap<BasicDirection, GridLocation>{
+        self.get_all_direct_neighbor_locations(&self.empty_tile_location) 
+    }
+
+    pub fn get_empty_neighbor(&self, origin: &GridLocation) -> Option<GridLocation>{
         for dir in BasicDirection::get_directions_as_vec(){
             let neighbor_location = self.neighbor_location(origin, &dir);
             if Board::valid_index(&neighbor_location) && !self.occupied(&neighbor_location){

@@ -1,7 +1,7 @@
 use crate::{prelude::*, output::{error_handler, print_to_console, graphics}};
 use rand::Rng;
 
-const LOCATION_SHIFT_BOUNDS:(u8, u8) = (18, 22);
+const LOCATION_SHIFT_BOUNDS:(u8, u8) = (18, 25);
 const BOARD_GENERATION_ATTEMPTS:u8=5;
 
 #[derive(Component)]
@@ -96,7 +96,7 @@ fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGe
         board.switch_tiles_by_location(&empty_tile_location, chosen_location);
         
         //get ready for next choice
-        empty_tile_location=chosen_location.clone();
+        empty_tile_location=board.empty_tile_location;
         shift_direction_sequence.push(*chosen_direction);
         previous_shift_direction=*chosen_direction;
     }
@@ -110,7 +110,6 @@ fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGe
         });
     print_to_console::print_possible_solution(reveresed_shift_order);
     board.ignore_player_input=false;
-    board.empty_tile_location=empty_tile_location;
     Ok(board)
 }
 
@@ -129,7 +128,10 @@ pub fn move_tile_logic(
         &occupied_tile_location, 
         &empty_tile_location
     )?;
-    print_to_console::game_log(GameLog::TilesMoved(empty_tile_location));
+    print_to_console::game_log(GameLog::TilesMoved(
+        game_board[&occupied_tile_location].tile_type,
+        empty_tile_location
+    ));
 
     game_board.switch_tiles_by_location(&empty_tile_location, &occupied_tile_location);
 

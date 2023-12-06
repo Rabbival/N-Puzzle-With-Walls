@@ -63,8 +63,6 @@ fn handle_mouse_click(
 ) -> Result<(), error_handler::TileMoveError>
 {
     if let Some(optional_occupied_tile_location) = GridLocation::from_world(cursor_position) {
-        print_to_console::game_log
-            (GameLog::TileClicked(game_board[&optional_occupied_tile_location].tile_type));
         if game_board.ignore_player_input{
             return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
         }
@@ -114,9 +112,9 @@ mod tests {
                 None
             );
         match location_search_outcome{
-                Err(error_handler::TileMoveError::IndexOutOfGridBounds(_))=> true,
-                _ => false
-            }
+            Err(error_handler::TileMoveError::IndexOutOfGridBounds(_))=> true,
+            _ => false
+        }
     }
 
     #[test]
@@ -125,17 +123,17 @@ mod tests {
     }
 
     fn test_frozen_board()-> bool{
-        let location_search_outcome=
+        let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
                 &mut Board::default(), //locked be default
                 &Board::default(),
                 None
             );
-        match location_search_outcome{
-                Err(TileMoveError::BoardFrozenToPlayer(_))=> true,
-                _ => false
-            }
+        match location_validation_outcome{
+            Err(TileMoveError::BoardFrozenToPlayer(_))=> true,
+            _ => false
+        }
     }
 
     #[test]
@@ -147,17 +145,17 @@ mod tests {
     fn test_empty_slot()-> bool{
         let mut board=Board::default();
         board.ignore_player_input=false;
-        let location_search_outcome=
+        let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
                 &Board::default(),
                 None
             );
-        match location_search_outcome{
-                Err(TileMoveError::PressedEmptySlot(_))=> true,
-                _ => false
-            }
+        match location_validation_outcome{
+            Err(TileMoveError::PressedEmptySlot(_))=> true,
+            _ => false
+        }
     }
 
     fn test_no_empty_neighbor()-> bool{
@@ -165,16 +163,16 @@ mod tests {
         board.ignore_player_input=false;
         let empty_tile_location=board.empty_tile_location;
         board[&empty_tile_location]=Tile::new(Some(16));
-        let location_search_outcome=
+        let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
                 &Board::default(),
                 None
             );
-        match location_search_outcome{
-                Err(TileMoveError::NoEmptyNeighbor(_))=> true,
-                _ => false
-            }
+        match location_validation_outcome{
+            Err(TileMoveError::NoEmptyNeighbor(_))=> true,
+            _ => false
+        }
     }
 }

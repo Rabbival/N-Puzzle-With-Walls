@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::board_manager, output::print_to_console};
+use crate::{prelude::*, logic::{board_manager, basic_direction}, output::{print_to_console, error_handler}};
 
 pub struct KeyboardInputHandlerPlugin;
 
@@ -9,9 +9,59 @@ impl Plugin for KeyboardInputHandlerPlugin {
     }
 }
 
-fn move_tiles_with_keyboard(keyboard_input: Res<Input<KeyCode>>){
+fn move_tiles_with_keyboard(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut game_board_query: Query<&mut Board, (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&Board, (With<SolvedBoard>, Without<GameBoard>)>,
+    tiles: Query<&mut Transform, With<Tile>>
+){
+    let mut move_request_direction:Option<basic_direction::BasicDirection>=None;
     if keyboard_input.just_pressed(KeyCode::W) ||  keyboard_input.just_pressed(KeyCode::Up){
-        info!("up just pressed");
+        move_request_direction=Some(basic_direction::BasicDirection::Up);
+    }
+    if keyboard_input.just_pressed(KeyCode::D) ||  keyboard_input.just_pressed(KeyCode::Right){
+        move_request_direction=Some(basic_direction::BasicDirection::Right);
+    }
+    if keyboard_input.just_pressed(KeyCode::S) ||  keyboard_input.just_pressed(KeyCode::Down){
+        move_request_direction=Some(basic_direction::BasicDirection::Down);
+    }
+    if keyboard_input.just_pressed(KeyCode::A) ||  keyboard_input.just_pressed(KeyCode::Left){
+        move_request_direction=Some(basic_direction::BasicDirection::Left);
+    }
+    if let None = move_request_direction {
+        return;
+    }
+    if let Err(error) = move_into_empty_from_direction(
+        move_request_direction.unwrap(),
+        game_board_query.single_mut().into_inner(),
+        solved_board_query.single(),
+        Some(tiles)
+    ){
+        print_to_console::print_input_error(error)
+    }
+}
+
+fn move_into_empty_from_direction(
+    move_from_direction: basic_direction::BasicDirection,
+    game_board: &mut Board,
+    solved_board: &Board,
+    optional_tiles: Option<Query<&mut Transform, With<Tile>>>
+) -> Result<(), error_handler::TileMoveError>
+{
+    let empty_tile_neighbors=game_board.get_direct_neighbors_of_empty();
+    if let Some(occupied_tile_location) = empty_tile_neighbors.get(&move_from_direction){
+        if let Some(tiles) = optional_tiles{
+            return board_manager::move_tile_logic(
+                *occupied_tile_location, 
+                game_board.empty_tile_location,
+                game_board, 
+                solved_board,
+                tiles
+            )
+        }
+        Ok(()) //only here for the sake of testing, there will always be tiles.
+    }else{
+        Err(error_handler::TileMoveError::NoOccupiedTileInThatDirection(move_from_direction))
     }
 }
 
@@ -30,6 +80,35 @@ fn listen_for_reset(
             )
         {
             print_to_console::print_debug_deriver(error, BevyPrintType::Error);
+        }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_valid_request() {
+        assert!( ! detected_as_invalid_request(basic_direction::BasicDirection::Up));
+        assert!(detected_as_invalid_request(basic_direction::BasicDirection::Right));
+        assert!(detected_as_invalid_request(basic_direction::BasicDirection::Down));
+        assert!( ! detected_as_invalid_request(basic_direction::BasicDirection::Left));
+    }
+
+    fn detected_as_invalid_request(from_dir: basic_direction::BasicDirection)-> bool{
+        let mut board=board_manager::generate_solved_board();
+        let direction_check_outcome=
+            move_into_empty_from_direction(
+                from_dir, 
+                &mut board,
+                &Board::default(),
+                None
+            );
+        match direction_check_outcome{
+            Err(error_handler::TileMoveError::NoOccupiedTileInThatDirection(_))=> true,
+            _=> false
         }
     }
 }
