@@ -1,4 +1,4 @@
-use std::ops::{Index,IndexMut};
+use std::{ops::{Index,IndexMut}, sync::{Arc, RwLock}};
 
 use bevy::{prelude::*, utils::HashMap};
 
@@ -7,20 +7,20 @@ use crate::prelude::*;
 pub const GRID_SIZE: u32 = 4;
 
 #[derive(Component, Clone, Debug)]
-pub struct Board {
-    pub grid: [[Tile; GRID_SIZE as usize]; GRID_SIZE as usize],
+pub struct Board<T> {
+    pub grid: [[Option<Arc::<RwLock::<T>>>; GRID_SIZE as usize]; GRID_SIZE as usize],
     pub empty_tile_location: GridLocation,
     ///appear as frozen to player
     pub ignore_player_input: bool
 }
 
-impl PartialEq for Board {
+impl<T: PartialEq + Eq> PartialEq for Board<T> {
     fn eq(&self, other: &Self) -> bool {
         let mut all_cells_are_equal=true;
         for row_index in 0..GRID_SIZE{
             for col_index in 0..GRID_SIZE{
                 let location=GridLocation::new(row_index as i32, col_index as i32);
-                if self[&location].tile_type != other[&location].tile_type{
+                if self[&location] != other[&location]{
                     all_cells_are_equal=false;
                     break;
                 }
@@ -29,19 +29,21 @@ impl PartialEq for Board {
         all_cells_are_equal
     }
 }
-impl Eq for Board{}
+impl<T: PartialEq + Eq> Eq for Board<T>{}
 
-impl Default for Board {
-    fn default() -> Self {
+//basics
+impl<T> Board<T> {
+    fn new() -> Self {
+        let grid = std::array::from_fn(|_| std::array::from_fn(|_| None));
         Self {
-            grid: [[Tile::default(); GRID_SIZE as usize]; GRID_SIZE as usize],
+            grid,
             empty_tile_location: GridLocation::default(),
             ignore_player_input: true
         }
     }
 }
 
-impl Board {
+impl<Tile> Board<Tile> {
     // assumes one is empty
     pub fn switch_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation){
         if self[first].tile_type==TileType::Empty{
@@ -62,7 +64,7 @@ impl Board {
     pub fn get_empty_neighbor(&self, origin: &GridLocation) -> Option<GridLocation>{
         for dir in BasicDirection::get_directions_as_vec(){
             let neighbor_location = self.neighbor_location(origin, &dir);
-            if Board::valid_index(&neighbor_location) && !self.occupied(&neighbor_location){
+            if Board::<Tile>::valid_index(&neighbor_location) && !self.occupied(&neighbor_location){
                 return Some(neighbor_location);
             }
         }
@@ -105,7 +107,7 @@ impl Board {
     }
 
     pub fn occupied(&self, location: &GridLocation) -> bool {
-        if Board::valid_index(location){
+        if Board::<Tile>::valid_index(location){
             match self[location].tile_type{
                 TileType::Empty=> {return false;},
                 TileType::Numbered(_)=> {return true;}
@@ -122,15 +124,15 @@ impl Board {
     }
 }
 
-impl Index<&GridLocation> for Board {
-    type Output = Tile;
+impl<T: PartialEq + Eq> Index<&GridLocation> for Board<T> {
+    type Output = Option<Arc::<RwLock::<T>>>;
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
         &self.grid[index.row as usize][index.col as usize]
     }
 }
 
-impl IndexMut<&GridLocation> for Board {
+impl<T: PartialEq + Eq> IndexMut<&GridLocation> for Board<T> {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
         &mut self.grid[index.row as usize][index.col as usize]
     }

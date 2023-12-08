@@ -36,8 +36,8 @@ fn update_cursor(
 fn listen_for_mouse_click(
     mouse: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,
-    mut game_board_query: Query<&mut Board, (With<GameBoard>, Without<SolvedBoard>)>,
-    solved_board_query: Query<&Board, (With<SolvedBoard>, Without<GameBoard>)>,
+    mut game_board_query: Query<&mut Board<Tile>, (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&Board<Tile>, (With<SolvedBoard>, Without<GameBoard>)>,
     tiles: Query<&mut Transform, With<Tile>>
 ) {
     if mouse.just_pressed(MouseButton::Left) {
@@ -57,8 +57,8 @@ fn listen_for_mouse_click(
 /// tile query optional for the sake of testing.
 fn handle_mouse_click(
     cursor_position: Vec2,
-    game_board: &mut Board,
-    solved_board: &Board,
+    game_board: &mut Board<Tile>,
+    solved_board: &Board<Tile>,
     optional_tiles: Option<Query<&mut Transform, With<Tile>>>
 ) -> Result<(), error_handler::TileMoveError>
 {
@@ -107,8 +107,8 @@ mod tests {
         let location_search_outcome=
             handle_mouse_click(
                 position_to_check, 
-                &mut Board::default(),
-                &Board::default(),
+                &mut Board::<Tile>::default(),
+                &Board::<Tile>::default(),
                 None
             );
         match location_search_outcome{
@@ -126,8 +126,8 @@ mod tests {
         let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
-                &mut Board::default(), //locked be default
-                &Board::default(),
+                &mut Board::<Tile>::default(), //locked be default
+                &Board::<Tile>::default(),
                 None
             );
         match location_validation_outcome{
@@ -143,13 +143,13 @@ mod tests {
     }
 
     fn test_empty_slot()-> bool{
-        let mut board=Board::default();
+        let mut board=Board::<Tile>::default();
         board.ignore_player_input=false;
         let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
-                &Board::default(),
+                &Board::<Tile>::default(),
                 None
             );
         match location_validation_outcome{
@@ -167,7 +167,7 @@ mod tests {
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
-                &Board::default(),
+                &Board::<Tile>::default(),
                 None
             );
         match location_validation_outcome{

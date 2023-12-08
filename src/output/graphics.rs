@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, logic::tile_dictionary};
 use bevy::{prelude::*, utils::HashMap};
 
 pub struct GraphicsPlugin;
@@ -13,7 +13,8 @@ impl Plugin for GraphicsPlugin {
 fn spawn_tiles(
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
-    mut board_query: Query<&mut Board, With<GameBoard>>,
+    mut board_query: Query<&mut Board<Tile>, With<GameBoard>>,
+    mut tile_dictionary: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
 ){
     let mut spawn_pos=Vec2::new(0.0,0.0);
     for row in &mut board_query.single_mut().grid{
@@ -39,11 +40,17 @@ fn spawn_tiles(
         spawn_pos.y-=ATLAS_CELL_SQUARE_SIZE;
         spawn_pos.x=0.0;
     }
+
+    let mut tile_dictionary_instance=tile_dictionary.single_mut();
+    for (entity, tile, _) in tiles.iter_mut(){
+        tile_dictionary_instance.insert(tile.tile_type, Some(entity));
+    }
+    
 }
 
 pub fn switch_tile_entity_positions(
     mut tiles: Query<&mut Transform, With<Tile>>,
-    board: &Board,
+    board: &Board<Tile>,
     first_grid_location: &GridLocation, 
     second_grid_location: &GridLocation
 ) -> Result<(),TileMoveError>
@@ -60,7 +67,7 @@ pub fn switch_tile_entity_positions(
 }
 
 fn extract_tile_entity(
-    board: &Board,
+    board: &Board<Tile>,
     grid_location: &GridLocation
 ) -> Result<Entity,TileMoveError>
 {
@@ -71,19 +78,15 @@ fn extract_tile_entity(
 }
 
 pub fn move_existing_tiles_after_reset(
-    board: &mut Board,
-    mut tiles: Query<(Entity, &mut Tile, &mut Transform)>
+    board: &mut Board<Tile>,
+    mut tiles: Query<(Entity, &mut Tile, &mut Transform)>,
+    tile_dictionary: &HashMap<TileType,Option<Entity>>,
 )-> Result<(),EntityRelatedCustomError>
 {
-    let mut entity_by_tile_type:HashMap<TileType,Option<Entity>>=HashMap::new();
-    for (entity, tile, _) in tiles.iter_mut(){
-        entity_by_tile_type.insert(tile.tile_type, Some(entity));
-    }
-
     let mut target_pos=Vec3::new(0.0,0.0,0.0);
     for row in &mut board.grid{
         for tile_from_cell in row{
-            match entity_by_tile_type.remove(&tile_from_cell.tile_type){
+            match tile_dictionary.remove(&tile_from_cell.tile_type){
                 None=> { return Err(EntityRelatedCustomError::ItemNotInMap
                     (ItemNotFoundInMapError::EntityNotFoundInMap)); },
                 Some(optional_entity)=> { 

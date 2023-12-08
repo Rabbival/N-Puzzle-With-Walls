@@ -26,8 +26,8 @@ fn spawn_solved_board(mut commands: Commands){
 }
 
 /// public for the sake of testing
-pub fn generate_solved_board() -> Board{
-    let mut solved_board = Board::default();
+pub fn generate_solved_board() -> Board<Tile>{
+    let mut solved_board = Board::<Tile>::default();
     for i in 0..GRID_SIZE as u32 {
         for j in 0..GRID_SIZE as u32 {
             let location = GridLocation::new(i as i32, j as i32);
@@ -41,7 +41,7 @@ pub fn generate_solved_board() -> Board{
     solved_board
 }
 
-fn spawn_game_board(mut commands: Commands, query: Query<&Board, With<SolvedBoard>>){
+fn spawn_game_board(mut commands: Commands, query: Query<&Board<Tile>, With<SolvedBoard>>){
     let solved_board=query.single();
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
         let attempt_result=generate_game_board(solved_board.clone());
@@ -59,7 +59,7 @@ fn spawn_game_board(mut commands: Commands, query: Query<&Board, With<SolvedBoar
 
 /// a permutation that was made from shifts in a solved board 
 /// would always be solvable (if we shift in reverse)
-fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGenerationError>
+fn generate_game_board(mut board: Board<Tile>) -> Result<Board<Tile>, error_handler::BoardGenerationError>
 {
     let mut rng = rand::thread_rng();
     let mut location_shift_count=rng.gen_range(LOCATION_SHIFT_BOUNDS.0..LOCATION_SHIFT_BOUNDS.1);
@@ -106,7 +106,7 @@ fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGe
         .iter()
         .rev()
         .map(|direction| -> BasicDirection {
-            direction.opposite_direction().unwrap()
+            *direction
         });
     print_to_console::print_possible_solution(reveresed_shift_order);
     board.ignore_player_input=false;
@@ -117,8 +117,8 @@ fn generate_game_board(mut board: Board) -> Result<Board, error_handler::BoardGe
 pub fn move_tile_logic(
     occupied_tile_location: GridLocation, 
     empty_tile_location: GridLocation, 
-    game_board: &mut Board,
-    solved_board: &Board,
+    game_board: &mut Board<Tile>,
+    solved_board: &Board<Tile>,
     tiles: Query<&mut Transform, With<Tile>>
 ) -> Result<(), error_handler::TileMoveError>
 {    
@@ -140,7 +140,7 @@ pub fn move_tile_logic(
     return Ok(());
 }
 
-fn check_if_solved(game_board: &mut Board, solved_board: &Board){
+fn check_if_solved(game_board: &mut Board<Tile>, solved_board: &Board<Tile>){
     if game_board == solved_board {
         print_to_console::game_log(GameLog::Victory);
         game_board.ignore_player_input=true;
@@ -148,9 +148,10 @@ fn check_if_solved(game_board: &mut Board, solved_board: &Board){
 }
 
 pub fn reset_board(
-    solved_board: &Board,
-    game_board: &mut Board,
-    tiles: Query<(Entity, &mut Tile, &mut Transform)>
+    solved_board: &Board<Tile>,
+    game_board: &mut Board<Tile>,
+    tiles: Query<(Entity, &mut Tile, &mut Transform)>,
+    tile_dictionary: &HashMap<TileType,Option<Entity>>,
 )-> Result<(),EntityRelatedCustomError>
 {
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
@@ -158,7 +159,7 @@ pub fn reset_board(
          //generation successful
         if let Ok(board) = attempt_result { 
             *game_board=board;
-            graphics::move_existing_tiles_after_reset(game_board, tiles)?;
+            graphics::move_existing_tiles_after_reset(game_board, tiles, tile_dictionary)?;
             return Ok(());
         }
     }

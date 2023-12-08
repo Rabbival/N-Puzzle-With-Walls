@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::{board_manager, basic_direction}, output::{print_to_console, error_handler}};
+use crate::{prelude::*, logic::{board_manager, basic_direction, tile_dictionary}, output::{print_to_console, error_handler}};
 
 pub struct KeyboardInputHandlerPlugin;
 
@@ -11,22 +11,22 @@ impl Plugin for KeyboardInputHandlerPlugin {
 
 fn move_tiles_with_keyboard(
     keyboard_input: Res<Input<KeyCode>>,
-    mut game_board_query: Query<&mut Board, (With<GameBoard>, Without<SolvedBoard>)>,
-    solved_board_query: Query<&Board, (With<SolvedBoard>, Without<GameBoard>)>,
+    mut game_board_query: Query<&mut Board<Tile>, (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&Board<Tile>, (With<SolvedBoard>, Without<GameBoard>)>,
     tiles: Query<&mut Transform, With<Tile>>
 ){
     let mut move_request_direction:Option<basic_direction::BasicDirection>=None;
     if keyboard_input.just_pressed(KeyCode::W) ||  keyboard_input.just_pressed(KeyCode::Up){
-        move_request_direction=Some(basic_direction::BasicDirection::Up);
-    }
-    if keyboard_input.just_pressed(KeyCode::D) ||  keyboard_input.just_pressed(KeyCode::Right){
-        move_request_direction=Some(basic_direction::BasicDirection::Right);
-    }
-    if keyboard_input.just_pressed(KeyCode::S) ||  keyboard_input.just_pressed(KeyCode::Down){
         move_request_direction=Some(basic_direction::BasicDirection::Down);
     }
-    if keyboard_input.just_pressed(KeyCode::A) ||  keyboard_input.just_pressed(KeyCode::Left){
+    if keyboard_input.just_pressed(KeyCode::D) ||  keyboard_input.just_pressed(KeyCode::Right){
         move_request_direction=Some(basic_direction::BasicDirection::Left);
+    }
+    if keyboard_input.just_pressed(KeyCode::S) ||  keyboard_input.just_pressed(KeyCode::Down){
+        move_request_direction=Some(basic_direction::BasicDirection::Up);
+    }
+    if keyboard_input.just_pressed(KeyCode::A) ||  keyboard_input.just_pressed(KeyCode::Left){
+        move_request_direction=Some(basic_direction::BasicDirection::Right);
     }
     if let None = move_request_direction {
         return;
@@ -42,14 +42,17 @@ fn move_tiles_with_keyboard(
 }
 
 fn move_into_empty_from_direction(
-    move_from_direction: basic_direction::BasicDirection,
-    game_board: &mut Board,
-    solved_board: &Board,
+    move_to_direction: basic_direction::BasicDirection,
+    game_board: &mut Board<Tile>,
+    solved_board: &Board<Tile>,
     optional_tiles: Option<Query<&mut Transform, With<Tile>>>
 ) -> Result<(), error_handler::TileMoveError>
 {
+    if game_board.ignore_player_input{
+        return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
+    }
     let empty_tile_neighbors=game_board.get_direct_neighbors_of_empty();
-    if let Some(occupied_tile_location) = empty_tile_neighbors.get(&move_from_direction){
+    if let Some(occupied_tile_location) = empty_tile_neighbors.get(&move_to_direction){
         if let Some(tiles) = optional_tiles{
             return board_manager::move_tile_logic(
                 *occupied_tile_location, 
@@ -61,14 +64,15 @@ fn move_into_empty_from_direction(
         }
         Ok(()) //only here for the sake of testing, there will always be tiles.
     }else{
-        Err(error_handler::TileMoveError::NoOccupiedTileInThatDirection(move_from_direction))
+        Err(error_handler::TileMoveError::NoOccupiedTileInThatDirection(move_to_direction))
     }
 }
 
 fn listen_for_reset(
-    solved_board_query: Query<&Board,(With<SolvedBoard>, Without<GameBoard>)>,
-    mut game_board_query: Query<&mut Board,(With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&Board<Tile>,(With<SolvedBoard>, Without<GameBoard>)>,
+    mut game_board_query: Query<&mut Board<Tile>,(With<GameBoard>, Without<SolvedBoard>)>,
     tiles: Query<(Entity, &mut Tile, &mut Transform)>,
+    tile_dictionary_query: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
@@ -76,7 +80,8 @@ fn listen_for_reset(
             board_manager::reset_board(
                 solved_board_query.single(),
                 &mut game_board_query.single_mut(),
-                tiles
+                tiles,
+                &tile_dictionary_query.single().entity_by_tile_type
             )
         {
             print_to_console::print_debug_deriver(error, BevyPrintType::Error);
@@ -103,7 +108,7 @@ mod tests {
             move_into_empty_from_direction(
                 from_dir, 
                 &mut board,
-                &Board::default(),
+                &Board::<Tile>::default(),
                 None
             );
         match direction_check_outcome{
