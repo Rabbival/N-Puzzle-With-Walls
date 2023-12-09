@@ -2,16 +2,30 @@ use std::{ops::{Index,IndexMut}, sync::{Arc, RwLock}};
 
 use bevy::{prelude::*, utils::HashMap};
 
-use crate::prelude::*;
+use crate::{prelude::*, output::error_handler};
 
 pub const GRID_SIZE: u32 = 4;
 
 #[derive(Component, Clone, Debug)]
 pub struct Board<T> {
-    pub grid: [[Option<Arc::<RwLock::<T>>>; GRID_SIZE as usize]; GRID_SIZE as usize],
+    pub grid: [[Arc::<RwLock::<Option<T>>>; GRID_SIZE as usize]; GRID_SIZE as usize],
     pub empty_tile_location: GridLocation,
     ///appear as frozen to player
     pub ignore_player_input: bool
+}
+
+//basics
+impl<T> Board<T> {
+    fn new() -> Self {
+        let grid = std::array::from_fn(|_| std::array::from_fn(|_| {
+            Arc::new(RwLock::new(None))
+        }));
+        Self {
+            grid,
+            empty_tile_location: GridLocation::default(),
+            ignore_player_input: true
+        }
+    }
 }
 
 impl<T: PartialEq + Eq> PartialEq for Board<T> {
@@ -31,22 +45,15 @@ impl<T: PartialEq + Eq> PartialEq for Board<T> {
 }
 impl<T: PartialEq + Eq> Eq for Board<T>{}
 
-//basics
-impl<T> Board<T> {
-    fn new() -> Self {
-        let grid = std::array::from_fn(|_| std::array::from_fn(|_| None));
-        Self {
-            grid,
-            empty_tile_location: GridLocation::default(),
-            ignore_player_input: true
+impl Board<Tile> {
+    /// assumes one is empty
+    pub fn switch_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation)
+    -> Result<(), error_handler::TileMoveError>
+    {
+        if let None = self[first]{
+            return Err(error_handler::TileMoveError::NoTileInCell(first));
         }
-    }
-}
-
-impl<Tile> Board<Tile> {
-    // assumes one is empty
-    pub fn switch_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation){
-        if self[first].tile_type==TileType::Empty{
+        if self[first].unwrap().tile_type==TileType::Empty{
             self.empty_tile_location=second.clone();
         }else{
             self.empty_tile_location=first.clone();
@@ -55,6 +62,7 @@ impl<Tile> Board<Tile> {
         let temp_tile=self[first];
         self[first]=self[second];
         self[second]=temp_tile;
+        Ok(())
     }
 
     pub fn get_direct_neighbors_of_empty(&self) -> HashMap<BasicDirection, GridLocation>{
@@ -106,14 +114,17 @@ impl<Tile> Board<Tile> {
         }
     }
 
-    pub fn occupied(&self, location: &GridLocation) -> bool {
+    pub fn occupied(&self, location: &GridLocation) -> Result<bool, error_handler::TileMoveError> {
+        if let None = self[location]{
+            return Err(error_handler::TileMoveError::NoTileInCell(location))
+        }
         if Board::<Tile>::valid_index(location){
-            match self[location].tile_type{
-                TileType::Empty=> {return false;},
-                TileType::Numbered(_)=> {return true;}
+            match self[location].unwrap().tile_type{
+                TileType::Empty=> {return Ok(false);},
+                TileType::Numbered(_)=> {return Ok(true);}
             }
         }
-        false
+        Ok(false)
     }
 
     pub fn valid_index(location: &GridLocation) -> bool {
@@ -125,15 +136,17 @@ impl<Tile> Board<Tile> {
 }
 
 impl<T: PartialEq + Eq> Index<&GridLocation> for Board<T> {
-    type Output = Option<Arc::<RwLock::<T>>>;
+    type Output = Option<T>;
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
-        &self.grid[index.row as usize][index.col as usize]
+        let cell_value = &self.grid[index.row as usize][index.col as usize];
+        &Arc::clone(&cell_value).into_inner().unwrap()
     }
 }
 
 impl<T: PartialEq + Eq> IndexMut<&GridLocation> for Board<T> {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
-        &mut self.grid[index.row as usize][index.col as usize]
+        let cell_value = &mut self.grid[index.row as usize][index.col as usize];
+        &mut Arc::clone(&cell_value).into_inner().unwrap()
     }
 }
