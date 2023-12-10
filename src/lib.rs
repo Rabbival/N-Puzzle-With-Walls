@@ -21,7 +21,7 @@ pub mod prelude {
         print_to_console::*,
     };
     pub use crate::logic::{
-        board::*,
+        interior_mut_grid::*,
         board_manager::*,
         basic_direction::*,
         tile::*,

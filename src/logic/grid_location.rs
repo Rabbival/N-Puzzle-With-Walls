@@ -14,12 +14,13 @@ impl GridLocation {
         }
     }
 
-    pub fn from_world(position: Vec2) -> Option<Self> {
+    /// grid provided to check that the index is valid for its size
+    pub fn from_world<T>(grid: InteriorMutGrid<T>, position: Vec2) -> Option<Self> {
         let location = GridLocation{ 
             row: (-1.0*position.y/(ATLAS_CELL_SQUARE_SIZE)+0.5) as i32, 
             col: (position.x/(ATLAS_CELL_SQUARE_SIZE)+0.5) as i32
         };
-        if Board::valid_index(&location) {
+        if grid.valid_index(&location) {
             Some(location)
         } else {
             None

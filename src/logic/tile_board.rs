@@ -1,13 +1,30 @@
 use crate::{prelude::*, output::error_handler};
 
-impl Board<Tile> {
+use std::ops::{Index,IndexMut};
+
+#[derive(Component, Clone, Debug, Default)]
+pub struct TileBoard {
+    /// even if the location is empty, TileBoard's location should have an empty tile (and NOT a None)
+    pub grid: InteriorMutGrid<Tile>,
+    pub empty_tile_location: GridLocation,
+    ///appear as frozen to player
+    pub ignore_player_input: bool
+}
+
+//constructors
+impl TileBoard{
+    pub fn from_grid(grid: &InteriorMutGrid<Tile>)-> Self{
+        Self { grid: grid.clone(), ..Default::default() }
+    }
+}
+
+impl TileBoard {
     /// assumes one is empty
     pub fn switch_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation)
     -> Result<(), error_handler::TileMoveError>
     {
-        if let None = self[first]{
-            return Err(error_handler::TileMoveError::NoTileInCell(first.clone()));
-        }
+        self.none_check(first)?;
+        self.none_check(second)?;
         if self[first].unwrap().tile_type==TileType::Empty{
             self.empty_tile_location=second.clone();
         }else{
@@ -28,8 +45,8 @@ impl Board<Tile> {
     -> Result<Option<GridLocation>, error_handler::TileMoveError>
     {
         for dir in BasicDirection::get_directions_as_vec(){
-            let neighbor_location = self.neighbor_location(origin, &dir);
-            if Board::<Tile>::valid_index(&neighbor_location) && !self.occupied(&neighbor_location)?{
+            let neighbor_location = self.grid.neighbor_location(origin, &dir);
+            if self.valid_index(&neighbor_location) && !self.occupied(&neighbor_location)?{
                 return Ok(Some(neighbor_location));
             }
         }
@@ -39,43 +56,12 @@ impl Board<Tile> {
     pub fn get_all_direct_neighbor_locations(&self, origin: &GridLocation) 
         -> HashMap<BasicDirection, GridLocation>
     {
-        let mut valid_neighbors:HashMap<BasicDirection, GridLocation>=HashMap::new();
-        for dir in BasicDirection::get_directions_as_vec(){
-            if let Ok(Some(neighbor_location)) = self.occupied_neighbor_location(origin, &dir){
-                valid_neighbors.insert(dir,neighbor_location);
-            }
-        }
-        valid_neighbors
-    }
-
-    pub fn occupied_neighbor_location(
-            &self, 
-            origin: &GridLocation, 
-            dir: &BasicDirection
-        ) -> Result<Option<GridLocation>, error_handler::TileMoveError>
-        {
-        let neighbor_location = self.neighbor_location(origin, dir);
-        if self.occupied(&neighbor_location)?{
-            Ok(Some(neighbor_location))
-        }else{
-            Ok(None)
-        }
-    }
-
-    pub fn neighbor_location(&self, origin: &GridLocation, dir: &BasicDirection) -> GridLocation{
-        match dir{
-            BasicDirection::Up=>GridLocation::new(origin.row-1, origin.col),
-            BasicDirection::Right=>GridLocation::new(origin.row, origin.col+1),
-            BasicDirection::Down=>GridLocation::new(origin.row+1, origin.col),
-            BasicDirection::Left=>GridLocation::new(origin.row, origin.col-1)
-        }
+        self.grid.get_all_direct_neighbor_locations(origin)
     }
 
     pub fn occupied(&self, location: &GridLocation) -> Result<bool, error_handler::TileMoveError> {
-        if let None = self[location]{
-            return Err(error_handler::TileMoveError::NoTileInCell(location.clone()))
-        }
-        if Board::<Tile>::valid_index(location){
+        self.none_check(location)?;
+        if self.valid_index(location){
             match self[location].unwrap().tile_type{
                 TileType::Empty=> {return Ok(false);},
                 TileType::Numbered(_)=> {return Ok(true);}
@@ -84,10 +70,28 @@ impl Board<Tile> {
         Ok(false)
     }
 
-    pub fn valid_index(location: &GridLocation) -> bool {
-        location.col >= 0
-            && location.row >= 0
-            && location.col < GRID_SIZE as i32
-            && location.row < GRID_SIZE as i32
+    pub fn valid_index(&self, location: &GridLocation) -> bool {
+        self.grid.valid_index(location)
+    }
+
+    fn none_check(&self, location: &GridLocation)-> Result<(), error_handler::TileMoveError>{
+        match self[location] {
+            None => Err(error_handler::TileMoveError::NoTileInCell(location.clone())),
+            Some(_) => Ok(())
+        }
+    }
+}
+
+impl Index<&GridLocation> for TileBoard {
+    type Output = Option<Tile>;
+
+    fn index(&self, index: &GridLocation) -> &Self::Output {
+        &self.grid[index]
+    }
+}
+
+impl IndexMut<&GridLocation> for TileBoard {
+    fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
+        &mut self.grid[index]
     }
 }
