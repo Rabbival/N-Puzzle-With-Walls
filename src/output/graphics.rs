@@ -77,14 +77,16 @@ fn extract_tile_entity(
 }
 
 pub fn move_existing_tiles_after_reset(
-    board: &mut Board<Tile>,
+    grid: &mut InteriorMutGrid<Tile>,
     mut tiles: Query<(Entity, &mut Tile, &mut Transform)>,
     tile_dictionary: &HashMap<TileType,Option<Entity>>,
 )-> Result<(),EntityRelatedCustomError>
 {
-    let mut target_pos=Vec3::new(0.0,0.0,0.0);
-    for row in &mut board.grid{
-        for tile_from_cell in row{
+    for (grid_location, cell_reference) in grid.iter(){
+        let rw_lock = cell_reference.as_ref();
+        let mut write = rw_lock.write().unwrap();
+        if let Some(tile_from_cell) = &mut *write{
+            let spawn_location_before_atlas_square_size=grid_location.to_world();
             match tile_dictionary.remove(&tile_from_cell.tile_type){
                 None=> { return Err(EntityRelatedCustomError::ItemNotInMap
                     (ItemNotFoundInMapError::EntityNotFoundInMap)); },
@@ -94,7 +96,11 @@ pub fn move_existing_tiles_after_reset(
                         Some(entity)=>{
                             tile_from_cell.tile_entity=optional_entity;
                             if let Ok((_,_,tile_transform)) = tiles.get_mut(entity) {
-                                tile_transform.into_inner().translation=target_pos;
+                                tile_transform.into_inner().translation= Vec3::new(
+                                    spawn_location_before_atlas_square_size.x*ATLAS_CELL_SQUARE_SIZE, 
+                                    spawn_location_before_atlas_square_size.y*ATLAS_CELL_SQUARE_SIZE, 
+                                    0.0
+                                );
                             }else{
                                 return Err(EntityRelatedCustomError::EntityNotInQuery);
                             }
@@ -102,10 +108,7 @@ pub fn move_existing_tiles_after_reset(
                     }
                 }
             }
-            target_pos.x+=ATLAS_CELL_SQUARE_SIZE;
         }
-        target_pos.y-=ATLAS_CELL_SQUARE_SIZE;
-        target_pos.x=0.0;
     }
     Ok(())
 }

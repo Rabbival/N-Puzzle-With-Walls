@@ -124,7 +124,7 @@ pub fn move_tile_logic(
 {    
     graphics::switch_tile_entity_positions(
         tiles, 
-        &game_board,
+        &game_board.grid,
         &occupied_tile_location, 
         &empty_tile_location
     )?;
@@ -163,7 +163,7 @@ pub fn reset_board(
          //generation successful
         if let Ok(board) = attempt_result { 
             *game_board=board;
-            graphics::move_existing_tiles_after_reset(game_board, tiles, tile_dictionary)?;
+            graphics::move_existing_tiles_after_reset(&mut game_board.grid, tiles, tile_dictionary)?;
             return Ok(());
         }
     }
