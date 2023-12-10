@@ -25,6 +25,8 @@ pub mod prelude {
         board_manager::*,
         basic_direction::*,
         tile::*,
-        grid_location::*
+        grid_location::*,
+        tile_dictionary::*,
+        tile_board::*
     };
 }

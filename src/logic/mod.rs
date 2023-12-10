@@ -4,3 +4,4 @@ pub mod board;
 pub mod board_manager;
 pub mod grid_location;
 pub mod tile_dictionary;
+pub mod tile_board;

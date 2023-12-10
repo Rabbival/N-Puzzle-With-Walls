@@ -9,7 +9,7 @@ pub enum BoardGenerationError{
 #[derive(Debug)]
 pub enum ItemNotFoundInMapError{
     DirectionNotFoundInMap,
-    EntityNotFoundInMap
+    EntityNotFoundInMap 
 }
 
 #[derive(Debug)]
