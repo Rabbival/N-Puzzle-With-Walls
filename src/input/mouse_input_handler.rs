@@ -36,8 +36,8 @@ fn update_cursor(
 fn listen_for_mouse_click(
     mouse: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,
-    mut game_board_query: Query<&mut Board<Tile>, (With<GameBoard>, Without<SolvedBoard>)>,
-    solved_board_query: Query<&Board<Tile>, (With<SolvedBoard>, Without<GameBoard>)>,
+    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
     tiles: Query<&mut Transform, With<Tile>>
 ) {
     if mouse.just_pressed(MouseButton::Left) {
