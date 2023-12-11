@@ -45,7 +45,7 @@ fn listen_for_mouse_click(
         handle_mouse_click(
                 cursor_position.world_position, 
                 game_board_query.single_mut().into_inner(),
-                solved_board_query.single(),
+                &solved_board_query.single().grid,
                 Some(tiles)
             )
         {
@@ -57,21 +57,21 @@ fn listen_for_mouse_click(
 /// tile query optional for the sake of testing.
 fn handle_mouse_click(
     cursor_position: Vec2,
-    game_board: &mut Board<Tile>,
-    solved_board: &Board<Tile>,
+    game_board: &mut TileBoard,
+    solved_grid: &InteriorMutGrid<Tile>,
     optional_tiles: Option<Query<&mut Transform, With<Tile>>>
 ) -> Result<(), error_handler::TileMoveError>
 {
-    if let Some(optional_occupied_tile_location) = GridLocation::from_world(cursor_position) {
+    if let Some(optional_occupied_tile_location) = GridLocation::from_world(&solved_grid, cursor_position) {
         if game_board.ignore_player_input{
             return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
         }
-        if !game_board.occupied(&optional_occupied_tile_location) {
+        if !game_board.occupied(&optional_occupied_tile_location)? {
             return Err(error_handler::TileMoveError::PressedEmptySlot(String::from("pressed an empty slot")));
         }
         let occupied_tile_location=optional_occupied_tile_location;
         let optional_empty_neighbor_location= 
-            game_board.get_empty_neighbor(&occupied_tile_location);
+            game_board.get_empty_neighbor(&occupied_tile_location)?;
         if let None=optional_empty_neighbor_location{
             return Err(error_handler::TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor")));
         }
@@ -82,7 +82,7 @@ fn handle_mouse_click(
                 occupied_tile_location, 
                 empty_neighbor_location,
                 game_board, 
-                solved_board,
+                solved_grid,
                 tiles
             )
         }
@@ -107,8 +107,8 @@ mod tests {
         let location_search_outcome=
             handle_mouse_click(
                 position_to_check, 
-                &mut Board::<Tile>::default(),
-                &Board::<Tile>::default(),
+                &mut TileBoard::default(),
+                &InteriorMutGrid::<Tile>::default(),
                 None
             );
         match location_search_outcome{
@@ -126,8 +126,8 @@ mod tests {
         let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
-                &mut Board::<Tile>::default(), //locked be default
-                &Board::<Tile>::default(),
+                &mut TileBoard::default(), //locked by default
+                &InteriorMutGrid::<Tile>::default(),
                 None
             );
         match location_validation_outcome{
@@ -143,13 +143,13 @@ mod tests {
     }
 
     fn test_empty_slot()-> bool{
-        let mut board=Board::<Tile>::default();
+        let mut board=TileBoard::default();
         board.ignore_player_input=false;
         let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
-                &Board::<Tile>::default(),
+                &InteriorMutGrid::<Tile>::default(),
                 None
             );
         match location_validation_outcome{
@@ -162,12 +162,12 @@ mod tests {
         let mut board=board_manager::generate_solved_board();
         board.ignore_player_input=false;
         let empty_tile_location=board.empty_tile_location;
-        board[&empty_tile_location]=Tile::new(Some(16));
+        board[&empty_tile_location]=Some(Tile::new(Some(16)));
         let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
-                &Board::<Tile>::default(),
+                &InteriorMutGrid::<Tile>::default(),
                 None
             );
         match location_validation_outcome{

@@ -115,17 +115,17 @@ impl<T: PartialEq + Eq> PartialEq for InteriorMutGrid<T>{
 impl<T: PartialEq + Eq> Eq for InteriorMutGrid<T>{}
 
 impl<T> Index<&GridLocation> for InteriorMutGrid<T> {
-    type Output = Option<T>;
+    type Output = RwLock<Option<T>>;
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
         let cell_value = &self.grid[index.row as usize][index.col as usize];
-        &Arc::clone(&cell_value).into_inner().unwrap()
+        Arc::clone(&cell_value).as_ref()
     }
 }
 
 impl<T> IndexMut<&GridLocation> for InteriorMutGrid<T> {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
         let cell_value = &mut self.grid[index.row as usize][index.col as usize];
-        &mut Arc::clone(&cell_value).into_inner().unwrap()
+        Arc::clone(&mut cell_value).as
     }
 }

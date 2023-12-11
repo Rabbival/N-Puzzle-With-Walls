@@ -154,7 +154,7 @@ pub fn reset_board(
     solved_grid: &InteriorMutGrid<Tile>,
     game_board: &mut TileBoard,
     tiles: Query<(Entity, &mut Tile, &mut Transform)>,
-    tile_dictionary: &HashMap<TileType,Option<Entity>>,
+    tile_dictionary: &mut HashMap<TileType,Option<Entity>>,
 )-> Result<(),EntityRelatedCustomError>
 {
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{

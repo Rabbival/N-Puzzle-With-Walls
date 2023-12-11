@@ -72,7 +72,7 @@ fn listen_for_reset(
     solved_board_query: Query<&TileBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     tiles: Query<(Entity, &mut Tile, &mut Transform)>,
-    tile_dictionary_query: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
+    mut tile_dictionary_query: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
@@ -81,7 +81,7 @@ fn listen_for_reset(
                 &solved_board_query.single().grid,
                 &mut game_board_query.single_mut(),
                 tiles,
-                &tile_dictionary_query.single().entity_by_tile_type
+                &mut tile_dictionary_query.single_mut().entity_by_tile_type
             )
         {
             print_to_console::print_debug_deriver(error, BevyPrintType::Error);

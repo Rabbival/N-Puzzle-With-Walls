@@ -79,7 +79,7 @@ fn extract_tile_entity(
 pub fn move_existing_tiles_after_reset(
     grid: &mut InteriorMutGrid<Tile>,
     mut tiles: Query<(Entity, &mut Tile, &mut Transform)>,
-    tile_dictionary: &HashMap<TileType,Option<Entity>>,
+    tile_dictionary: &mut HashMap<TileType,Option<Entity>>,
 )-> Result<(),EntityRelatedCustomError>
 {
     for (grid_location, cell_reference) in grid.iter(){
