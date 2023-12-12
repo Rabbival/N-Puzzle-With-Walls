@@ -58,7 +58,7 @@ fn listen_for_mouse_click(
 fn handle_mouse_click(
     cursor_position: Vec2,
     game_board: &mut TileBoard,
-    solved_grid: &InteriorMutGrid<Tile>,
+    solved_grid: &Grid<Tile>,
     optional_tiles: Option<Query<&mut Transform, With<Tile>>>
 ) -> Result<(), error_handler::TileMoveError>
 {
@@ -108,7 +108,7 @@ mod tests {
             handle_mouse_click(
                 position_to_check, 
                 &mut TileBoard::default(),
-                &InteriorMutGrid::<Tile>::default(),
+                &Grid::<Tile>::default(),
                 None
             );
         match location_search_outcome{
@@ -127,7 +127,7 @@ mod tests {
             handle_mouse_click(
                 Vec2::default(), 
                 &mut TileBoard::default(), //locked by default
-                &InteriorMutGrid::<Tile>::default(),
+                &Grid::<Tile>::default(),
                 None
             );
         match location_validation_outcome{
@@ -138,20 +138,44 @@ mod tests {
 
     #[test]
     fn test_valid_location(){
+        assert!(test_no_tile_in_cell());
         assert!(test_empty_slot());
         assert!(test_no_empty_neighbor());
     }
 
-    fn test_empty_slot()-> bool{
+    fn test_no_tile_in_cell()-> bool{
         let mut board=TileBoard::default();
         board.ignore_player_input=false;
         let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
-                &InteriorMutGrid::<Tile>::default(),
+                &Grid::<Tile>::default(),
                 None
             );
+
+        println!("{:?}", location_validation_outcome);
+
+        match location_validation_outcome{
+            Err(TileMoveError::NoTileInCell(_))=> true,
+            _ => false
+        }
+    }
+
+    fn test_empty_slot()-> bool{
+        let mut board=TileBoard::default();
+        board.ignore_player_input=false;
+        board[&GridLocation::new(0, 0)]=Some(Tile::new(None));
+        let location_validation_outcome=
+            handle_mouse_click(
+                Vec2::default(), 
+                &mut board,
+                &Grid::<Tile>::default(),
+                None
+            );
+
+        println!("{:?}", location_validation_outcome);
+
         match location_validation_outcome{
             Err(TileMoveError::PressedEmptySlot(_))=> true,
             _ => false
@@ -167,7 +191,7 @@ mod tests {
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
-                &InteriorMutGrid::<Tile>::default(),
+                &Grid::<Tile>::default(),
                 None
             );
         match location_validation_outcome{

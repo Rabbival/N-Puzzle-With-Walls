@@ -121,7 +121,7 @@ pub fn move_tile_logic(
     occupied_tile_location: GridLocation, 
     empty_tile_location: GridLocation, 
     game_board: &mut TileBoard,
-    solved_grid: &InteriorMutGrid<Tile>,
+    solved_grid: &Grid<Tile>,
     tiles: Query<&mut Transform, With<Tile>>
 ) -> Result<(), error_handler::TileMoveError>
 {    
@@ -146,7 +146,7 @@ pub fn move_tile_logic(
     return Ok(());
 }
 
-fn check_if_solved(game_board: &mut TileBoard, solved_grid: &InteriorMutGrid<Tile>){
+fn check_if_solved(game_board: &mut TileBoard, solved_grid: &Grid<Tile>){
     if game_board.grid == *solved_grid {
         print_to_console::game_log(GameLog::Victory);
         game_board.ignore_player_input=true;
@@ -154,7 +154,7 @@ fn check_if_solved(game_board: &mut TileBoard, solved_grid: &InteriorMutGrid<Til
 }
 
 pub fn reset_board(
-    solved_grid: &InteriorMutGrid<Tile>,
+    solved_grid: &Grid<Tile>,
     game_board: &mut TileBoard,
     tiles: Query<(Entity, &mut Tile, &mut Transform)>,
     tile_dictionary: &mut HashMap<TileType,Option<Entity>>,

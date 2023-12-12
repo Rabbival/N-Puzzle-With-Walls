@@ -7,11 +7,11 @@ use crate::prelude::*;
 pub const GRID_SIZE: u32 = 4;
 
 #[derive(Component, Clone, Debug)]
-pub struct InteriorMutGrid<T> {
+pub struct Grid<T> {
     pub grid: [[Option<T>; GRID_SIZE as usize]; GRID_SIZE as usize],
 }
 
-impl<T> InteriorMutGrid<T>{
+impl<T> Grid<T>{
     /// only returns occupied ones 
     pub fn get_all_direct_neighbor_locations(&self, origin: &GridLocation) 
     -> HashMap<BasicDirection, GridLocation>
@@ -69,7 +69,8 @@ impl<T> InteriorMutGrid<T>{
     }
 }
 
-impl<T> InteriorMutGrid<T> {
+//iterators
+impl<T> Grid<T> {
     pub fn iter(&self) -> impl Iterator<Item = (GridLocation, &Option<T>)> + '_ {
         self.grid
             .iter()
@@ -100,10 +101,10 @@ impl<T> InteriorMutGrid<T> {
                     cell_value,
                 )
             })
-    }
+        }
 }
 
-impl<T> Default for InteriorMutGrid<T> {
+impl<T> Default for Grid<T> {
     fn default() -> Self {
         Self {
             grid: std::array::from_fn(|_| std::array::from_fn(|_| {
@@ -113,7 +114,7 @@ impl<T> Default for InteriorMutGrid<T> {
     }
 }
 
-impl<T: PartialEq + Eq> PartialEq for InteriorMutGrid<T>{
+impl<T: PartialEq + Eq> PartialEq for Grid<T>{
     fn eq(&self, other: &Self) -> bool {
         let mut all_cells_are_equal=true;
         for row_index in 0..GRID_SIZE{
@@ -128,9 +129,9 @@ impl<T: PartialEq + Eq> PartialEq for InteriorMutGrid<T>{
         all_cells_are_equal
     }
 }
-impl<T: PartialEq + Eq> Eq for InteriorMutGrid<T>{}
+impl<T: PartialEq + Eq> Eq for Grid<T>{}
 
-impl<T> Index<&GridLocation> for InteriorMutGrid<T> {
+impl<T> Index<&GridLocation> for Grid<T> {
     type Output = Option<T>;
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
@@ -138,7 +139,7 @@ impl<T> Index<&GridLocation> for InteriorMutGrid<T> {
     }
 }
 
-impl<T> IndexMut<&GridLocation> for InteriorMutGrid<T> {
+impl<T> IndexMut<&GridLocation> for Grid<T> {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
         &mut self.grid[index.row as usize][index.col as usize]
     }

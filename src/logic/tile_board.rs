@@ -2,10 +2,10 @@ use std::ops::{Index,IndexMut};
 
 use crate::{prelude::*, output::error_handler};
 
-#[derive(Component, Clone, Debug, Default)]
+#[derive(Component, Clone, Debug)]
 pub struct TileBoard {
     /// even if the location is empty, TileBoard's location should have an empty tile (and NOT a None)
-    pub grid: InteriorMutGrid<Tile>,
+    pub grid: Grid<Tile>,
     pub empty_tile_location: GridLocation,
     ///appear as frozen to player
     pub ignore_player_input: bool
@@ -13,7 +13,7 @@ pub struct TileBoard {
 
 //constructors
 impl TileBoard{
-    pub fn from_grid(grid: &InteriorMutGrid<Tile>)-> Self{
+    pub fn from_grid(grid: &Grid<Tile>)-> Self{
         Self { grid: grid.clone(), ..Default::default() }
     }
 }
@@ -78,6 +78,16 @@ impl TileBoard {
         match self[location] {
             None => Err(error_handler::TileMoveError::NoTileInCell(location.clone())),
             Some(_) => Ok(())
+        }
+    }
+}
+
+impl Default for TileBoard{
+    fn default() -> Self {
+        Self { 
+            grid: Grid::default(), 
+            empty_tile_location: GridLocation { row: (GRID_SIZE-1) as i32, col: (GRID_SIZE-1) as i32}, 
+            ignore_player_input: true
         }
     }
 }

@@ -44,7 +44,7 @@ fn move_tiles_with_keyboard(
 fn move_into_empty_from_direction(
     move_to_direction: basic_direction::BasicDirection,
     game_board: &mut TileBoard,
-    solved_grid: &InteriorMutGrid<Tile>,
+    solved_grid: &Grid<Tile>,
     optional_tiles: Option<Query<&mut Transform, With<Tile>>>
 ) -> Result<(), error_handler::TileMoveError>
 {
@@ -104,6 +104,7 @@ mod tests {
 
     fn detected_as_invalid_request(from_dir: basic_direction::BasicDirection)-> bool{
         let mut board=board_manager::generate_solved_board();
+        board.ignore_player_input=false;
         let direction_check_outcome=
             move_into_empty_from_direction(
                 from_dir, 
@@ -111,6 +112,9 @@ mod tests {
                 &TileBoard::default().grid,
                 None
             );
+
+        println!("for {:?}, {:?}", from_dir, direction_check_outcome);
+
         match direction_check_outcome{
             Err(error_handler::TileMoveError::NoOccupiedTileInThatDirection(_))=> true,
             _=> false

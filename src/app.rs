@@ -31,7 +31,8 @@ pub fn main() {
         KeyboardInputHandlerPlugin,
         AssetLoaderPlugin,
         BoardManagerPlugin,
-        GraphicsPlugin
+        GraphicsPlugin,
+        TileDictionaryPlugin
     ))
     ;
 

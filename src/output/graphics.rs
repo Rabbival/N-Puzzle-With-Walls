@@ -42,7 +42,7 @@ fn spawn_tiles(
 
 pub fn switch_tile_entity_positions(
     mut tiles: Query<&mut Transform, With<Tile>>,
-    grid: &InteriorMutGrid<Tile>,
+    grid: &Grid<Tile>,
     first_grid_location: &GridLocation, 
     second_grid_location: &GridLocation
 ) -> Result<(),TileMoveError>
@@ -59,7 +59,7 @@ pub fn switch_tile_entity_positions(
 }
 
 fn extract_tile_entity(
-    grid: &InteriorMutGrid<Tile>,
+    grid: &Grid<Tile>,
     grid_location: &GridLocation
 ) -> Result<Entity,TileMoveError>
 {
@@ -75,7 +75,7 @@ fn extract_tile_entity(
 }
 
 pub fn move_existing_tiles_after_reset(
-    grid: &mut InteriorMutGrid<Tile>,
+    grid: &mut Grid<Tile>,
     mut tiles: Query<(Entity, &mut Tile, &mut Transform)>,
     tile_dictionary: &mut HashMap<TileType,Option<Entity>>,
 )-> Result<(),EntityRelatedCustomError>
