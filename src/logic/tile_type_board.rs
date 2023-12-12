@@ -3,29 +3,29 @@ use std::ops::{Index,IndexMut};
 use crate::{prelude::*, output::error_handler};
 
 #[derive(Component, Clone, Debug)]
-pub struct TileBoard {
-    /// even if the location is empty, TileBoard's location should have an empty tile (and NOT a None)
-    pub grid: Grid<Tile>,
+pub struct TileTypeBoard {
+    /// even if the location is empty, TileTypeBoard's location should have an empty tile (and NOT a None)
+    pub grid: Grid<TileType>,
     pub empty_tile_location: GridLocation,
     ///appear as frozen to player
     pub ignore_player_input: bool
 }
 
 //constructors
-impl TileBoard{
-    pub fn from_grid(grid: &Grid<Tile>)-> Self{
+impl TileTypeBoard{
+    pub fn from_grid(grid: &Grid<TileType>)-> Self{
         Self { grid: grid.clone(), ..Default::default() }
     }
 }
 
-impl TileBoard {
+impl TileTypeBoard {
     /// assumes one is empty
     pub fn switch_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation)
     -> Result<(), error_handler::TileMoveError>
     {
         self.none_check(first)?;
         self.none_check(second)?;
-        if self[first].unwrap().tile_type==TileType::Empty{
+        if self[first].unwrap()==TileType::Empty{
             self.empty_tile_location=second.clone();
         }else{
             self.empty_tile_location=first.clone();
@@ -62,7 +62,7 @@ impl TileBoard {
     pub fn occupied(&self, location: &GridLocation) -> Result<bool, error_handler::TileMoveError> {
         self.none_check(location)?;
         if self.valid_index(location){
-            match self[location].unwrap().tile_type{
+            match self[location].unwrap(){
                 TileType::Empty=> {return Ok(false);},
                 TileType::Numbered(_)=> {return Ok(true);}
             }
@@ -82,7 +82,7 @@ impl TileBoard {
     }
 }
 
-impl Default for TileBoard{
+impl Default for TileTypeBoard{
     fn default() -> Self {
         Self { 
             grid: Grid::default(), 
@@ -92,15 +92,15 @@ impl Default for TileBoard{
     }
 }
 
-impl Index<&GridLocation> for TileBoard {
-    type Output = Option<Tile>;
+impl Index<&GridLocation> for TileTypeBoard {
+    type Output = Option<TileType>;
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
         &self.grid[index]
     }
 }
 
-impl IndexMut<&GridLocation> for TileBoard {
+impl IndexMut<&GridLocation> for TileTypeBoard {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
         &mut self.grid[index]
     }

@@ -13,17 +13,17 @@ impl Plugin for GraphicsPlugin {
 fn spawn_tiles(
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
-    mut board_query: Query<&mut TileBoard, With<GameBoard>>,
+    mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     mut tile_dictionary: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
 ){
     let mut tile_dictionary_instance=tile_dictionary.single_mut();
     for (grid_location, cell_reference) in board_query.single_mut().grid.iter_mut(){
-        if let Some(tile_from_cell) = cell_reference{
+        if let Some(tile_type_from_cell) = cell_reference{
             let spawn_location_before_atlas_square_size=grid_location.to_world();
             let entity_id=commands.spawn((
                 SpriteSheetBundle {
                     texture_atlas: sprite_atlas.clone().0.clone(),
-                    sprite: TextureAtlasSprite::new(tile_from_cell.to_atlas_index()),
+                    sprite: TextureAtlasSprite::new(tile_type_from_cell.to_atlas_index()),
                     transform: Transform::from_translation(
                         Vec3::new(
                             spawn_location_before_atlas_square_size.x,
@@ -32,17 +32,16 @@ fn spawn_tiles(
                         )),
                     ..default()
                 },
-                *tile_from_cell
+                *tile_type_from_cell
             )).id();
-            tile_from_cell.tile_entity=Some(entity_id);
-            tile_dictionary_instance.entity_by_tile_type.insert(tile_from_cell.tile_type, Some(entity_id));
+            tile_dictionary_instance.entity_by_tile_type.insert(tile_type_from_cell, Some(entity_id));
         }
     }
 }
 
 pub fn switch_tile_entity_positions(
-    mut tiles: Query<&mut Transform, With<Tile>>,
-    grid: &Grid<Tile>,
+    mut tiles: Query<&mut Transform, With<TileType>>,
+    grid: &Grid<TileType>,
     first_grid_location: &GridLocation, 
     second_grid_location: &GridLocation
 ) -> Result<(),TileMoveError>
@@ -59,14 +58,14 @@ pub fn switch_tile_entity_positions(
 }
 
 fn extract_tile_entity(
-    grid: &Grid<Tile>,
+    grid: &Grid<TileType>,
     grid_location: &GridLocation
 ) -> Result<Entity,TileMoveError>
 {
     match grid[grid_location]{
         None => {return Err(TileMoveError::NoTileInCell(grid_location.clone()))},
-        Some(tile_in_cell) => {
-            match tile_in_cell.tile_entity{
+        Some(tile_type_from_cell) => {
+            match tile_type_from_cell{
                 None=> {Err(TileMoveError::EntityRelated(EntityRelatedCustomError::NoEntity))},
                 Some(entity)=> {Ok(entity)}
             }
@@ -75,23 +74,22 @@ fn extract_tile_entity(
 }
 
 pub fn move_existing_tiles_after_reset(
-    grid: &mut Grid<Tile>,
-    mut tiles: Query<(Entity, &mut Tile, &mut Transform)>,
+    grid: &mut Grid<TileType>,
+    mut tiles: Query<(Entity, &mut TileType, &mut Transform)>,
     tile_dictionary: &mut HashMap<TileType,Option<Entity>>,
 )-> Result<(),EntityRelatedCustomError>
 {
     for (grid_location, cell_reference) in grid.iter_mut(){
-        if let Some(tile_from_cell) = cell_reference{
+        if let Some(tile_type_from_cell) = cell_reference{
             let spawn_location_before_atlas_square_size=grid_location.to_world();
-            match tile_dictionary.remove(&tile_from_cell.tile_type){
+            match tile_dictionary.get(tile_type_from_cell){
                 None=> { return Err(EntityRelatedCustomError::ItemNotInMap
                     (ItemNotFoundInMapError::EntityNotFoundInMap)); },
                 Some(optional_entity)=> { 
                     match optional_entity{
                         None=>{return Err(EntityRelatedCustomError::NoEntity);},
                         Some(entity)=>{
-                            tile_from_cell.tile_entity=optional_entity;
-                            if let Ok((_,_,tile_transform)) = tiles.get_mut(entity) {
+                            if let Ok((_,_,tile_transform)) = tiles.get_mut(*entity) {
                                 tile_transform.into_inner().translation= Vec3::new(
                                     spawn_location_before_atlas_square_size.x, 
                                     spawn_location_before_atlas_square_size.y, 

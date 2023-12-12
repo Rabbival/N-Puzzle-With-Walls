@@ -11,9 +11,9 @@ impl Plugin for KeyboardInputHandlerPlugin {
 
 fn move_tiles_with_keyboard(
     keyboard_input: Res<Input<KeyCode>>,
-    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
-    solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
-    tiles: Query<&mut Transform, With<Tile>>
+    mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
+    tiles: Query<&mut Transform, With<TileType>>
 ){
     let mut move_request_direction:Option<basic_direction::BasicDirection>=None;
     if keyboard_input.just_pressed(KeyCode::W) ||  keyboard_input.just_pressed(KeyCode::Up){
@@ -43,9 +43,9 @@ fn move_tiles_with_keyboard(
 
 fn move_into_empty_from_direction(
     move_to_direction: basic_direction::BasicDirection,
-    game_board: &mut TileBoard,
-    solved_grid: &Grid<Tile>,
-    optional_tiles: Option<Query<&mut Transform, With<Tile>>>
+    game_board: &mut TileTypeBoard,
+    solved_grid: &Grid<TileType>,
+    optional_tiles: Option<Query<&mut Transform, With<TileType>>>
 ) -> Result<(), error_handler::TileMoveError>
 {
     if game_board.ignore_player_input{
@@ -69,9 +69,9 @@ fn move_into_empty_from_direction(
 }
 
 fn listen_for_reset(
-    solved_board_query: Query<&TileBoard,(With<SolvedBoard>, Without<GameBoard>)>,
-    mut game_board_query: Query<&mut TileBoard,(With<GameBoard>, Without<SolvedBoard>)>,
-    tiles: Query<(Entity, &mut Tile, &mut Transform)>,
+    solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
+    mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
+    tiles: Query<(Entity, &mut TileType, &mut Transform)>,
     mut tile_dictionary_query: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
     keyboard_input: Res<Input<KeyCode>>
 ){
@@ -109,7 +109,7 @@ mod tests {
             move_into_empty_from_direction(
                 from_dir, 
                 &mut board,
-                &TileBoard::default().grid,
+                &TileTypeBoard::default().grid,
                 None
             );
 

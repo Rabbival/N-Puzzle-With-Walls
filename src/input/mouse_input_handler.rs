@@ -36,9 +36,9 @@ fn update_cursor(
 fn listen_for_mouse_click(
     mouse: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,
-    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
-    solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
-    tiles: Query<&mut Transform, With<Tile>>
+    mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
+    tiles: Query<&mut Transform, With<TileType>>
 ) {
     if mouse.just_pressed(MouseButton::Left) {
         if let Err(input_error) = 
@@ -57,9 +57,9 @@ fn listen_for_mouse_click(
 /// tile query optional for the sake of testing.
 fn handle_mouse_click(
     cursor_position: Vec2,
-    game_board: &mut TileBoard,
-    solved_grid: &Grid<Tile>,
-    optional_tiles: Option<Query<&mut Transform, With<Tile>>>
+    game_board: &mut TileTypeBoard,
+    solved_grid: &Grid<TileType>,
+    optional_tiles: Option<Query<&mut Transform, With<TileType>>>
 ) -> Result<(), error_handler::TileMoveError>
 {
     if let Some(optional_occupied_tile_location) = GridLocation::from_world(&solved_grid, cursor_position) {
@@ -107,8 +107,8 @@ mod tests {
         let location_search_outcome=
             handle_mouse_click(
                 position_to_check, 
-                &mut TileBoard::default(),
-                &Grid::<Tile>::default(),
+                &mut TileTypeBoard::default(),
+                &Grid::<TileType>::default(),
                 None
             );
         match location_search_outcome{
@@ -126,8 +126,8 @@ mod tests {
         let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
-                &mut TileBoard::default(), //locked by default
-                &Grid::<Tile>::default(),
+                &mut TileTypeBoard::default(), //locked by default
+                &Grid::<TileType>::default(),
                 None
             );
         match location_validation_outcome{
@@ -144,13 +144,13 @@ mod tests {
     }
 
     fn test_no_tile_in_cell()-> bool{
-        let mut board=TileBoard::default();
+        let mut board=TileTypeBoard::default();
         board.ignore_player_input=false;
         let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
-                &Grid::<Tile>::default(),
+                &Grid::<TileType>::default(),
                 None
             );
 
@@ -163,14 +163,14 @@ mod tests {
     }
 
     fn test_empty_slot()-> bool{
-        let mut board=TileBoard::default();
+        let mut board=TileTypeBoard::default();
         board.ignore_player_input=false;
-        board[&GridLocation::new(0, 0)]=Some(Tile::new(None));
+        board[&GridLocation::new(0, 0)]=Some(TileType::new(None));
         let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
-                &Grid::<Tile>::default(),
+                &Grid::<TileType>::default(),
                 None
             );
 
@@ -186,12 +186,12 @@ mod tests {
         let mut board=board_manager::generate_solved_board();
         board.ignore_player_input=false;
         let empty_tile_location=board.empty_tile_location;
-        board[&empty_tile_location]=Some(Tile::new(Some(16)));
+        board[&empty_tile_location]=Some(TileType::new(Some(16)));
         let location_validation_outcome=
             handle_mouse_click(
                 Vec2::default(), 
                 &mut board,
-                &Grid::<Tile>::default(),
+                &Grid::<TileType>::default(),
                 None
             );
         match location_validation_outcome{
