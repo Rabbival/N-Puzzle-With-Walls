@@ -156,8 +156,8 @@ fn check_if_solved(game_board: &mut TileTypeBoard, solved_grid: &Grid<TileType>)
 pub fn reset_board(
     solved_grid: &Grid<TileType>,
     game_board: &mut TileTypeBoard,
-    tiles: Query<(Entity, &mut TileType, &mut Transform)>,
-    tile_dictionary: &mut HashMap<TileType,Option<Entity>>,
+    tiles: Query<(&mut Transform, With<TileType>)>,
+    tile_dictionary: &HashMap<TileType,Option<Entity>>,
 )-> Result<(),EntityRelatedCustomError>
 {
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{

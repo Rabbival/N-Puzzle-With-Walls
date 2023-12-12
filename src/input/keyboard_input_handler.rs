@@ -71,8 +71,8 @@ fn move_into_empty_from_direction(
 fn listen_for_reset(
     solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
-    tiles: Query<(Entity, &mut TileType, &mut Transform)>,
-    mut tile_dictionary_query: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
+    tiles: Query<(&mut Transform, With<TileType>)>,
+    tile_dictionary_query: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
@@ -81,7 +81,7 @@ fn listen_for_reset(
                 &solved_board_query.single().grid,
                 &mut game_board_query.single_mut(),
                 tiles,
-                &mut tile_dictionary_query.single_mut().entity_by_tile_type
+                &tile_dictionary_query.single().entity_by_tile_type
             )
         {
             print_to_console::print_debug_deriver(error, BevyPrintType::Error);

@@ -41,13 +41,14 @@ fn spawn_tiles(
 
 pub fn switch_tile_entity_positions(
     mut tiles: Query<&mut Transform, With<TileType>>,
+    tile_dictionary: &HashMap<TileType,Option<Entity>>,
     grid: &Grid<TileType>,
     first_grid_location: &GridLocation, 
     second_grid_location: &GridLocation
 ) -> Result<(),TileMoveError>
 {
-    let first_tile_entity=extract_tile_entity(grid, first_grid_location)?;
-    let second_tile_entity=extract_tile_entity(grid, second_grid_location)?;
+    let first_tile_entity=extract_tile_entity(&tiles, grid, first_grid_location)?;
+    let second_tile_entity=extract_tile_entity(&tiles, grid, second_grid_location)?;
     if let Ok([mut transform_first, mut transform_second]) = 
         tiles.get_many_mut([first_tile_entity, second_tile_entity]) {
             std::mem::swap(&mut *transform_first, &mut *transform_second);
@@ -58,6 +59,7 @@ pub fn switch_tile_entity_positions(
 }
 
 fn extract_tile_entity(
+    tile_dictionary: &HashMap<TileType,Option<Entity>>,
     grid: &Grid<TileType>,
     grid_location: &GridLocation
 ) -> Result<Entity,TileMoveError>
@@ -65,18 +67,21 @@ fn extract_tile_entity(
     match grid[grid_location]{
         None => {return Err(TileMoveError::NoTileInCell(grid_location.clone()))},
         Some(tile_type_from_cell) => {
-            match tile_type_from_cell{
-                None=> {Err(TileMoveError::EntityRelated(EntityRelatedCustomError::NoEntity))},
-                Some(entity)=> {Ok(entity)}
-            }
+            match tile_dictionary.get(&tile_type_from_cell){
+                None=> { return Err(TileMoveError::EntityRelated
+                    (ItemNotFoundInMapError::EntityNotFoundInMap)); },
+                Some(optional_entity)=> {
+                    match optional_entity{
+                        None=>{return Err(EntityRelatedCustomError::NoEntity);},
+                        Some(entity)=>{
         }
     }
 }
 
 pub fn move_existing_tiles_after_reset(
     grid: &mut Grid<TileType>,
-    mut tiles: Query<(Entity, &mut TileType, &mut Transform)>,
-    tile_dictionary: &mut HashMap<TileType,Option<Entity>>,
+    mut tiles: Query<(&mut Transform, With<TileType>)>,
+    tile_dictionary: &HashMap<TileType,Option<Entity>>,
 )-> Result<(),EntityRelatedCustomError>
 {
     for (grid_location, cell_reference) in grid.iter_mut(){
@@ -89,8 +94,8 @@ pub fn move_existing_tiles_after_reset(
                     match optional_entity{
                         None=>{return Err(EntityRelatedCustomError::NoEntity);},
                         Some(entity)=>{
-                            if let Ok((_,_,tile_transform)) = tiles.get_mut(*entity) {
-                                tile_transform.into_inner().translation= Vec3::new(
+                            if let Ok(mut tile_transform) = tiles.get_mut(*entity) {
+                                tile_transform.0.translation= Vec3::new(
                                     spawn_location_before_atlas_square_size.x, 
                                     spawn_location_before_atlas_square_size.y, 
                                     0.0
