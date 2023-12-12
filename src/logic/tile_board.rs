@@ -1,6 +1,6 @@
-use crate::{prelude::*, output::error_handler};
-
 use std::ops::{Index,IndexMut};
+
+use crate::{prelude::*, output::error_handler};
 
 #[derive(Component, Clone, Debug, Default)]
 pub struct TileBoard {

@@ -13,14 +13,12 @@ impl Plugin for GraphicsPlugin {
 fn spawn_tiles(
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
-    board_query: Query<&TileBoard, With<GameBoard>>,
+    mut board_query: Query<&mut TileBoard, With<GameBoard>>,
     mut tile_dictionary: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
 ){
     let mut tile_dictionary_instance=tile_dictionary.single_mut();
-    for (grid_location, cell_reference) in board_query.single().grid.iter(){
-        let rw_lock = cell_reference.as_ref();
-        let mut write = rw_lock.write().unwrap();
-        if let Some(tile_from_cell) = &mut *write{
+    for (grid_location, cell_reference) in board_query.single_mut().grid.iter_mut(){
+        if let Some(tile_from_cell) = cell_reference{
             let spawn_location_before_atlas_square_size=grid_location.to_world();
             let entity_id=commands.spawn((
                 SpriteSheetBundle {
@@ -82,10 +80,8 @@ pub fn move_existing_tiles_after_reset(
     tile_dictionary: &mut HashMap<TileType,Option<Entity>>,
 )-> Result<(),EntityRelatedCustomError>
 {
-    for (grid_location, cell_reference) in grid.iter(){
-        let rw_lock = cell_reference.as_ref();
-        let mut write = rw_lock.write().unwrap();
-        if let Some(tile_from_cell) = &mut *write{
+    for (grid_location, cell_reference) in grid.iter_mut(){
+        if let Some(tile_from_cell) = cell_reference{
             let spawn_location_before_atlas_square_size=grid_location.to_world();
             match tile_dictionary.remove(&tile_from_cell.tile_type){
                 None=> { return Err(EntityRelatedCustomError::ItemNotInMap

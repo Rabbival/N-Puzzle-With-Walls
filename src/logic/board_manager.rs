@@ -93,7 +93,10 @@ fn generate_game_board(mut board: TileBoard) -> Result<TileBoard, error_handler:
                 (ItemNotFoundInMapError::DirectionNotFoundInMap));
         }
         let chosen_location=chosen_location_option.unwrap();
-        board.switch_tiles_by_location(&empty_tile_location, chosen_location);
+        if let Err(_) = 
+            board.switch_tiles_by_location(&empty_tile_location, chosen_location){
+                return Err(error_handler::BoardGenerationError::TileMoveError);
+            }
         
         //get ready for next choice
         empty_tile_location=board.empty_tile_location;
@@ -136,7 +139,7 @@ pub fn move_tile_logic(
         empty_tile_location
     ));
 
-    game_board.switch_tiles_by_location(&empty_tile_location, &occupied_tile_location);
+    game_board.switch_tiles_by_location(&empty_tile_location, &occupied_tile_location)?;
 
     check_if_solved(game_board, solved_grid);
 

@@ -1,4 +1,4 @@
-use std::{ops::{Index,IndexMut}, sync::{Arc, RwLock}};
+use std::ops::{Index,IndexMut};
 
 use bevy::prelude::*;
 
@@ -8,7 +8,7 @@ pub const GRID_SIZE: u32 = 4;
 
 #[derive(Component, Clone, Debug)]
 pub struct InteriorMutGrid<T> {
-    pub grid: [[Arc::<RwLock::<Option<T>>>; GRID_SIZE as usize]; GRID_SIZE as usize],
+    pub grid: [[Option<T>; GRID_SIZE as usize]; GRID_SIZE as usize],
 }
 
 impl<T> InteriorMutGrid<T>{
@@ -70,7 +70,7 @@ impl<T> InteriorMutGrid<T>{
 }
 
 impl<T> InteriorMutGrid<T> {
-    pub fn iter(&self) -> impl Iterator<Item = (GridLocation, Arc<RwLock<Option<T>>>)> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = (GridLocation, &Option<T>)> + '_ {
         self.grid
             .iter()
             .flatten()
@@ -81,7 +81,23 @@ impl<T> InteriorMutGrid<T> {
                         i as u32 / GRID_SIZE) as i32,
                         (i as u32 % GRID_SIZE) as i32
                     ),
-                    Arc::clone(cell_value),
+                    cell_value,
+                )
+            })
+    }
+
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (GridLocation, &mut Option<T>)> + '_ {
+        self.grid
+            .iter_mut()
+            .flatten()
+            .enumerate()
+            .map(|(i, cell_value)| {
+                (
+                    GridLocation::new((
+                        i as u32 / GRID_SIZE) as i32,
+                        (i as u32 % GRID_SIZE) as i32
+                    ),
+                    cell_value,
                 )
             })
     }
@@ -91,7 +107,7 @@ impl<T> Default for InteriorMutGrid<T> {
     fn default() -> Self {
         Self {
             grid: std::array::from_fn(|_| std::array::from_fn(|_| {
-                Arc::new(RwLock::new(None))
+                None
             }))
         }
     }
@@ -103,9 +119,9 @@ impl<T: PartialEq + Eq> PartialEq for InteriorMutGrid<T>{
         for row_index in 0..GRID_SIZE{
             for col_index in 0..GRID_SIZE{
                 let location=GridLocation::new(row_index as i32, col_index as i32);
-                if self[&location] != other[&location]{
-                    all_cells_are_equal=false;
-                    break;
+                if self[&location] != other[&location] {
+                        all_cells_are_equal=false;
+                        break;
                 }
             }
         }
@@ -115,17 +131,15 @@ impl<T: PartialEq + Eq> PartialEq for InteriorMutGrid<T>{
 impl<T: PartialEq + Eq> Eq for InteriorMutGrid<T>{}
 
 impl<T> Index<&GridLocation> for InteriorMutGrid<T> {
-    type Output = RwLock<Option<T>>;
+    type Output = Option<T>;
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
-        let cell_value = &self.grid[index.row as usize][index.col as usize];
-        Arc::clone(&cell_value).as_ref()
+        &self.grid[index.row as usize][index.col as usize]
     }
 }
 
 impl<T> IndexMut<&GridLocation> for InteriorMutGrid<T> {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
-        let cell_value = &mut self.grid[index.row as usize][index.col as usize];
-        Arc::clone(&mut cell_value).as
+        &mut self.grid[index.row as usize][index.col as usize]
     }
 }

@@ -3,7 +3,8 @@ use crate::logic::{basic_direction, grid_location};
 #[derive(Debug)]
 pub enum BoardGenerationError{
     DirectionCouldntBeFlipped,
-    ItemNotInMap(ItemNotFoundInMapError)
+    ItemNotInMap(ItemNotFoundInMapError),
+    TileMoveError
 }
 
 #[derive(Debug)]
