@@ -26,8 +26,8 @@ fn spawn_tiles(
                     sprite: TextureAtlasSprite::new(tile_from_cell.to_atlas_index()),
                     transform: Transform::from_translation(
                         Vec3::new(
-                            spawn_location_before_atlas_square_size.x*ATLAS_CELL_SQUARE_SIZE,
-                            spawn_location_before_atlas_square_size.y*ATLAS_CELL_SQUARE_SIZE,
+                            spawn_location_before_atlas_square_size.x,
+                            spawn_location_before_atlas_square_size.y,
                             0.0
                         )),
                     ..default()
@@ -93,8 +93,8 @@ pub fn move_existing_tiles_after_reset(
                             tile_from_cell.tile_entity=optional_entity;
                             if let Ok((_,_,tile_transform)) = tiles.get_mut(entity) {
                                 tile_transform.into_inner().translation= Vec3::new(
-                                    spawn_location_before_atlas_square_size.x*ATLAS_CELL_SQUARE_SIZE, 
-                                    spawn_location_before_atlas_square_size.y*ATLAS_CELL_SQUARE_SIZE, 
+                                    spawn_location_before_atlas_square_size.x, 
+                                    spawn_location_before_atlas_square_size.y, 
                                     0.0
                                 );
                             }else{
