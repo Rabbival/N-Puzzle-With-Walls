@@ -32,6 +32,10 @@ pub fn print_input_error(input_error: TileMoveError){
     }
 }
 
+pub fn print_entity_related_error(entity_error: EntityRelatedCustomError){
+    error!("{:?}", entity_error);
+}
+
 pub enum BevyPrintType{
     Info, 
     Warn,

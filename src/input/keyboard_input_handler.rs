@@ -5,7 +5,10 @@ pub struct KeyboardInputHandlerPlugin;
 impl Plugin for KeyboardInputHandlerPlugin {
     fn build(&self, app: &mut App) {
         app
-        .add_systems(Update, (listen_for_reset, move_tiles_with_keyboard));
+            .add_systems(Update, 
+                (listen_for_reset, move_tiles_with_keyboard).in_set(CostumeSystemSets::InputListening)
+            )
+            ;
     }
 }
 

@@ -1,12 +1,18 @@
-use crate::{prelude::*, logic::tile_dictionary};
+use crate::{prelude::*, logic::tile_dictionary, costume_event};
 use bevy::{prelude::*, utils::HashMap};
+
+use super::print_to_console;
 
 pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(PostStartup, spawn_tiles);
+            .add_systems(PostStartup, spawn_tiles)
+            .add_systems(Update, 
+                move_existing_tiles_after_reset.in_set(CostumeSystemSets::ChangesBasedOnInput)
+            )
+            ;
     }
 }
 
@@ -85,10 +91,28 @@ fn extract_tile_entity(
     }
 }
 
-pub fn move_existing_tiles_after_reset(
-    grid: &mut Grid<TileType>,
-    mut tiles: Query<(&mut Transform, With<TileType>)>,
+fn move_existing_tiles_after_reset(
+    reset_listener: EventReader<costume_event::ResetBoardGraphics>,
+    board_query: Query<&TileTypeBoard, With<GameBoard>>,
+    tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
+    mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
+){
+    if reset_listener.is_empty(){
+        return;
+    }
+    if let Err(error) = post_reset_tile_moving(
+        &board_query.single().grid,
+        &tile_dictionary.single().entity_by_tile_type,
+        tile_transforms
+    ){
+        print_to_console::print_entity_related_error(error);
+    }
+}
+
+fn post_reset_tile_moving(
+    grid: &Grid<TileType>,
     tile_dictionary: &HashMap<TileType,Option<Entity>>,
+    mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
 )-> Result<(),EntityRelatedCustomError>
 {
     for (grid_location, cell_reference) in grid.iter_mut(){
@@ -101,7 +125,7 @@ pub fn move_existing_tiles_after_reset(
                     match optional_entity{
                         None=>{return Err(EntityRelatedCustomError::NoEntity);},
                         Some(entity)=>{
-                            if let Ok(mut tile_transform) = tiles.get_mut(*entity) {
+                            if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
                                 tile_transform.0.translation= Vec3::new(
                                     spawn_location_before_atlas_square_size.x, 
                                     spawn_location_before_atlas_square_size.y, 

@@ -1,5 +1,8 @@
 #![allow(clippy::type_complexity)]
 mod app;
+mod screen_setup;
+mod system_sets;
+mod costume_event;
 mod output;
 mod input;
 mod logic;
@@ -9,6 +12,9 @@ pub mod prelude {
     pub use bevy::{prelude::*, utils::HashMap};
 
     pub use crate::app::*;
+    pub use crate::screen_setup::*;
+    pub use crate::system_sets::*;
+    pub use crate::costume_event::*;
     pub use crate::input::{
         mouse_input_handler::*,
         keyboard_input_handler::*
