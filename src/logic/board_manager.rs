@@ -122,11 +122,13 @@ pub fn move_tile_logic(
     empty_tile_location: GridLocation, 
     game_board: &mut TileTypeBoard,
     solved_grid: &Grid<TileType>,
-    tiles: Query<&mut Transform, With<TileType>>
+    tiles: Query<&mut Transform, With<TileType>>,
+    tile_dictionary: &HashMap<TileType,Option<Entity>>
 ) -> Result<(), error_handler::TileMoveError>
 {    
     graphics::switch_tile_entity_positions(
         tiles, 
+        tile_dictionary,
         &game_board.grid,
         &occupied_tile_location, 
         &empty_tile_location

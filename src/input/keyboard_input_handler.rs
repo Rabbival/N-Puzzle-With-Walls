@@ -13,7 +13,8 @@ fn move_tiles_with_keyboard(
     keyboard_input: Res<Input<KeyCode>>,
     mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
     solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
-    tiles: Query<&mut Transform, With<TileType>>
+    tiles: Query<&mut Transform, With<TileType>>,
+    tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
 ){
     let mut move_request_direction:Option<basic_direction::BasicDirection>=None;
     if keyboard_input.just_pressed(KeyCode::W) ||  keyboard_input.just_pressed(KeyCode::Up){
@@ -35,7 +36,8 @@ fn move_tiles_with_keyboard(
         move_request_direction.unwrap(),
         game_board_query.single_mut().into_inner(),
         &solved_board_query.single().grid,
-        Some(tiles)
+        Some(tiles),
+        &tile_dictionary.single().entity_by_tile_type
     ){
         print_to_console::print_input_error(error)
     }
@@ -45,7 +47,8 @@ fn move_into_empty_from_direction(
     move_to_direction: basic_direction::BasicDirection,
     game_board: &mut TileTypeBoard,
     solved_grid: &Grid<TileType>,
-    optional_tiles: Option<Query<&mut Transform, With<TileType>>>
+    optional_tiles: Option<Query<&mut Transform, With<TileType>>>,
+    tile_dictionary: &HashMap<TileType,Option<Entity>>
 ) -> Result<(), error_handler::TileMoveError>
 {
     if game_board.ignore_player_input{
@@ -59,7 +62,8 @@ fn move_into_empty_from_direction(
                 game_board.empty_tile_location,
                 game_board, 
                 solved_grid,
-                tiles
+                tiles,
+                tile_dictionary
             )
         }
         Ok(()) //only here for the sake of testing, there will always be tiles.
@@ -92,6 +96,7 @@ fn listen_for_reset(
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[test]
@@ -110,7 +115,8 @@ mod tests {
                 from_dir, 
                 &mut board,
                 &TileTypeBoard::default().grid,
-                None
+                None,
+                &HashMap::<TileType,Option<Entity>>::new()
             );
 
         println!("for {:?}, {:?}", from_dir, direction_check_outcome);
