@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::tile_dictionary, costume_event};
+use crate::{prelude::*, logic::tile_dictionary, costume_event::reset_event};
 use bevy::{prelude::*, utils::HashMap};
 
 use super::print_to_console;
@@ -92,7 +92,7 @@ fn extract_tile_entity(
 }
 
 fn move_existing_tiles_after_reset(
-    mut graphics_reset_listener: EventReader<costume_event::ResetBoardGraphics>,
+    mut graphics_reset_listener: EventReader<reset_event::ResetBoardGraphics>,
     mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
     tile_transforms: Query<(&mut Transform, With<TileType>)>,

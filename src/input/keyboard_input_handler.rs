@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::{board_manager, basic_direction, tile_dictionary}, output::{print_to_console, error_handler}, costume_event};
+use crate::{prelude::*, logic::{board_manager, basic_direction, tile_dictionary}, output::{print_to_console, error_handler}, costume_event::reset_event};
 
 pub struct KeyboardInputHandlerPlugin;
 
@@ -76,11 +76,11 @@ fn move_into_empty_from_direction(
 }
 
 fn listen_for_reset(
-    mut input_event_writer: EventWriter<costume_event::ResetBoardLogic>,
+    mut input_event_writer: EventWriter<reset_event::ResetBoardLogic>,
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
-        input_event_writer.send(costume_event::ResetBoardLogic::default());
+        input_event_writer.send(reset_event::ResetBoardLogic::default());
     }
 }
 

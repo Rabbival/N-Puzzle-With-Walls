@@ -6,9 +6,9 @@ pub struct ResetBoardGraphics;
 #[derive (Event, Default)]
 pub struct ResetBoardLogic;
 
-pub struct EventPlugin;
+pub struct ResetEventPlugin;
 
-impl Plugin for EventPlugin {
+impl Plugin for ResetEventPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<ResetBoardLogic>()

@@ -16,8 +16,7 @@ pub fn main() {
         //costume
         .add_plugins((
             CameraPlugin,
-            MouseInputHandlerPlugin,
-            KeyboardInputHandlerPlugin,
+            InputPlugin,
             AssetLoaderPlugin,
             BoardManagerPlugin,
             GraphicsPlugin,

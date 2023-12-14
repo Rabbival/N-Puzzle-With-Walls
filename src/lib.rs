@@ -14,8 +14,12 @@ pub mod prelude {
     pub use crate::app::*;
     pub use crate::screen_setup::*;
     pub use crate::system_sets::*;
-    pub use crate::costume_event::*;
+    pub use crate::costume_event::{
+        EventPlugin,
+        reset_event::*,
+    };
     pub use crate::input::{
+        InputPlugin,
         mouse_input_handler::*,
         keyboard_input_handler::*
     };

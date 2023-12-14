@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::{error_handler, print_to_console, graphics}, costume_event};
+use crate::{prelude::*, output::{error_handler, print_to_console, graphics}, costume_event::reset_event};
 use rand::Rng;
 
 const LOCATION_SHIFT_BOUNDS:(u8, u8) = (18, 25);
@@ -159,8 +159,8 @@ fn check_if_solved(game_board: &mut TileTypeBoard, solved_grid: &Grid<TileType>)
 }
 
 pub fn reset_board(
-    mut reset_listener: EventReader<costume_event::ResetBoardLogic>,
-    mut graphics_event_writer: EventWriter<costume_event::ResetBoardGraphics>,
+    mut reset_listener: EventReader<reset_event::ResetBoardLogic>,
+    mut graphics_event_writer: EventWriter<reset_event::ResetBoardGraphics>,
     solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
 ){
@@ -173,7 +173,7 @@ pub fn reset_board(
              //generation successful
             if let Ok(board) = attempt_result { 
                 *game_board=board;
-                graphics_event_writer.send(costume_event::ResetBoardGraphics::default());
+                graphics_event_writer.send(reset_event::ResetBoardGraphics::default());
                 return;
             }
         }
