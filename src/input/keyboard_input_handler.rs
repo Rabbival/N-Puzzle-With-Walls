@@ -1,23 +1,25 @@
-use crate::{prelude::*, logic::{board_manager, basic_direction, tile_dictionary}, output::{print_to_console, error_handler}, costume_event::reset_event};
+use crate::{prelude::*, logic::basic_direction, output::{print_to_console, error_handler}, costume_event::{reset_event, move_tile_event}};
 
 pub struct KeyboardInputHandlerPlugin;
 
 impl Plugin for KeyboardInputHandlerPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, 
-                (listen_for_reset, move_tiles_with_keyboard).in_set(CostumeSystemSets::InputListening)
+            .add_systems(Update, (
+                    move_tiles_with_keyboard,
+                    listen_for_reset, 
+                )
+                .chain()
+                .in_set(CostumeSystemSets::InputListening)
             )
             ;
     }
 }
 
 fn move_tiles_with_keyboard(
+    mut logic_event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
+    game_board_query: Query<&TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
-    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
-    tiles: Query<&mut Transform, With<TileType>>,
-    tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
 ){
     let mut move_request_direction:Option<basic_direction::BasicDirection>=None;
     if keyboard_input.just_pressed(KeyCode::W) ||  keyboard_input.just_pressed(KeyCode::Up){
@@ -36,22 +38,18 @@ fn move_tiles_with_keyboard(
         return;
     }
     if let Err(error) = move_into_empty_from_direction(
+        logic_event_writer,
+        game_board_query.single(),
         move_request_direction.unwrap(),
-        game_board_query.single_mut().into_inner(),
-        &solved_board_query.single().grid,
-        Some(tiles),
-        &tile_dictionary.single().entity_by_tile_type
     ){
         print_to_console::print_tile_move_error(error)
     }
 }
 
 fn move_into_empty_from_direction(
+    mut logic_event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
+    game_board: &TileTypeBoard,
     move_to_direction: basic_direction::BasicDirection,
-    game_board: &mut TileTypeBoard,
-    solved_grid: &Grid<TileType>,
-    optional_tiles: Option<Query<&mut Transform, With<TileType>>>,
-    tile_dictionary: &HashMap<TileType,Option<Entity>>
 ) -> Result<(), error_handler::TileMoveError>
 {
     if game_board.ignore_player_input{
@@ -59,16 +57,10 @@ fn move_into_empty_from_direction(
     }
     let empty_tile_neighbors=game_board.get_direct_neighbors_of_empty();
     if let Some(occupied_tile_location) = empty_tile_neighbors.get(&move_to_direction){
-        if let Some(tiles) = optional_tiles{
-            return board_manager::move_tile_logic(
-                *occupied_tile_location, 
-                game_board.empty_tile_location,
-                game_board, 
-                solved_grid,
-                tiles,
-                tile_dictionary
-            )
-        }
+        logic_event_writer.send(move_tile_event::SwitchTilesLogic{
+            occupied_tile_location: *occupied_tile_location, 
+            empty_tile_location: game_board.empty_tile_location,
+        });
         Ok(()) //only here for the sake of testing, there will always be tiles.
     }else{
         Err(error_handler::TileMoveError::NoOccupiedTileInThatDirection(move_to_direction))
@@ -87,11 +79,18 @@ fn listen_for_reset(
 
 #[cfg(test)]
 mod tests {
+    use crate::logic::board_manager;
 
     use super::*;
 
     #[test]
     fn test_valid_request() {
+        // let mut app = App::new();
+        // app
+        //     .add_event::<move_tile_event::SwitchTilesLogic>()
+        //     .add_systems(Startup, systems)
+        // ;
+
         assert!( ! detected_as_invalid_request(basic_direction::BasicDirection::Up));
         assert!(detected_as_invalid_request(basic_direction::BasicDirection::Right));
         assert!(detected_as_invalid_request(basic_direction::BasicDirection::Down));
@@ -103,11 +102,9 @@ mod tests {
         board.ignore_player_input=false;
         let direction_check_outcome=
             move_into_empty_from_direction(
-                from_dir, 
-                &mut board,
-                &TileTypeBoard::default().grid,
-                None,
-                &HashMap::<TileType,Option<Entity>>::new()
+                EventWriter::<move_tile_event::SwitchTilesLogic>, 
+                &board,
+                from_dir
             );
 
         println!("for {:?}, {:?}", from_dir, direction_check_outcome);
