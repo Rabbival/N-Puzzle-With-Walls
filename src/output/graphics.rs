@@ -92,25 +92,29 @@ fn extract_tile_entity(
 }
 
 fn move_existing_tiles_after_reset(
-    reset_listener: EventReader<costume_event::ResetBoardGraphics>,
-    board_query: Query<&TileTypeBoard, With<GameBoard>>,
+    mut graphics_reset_listener: EventReader<costume_event::ResetBoardGraphics>,
+    mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
-    mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
+    tile_transforms: Query<(&mut Transform, With<TileType>)>,
 ){
-    if reset_listener.is_empty(){
+    //got to be able to move the mut query, and it doesn't pass any info
+    if graphics_reset_listener.is_empty(){
         return;
     }
+
     if let Err(error) = post_reset_tile_moving(
-        &board_query.single().grid,
+        &mut board_query.single_mut().grid,
         &tile_dictionary.single().entity_by_tile_type,
         tile_transforms
     ){
         print_to_console::print_entity_related_error(error);
     }
+    
+    graphics_reset_listener.clear();
 }
 
 fn post_reset_tile_moving(
-    grid: &Grid<TileType>,
+    grid: &mut Grid<TileType>,
     tile_dictionary: &HashMap<TileType,Option<Entity>>,
     mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
 )-> Result<(),EntityRelatedCustomError>

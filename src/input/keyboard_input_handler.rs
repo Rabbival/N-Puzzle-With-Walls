@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::{board_manager, basic_direction, tile_dictionary}, output::{print_to_console, error_handler}};
+use crate::{prelude::*, logic::{board_manager, basic_direction, tile_dictionary}, output::{print_to_console, error_handler}, costume_event};
 
 pub struct KeyboardInputHandlerPlugin;
 
@@ -76,23 +76,11 @@ fn move_into_empty_from_direction(
 }
 
 fn listen_for_reset(
-    solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
-    mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
-    tiles: Query<(&mut Transform, With<TileType>)>,
-    tile_dictionary_query: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
+    mut input_event_writer: EventWriter<costume_event::ResetBoardLogic>,
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
-        if let Err(error) = 
-            board_manager::reset_board(
-                &solved_board_query.single().grid,
-                &mut game_board_query.single_mut(),
-                tiles,
-                &tile_dictionary_query.single().entity_by_tile_type
-            )
-        {
-            print_to_console::print_debug_deriver(error, BevyPrintType::Error);
-        }
+        input_event_writer.send(costume_event::ResetBoardLogic::default());
     }
 }
 

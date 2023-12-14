@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::{error_handler, print_to_console, graphics}};
+use crate::{prelude::*, output::{error_handler, print_to_console, graphics}, costume_event};
 use rand::Rng;
 
 const LOCATION_SHIFT_BOUNDS:(u8, u8) = (18, 25);
@@ -17,6 +17,9 @@ impl Plugin for BoardManagerPlugin {
             //important to run before we draw it in graphics.rs
             .add_systems(PreStartup, spawn_solved_board)
             .add_systems(Startup, spawn_game_board)
+            .add_systems(Update, 
+                reset_board.in_set(CostumeSystemSets::InputHandling)
+            )
             ;
     }
 }
@@ -156,24 +159,26 @@ fn check_if_solved(game_board: &mut TileTypeBoard, solved_grid: &Grid<TileType>)
 }
 
 pub fn reset_board(
-    solved_grid: &Grid<TileType>,
-    game_board: &mut TileTypeBoard,
-    tiles: Query<(&mut Transform, With<TileType>)>,
-    tile_dictionary: &HashMap<TileType,Option<Entity>>,
-)-> Result<(),EntityRelatedCustomError>
-{
-    for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
-        let attempt_result=
-            generate_game_board(TileTypeBoard::from_grid(solved_grid));
-         //generation successful
-        if let Ok(board) = attempt_result { 
-            *game_board=board;
-            graphics::move_existing_tiles_after_reset(&mut game_board.grid, tiles, tile_dictionary)?;
-            return Ok(());
+    mut reset_listener: EventReader<costume_event::ResetBoardLogic>,
+    mut graphics_event_writer: EventWriter<costume_event::ResetBoardGraphics>,
+    solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
+    mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
+){
+    for _reset_request in reset_listener.read(){
+        let solved_grid=&solved_board_query.single().grid;
+        let mut game_board=game_board_query.single_mut();
+        for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
+            let attempt_result=
+                generate_game_board(TileTypeBoard::from_grid(solved_grid));
+             //generation successful
+            if let Ok(board) = attempt_result { 
+                *game_board=board;
+                graphics_event_writer.send(costume_event::ResetBoardGraphics::default());
+                return;
+            }
         }
+        print_to_console::couldnt_generate_board();
     }
-    print_to_console::couldnt_generate_board();
-    Ok(()) //here to compile. the line above panics.
 }
 
 
