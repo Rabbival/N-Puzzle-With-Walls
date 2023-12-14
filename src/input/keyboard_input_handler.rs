@@ -42,7 +42,7 @@ fn move_tiles_with_keyboard(
         Some(tiles),
         &tile_dictionary.single().entity_by_tile_type
     ){
-        print_to_console::print_input_error(error)
+        print_to_console::print_tile_move_error(error)
     }
 }
 

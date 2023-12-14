@@ -16,7 +16,8 @@ pub mod prelude {
     pub use crate::system_sets::*;
     pub use crate::costume_event::{
         EventPlugin,
-        reset_event::*,
+        reset_event::ResetEventPlugin,
+        move_tile_event::MoveTileEventPlugin
     };
     pub use crate::input::{
         InputPlugin,

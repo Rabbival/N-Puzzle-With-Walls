@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::tile_dictionary, costume_event::reset_event};
+use crate::{prelude::*, logic::tile_dictionary, costume_event::{reset_event, move_tile_event}};
 use bevy::{prelude::*, utils::HashMap};
 
 use super::print_to_console;
@@ -9,8 +9,12 @@ impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(PostStartup, spawn_tiles)
-            .add_systems(Update, 
-                move_existing_tiles_after_reset.in_set(CostumeSystemSets::ChangesBasedOnInput)
+            .add_systems(Update, (
+                    switch_tile_entity_positions,
+                    move_existing_tiles_after_reset,
+                )
+                .chain()
+                .in_set(CostumeSystemSets::ChangesBasedOnInput)
             )
             ;
     }
@@ -45,8 +49,28 @@ fn spawn_tiles(
     }
 }
 
-pub fn switch_tile_entity_positions(
-    mut tiles: Query<&mut Transform, With<TileType>>,
+
+fn switch_tile_entity_positions(
+    mut graphics_switch_tiles_listener: EventReader<move_tile_event::SwitchTilesGraphics>,
+    mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
+    tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
+    mut tile_transforms: Query<&mut Transform, With<TileType>>,
+){
+    for tile_switch_request in graphics_switch_tiles_listener.read(){
+        if let Err(move_error) = switch_tile_entity_positions_inner(
+            &mut tile_transforms,
+            &tile_dictionary.single().entity_by_tile_type,
+            &board_query.single_mut().grid,
+            &tile_switch_request.first_grid_location,
+            &tile_switch_request.second_grid_location,
+        ){
+            print_tile_move_error(move_error);
+        }
+    }
+}
+
+fn switch_tile_entity_positions_inner(
+    tile_transforms: &mut Query<&mut Transform, With<TileType>>,
     tile_dictionary: &HashMap<TileType,Option<Entity>>,
     grid: &Grid<TileType>,
     first_grid_location: &GridLocation, 
@@ -56,7 +80,7 @@ pub fn switch_tile_entity_positions(
     let first_tile_entity=extract_tile_entity(&tile_dictionary, grid, first_grid_location)?;
     let second_tile_entity=extract_tile_entity(&tile_dictionary, grid, second_grid_location)?;
     if let Ok([mut transform_first, mut transform_second]) = 
-        tiles.get_many_mut([first_tile_entity, second_tile_entity]) {
+        tile_transforms.get_many_mut([first_tile_entity, second_tile_entity]) {
             std::mem::swap(&mut *transform_first, &mut *transform_second);
     }else{
         return Err(TileMoveError::EntityRelated(EntityRelatedCustomError::EntityNotInQuery));
@@ -91,32 +115,28 @@ fn extract_tile_entity(
     }
 }
 
+
 fn move_existing_tiles_after_reset(
     mut graphics_reset_listener: EventReader<reset_event::ResetBoardGraphics>,
     mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
-    tile_transforms: Query<(&mut Transform, With<TileType>)>,
+    mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
 ){
-    //got to be able to move the mut query, and it doesn't pass any info
-    if graphics_reset_listener.is_empty(){
-        return;
+    for _reset_request in graphics_reset_listener.read(){
+        if let Err(error) = move_existing_tiles_after_reset_inner(
+            &mut board_query.single_mut().grid,
+            &tile_dictionary.single().entity_by_tile_type,
+            &mut tile_transforms
+        ){
+            print_to_console::print_entity_related_error(error);
+        }
     }
-
-    if let Err(error) = post_reset_tile_moving(
-        &mut board_query.single_mut().grid,
-        &tile_dictionary.single().entity_by_tile_type,
-        tile_transforms
-    ){
-        print_to_console::print_entity_related_error(error);
-    }
-    
-    graphics_reset_listener.clear();
 }
 
-fn post_reset_tile_moving(
+fn move_existing_tiles_after_reset_inner(
     grid: &mut Grid<TileType>,
     tile_dictionary: &HashMap<TileType,Option<Entity>>,
-    mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
+    tile_transforms: &mut Query<(&mut Transform, With<TileType>)>,
 )-> Result<(),EntityRelatedCustomError>
 {
     for (grid_location, cell_reference) in grid.iter_mut(){

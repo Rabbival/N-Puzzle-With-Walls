@@ -11,8 +11,8 @@ pub fn couldnt_generate_board(){
     panic!("couldn't generate board");
 }
 
-pub fn print_input_error(input_error: TileMoveError){
-    match input_error{
+pub fn print_tile_move_error(move_error: TileMoveError){
+    match move_error{
         TileMoveError::BoardFrozenToPlayer(message)=>{
             warn!(message);
         },
@@ -28,7 +28,7 @@ pub fn print_input_error(input_error: TileMoveError){
         TileMoveError::IndexOutOfGridBounds(message)=>{
             error!(message);
         },
-        _=>{error!("{:?}", input_error)}
+        _=>{error!("{:?}", move_error)}
     }
 }
 

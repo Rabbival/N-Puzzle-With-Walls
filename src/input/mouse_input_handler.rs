@@ -51,7 +51,7 @@ fn listen_for_mouse_click(
                 &tile_dictionary.single().entity_by_tile_type
             )
         {
-            print_to_console::print_input_error(input_error);
+            print_to_console::print_tile_move_error(input_error);
         }
     }
 }

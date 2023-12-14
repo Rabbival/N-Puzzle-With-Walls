@@ -31,9 +31,7 @@ impl TileTypeBoard {
             self.empty_tile_location=first.clone();
         }
 
-        let temp_tile=self[first];
-        self[first]=self[second];
-        self[second]=temp_tile;
+        std::mem::swap(&mut self[first], &mut self[second]);
         Ok(())
     }
 

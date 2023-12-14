@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use crate::prelude::*;
 
 pub mod reset_event;
+pub mod move_tile_event;
 
 pub struct EventPlugin;
 
@@ -10,6 +11,7 @@ impl Plugin for EventPlugin {
         app
             .add_plugins((
                 ResetEventPlugin,
+                MoveTileEventPlugin
             ))
             ;
     }
