@@ -23,6 +23,7 @@ impl Plugin for GraphicsPlugin {
 fn spawn_tiles(
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
+    font: Res<TileTextFont>,
     mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     mut tile_dictionary: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
 ){
@@ -30,9 +31,9 @@ fn spawn_tiles(
     for (grid_location, cell_reference) in board_query.single_mut().grid.iter_mut(){
         if let Some(tile_type_from_cell) = cell_reference{
             let spawn_location_before_atlas_square_size=grid_location.to_world();
-            let entity_id=commands.spawn((
+            let tile_entity_id=commands.spawn((
                 SpriteSheetBundle {
-                    texture_atlas: sprite_atlas.clone().0.clone(),
+                    texture_atlas: sprite_atlas.0.clone(),
                     sprite: TextureAtlasSprite::new(tile_type_from_cell.to_atlas_index()),
                     transform: Transform::from_translation(
                         Vec3::new(
@@ -43,8 +44,28 @@ fn spawn_tiles(
                     ..default()
                 },
                 *tile_type_from_cell
-            )).id();
-            tile_dictionary_instance.entity_by_tile_type.insert(*tile_type_from_cell, Some(entity_id));
+            )).with_children(|parent|{
+                parent.spawn(
+                    TextBundle::from_section(
+                        match tile_type_from_cell.to_number(){
+                            None=> String::from(""),
+                            Some(number)=> number.to_string()
+                        },
+                        TextStyle {
+                            font: font.0.clone(),
+                            font_size: 100.0,
+                            ..default()
+                        },
+                    ) // Set the alignment of the Text
+                    .with_text_alignment(TextAlignment::Center)
+                );
+            })
+            .id();
+
+            tile_dictionary_instance.entity_by_tile_type.insert(
+                *tile_type_from_cell, 
+                Some(tile_entity_id)
+            );
         }
     }
 }

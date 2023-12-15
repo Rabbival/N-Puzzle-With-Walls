@@ -5,13 +5,27 @@ pub const ATLAS_CELL_SQUARE_SIZE:f32=32.0;
 #[derive(Resource, Deref, DerefMut, Clone, Default)]
 pub struct SpriteAtlas(pub Handle<TextureAtlas>);
 
+#[derive(Resource, Deref, DerefMut, Clone, Default)]
+pub struct TileTextFont(pub Handle<Font>);
+
 pub struct AssetLoaderPlugin;
 
 impl Plugin for AssetLoaderPlugin{
     fn build(&self, app: &mut App){
         app
-            .add_systems(PreStartup, sprite_atlas_setup);
+            .add_systems(PreStartup, (
+                sprite_atlas_setup,
+                tile_text_font_setup
+            ));
     }
+}
+
+fn tile_text_font_setup(    
+    mut commands: Commands, 
+    asset_server: Res<AssetServer>,
+){
+    let font_handle = asset_server.load("FiraSans-Bold.ttf");
+    commands.insert_resource(TileTextFont(font_handle));
 }
 
 fn sprite_atlas_setup(

@@ -21,4 +21,11 @@ impl TileType{
             TileType::Numbered(num) => *num as usize -1,
         }
     }
+
+    pub fn to_number(&self) -> Option<usize>{
+        match self{
+            TileType::Empty => None,
+            TileType::Numbered(num) => Some(*num as usize),
+        }
+    }
 }
