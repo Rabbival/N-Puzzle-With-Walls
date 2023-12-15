@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::{print_to_console, error_handler}, logic::{board_manager, tile_dictionary}};
+use crate::{prelude::*, output::{print_to_console, error_handler}, costume_event::move_tile_event};
 
 #[derive(Resource, Default)]
 pub struct CursorPosition {
@@ -34,21 +34,17 @@ fn update_cursor(
 }
 
 fn listen_for_mouse_click(
+    mut logic_event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
     mouse: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,
-    mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
-    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
-    tiles: Query<&mut Transform, With<TileType>>,
-    tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
+    game_board_query: Query<&TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
 ) {
     if mouse.just_pressed(MouseButton::Left) {
         if let Err(input_error) = 
         handle_mouse_click(
+                &mut logic_event_writer,
                 cursor_position.world_position, 
-                game_board_query.single_mut().into_inner(),
-                &solved_board_query.single().grid,
-                Some(tiles),
-                &tile_dictionary.single().entity_by_tile_type
+                game_board_query.single()
             )
         {
             print_to_console::print_tile_move_error(input_error);
@@ -56,16 +52,13 @@ fn listen_for_mouse_click(
     }
 }
 
-/// tile query optional for the sake of testing.
 fn handle_mouse_click(
+    logic_event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>,
     cursor_position: Vec2,
-    game_board: &mut TileTypeBoard,
-    solved_grid: &Grid<TileType>,
-    optional_tiles: Option<Query<&mut Transform, With<TileType>>>,
-    tile_dictionary: &HashMap<TileType,Option<Entity>>
+    game_board: &TileTypeBoard,
 ) -> Result<(), error_handler::TileMoveError>
 {
-    if let Some(optional_occupied_tile_location) = GridLocation::from_world(&solved_grid, cursor_position) {
+    if let Some(optional_occupied_tile_location) = GridLocation::from_world(&game_board.grid, cursor_position) {
         if game_board.ignore_player_input{
             return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
         }
@@ -80,17 +73,12 @@ fn handle_mouse_click(
         }
         let empty_neighbor_location=optional_empty_neighbor_location.unwrap();
 
-        if let Some(tiles) = optional_tiles{
-            return board_manager::move_tile_logic(
-                occupied_tile_location, 
-                empty_neighbor_location,
-                game_board, 
-                solved_grid,
-                tiles,
-                tile_dictionary
-            )
-        }
-        Ok(()) //only here for the sake of testing, there will always be tiles.
+        logic_event_writer.send(move_tile_event::SwitchTilesLogic{
+            occupied_tile_location: occupied_tile_location,
+            empty_tile_location: empty_neighbor_location
+        });
+
+        Ok(())
     }else{
         Err(error_handler::TileMoveError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
     }
@@ -99,42 +87,69 @@ fn handle_mouse_click(
 
 #[cfg(test)]
 mod tests {
+    use crate::logic::board_manager;
+
     use super::*;
 
     #[test]
-    fn test_input_validation() {
-        assert!(test_index_out_of_bound(Vec2::new(-100.0, -100.0)));
-        assert!(test_index_out_of_bound(Vec2::new(WINDOW_SIZE, WINDOW_SIZE)));
+    fn test_input_validation(){
+        let mut app = App::new();
+        app
+            .add_event::<move_tile_event::SwitchTilesLogic>()
+            .add_systems(Update, test_input_validation_inner)
+        ;
+        app.update();
     }
 
-    fn test_index_out_of_bound(position_to_check: Vec2)-> bool{
+    fn test_input_validation_inner(mut event_writer: EventWriter<move_tile_event::SwitchTilesLogic>) {
+        assert!(test_index_out_of_bound(
+            Vec2::new(-100.0, -100.0),
+            &mut event_writer
+        ));
+        assert!(test_index_out_of_bound(
+            Vec2::new(WINDOW_SIZE, WINDOW_SIZE),
+            &mut event_writer
+        ));
+    }
+
+    fn test_index_out_of_bound(
+        position_to_check: Vec2,
+        event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>
+    )-> bool
+    {
         let location_search_outcome=
             handle_mouse_click(
+                event_writer,
                 position_to_check, 
-                &mut TileTypeBoard::default(),
-                &Grid::<TileType>::default(),
-                None,
-                &HashMap::<TileType,Option<Entity>>::new()
+                &TileTypeBoard::default(),
             );
         match location_search_outcome{
             Err(error_handler::TileMoveError::IndexOutOfGridBounds(_))=> true,
             _ => false
         }
     }
+    
 
     #[test]
-    fn test_board_freezing() {
-        assert!(test_frozen_board());
+    fn test_board_freezing(){
+        let mut app = App::new();
+        app
+            .add_event::<move_tile_event::SwitchTilesLogic>()
+            .add_systems(Update, test_board_freezing_inner)
+        ;
+        app.update();
     }
 
-    fn test_frozen_board()-> bool{
+    fn test_board_freezing_inner(mut event_writer: EventWriter<move_tile_event::SwitchTilesLogic>) {
+        assert!(test_frozen_board(&mut event_writer));
+    }
+
+    fn test_frozen_board(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>)-> bool{
         let location_validation_outcome=
             handle_mouse_click(
+                event_writer,
                 Vec2::default(), 
-                &mut TileTypeBoard::default(), //locked by default
-                &Grid::<TileType>::default(),
-                None,
-                &HashMap::<TileType,Option<Entity>>::new()
+                &TileTypeBoard::default(), //locked by default
             );
         match location_validation_outcome{
             Err(TileMoveError::BoardFrozenToPlayer(_))=> true,
@@ -142,23 +157,31 @@ mod tests {
         }
     }
 
+
     #[test]
     fn test_valid_location(){
-        assert!(test_no_tile_in_cell());
-        assert!(test_empty_slot());
-        assert!(test_no_empty_neighbor());
+        let mut app = App::new();
+        app
+            .add_event::<move_tile_event::SwitchTilesLogic>()
+            .add_systems(Update, test_valid_location_inner)
+        ;
+        app.update();
     }
 
-    fn test_no_tile_in_cell()-> bool{
+    fn test_valid_location_inner(mut event_writer: EventWriter<move_tile_event::SwitchTilesLogic>){
+        assert!(test_no_tile_in_cell(&mut event_writer));
+        assert!(test_empty_slot(&mut event_writer));
+        assert!(test_no_empty_neighbor(&mut event_writer));
+    }
+
+    fn test_no_tile_in_cell(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>)-> bool{
         let mut board=TileTypeBoard::default();
         board.ignore_player_input=false;
         let location_validation_outcome=
             handle_mouse_click(
+                event_writer,
                 Vec2::default(), 
-                &mut board,
-                &Grid::<TileType>::default(),
-                None,
-                &HashMap::<TileType,Option<Entity>>::new()
+                &board,
             );
 
         println!("{:?}", location_validation_outcome);
@@ -169,17 +192,15 @@ mod tests {
         }
     }
 
-    fn test_empty_slot()-> bool{
+    fn test_empty_slot(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>)-> bool{
         let mut board=TileTypeBoard::default();
         board.ignore_player_input=false;
         board[&GridLocation::new(0, 0)]=Some(TileType::new(None));
         let location_validation_outcome=
             handle_mouse_click(
+                event_writer,
                 Vec2::default(), 
-                &mut board,
-                &Grid::<TileType>::default(),
-                None,
-                &HashMap::<TileType,Option<Entity>>::new()
+                &board,
             );
 
         println!("{:?}", location_validation_outcome);
@@ -190,18 +211,16 @@ mod tests {
         }
     }
 
-    fn test_no_empty_neighbor()-> bool{
+    fn test_no_empty_neighbor(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>)-> bool{
         let mut board=board_manager::generate_solved_board();
         board.ignore_player_input=false;
         let empty_tile_location=board.empty_tile_location;
         board[&empty_tile_location]=Some(TileType::new(Some(16)));
         let location_validation_outcome=
             handle_mouse_click(
+                event_writer,
                 Vec2::default(), 
-                &mut board,
-                &Grid::<TileType>::default(),
-                None,
-                &HashMap::<TileType,Option<Entity>>::new()
+                &board,
             );
         match location_validation_outcome{
             Err(TileMoveError::NoEmptyNeighbor(_))=> true,

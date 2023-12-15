@@ -133,7 +133,7 @@ pub fn move_tile_logic(
 ){    
     for switch_tile_request in logic_event_reader.read(){
         if let Err(move_error)=inner_move_tile_logic(
-            graphics_event_writer, 
+            &mut graphics_event_writer, 
             switch_tile_request.occupied_tile_location, 
             switch_tile_request.empty_tile_location, 
             &mut game_board_query.single_mut(), 
@@ -146,7 +146,7 @@ pub fn move_tile_logic(
 
 /// graphics switched before logic for the sake of graphics function readability
 pub fn inner_move_tile_logic(
-    mut graphics_event_writer: EventWriter<move_tile_event::SwitchTilesGraphics>,
+    graphics_event_writer: &mut EventWriter<move_tile_event::SwitchTilesGraphics>,
     occupied_tile_location: GridLocation, 
     empty_tile_location: GridLocation, 
     game_board: &mut TileTypeBoard,

@@ -38,7 +38,7 @@ fn move_tiles_with_keyboard(
         return;
     }
     if let Err(error) = move_into_empty_from_direction(
-        logic_event_writer,
+        &mut logic_event_writer,
         game_board_query.single(),
         move_request_direction.unwrap(),
     ){
@@ -47,7 +47,7 @@ fn move_tiles_with_keyboard(
 }
 
 fn move_into_empty_from_direction(
-    mut logic_event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
+    logic_event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>,
     game_board: &TileTypeBoard,
     move_to_direction: basic_direction::BasicDirection,
 ) -> Result<(), error_handler::TileMoveError>
@@ -88,33 +88,33 @@ mod tests {
         let mut app = App::new();
         app
             .add_event::<move_tile_event::SwitchTilesLogic>()
-            .add_systems(Update, test_all_directions)
+            .add_systems(Update, test_valid_request_inner)
         ;
         app.update();
     }
 
-    fn test_all_directions(event_writer: EventWriter::<move_tile_event::SwitchTilesLogic>) {
+    fn test_valid_request_inner(mut event_writer: EventWriter::<move_tile_event::SwitchTilesLogic>) {
         assert!( ! detected_as_invalid_request(
             basic_direction::BasicDirection::Up,
-            event_writer
+            &mut event_writer
         ));
         assert!(detected_as_invalid_request(
             basic_direction::BasicDirection::Right,
-            event_writer
+            &mut event_writer
         ));
         assert!(detected_as_invalid_request(
             basic_direction::BasicDirection::Down,
-            event_writer
+            &mut event_writer
         ));
         assert!( ! detected_as_invalid_request(
             basic_direction::BasicDirection::Left,
-            event_writer
+            &mut event_writer
         ));
     }
 
     fn detected_as_invalid_request(
         from_dir: basic_direction::BasicDirection,
-        event_writer: EventWriter::<move_tile_event::SwitchTilesLogic>
+        event_writer: &mut EventWriter::<move_tile_event::SwitchTilesLogic>
     )-> bool
     {
         let mut board=board_manager::generate_solved_board();
