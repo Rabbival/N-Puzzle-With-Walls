@@ -16,6 +16,7 @@ impl Plugin for GraphicsPlugin {
                 .chain()
                 .in_set(CostumeSystemSets::ChangesBasedOnInput)
             )
+            //.add_systems(Update, debug_text_position.run_if(run_once()))
             ;
     }
 }
@@ -30,37 +31,48 @@ fn spawn_tiles(
     let mut tile_dictionary_instance=tile_dictionary.single_mut();
     for (grid_location, cell_reference) in board_query.single_mut().grid.iter_mut(){
         if let Some(tile_type_from_cell) = cell_reference{
-            let spawn_location_before_atlas_square_size=grid_location.to_world();
+            let grid_location_in_world=grid_location.to_world();
+            let tile_spawn_location=Vec3::new(
+                grid_location_in_world.x,
+                grid_location_in_world.y,
+                0.0
+            );
+            let text_spawn_location=Vec3::new(
+                grid_location.row as f32,
+                grid_location.col as f32,
+                1.0
+            );
+
             let tile_entity_id=commands.spawn((
                 SpriteSheetBundle {
                     texture_atlas: sprite_atlas.0.clone(),
                     sprite: TextureAtlasSprite::new(tile_type_from_cell.to_atlas_index()),
-                    transform: Transform::from_translation(
-                        Vec3::new(
-                            spawn_location_before_atlas_square_size.x,
-                            spawn_location_before_atlas_square_size.y,
-                            0.0
-                        )),
+                    transform: Transform::from_translation(tile_spawn_location),
                     ..default()
                 },
                 *tile_type_from_cell
             )).with_children(|parent|{
-                parent.spawn(
-                    TextBundle::from_section(
-                        match tile_type_from_cell.to_number(){
-                            None=> String::from(""),
-                            Some(number)=> number.to_string()
-                        },
-                        TextStyle {
-                            font: font.0.clone(),
-                            font_size: 100.0,
-                            ..default()
-                        },
-                    ) // Set the alignment of the Text
-                    .with_text_alignment(TextAlignment::Center)
-                );
-            })
-            .id();
+                parent.spawn(Text2dBundle {
+                    text: Text {
+                        sections: vec![TextSection::new(
+                                match tile_type_from_cell.to_number(){
+                                    None=> String::from(""),
+                                    Some(number)=> number.to_string()
+                                },
+                                TextStyle {
+                                    font: font.0.clone(),
+                                    font_size: 20.0,
+                                    color: Color::INDIGO,
+                                    ..default()
+                                }
+                            )],
+                        alignment: TextAlignment::Center,
+                        linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
+                    },
+                    transform: Transform::from_translation(text_spawn_location),
+                    ..default()
+                });
+            }).id();
 
             tile_dictionary_instance.entity_by_tile_type.insert(
                 *tile_type_from_cell, 

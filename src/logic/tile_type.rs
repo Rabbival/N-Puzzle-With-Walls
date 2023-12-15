@@ -17,8 +17,8 @@ impl TileType{
 
     pub fn to_atlas_index(&self) -> usize{
         match self{
-            TileType::Empty => 15,
-            TileType::Numbered(num) => *num as usize -1,
+            TileType::Empty => 0,
+            TileType::Numbered(_) => 1,
         }
     }
 
