@@ -84,25 +84,44 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_valid_request() {
-        // let mut app = App::new();
-        // app
-        //     .add_event::<move_tile_event::SwitchTilesLogic>()
-        //     .add_systems(Startup, systems)
-        // ;
-
-        assert!( ! detected_as_invalid_request(basic_direction::BasicDirection::Up));
-        assert!(detected_as_invalid_request(basic_direction::BasicDirection::Right));
-        assert!(detected_as_invalid_request(basic_direction::BasicDirection::Down));
-        assert!( ! detected_as_invalid_request(basic_direction::BasicDirection::Left));
+    fn test_valid_request(){
+        let mut app = App::new();
+        app
+            .add_event::<move_tile_event::SwitchTilesLogic>()
+            .add_systems(Update, test_all_directions)
+        ;
+        app.update();
     }
 
-    fn detected_as_invalid_request(from_dir: basic_direction::BasicDirection)-> bool{
+    fn test_all_directions(event_writer: EventWriter::<move_tile_event::SwitchTilesLogic>) {
+        assert!( ! detected_as_invalid_request(
+            basic_direction::BasicDirection::Up,
+            event_writer
+        ));
+        assert!(detected_as_invalid_request(
+            basic_direction::BasicDirection::Right,
+            event_writer
+        ));
+        assert!(detected_as_invalid_request(
+            basic_direction::BasicDirection::Down,
+            event_writer
+        ));
+        assert!( ! detected_as_invalid_request(
+            basic_direction::BasicDirection::Left,
+            event_writer
+        ));
+    }
+
+    fn detected_as_invalid_request(
+        from_dir: basic_direction::BasicDirection,
+        event_writer: EventWriter::<move_tile_event::SwitchTilesLogic>
+    )-> bool
+    {
         let mut board=board_manager::generate_solved_board();
         board.ignore_player_input=false;
         let direction_check_outcome=
             move_into_empty_from_direction(
-                EventWriter::<move_tile_event::SwitchTilesLogic>, 
+                event_writer, 
                 &board,
                 from_dir
             );
