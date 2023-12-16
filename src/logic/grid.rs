@@ -14,7 +14,7 @@ pub struct Grid<T: Default> {
 
 //basics
 impl<T: Default> Grid<T> {
-    fn new(grid_side_length: u8) -> Self {
+    pub fn new(grid_side_length: u8) -> Self {
         Self {
             grid_side_length: grid_side_length,
             grid: HashMap::<GridLocation, T>::new(),
@@ -22,16 +22,21 @@ impl<T: Default> Grid<T> {
         }
     }
 
-    fn get(&self, location: &GridLocation) -> Option<&T> {
+    ///immutable reference
+    pub fn get_side_length(&self) -> &u8 {
+        &self.grid_side_length
+    }
+
+    pub fn get(&self, location: &GridLocation) -> Option<&T> {
         self.grid.get(location)
     }
 
-    fn get_mut(&self, location: &GridLocation) -> Option<&mut T> {
+    pub fn get_mut(&self, location: &GridLocation) -> Option<&mut T> {
         self.grid.get_mut(location)
     }
 
     /// returns whether insertion was successful
-    fn set(&self, location: &GridLocation, value: T) -> bool {
+    pub fn set(&self, location: &GridLocation, value: T) -> bool {
         if self.valid_index(location){
             self.grid.insert(location.clone(), value);
         }
@@ -39,7 +44,7 @@ impl<T: Default> Grid<T> {
     }
 
     /// returns an option with the previous value
-    fn set_and_get_former(&self, location: &GridLocation, value: T)-> Option<T>{
+    pub fn set_and_get_former(&self, location: &GridLocation, value: T)-> Option<T>{
         self.grid.insert(location.clone(), value)
     }
 
@@ -133,7 +138,7 @@ impl<T: Default> Index<&GridLocation> for Grid<T> {
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
         if let Some(value) = self.get(index){
-            value
+            return value;
         }
         &self.default_container
     }
@@ -144,7 +149,7 @@ impl<T: Default> Index<&GridLocation> for Grid<T> {
 impl<T: Default> IndexMut<&GridLocation> for Grid<T> {
     fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
         if let Some(value) = self.get_mut(index){
-            value
+            return value;
         }
         &mut self.default_container
     }
