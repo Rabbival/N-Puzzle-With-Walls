@@ -5,18 +5,15 @@ use crate::prelude::*;
 #[derive(Component, Clone, Debug)]
 pub struct Grid<T> {
     grid_side_length: u8,
-    /// on [-1,-1] there's None
     grid: HashMap<GridLocation, Option<T>>
 }
 
 //basics
 impl<T> Grid<T> {
     pub fn new(grid_side_length: u8) -> Self {
-        let mut grid=HashMap::<GridLocation, Option<T>>::new();
-        grid.insert(GridLocation { row: -1, col: -1 }, None);
         Self {
             grid_side_length: grid_side_length,
-            grid: grid
+            grid: HashMap::<GridLocation, Option<T>>::new();
         }
     }
 
