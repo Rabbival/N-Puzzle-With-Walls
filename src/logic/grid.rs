@@ -5,37 +5,57 @@ use crate::prelude::*;
 #[derive(Component, Clone, Debug)]
 pub struct Grid<T> {
     grid_side_length: u8,
-    grid: HashMap<GridLocation, T>
+    /// on [-1,-1] there's None
+    grid: HashMap<GridLocation, Option<T>>
 }
 
 //basics
 impl<T> Grid<T> {
-    fn new(grid_side_length: u8) -> Self {
+    pub fn new(grid_side_length: u8) -> Self {
+        let mut grid=HashMap::<GridLocation, Option<T>>::new();
+        grid.insert(GridLocation { row: -1, col: -1 }, None);
         Self {
             grid_side_length: grid_side_length,
-            grid: HashMap::<GridLocation, T>::new()
+            grid: grid
         }
     }
 
-    fn get(&self, location: &GridLocation) -> Option<&T> {
-        self.grid.get(location)
+    pub fn get_side_length(&self)-> &u8 {
+        &self.grid_side_length
     }
 
-    fn get_mut(&self, location: &GridLocation) -> Option<&mut T> {
-        self.grid.get_mut(location)
+    pub fn get(&self, location: &GridLocation) -> Option<&T> {
+        if self.valid_index(location){
+            self.grid.get(location)?.as_ref()
+        }else{
+            None
+        }
+    }
+
+    pub fn get_mut(&self, location: &GridLocation) -> Option<&mut T> {
+        if self.valid_index(location){
+            self.grid.get(location)?.as_mut()
+        }else{
+            None
+        }
     }
 
     /// returns whether insertion was successful
-    fn set(&self, location: &GridLocation, value: T) -> bool {
+    pub fn set(&self, location: &GridLocation, value: T) -> bool {
         if self.valid_index(location){
-            self.grid.insert(location.clone(), value);
+            self.grid.insert(location.clone(), Some(value));
+            return true;
         }
         false
     }
 
     /// returns an option with the previous value
-    fn set_and_get_former(&self, location: &GridLocation, value: T)-> Option<T>{
-        self.grid.insert(location.clone(), value)
+    pub fn set_and_get_former(&self, location: &GridLocation, value: T)-> Option<T>{
+        if self.valid_index(location){
+            self.grid.insert(location.clone(), Some(value))?
+        }else{
+            None
+        }
     }
 
     /// also returns false if the location is invalid, so remember to check that if relevant
@@ -96,12 +116,26 @@ impl<T> Grid<T>{
 
 //iterators
 impl<T> Grid<T> {
-    pub fn iter(&self) -> impl Iterator<Item = (&GridLocation, &T)> + '_ {
-        self.grid.iter()
+    /// only returns Some(&T)
+    pub fn iter(&self) -> impl Iterator<Item = (&GridLocation, Option<&T>)> + '_ {
+        self.grid
+            .iter()
+            .filter(|(_, optional_value)|
+                optional_value.is_some())
+            .map(|(location, optional_value)|{
+                (location, optional_value.as_ref())
+            })
     }
 
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = (&GridLocation, &mut T)> + '_ {
-        self.grid.iter_mut()
+
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (&GridLocation, Option<&mut T>)> + '_ {
+        self.grid
+            .iter_mut()
+            .filter(|(_, optional_value)|
+                optional_value.is_some())
+            .map(|(location, optional_value)|{
+                (location, optional_value.as_mut())
+            })
     }
 }
 
