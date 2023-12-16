@@ -1,5 +1,3 @@
-use std::ops::{Index,IndexMut};
-
 use crate::{prelude::*, output::error_handler};
 
 #[derive(Component, Clone, Debug)]
@@ -13,8 +11,27 @@ pub struct TileTypeBoard {
 
 //constructors
 impl TileTypeBoard{
-    pub fn from_grid(grid: &Grid<TileType>)-> Self{
-        Self { grid: grid.clone(), ..Default::default() }
+    pub fn from_grid(grid: &Grid<TileType>) -> Self{
+        let grid_side_length = grid.get_side_length();
+        Self { 
+            grid: grid.clone(), 
+            empty_tile_location: GridLocation { 
+                row: (grid_side_length-1) as i32, 
+                col: (grid_side_length-1) as i32
+            }, 
+            ignore_player_input: true
+        }
+    }
+
+    pub fn new(grid_side_length: u8) -> Self{
+        Self { 
+            grid: Grid::new(grid_side_length), 
+            empty_tile_location: GridLocation { 
+                row: (grid_side_length-1) as i32, 
+                col: (grid_side_length-1) as i32
+            }, 
+            ignore_player_input: true
+        }
     }
 }
 
@@ -25,7 +42,7 @@ impl TileTypeBoard {
     {
         self.none_check(first)?;
         self.none_check(second)?;
-        if self[first].unwrap()==TileType::Empty{
+        if self.get(first).unwrap()==TileType::Empty{
             self.empty_tile_location=second.clone();
         }else{
             self.empty_tile_location=first.clone();
@@ -83,26 +100,27 @@ impl TileTypeBoard {
     }
 }
 
-impl Default for TileTypeBoard{
-    fn default() -> Self {
-        Self { 
-            grid: Grid::default(), 
-            empty_tile_location: GridLocation { row: (GRID_SIDE_LENGTH-1) as i32, col: (GRID_SIDE_LENGTH-1) as i32}, 
-            ignore_player_input: true
-        }
+//shorter access to grid's basic functions
+impl TileTypeBoard{
+    pub fn get_side_length(&self)-> &u8 {
+        self.grid.get_side_length()
     }
-}
 
-impl Index<&GridLocation> for TileTypeBoard {
-    type Output = Option<TileType>;
-
-    fn index(&self, index: &GridLocation) -> &Self::Output {
-        &self.grid[index]
+    pub fn get(&self, location: &GridLocation) -> Option<&TileType> {
+        self.grid.get(location)
     }
-}
 
-impl IndexMut<&GridLocation> for TileTypeBoard {
-    fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
-        &mut self.grid[index]
+    pub fn get_mut(&self, location: &GridLocation) -> Option<&mut TileType> {
+        self.grid.get_mut(location)
+    }
+
+    /// returns whether insertion was successful
+    pub fn set(&self, location: &GridLocation, value: TileType) -> bool {
+        self.grid.set(location, value)
+    }
+
+    /// returns an option with the previous value
+    pub fn set_and_get_former(&self, location: &GridLocation, value: TileType)-> Option<TileType>{
+        self.grid.set_and_get_former(location, value)
     }
 }
