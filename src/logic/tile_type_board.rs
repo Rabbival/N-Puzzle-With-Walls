@@ -13,24 +13,8 @@ pub struct TileTypeBoard {
 
 //constructors
 impl TileTypeBoard{
-    pub fn new(grid_side_length: u8) -> Self {
-        Self { 
-            grid: Grid::new(grid_side_length), 
-            empty_tile_location: GridLocation { 
-                row: (grid_side_length-1) as i32, 
-                col: (grid_side_length-1) as i32
-            }, 
-            ignore_player_input: true
-        }
-    }
-
     pub fn from_grid(grid: &Grid<TileType>)-> Self{
-        let grid_side_length=grid.get_side_length();
-        Self { 
-            grid: grid.clone(), 
-            empty_tile_location: GridLocation { row: (grid_side_length-1) as i32, col: (grid_side_length-1) as i32}, 
-            ignore_player_input: true
-        }
+        Self { grid: grid.clone(), ..Default::default() }
     }
 }
 
@@ -99,8 +83,18 @@ impl TileTypeBoard {
     }
 }
 
+impl Default for TileTypeBoard{
+    fn default() -> Self {
+        Self { 
+            grid: Grid::default(), 
+            empty_tile_location: GridLocation { row: (GRID_SIDE_LENGTH-1) as i32, col: (GRID_SIDE_LENGTH-1) as i32}, 
+            ignore_player_input: true
+        }
+    }
+}
+
 impl Index<&GridLocation> for TileTypeBoard {
-    type Output = TileType;
+    type Output = Option<TileType>;
 
     fn index(&self, index: &GridLocation) -> &Self::Output {
         &self.grid[index]

@@ -15,7 +15,7 @@ impl GridLocation {
     }
 
     /// grid provided to check that the index is valid for its size
-    pub fn from_world<T: Default>(grid: &Grid<T>, position: Vec2) -> Option<Self> {
+    pub fn from_world<T>(grid: &Grid<T>, position: Vec2) -> Option<Self> {
         let location = GridLocation{ 
             row: (-1.0*position.y/(ATLAS_CELL_SQUARE_SIZE)+0.5) as i32, 
             col: (position.x/(ATLAS_CELL_SQUARE_SIZE)+0.5) as i32
