@@ -37,11 +37,7 @@ fn spawn_tiles(
                 grid_location_in_world.y,
                 0.0
             );
-            let text_spawn_location=Vec3::new(
-                grid_location.row as f32,
-                grid_location.col as f32,
-                1.0
-            );
+            let text_spawn_location=Vec3::Z;
 
             let tile_entity_id=commands.spawn((
                 SpriteSheetBundle {
@@ -61,7 +57,7 @@ fn spawn_tiles(
                                 },
                                 TextStyle {
                                     font: font.0.clone(),
-                                    font_size: 20.0,
+                                    font_size: 32.0,
                                     color: Color::INDIGO,
                                     ..default()
                                 }
