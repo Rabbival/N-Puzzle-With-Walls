@@ -1,24 +1,19 @@
-use std::ops::{Index, IndexMut};
-
 use bevy::prelude::*;
 
 use crate::prelude::*;
 
-/// make sure to have a default you can tell apart
 #[derive(Component, Clone, Debug)]
-pub struct Grid<T: Default> {
+pub struct Grid<T> {
     grid_side_length: u8,
-    grid: HashMap<GridLocation, T>,
-    default_container: T
+    grid: HashMap<GridLocation, T>
 }
 
 //basics
-impl<T: Default> Grid<T> {
+impl<T> Grid<T> {
     fn new(grid_side_length: u8) -> Self {
         Self {
             grid_side_length: grid_side_length,
-            grid: HashMap::<GridLocation, T>::new(),
-            default_container: T::default()
+            grid: HashMap::<GridLocation, T>::new()
         }
     }
 
@@ -60,7 +55,7 @@ impl<T: Default> Grid<T> {
     }
 }
 
-impl<T: Default> Grid<T>{
+impl<T> Grid<T>{
     /// only returns occupied ones 
     pub fn get_all_direct_neighbor_locations(&self, origin: &GridLocation) 
     -> HashMap<BasicDirection, GridLocation>
@@ -100,7 +95,7 @@ impl<T: Default> Grid<T>{
 }
 
 //iterators
-impl<T: Default> Grid<T> {
+impl<T> Grid<T> {
     pub fn iter(&self) -> impl Iterator<Item = (&GridLocation, &T)> + '_ {
         self.grid.iter()
     }
@@ -110,7 +105,7 @@ impl<T: Default> Grid<T> {
     }
 }
 
-impl<T: Default + PartialEq + Eq> PartialEq for Grid<T>{
+impl<T: PartialEq + Eq> PartialEq for Grid<T>{
     fn eq(&self, other: &Self) -> bool {
         let mut all_cells_are_equal=true;
         let self_iter=self.iter();
@@ -124,28 +119,4 @@ impl<T: Default + PartialEq + Eq> PartialEq for Grid<T>{
         all_cells_are_equal
     }
 }
-impl<T: Default + PartialEq + Eq> Eq for Grid<T>{}
-
-/// in case there's no value with this location, 
-/// a reference to the default container will be provided instead
-impl<T: Default> Index<&GridLocation> for Grid<T> {
-    type Output = T;
-
-    fn index(&self, index: &GridLocation) -> &Self::Output {
-        if let Some(value) = self.get(index){
-            value
-        }
-        &self.default_container
-    }
-}
-
-/// in case there's no value with this location, 
-/// a reference to the default container will be provided instead
-impl<T: Default> IndexMut<&GridLocation> for Grid<T> {
-    fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
-        if let Some(value) = self.get_mut(index){
-            value
-        }
-        &mut self.default_container
-    }
-}
+impl<T: PartialEq + Eq> Eq for Grid<T>{}
