@@ -1,14 +1,58 @@
-use std::ops::{Index,IndexMut};
-
 use bevy::prelude::*;
 
 use crate::prelude::*;
 
-pub const GRID_SIZE: u32 = 4;
-
 #[derive(Component, Clone, Debug)]
 pub struct Grid<T> {
-    pub grid: [[Option<T>; GRID_SIZE as usize]; GRID_SIZE as usize],
+    grid_side_length: u8,
+    grid: HashMap<GridLocation, T>
+}
+
+//basics
+impl<T> Grid<T> {
+    fn new(grid_side_length: u8) -> Self {
+        Self {
+            grid_side_length: grid_side_length,
+            grid: HashMap::<GridLocation, T>::new()
+        }
+    }
+
+    fn get(&self, location: &GridLocation) -> Option<&T> {
+        self.grid.get(location)
+    }
+
+    fn get_mut(&self, location: &GridLocation) -> Option<&mut T> {
+        self.grid.get_mut(location)
+    }
+
+    /// returns whether insertion was successful
+    fn set(&self, location: &GridLocation, value: T) -> bool {
+        if self.valid_index(location){
+            self.grid.insert(location.clone(), value);
+        }
+        false
+    }
+
+    /// returns an option with the previous value
+    fn set_and_get_former(&self, location: &GridLocation, value: T)-> Option<T>{
+        self.grid.insert(location.clone(), value)
+    }
+
+    /// also returns false if the location is invalid, so remember to check that if relevant
+    pub fn occupied(&self, location: &GridLocation) -> bool {
+        if self.valid_index(location){
+            return self.grid.contains_key(location);
+        }
+        false
+    }
+
+    /// object function in case we'd want to have grids of different sizes
+    pub fn valid_index(&self, location: &GridLocation) -> bool {
+        location.col >= 0
+            && location.row >= 0
+            && location.col < self.grid_side_length as i32
+            && location.row < self.grid_side_length as i32
+    }
 }
 
 impl<T> Grid<T>{
@@ -48,99 +92,31 @@ impl<T> Grid<T>{
             BasicDirection::Left=>GridLocation::new(origin.row, origin.col-1)
         }
     }
-
-    /// also returns false if the location is invalid, so remember to check that if relevant
-    pub fn occupied(&self, location: &GridLocation) -> bool {
-        if self.valid_index(location){
-            match self[location]{
-                None=> {return false;},
-                Some(_)=> {return true;}
-            }
-        }
-        false
-    }
-
-    /// object function in case we'd want to have grids of different sizes
-    pub fn valid_index(&self, location: &GridLocation) -> bool {
-        location.col >= 0
-            && location.row >= 0
-            && location.col < GRID_SIZE as i32
-            && location.row < GRID_SIZE as i32
-    }
 }
 
 //iterators
 impl<T> Grid<T> {
-    pub fn iter(&self) -> impl Iterator<Item = (GridLocation, &Option<T>)> + '_ {
-        self.grid
-            .iter()
-            .flatten()
-            .enumerate()
-            .map(|(i, cell_value)| {
-                (
-                    GridLocation::new((
-                        i as u32 / GRID_SIZE) as i32,
-                        (i as u32 % GRID_SIZE) as i32
-                    ),
-                    cell_value,
-                )
-            })
+    pub fn iter(&self) -> impl Iterator<Item = (&GridLocation, &T)> + '_ {
+        self.grid.iter()
     }
 
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = (GridLocation, &mut Option<T>)> + '_ {
-        self.grid
-            .iter_mut()
-            .flatten()
-            .enumerate()
-            .map(|(i, cell_value)| {
-                (
-                    GridLocation::new((
-                        i as u32 / GRID_SIZE) as i32,
-                        (i as u32 % GRID_SIZE) as i32
-                    ),
-                    cell_value,
-                )
-            })
-        }
-}
-
-impl<T> Default for Grid<T> {
-    fn default() -> Self {
-        Self {
-            grid: std::array::from_fn(|_| std::array::from_fn(|_| {
-                None
-            }))
-        }
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (&GridLocation, &mut T)> + '_ {
+        self.grid.iter_mut()
     }
 }
 
 impl<T: PartialEq + Eq> PartialEq for Grid<T>{
     fn eq(&self, other: &Self) -> bool {
         let mut all_cells_are_equal=true;
-        for row_index in 0..GRID_SIZE{
-            for col_index in 0..GRID_SIZE{
-                let location=GridLocation::new(row_index as i32, col_index as i32);
-                if self[&location] != other[&location] {
-                        all_cells_are_equal=false;
-                        break;
-                }
+        let self_iter=self.iter();
+        let other_iter=other.iter();
+        for ((_ , self_value), ( _ , other_value)) in self_iter.zip(other_iter) {
+            if self_value != other_value{
+                all_cells_are_equal=false;
+                break;
             }
         }
         all_cells_are_equal
     }
 }
 impl<T: PartialEq + Eq> Eq for Grid<T>{}
-
-impl<T> Index<&GridLocation> for Grid<T> {
-    type Output = Option<T>;
-
-    fn index(&self, index: &GridLocation) -> &Self::Output {
-        &self.grid[index.row as usize][index.col as usize]
-    }
-}
-
-impl<T> IndexMut<&GridLocation> for Grid<T> {
-    fn index_mut(&mut self, index: &GridLocation) -> &mut Self::Output {
-        &mut self.grid[index.row as usize][index.col as usize]
-    }
-}

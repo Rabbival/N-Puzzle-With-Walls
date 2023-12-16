@@ -35,13 +35,13 @@ fn spawn_solved_board(mut commands: Commands){
 /// public for the sake of testing
 pub fn generate_solved_board() -> TileTypeBoard{
     let mut solved_board = TileTypeBoard::default();
-    for i in 0..GRID_SIZE as u32 {
-        for j in 0..GRID_SIZE as u32 {
+    for i in 0..GRID_SIDE_LENGTH as u32 {
+        for j in 0..GRID_SIDE_LENGTH as u32 {
             let location = GridLocation::new(i as i32, j as i32);
-            solved_board[&location] = Some(TileType::new(Some(i*GRID_SIZE+j+1)));
+            solved_board[&location] = Some(TileType::new(Some(i*GRID_SIDE_LENGTH+j+1)));
         }
     }
-    let empty_tile_location=GridLocation::new((GRID_SIZE-1) as i32, (GRID_SIZE-1) as i32);
+    let empty_tile_location=GridLocation::new((GRID_SIDE_LENGTH-1) as i32, (GRID_SIDE_LENGTH-1) as i32);
     solved_board[&empty_tile_location] = Some(TileType::new(None));
     solved_board.empty_tile_location=empty_tile_location;
     solved_board.ignore_player_input=true;

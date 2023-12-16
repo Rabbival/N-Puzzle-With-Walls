@@ -87,7 +87,7 @@ impl Default for TileTypeBoard{
     fn default() -> Self {
         Self { 
             grid: Grid::default(), 
-            empty_tile_location: GridLocation { row: (GRID_SIZE-1) as i32, col: (GRID_SIZE-1) as i32}, 
+            empty_tile_location: GridLocation { row: (GRID_SIDE_LENGTH-1) as i32, col: (GRID_SIDE_LENGTH-1) as i32}, 
             ignore_player_input: true
         }
     }

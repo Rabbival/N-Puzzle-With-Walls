@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::prelude::*;
 
-pub const WINDOW_SIZE: f32 = GRID_SIZE as f32 * ATLAS_CELL_SQUARE_SIZE / CAMERA_ZOOM;
+pub const WINDOW_SIZE: f32 = GRID_SIDE_LENGTH as f32 * ATLAS_CELL_SQUARE_SIZE / CAMERA_ZOOM;
 
 pub struct ScreenSetupPlugin;
 
