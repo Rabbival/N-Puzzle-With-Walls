@@ -123,10 +123,10 @@ fn extract_tile_entity(
     grid_location: &GridLocation
 ) -> Result<Entity,TileMoveError>
 {
-    match grid[grid_location]{
+    match grid.get(grid_location){
         None => {return Err(TileMoveError::NoTileInCell(grid_location.clone()))},
         Some(tile_type_from_cell) => {
-            match tile_dictionary.get(&tile_type_from_cell){
+            match tile_dictionary.get(tile_type_from_cell){
                 None=> { return Err(TileMoveError::EntityRelated
                     (EntityRelatedCustomError::ItemNotInMap
                         (ItemNotFoundInMapError::EntityNotFoundInMap)

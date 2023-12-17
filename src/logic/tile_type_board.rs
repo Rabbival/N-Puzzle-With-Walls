@@ -1,5 +1,7 @@
 use crate::{prelude::*, output::error_handler};
 
+const DEFAULT_BOARD_SIDE_LENGTH: u8 = 4;
+
 #[derive(Component, Clone, Debug)]
 pub struct TileTypeBoard {
     /// even if the location is empty, TileTypeBoard's location should have an empty tile (and NOT a None)
@@ -122,5 +124,11 @@ impl TileTypeBoard{
     /// returns an option with the previous value
     pub fn set_and_get_former(&self, location: &GridLocation, value: TileType)-> Option<TileType>{
         self.grid.set_and_get_former(location, value)
+    }
+}
+
+impl Default for TileTypeBoard{
+    fn default() -> Self {
+        Self::new(DEFAULT_BOARD_SIDE_LENGTH)
     }
 }

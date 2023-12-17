@@ -101,13 +101,16 @@ mod tests {
         app.update();
     }
 
-    fn test_input_validation_inner(mut event_writer: EventWriter<move_tile_event::SwitchTilesLogic>) {
+    fn test_input_validation_inner(
+        mut event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
+        window_resolution: Res<CostumeWindowResolution>
+    ) {
         assert!(test_index_out_of_bound(
             Vec2::new(-100.0, -100.0),
             &mut event_writer
         ));
         assert!(test_index_out_of_bound(
-            Vec2::new(WINDOW_SIZE, WINDOW_SIZE),
+            Vec2::new(window_resolution.0, window_resolution.0),
             &mut event_writer
         ));
     }
@@ -195,7 +198,7 @@ mod tests {
     fn test_empty_slot(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>)-> bool{
         let mut board=TileTypeBoard::default();
         board.ignore_player_input=false;
-        board[&GridLocation::new(0, 0)]=Some(TileType::new(None));
+        board.set(&GridLocation::new(0, 0), TileType::new(None));
         let location_validation_outcome=
             handle_mouse_click(
                 event_writer,
@@ -215,7 +218,7 @@ mod tests {
         let mut board=board_manager::generate_solved_board();
         board.ignore_player_input=false;
         let empty_tile_location=board.empty_tile_location;
-        board[&empty_tile_location]=Some(TileType::new(Some(16)));
+        board.set(&empty_tile_location, TileType::new(Some(16)));
         let location_validation_outcome=
             handle_mouse_click(
                 event_writer,
