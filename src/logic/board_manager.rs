@@ -35,14 +35,15 @@ fn spawn_solved_board(mut commands: Commands){
 /// public for the sake of testing
 pub fn generate_solved_board() -> TileTypeBoard{
     let mut solved_board = TileTypeBoard::default();
-    for i in 0..GRID_SIDE_LENGTH as u32 {
-        for j in 0..GRID_SIDE_LENGTH as u32 {
+    let grid_side_length = solved_board.get_side_length().clone() as u32;
+    for i in 0..grid_side_length as u32 {
+        for j in 0..grid_side_length as u32 {
             let location = GridLocation::new(i as i32, j as i32);
-            solved_board[&location] = Some(TileType::new(Some(i*GRID_SIDE_LENGTH+j+1)));
+            solved_board.set(&location, TileType::new(Some(i*grid_side_length+j+1)));
         }
     }
-    let empty_tile_location=GridLocation::new((GRID_SIDE_LENGTH-1) as i32, (GRID_SIDE_LENGTH-1) as i32);
-    solved_board[&empty_tile_location] = Some(TileType::new(None));
+    let empty_tile_location=GridLocation::new((grid_side_length-1) as i32, (grid_side_length-1) as i32);
+    solved_board.set(&empty_tile_location, TileType::new(None));
     solved_board.empty_tile_location=empty_tile_location;
     solved_board.ignore_player_input=true;
     solved_board
@@ -157,12 +158,12 @@ pub fn inner_move_tile_logic(
         first_grid_location: occupied_tile_location.clone(),
         second_grid_location: empty_tile_location.clone()
     });
-    if game_board[&occupied_tile_location] == None {
+    if game_board.get(&occupied_tile_location) == None {
         return Err(error_handler::TileMoveError::NoTileInCell(occupied_tile_location));
     }
     print_to_console::game_log(GameLog::TilesMoved(
-        game_board[&occupied_tile_location].unwrap(),
-        empty_tile_location
+        game_board.get(&occupied_tile_location).unwrap(),
+        &empty_tile_location
     ));
 
     game_board.switch_tiles_by_location(&empty_tile_location, &occupied_tile_location)?;

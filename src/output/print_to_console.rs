@@ -2,8 +2,8 @@ use std::fmt::Debug;
 
 use crate::prelude::*;
 
-pub enum GameLog{
-    TilesMoved(TileType, GridLocation),
+pub enum GameLog<'a>{
+    TilesMoved(&'a TileType, &'a GridLocation),
     Victory
 }
 
@@ -60,7 +60,7 @@ pub fn print_possible_solution<T: Iterator<Item = BasicDirection>>(reversed_dire
 pub fn game_log(log: GameLog){
     match log{
         GameLog::TilesMoved(tile_type, location)=>{
-            info!("{:?} tile moved to {:?}", tile_type, location);
+            info!("{:?} tile moved to {:?}", *tile_type, *location);
         },
         GameLog::Victory=>{
             info!("puzzle solved!");

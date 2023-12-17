@@ -29,16 +29,16 @@ impl<T> Grid<T> {
         }
     }
 
-    pub fn get_mut(&self, location: &GridLocation) -> Option<&mut T> {
+    pub fn get_mut(&mut self, location: &GridLocation) -> Option<&mut T> {
         if self.valid_index(location){
-            self.grid.get(location)?.as_mut()
+            self.grid.get_mut(location)?.as_mut()
         }else{
             None
         }
     }
 
     /// returns whether insertion was successful
-    pub fn set(&self, location: &GridLocation, value: T) -> bool {
+    pub fn set(&mut self, location: &GridLocation, value: T) -> bool {
         if self.valid_index(location){
             self.grid.insert(location.clone(), Some(value));
             return true;
@@ -47,7 +47,7 @@ impl<T> Grid<T> {
     }
 
     /// returns an option with the previous value
-    pub fn set_and_get_former(&self, location: &GridLocation, value: T)-> Option<T>{
+    pub fn set_and_get_former(&mut self, location: &GridLocation, value: T)-> Option<T>{
         if self.valid_index(location){
             self.grid.insert(location.clone(), Some(value))?
         }else{

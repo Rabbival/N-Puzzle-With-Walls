@@ -112,17 +112,17 @@ impl TileTypeBoard{
         self.grid.get(location)
     }
 
-    pub fn get_mut(&self, location: &GridLocation) -> Option<&mut TileType> {
+    pub fn get_mut(&mut self, location: &GridLocation) -> Option<&mut TileType> {
         self.grid.get_mut(location)
     }
 
     /// returns whether insertion was successful
-    pub fn set(&self, location: &GridLocation, value: TileType) -> bool {
+    pub fn set(&mut self, location: &GridLocation, value: TileType) -> bool {
         self.grid.set(location, value)
     }
 
     /// returns an option with the previous value
-    pub fn set_and_get_former(&self, location: &GridLocation, value: TileType)-> Option<TileType>{
+    pub fn set_and_get_former(&mut self, location: &GridLocation, value: TileType)-> Option<TileType>{
         self.grid.set_and_get_former(location, value)
     }
 }
