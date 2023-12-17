@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::basic_direction, output::{print_to_console, error_handler}, costume_event::{reset_event, move_tile_event}};
+use crate::{prelude::*, logic::enums::basic_direction, output::{print_to_console, error_handler}, costume_event::{reset_event, move_tile_event}};
 
 pub struct KeyboardInputHandlerPlugin;
 

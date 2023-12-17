@@ -37,7 +37,7 @@ fn spawn_tiles(
                 grid_location_in_world.y,
                 0.0
             );
-            let text_spawn_location=Vec3::Z;
+            let text_spawn_loc_relative=Vec3::Z;
 
             let tile_entity_id=commands.spawn((
                 SpriteSheetBundle {
@@ -57,7 +57,7 @@ fn spawn_tiles(
                                 },
                                 TextStyle {
                                     font: font.0.clone(),
-                                    font_size: 32.0,
+                                    font_size: 29.0,
                                     color: Color::INDIGO,
                                     ..default()
                                 }
@@ -65,7 +65,7 @@ fn spawn_tiles(
                         alignment: TextAlignment::Center,
                         linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
                     },
-                    transform: Transform::from_translation(text_spawn_location),
+                    transform: Transform::from_translation(text_spawn_loc_relative),
                     ..default()
                 });
             }).id();

@@ -10,10 +10,10 @@ impl Plugin for SolvedBoardBuilderPlugin {
     }
 }
 
-const TEST_SIZE: u8 = 6;
+const TEST_SIZE: BoardSize = BoardSize::Tiny;
 
 fn spawn_solved_board(mut commands: Commands){
-    commands.spawn((generate_solved_board(TEST_SIZE), SolvedBoard));
+    commands.spawn((generate_solved_board(TEST_SIZE.to_grid_side_length()), SolvedBoard));
 }
 
 /// public for the sake of testing

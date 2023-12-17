@@ -1,4 +1,4 @@
-use crate::logic::{basic_direction, grid};
+use crate::logic::{enums::basic_direction, grid};
 
 #[derive(Debug)]
 pub enum BoardGenerationError{
