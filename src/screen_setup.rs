@@ -11,7 +11,6 @@ impl Plugin for ScreenSetupPlugin {
     fn build(&self, app: &mut App) {
         app
         
-            .init_resource::<CostumeWindowResolution>()
             .add_plugins(
                 DefaultPlugins
                     .set(ImagePlugin::default_nearest())
@@ -29,6 +28,7 @@ impl Plugin for ScreenSetupPlugin {
                 color: Color::default(),
                 brightness: 0.75,
             })
+            .init_resource::<CostumeWindowResolution>()
             .add_systems(PostStartup, set_resolution_based_on_board_size)
             ;
     }

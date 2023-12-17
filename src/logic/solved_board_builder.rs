@@ -1,19 +1,24 @@
 use crate::prelude::*;
 
+#[derive(Resource, Default)]
+pub struct CurrentBoardSize(pub BoardSize);
+
 pub struct SolvedBoardBuilderPlugin;
 
 impl Plugin for SolvedBoardBuilderPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(PreStartup, spawn_solved_board)
+            .init_resource::<CurrentBoardSize>()
             ;
     }
 }
 
-const TEST_SIZE: BoardSize = BoardSize::Tiny;
-
-fn spawn_solved_board(mut commands: Commands){
-    commands.spawn((generate_solved_board(TEST_SIZE.to_grid_side_length()), SolvedBoard));
+fn spawn_solved_board(
+    mut commands: Commands,
+    board_size: Res<CurrentBoardSize>
+){
+    commands.spawn((generate_solved_board(board_size.0.to_grid_side_length()), SolvedBoard));
 }
 
 /// public for the sake of testing

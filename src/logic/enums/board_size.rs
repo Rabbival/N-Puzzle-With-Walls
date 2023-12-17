@@ -1,4 +1,7 @@
+/// defaultly tiny
+#[derive(Default)]
 pub enum BoardSize{
+    #[default]
     Tiny,
     Small,
     Medium,
