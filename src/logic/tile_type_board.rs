@@ -1,6 +1,6 @@
 use crate::{prelude::*, output::error_handler};
 
-const DEFAULT_BOARD_SIDE_LENGTH: u8 = 4;
+pub const DEFAULT_BOARD_SIDE_LENGTH: u8 = 4;
 
 #[derive(Component, Clone, Debug)]
 pub struct TileTypeBoard {

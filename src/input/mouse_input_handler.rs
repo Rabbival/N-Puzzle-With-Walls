@@ -101,16 +101,16 @@ mod tests {
         app.update();
     }
 
-    fn test_input_validation_inner(
-        mut event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
-        window_resolution: Res<CostumeWindowResolution>
-    ) {
+    fn test_input_validation_inner(mut event_writer: EventWriter<move_tile_event::SwitchTilesLogic>) {
         assert!(test_index_out_of_bound(
             Vec2::new(-100.0, -100.0),
             &mut event_writer
         ));
         assert!(test_index_out_of_bound(
-            Vec2::new(window_resolution.0, window_resolution.0),
+            Vec2::new(
+                DEFAULT_BOARD_SIDE_LENGTH as f32 *ATLAS_CELL_SQUARE_SIZE, 
+                DEFAULT_BOARD_SIDE_LENGTH as f32 *ATLAS_CELL_SQUARE_SIZE
+            ),
             &mut event_writer
         ));
     }
