@@ -42,6 +42,7 @@ pub mod prelude {
         tile_type::*,
         tile_dictionary::*,
         tile_type_board::*,
-        board_builder::*
+        board_builder::*,
+        solved_board_builder::*,
     };
 }
