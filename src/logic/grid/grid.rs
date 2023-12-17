@@ -13,7 +13,7 @@ impl<T> Grid<T> {
     pub fn new(grid_side_length: u8) -> Self {
         Self {
             grid_side_length: grid_side_length,
-            grid: HashMap::<GridLocation, Option<T>>::new();
+            grid: HashMap::<GridLocation, Option<T>>::new()
         }
     }
 

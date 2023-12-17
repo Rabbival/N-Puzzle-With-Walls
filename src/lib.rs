@@ -32,11 +32,13 @@ pub mod prelude {
         print_to_console::*,
     };
     pub use crate::logic::{
-        grid::*,
+        grid::{
+            grid::*,
+            grid_location::*,
+        },
         board_manager::*,
         basic_direction::*,
         tile_type::*,
-        grid_location::*,
         tile_dictionary::*,
         tile_type_board::*
     };

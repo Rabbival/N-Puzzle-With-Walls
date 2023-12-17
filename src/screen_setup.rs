@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use crate::prelude::*;
 
-pub const WINDOW_SIZE: f32 = GRID_SIDE_LENGTH as f32 * ATLAS_CELL_SQUARE_SIZE / CAMERA_ZOOM;
-
 pub struct ScreenSetupPlugin;
 
 impl Plugin for ScreenSetupPlugin {
@@ -13,7 +11,6 @@ impl Plugin for ScreenSetupPlugin {
                     .set(ImagePlugin::default_nearest())
                     .set(WindowPlugin {
                         primary_window: Some(Window {
-                            resolution: (WINDOW_SIZE, WINDOW_SIZE).into(),
                             resizable: false,
                             ..default()
                         }),
@@ -26,6 +23,18 @@ impl Plugin for ScreenSetupPlugin {
                 color: Color::default(),
                 brightness: 0.75,
             })
+            .add_systems(PostStartup, set_resolution_based_on_board_size)
             ;
     }
+}
+
+fn set_resolution_based_on_board_size(
+    mut windows: Query<&mut Window>,
+    solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>
+){
+    let mut window = windows.single_mut();
+    let solved_board = solved_board_query.single();
+
+    let res = solved_board.get_side_length().clone() as f32 * ATLAS_CELL_SQUARE_SIZE / CAMERA_ZOOM;
+    window.resolution.set(res, res);
 }

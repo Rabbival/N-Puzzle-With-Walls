@@ -49,9 +49,9 @@ impl TileTypeBoard {
         }
 
         //can't std::swap because that would require two coexisting &mut self
-        let temp_tile=self[first];
-        self[first]=self[second];
-        self[second]=temp_tile;
+        let originally_in_first=
+            self.set_and_get_former(first, self.get(second).unwrap().clone());
+        self.set(second, originally_in_first.unwrap().clone());
         Ok(())
     }
 
@@ -80,7 +80,7 @@ impl TileTypeBoard {
     pub fn occupied(&self, location: &GridLocation) -> Result<bool, error_handler::TileMoveError> {
         self.none_check(location)?;
         if self.valid_index(location){
-            match self[location].unwrap(){
+            match self.get(location).unwrap(){
                 TileType::Empty=> {return Ok(false);},
                 TileType::Numbered(_)=> {return Ok(true);}
             }
@@ -93,7 +93,7 @@ impl TileTypeBoard {
     }
 
     fn none_check(&self, location: &GridLocation)-> Result<(), error_handler::TileMoveError>{
-        match self[location] {
+        match self.get(location) {
             None => Err(error_handler::TileMoveError::NoTileInCell(location.clone())),
             Some(_) => Ok(())
         }
