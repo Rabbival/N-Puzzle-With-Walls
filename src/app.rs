@@ -11,14 +11,14 @@ pub fn main() {
         //costume basics
         .add_plugins((
             SystemSetsPlugin,
-            EventPlugin
+            EventPlugins
         ))
         //costume
         .add_plugins((
             CameraPlugin,
             InputPlugin,
             AssetLoaderPlugin,
-            BoardManagerPlugin,
+            BoardPlugins,
             GraphicsPlugin,
             TileDictionaryPlugin
         ))

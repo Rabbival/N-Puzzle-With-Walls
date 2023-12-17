@@ -87,7 +87,7 @@ fn handle_mouse_click(
 
 #[cfg(test)]
 mod tests {
-    use crate::logic::board_manager;
+    use crate::logic::board_builder;
 
     use super::*;
 
@@ -108,8 +108,8 @@ mod tests {
         ));
         assert!(test_index_out_of_bound(
             Vec2::new(
-                DEFAULT_BOARD_SIDE_LENGTH as f32 *ATLAS_CELL_SQUARE_SIZE, 
-                DEFAULT_BOARD_SIDE_LENGTH as f32 *ATLAS_CELL_SQUARE_SIZE
+                DEFAULT_BOARD_SIDE_LENGTH as f32 * ATLAS_CELL_SQUARE_SIZE, 
+                DEFAULT_BOARD_SIDE_LENGTH as f32 * ATLAS_CELL_SQUARE_SIZE
             ),
             &mut event_writer
         ));
@@ -215,7 +215,7 @@ mod tests {
     }
 
     fn test_no_empty_neighbor(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>)-> bool{
-        let mut board=board_manager::generate_solved_board();
+        let mut board=board_builder::generate_solved_board();
         board.ignore_player_input=false;
         let empty_tile_location=board.empty_tile_location;
         board.set(&empty_tile_location, TileType::new(Some(16)));

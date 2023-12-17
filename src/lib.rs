@@ -15,7 +15,7 @@ pub mod prelude {
     pub use crate::screen_setup::*;
     pub use crate::system_sets::*;
     pub use crate::costume_event::{
-        EventPlugin,
+        EventPlugins,
         reset_event::ResetEventPlugin,
         move_tile_event::MoveTileEventPlugin
     };
@@ -32,6 +32,7 @@ pub mod prelude {
         print_to_console::*,
     };
     pub use crate::logic::{
+        BoardPlugins,
         grid::{
             grid::*,
             grid_location::*,
@@ -40,6 +41,7 @@ pub mod prelude {
         basic_direction::*,
         tile_type::*,
         tile_dictionary::*,
-        tile_type_board::*
+        tile_type_board::*,
+        board_builder::*
     };
 }
