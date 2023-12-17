@@ -1,7 +1,7 @@
-/// defaultly tiny
-#[derive(Default)]
+use crate::prelude::*;
+
+#[derive(Resource)]
 pub enum BoardSize{
-    #[default]
     Tiny,
     Small,
     Medium,
