@@ -1,7 +1,6 @@
 use crate::{prelude::*, output::{print_to_console, error_handler}};
 use rand::Rng;
 
-const LOCATION_SHIFT_BOUNDS:(u8, u8) = (18, 25);
 pub const BOARD_GENERATION_ATTEMPTS:u8=5;
 
 #[derive(Component)]
@@ -21,10 +20,17 @@ impl Plugin for BoardBuilderPlugin {
 }
 
 
-fn spawn_game_board(mut commands: Commands, query: Query<&TileTypeBoard, With<SolvedBoard>>){
+fn spawn_game_board(
+    mut commands: Commands, 
+    query: Query<&TileTypeBoard, With<SolvedBoard>>,
+    board_size_res: Res<BoardSize>
+){
     let solved_board=query.single();
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
-        let attempt_result=generate_game_board(solved_board.clone());
+        let attempt_result=generate_game_board(
+            solved_board.clone(),
+            board_size_res.to_random_turns_range()
+        );
          //generation successful
         if let Ok(board) = attempt_result { 
             commands.spawn((
@@ -39,10 +45,13 @@ fn spawn_game_board(mut commands: Commands, query: Query<&TileTypeBoard, With<So
 
 /// a permutation that was made from shifts in a solved board 
 /// would always be solvable (if we shift in reverse)
-pub fn generate_game_board(mut board: TileTypeBoard) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
+pub fn generate_game_board(
+    mut board: TileTypeBoard,
+    generation_range: (u8, u8)
+) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
 {
     let mut rng = rand::thread_rng();
-    let mut location_shift_count=rng.gen_range(LOCATION_SHIFT_BOUNDS.0..LOCATION_SHIFT_BOUNDS.1);
+    let mut location_shift_count=rng.gen_range(generation_range.0..generation_range.1);
     //prevents the generation of another solved board
     if location_shift_count%2 == 0 {
         location_shift_count+=1;

@@ -6,7 +6,7 @@ impl Plugin for SolvedBoardBuilderPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(PreStartup, spawn_solved_board)
-            .insert_resource(BoardSize::Tiny)
+            .insert_resource(BoardSize::Giant)
             ;
     }
 }

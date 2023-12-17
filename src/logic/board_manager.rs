@@ -79,13 +79,17 @@ pub fn reset_board(
     mut graphics_event_writer: EventWriter<reset_event::ResetBoardGraphics>,
     solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
+    board_size_res: Res<BoardSize>
 ){
     for _reset_request in reset_listener.read(){
         let solved_grid=&solved_board_query.single().grid;
         let mut game_board=game_board_query.single_mut();
         for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
             let attempt_result=
-                generate_game_board(TileTypeBoard::from_grid(solved_grid));
+                generate_game_board(
+                    TileTypeBoard::from_grid(solved_grid), 
+                    board_size_res.to_random_turns_range()
+                );
              //generation successful
             if let Ok(board) = attempt_result { 
                 *game_board=board;
@@ -103,13 +107,15 @@ pub fn reset_board(
 mod tests {
     use super::*;
 
+    const RANDOM_RANGE_FOR_TESTING: (u8, u8) = (31,41);
+
     #[test]
     fn several_attempts_at_generating_unsolved_boards(){
         const ATTEMPT_COUNT: u8 = 10;
         let solved_board=generate_solved_board(DEFAULT_BOARD_SIDE_LENGTH);
         for _ in 0..ATTEMPT_COUNT{
             assert_ne!(solved_board.grid, 
-                match generate_game_board(solved_board.clone()){
+                match generate_game_board(solved_board.clone(), RANDOM_RANGE_FOR_TESTING){
                     Ok(board)=> board,
                     Err(_)=> panic!()
                 }.grid
