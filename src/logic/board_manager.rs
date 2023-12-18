@@ -47,10 +47,10 @@ pub fn inner_move_tile_logic(
 ) -> Result<(), error_handler::TileMoveError>
 {    
     graphics_event_writer.send(move_tile_event::SwitchTilesGraphics{
-        first_grid_location: occupied_tile_location.clone(),
-        second_grid_location: empty_tile_location.clone()
+        first_grid_location: occupied_tile_location,
+        second_grid_location: empty_tile_location
     });
-    if game_board.get(&occupied_tile_location) == None {
+    if game_board.get(&occupied_tile_location).is_none() {
         return Err(error_handler::TileMoveError::NoTileInCell(occupied_tile_location));
     }
     print_to_console::game_log(GameLog::TilesMoved(
@@ -62,7 +62,7 @@ pub fn inner_move_tile_logic(
 
     check_if_solved(game_board, solved_grid);
 
-    return Ok(());
+    Ok(())
 }
 
 /// also freezes the board if it is solved
@@ -93,7 +93,7 @@ pub fn reset_board(
              //generation successful
             if let Ok(board) = attempt_result { 
                 *game_board=board;
-                graphics_event_writer.send(reset_event::ResetBoardGraphics::default());
+                graphics_event_writer.send(reset_event::ResetBoardGraphics);
                 return;
             }
         }

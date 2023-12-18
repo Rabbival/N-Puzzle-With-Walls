@@ -68,13 +68,13 @@ fn handle_mouse_click(
         let occupied_tile_location=optional_occupied_tile_location;
         let optional_empty_neighbor_location= 
             game_board.get_empty_neighbor(&occupied_tile_location)?;
-        if let None=optional_empty_neighbor_location{
+        if optional_empty_neighbor_location.is_none(){
             return Err(error_handler::TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor")));
         }
         let empty_neighbor_location=optional_empty_neighbor_location.unwrap();
 
         logic_event_writer.send(move_tile_event::SwitchTilesLogic{
-            occupied_tile_location: occupied_tile_location,
+            occupied_tile_location,
             empty_tile_location: empty_neighbor_location
         });
 

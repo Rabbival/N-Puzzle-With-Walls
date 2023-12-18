@@ -34,7 +34,7 @@ fn move_tiles_with_keyboard(
     if keyboard_input.just_pressed(KeyCode::A) ||  keyboard_input.just_pressed(KeyCode::Left){
         move_request_direction=Some(basic_direction::BasicDirection::Right);
     }
-    if let None = move_request_direction {
+    if move_request_direction.is_none()  {
         return;
     }
     if let Err(error) = move_into_empty_from_direction(
@@ -72,7 +72,7 @@ fn listen_for_reset(
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
-        input_event_writer.send(reset_event::ResetBoardLogic::default());
+        input_event_writer.send(reset_event::ResetBoardLogic);
     }
 }
 

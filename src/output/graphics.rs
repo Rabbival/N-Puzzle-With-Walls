@@ -58,8 +58,7 @@ fn spawn_tiles(
                                 TextStyle {
                                     font: font.0.clone(),
                                     font_size: 29.0,
-                                    color: Color::INDIGO,
-                                    ..default()
+                                    color: Color::INDIGO
                                 }
                             )],
                         alignment: TextAlignment::Center,
@@ -106,8 +105,8 @@ fn switch_tile_entity_positions_inner(
     second_grid_location: &GridLocation
 ) -> Result<(),TileMoveError>
 {
-    let first_tile_entity=extract_tile_entity(&tile_dictionary, grid, first_grid_location)?;
-    let second_tile_entity=extract_tile_entity(&tile_dictionary, grid, second_grid_location)?;
+    let first_tile_entity=extract_tile_entity(tile_dictionary, grid, first_grid_location)?;
+    let second_tile_entity=extract_tile_entity(tile_dictionary, grid, second_grid_location)?;
     if let Ok([mut transform_first, mut transform_second]) = 
         tile_transforms.get_many_mut([first_tile_entity, second_tile_entity]) {
             std::mem::swap(&mut *transform_first, &mut *transform_second);
@@ -124,18 +123,18 @@ fn extract_tile_entity(
 ) -> Result<Entity,TileMoveError>
 {
     match grid.get(grid_location){
-        None => {return Err(TileMoveError::NoTileInCell(grid_location.clone()))},
+        None => {Err(TileMoveError::NoTileInCell(*grid_location))},
         Some(tile_type_from_cell) => {
             match tile_dictionary.get(tile_type_from_cell){
-                None=> { return Err(TileMoveError::EntityRelated
+                None=> {Err(TileMoveError::EntityRelated
                     (EntityRelatedCustomError::ItemNotInMap
                         (ItemNotFoundInMapError::EntityNotFoundInMap)
                     )
-                );},
+                )},
                 Some(optional_entity)=> {
                     match optional_entity{
-                        None=>{return Err(TileMoveError::EntityRelated
-                            (EntityRelatedCustomError::NoEntity));},
+                        None=>{Err(TileMoveError::EntityRelated
+                            (EntityRelatedCustomError::NoEntity))},
                         Some(entity)=>{ Ok(*entity) }
                     }
                 }

@@ -20,7 +20,7 @@ fn spawn_camera(
     mut zoom: ResMut<CameraZoom>
 ) {
     let solved_board=solved_board_query.single();
-    let grid_side_length=solved_board.get_side_length().clone();
+    let grid_side_length= *solved_board.get_side_length();
     
     let camera_zoom = grid_side_length as f32 * ATLAS_CELL_SQUARE_SIZE / screen_setup::WINDOW_RESOLUTION;
     zoom.0=camera_zoom;

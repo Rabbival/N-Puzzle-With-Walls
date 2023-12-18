@@ -67,7 +67,7 @@ pub fn generate_game_board(
 
         //don't want to shift back and forth
         let opposite_of_previous_shift=previous_shift_direction.opposite_direction();
-        if let None = opposite_of_previous_shift{
+        if opposite_of_previous_shift.is_none(){
             return Err(error_handler::BoardGenerationError::DirectionCouldntBeFlipped);
         }
         optional_directions.remove(&opposite_of_previous_shift.unwrap());
@@ -77,29 +77,26 @@ pub fn generate_game_board(
         let chosen_shift_index=rng.gen_range(0..optional_directions.len());
         let chosen_direction=valid_directions[chosen_shift_index];
         let chosen_location_option=optional_directions.get(chosen_direction);
-        if let None = chosen_location_option{
+        if chosen_location_option.is_none(){
             return Err(error_handler::BoardGenerationError::ItemNotInMap
                 (ItemNotFoundInMapError::DirectionNotFoundInMap));
         }
         let chosen_location=chosen_location_option.unwrap();
-        if let Err(_) = 
-            board.switch_tiles_by_location(&empty_tile_location, chosen_location){
+        if board.switch_tiles_by_location(&empty_tile_location, chosen_location).is_err(){
                 return Err(error_handler::BoardGenerationError::TileMoveError);
             }
         
         //get ready for next choice
         empty_tile_location=board.empty_tile_location;
         shift_direction_sequence.push(*chosen_direction);
-        previous_shift_direction=*chosen_direction;
+        previous_shift_direction= *chosen_direction;
     }
 
     //generation was successful
     let reveresed_shift_order=shift_direction_sequence
         .iter()
         .rev()
-        .map(|direction| -> BasicDirection {
-            *direction
-        });
+        .copied();
     print_to_console::print_possible_solution(reveresed_shift_order);
     board.ignore_player_input=false;
     Ok(board)

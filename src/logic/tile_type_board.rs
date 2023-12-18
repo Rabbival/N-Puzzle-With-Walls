@@ -45,15 +45,15 @@ impl TileTypeBoard {
         self.none_check(first)?;
         self.none_check(second)?;
         if self.get(first).unwrap()==TileType::Empty{
-            self.empty_tile_location=second.clone();
+            self.empty_tile_location= *second;
         }else{
-            self.empty_tile_location=first.clone();
+            self.empty_tile_location= *first;
         }
 
         //can't std::swap because that would require two coexisting &mut self
         let originally_in_first=
-            self.set_and_get_former(first, self.get(second).unwrap().clone());
-        self.set(second, originally_in_first.unwrap().clone());
+            self.set_and_get_former(first, *self.get(second).unwrap());
+        self.set(second, originally_in_first.unwrap());
         Ok(())
     }
 
@@ -96,7 +96,7 @@ impl TileTypeBoard {
 
     fn none_check(&self, location: &GridLocation)-> Result<(), error_handler::TileMoveError>{
         match self.get(location) {
-            None => Err(error_handler::TileMoveError::NoTileInCell(location.clone())),
+            None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
             Some(_) => Ok(())
         }
     }

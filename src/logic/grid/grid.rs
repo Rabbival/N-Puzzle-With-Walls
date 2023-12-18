@@ -12,7 +12,7 @@ pub struct Grid<T> {
 impl<T> Grid<T> {
     pub fn new(grid_side_length: u8) -> Self {
         Self {
-            grid_side_length: grid_side_length,
+            grid_side_length,
             grid: HashMap::<GridLocation, Option<T>>::new()
         }
     }
@@ -40,7 +40,7 @@ impl<T> Grid<T> {
     /// returns whether insertion was successful
     pub fn set(&mut self, location: &GridLocation, value: T) -> bool {
         if self.valid_index(location){
-            self.grid.insert(location.clone(), Some(value));
+            self.grid.insert(*location, Some(value));
             return true;
         }
         false
@@ -49,7 +49,7 @@ impl<T> Grid<T> {
     /// returns an option with the previous value
     pub fn set_and_get_former(&mut self, location: &GridLocation, value: T)-> Option<T>{
         if self.valid_index(location){
-            self.grid.insert(location.clone(), Some(value))?
+            self.grid.insert(*location, Some(value))?
         }else{
             None
         }
