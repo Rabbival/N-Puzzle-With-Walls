@@ -11,7 +11,8 @@ pub fn main() {
         //costume basics
         .add_plugins((
             SystemSetsPlugin,
-            EventPlugins
+            EventPlugins,
+            GameStatePlugin
         ))
         //costume
         .add_plugins((

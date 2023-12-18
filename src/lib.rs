@@ -37,6 +37,7 @@ pub mod prelude {
             basic_direction::*,
             tile_type::*,
             board_size::*,
+            state::*,
         },
         grid::{
             grid::*,
