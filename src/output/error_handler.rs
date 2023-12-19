@@ -2,6 +2,7 @@ use crate::logic::{enums::basic_direction, grid};
 
 #[derive(Debug)]
 pub enum BoardGenerationError{
+    VectorPermutationGenerationFailed,
     DirectionCouldntBeFlipped,
     ItemNotInMap(ItemNotFoundInMapError),
     TileMoveError

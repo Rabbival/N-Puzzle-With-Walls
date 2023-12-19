@@ -66,7 +66,7 @@ impl TileTypeBoard {
     {
         for dir in BasicDirection::get_directions_as_vec(){
             let neighbor_location = self.grid.neighbor_location(origin, &dir);
-            if self.valid_index(&neighbor_location) && !self.occupied(&neighbor_location)?{
+            if neighbor_location == self.empty_tile_location{
                 return Ok(Some(neighbor_location));
             }
         }

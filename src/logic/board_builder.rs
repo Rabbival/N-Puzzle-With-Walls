@@ -26,26 +26,100 @@ fn spawn_game_board(
     board_size_res: Res<BoardSize>
 ){
     let solved_board=query.single();
+    let attempt_result=generate_game_board(
+        solved_board.clone(),
+        board_size_res.to_random_turns_range()
+    );
+    if let Ok(board) = attempt_result { 
+        commands.spawn((
+            board,
+            GameBoard
+        ));
+    }
+    else{
+        print_to_console::couldnt_generate_board();
+    }
+}
+
+pub fn generate_game_board(
+    solved_board: TileTypeBoard,
+    generation_range: (u8, u8)
+) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
+{
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
-        let attempt_result=generate_game_board(
-            solved_board.clone(),
-            board_size_res.to_random_turns_range()
-        );
+        let attempt_result
+            =generate_board_by_vector_permutation(solved_board.clone());
          //generation successful
         if let Ok(board) = attempt_result { 
-            commands.spawn((
-                board,
-                GameBoard
-            ));
-            return; 
+            return Ok(board); 
         }
     }
-    print_to_console::couldnt_generate_board();
+    brute_force_generate_game_board(solved_board.clone(), generation_range)
 }
+
+fn generate_board_by_vector_permutation(
+    mut board: TileTypeBoard
+) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
+{
+    let sorted_vector = make_sorted_types_vector(board.get_side_length());
+    let permutation 
+        = make_valid_permutation_out_of_vector(&sorted_vector);
+
+    //TODO: put permutation in board and return it
+
+}
+
+fn make_sorted_types_vector(length: &u8) -> Vec<TileType> {
+    let mut output_vector=vec![];
+    for index in 0..length-1{
+        output_vector.push(TileType::Numbered(index as u32));
+    }
+    output_vector.push(TileType::Empty);
+    output_vector
+}
+
+fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<TileType>) 
+-> Result<Vec<TileType>, error_handler::BoardGenerationError> 
+{
+    let mut permutation_result
+        = Err(error_handler::BoardGenerationError::VectorPermutationGenerationFailed);
+    let mut rng = rand::thread_rng();
+    let mut permutation = vec![];
+    let permutation_length = sorted_vector.len();
+    
+    for attempt in 0..BOARD_GENERATION_ATTEMPTS{
+        //generate random permutation
+        let mut cloned_sorted = sorted_vector.clone();
+        let mut cloned_sorted_size = permutation_length;
+        permutation = vec![];
+        for index in 0..sorted_vector.len(){
+            let chosen_index=rng.gen_range(0..cloned_sorted_size);
+            permutation.push(cloned_sorted.remove(chosen_index));
+            cloned_sorted_size -= 1;
+        }
+        if validate_solvability(sorted_vector, &permutation){
+            permutation_result=Ok(permutation);
+            break;
+        }
+    }
+
+    permutation_result
+}
+
+fn validate_solvability(sorted_vector: &Vec<TileType>, permutation: &Vec<TileType>) -> bool {
+    let mut wrong_place_counter = 0;
+    for (sorted_value, permutation_value) in sorted_vector.iter().zip(permutation.iter()) {
+        if sorted_value != permutation_value{
+            wrong_place_counter += 1;
+        }
+    }
+    wrong_place_counter % 2 == 0
+}
+
 
 /// a permutation that was made from shifts in a solved board 
 /// would always be solvable (if we shift in reverse)
-pub fn generate_game_board(
+fn brute_force_generate_game_board(
     mut board: TileTypeBoard,
     generation_range: (u8, u8)
 ) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
