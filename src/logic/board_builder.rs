@@ -58,24 +58,27 @@ pub fn generate_game_board(
 }
 
 fn generate_board_by_vector_permutation(
-    mut board: TileTypeBoard
+    board: TileTypeBoard
 ) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
 {
-    let sorted_vector = make_sorted_types_vector(board.get_side_length());
-    let permutation 
-        = make_valid_permutation_out_of_vector(&sorted_vector);
-
-    //TODO: put permutation in board and return it
-
-}
-
-fn make_sorted_types_vector(length: &u8) -> Vec<TileType> {
-    let mut output_vector=vec![];
-    for index in 0..length-1{
-        output_vector.push(TileType::Numbered(index as u32));
+    let solved_board_iterator = board.grid.iter();
+    let mut sorted_tiles=vec![];
+    let mut sorted_indexes=vec![];
+    for (index, optional_tile) in solved_board_iterator{
+        sorted_indexes.push(index);
+        if optional_tile.is_none(){
+            return Err(error_handler::BoardGenerationError::GridError(GridError::IteratorYieldedNone));
+        }else{
+            sorted_tiles.push(*optional_tile.unwrap());
+        }
     }
-    output_vector.push(TileType::Empty);
-    output_vector
+    let permutation 
+        = make_valid_permutation_out_of_vector(&sorted_tiles)?;
+    let mut grid=Grid::new(*board.get_side_length());
+    for (location, value) in sorted_indexes.iter().zip(permutation.iter()){
+        grid.set(location, *value);
+    }
+    Ok(TileTypeBoard::from_grid(&grid))
 }
 
 fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<TileType>) 
@@ -84,15 +87,15 @@ fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<TileType>)
     let mut permutation_result
         = Err(error_handler::BoardGenerationError::VectorPermutationGenerationFailed);
     let mut rng = rand::thread_rng();
-    let mut permutation = vec![];
+    let mut permutation ;
     let permutation_length = sorted_vector.len();
     
-    for attempt in 0..BOARD_GENERATION_ATTEMPTS{
+    for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
         //generate random permutation
         let mut cloned_sorted = sorted_vector.clone();
         let mut cloned_sorted_size = permutation_length;
         permutation = vec![];
-        for index in 0..sorted_vector.len(){
+        for _index in 0..sorted_vector.len(){
             let chosen_index=rng.gen_range(0..cloned_sorted_size);
             permutation.push(cloned_sorted.remove(chosen_index));
             cloned_sorted_size -= 1;
@@ -122,7 +125,7 @@ fn validate_and_attempt_solvability(sorted_vector: &Vec<TileType>, permutation: 
     if wrong_placed.len() % 2 == 0 {
         true
     }else{
-        attempt_solvability(&mut wrong_placed, permutation);
+        //attempt_solvability(&mut wrong_placed, permutation);
         wrong_placed.len() % 2 == 0
     }
 }

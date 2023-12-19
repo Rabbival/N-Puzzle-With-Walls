@@ -5,7 +5,8 @@ pub enum BoardGenerationError{
     VectorPermutationGenerationFailed,
     DirectionCouldntBeFlipped,
     ItemNotInMap(ItemNotFoundInMapError),
-    TileMoveError
+    TileMoveError,
+    GridError(GridError)
 }
 
 #[derive(Debug)]
@@ -30,4 +31,9 @@ pub enum EntityRelatedCustomError{
     NoEntity,
     EntityNotInQuery,
     ItemNotInMap(ItemNotFoundInMapError)
+}
+
+#[derive(Debug)]
+pub enum GridError{
+    IteratorYieldedNone,
 }
