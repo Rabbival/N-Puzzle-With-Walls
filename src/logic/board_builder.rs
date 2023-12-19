@@ -224,3 +224,47 @@ fn brute_force_generate_game_board(
     board.ignore_player_input=false;
     Ok(board)
 }
+
+
+//board building tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const RANDOM_RANGE_FOR_TESTING: (u8, u8) = (31,41);
+
+    #[test]
+    fn several_attempts_at_generating_unsolved_boards(){
+        const ATTEMPT_COUNT: u8 = 10;
+        let solved_board=generate_solved_board(DEFAULT_BOARD_SIDE_LENGTH);
+        for _ in 0..ATTEMPT_COUNT{
+            assert_ne!(solved_board.grid, 
+                match generate_game_board(solved_board.clone(), RANDOM_RANGE_FOR_TESTING){
+                    Ok(board)=> board,
+                    Err(_)=> panic!()
+                }.grid
+            );
+        }
+    }
+
+    
+
+    //TODO: test:
+    //attempt_solvability 
+    /*
+    examples:
+    only one in wrong place (should be false)
+    three in wrong place (should be true)
+     */
+    //validate_and_attempt_solvability
+    /*
+    examples:
+    sorted (should be true)
+    two wrong places (should be true)
+    only one in wrong place (should be false)
+     */
+    //make_valid_permutation_out_of_vector
+    /*
+    I should check that the returned one has an even number of tiles in wrong places
+     */
+}

@@ -100,26 +100,3 @@ pub fn reset_board(
         print_to_console::couldnt_generate_board();
     }
 }
-
-
-//board building tests
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    const RANDOM_RANGE_FOR_TESTING: (u8, u8) = (31,41);
-
-    #[test]
-    fn several_attempts_at_generating_unsolved_boards(){
-        const ATTEMPT_COUNT: u8 = 10;
-        let solved_board=generate_solved_board(DEFAULT_BOARD_SIDE_LENGTH);
-        for _ in 0..ATTEMPT_COUNT{
-            assert_ne!(solved_board.grid, 
-                match generate_game_board(solved_board.clone(), RANDOM_RANGE_FOR_TESTING){
-                    Ok(board)=> board,
-                    Err(_)=> panic!()
-                }.grid
-            );
-        }
-    }
-}
