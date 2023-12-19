@@ -97,7 +97,7 @@ fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<TileType>)
             permutation.push(cloned_sorted.remove(chosen_index));
             cloned_sorted_size -= 1;
         }
-        if validate_solvability(sorted_vector, &permutation){
+        if validate_and_attempt_solvability(sorted_vector, &mut permutation){
             permutation_result=Ok(permutation);
             break;
         }
@@ -106,14 +106,35 @@ fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<TileType>)
     permutation_result
 }
 
-fn validate_solvability(sorted_vector: &Vec<TileType>, permutation: &Vec<TileType>) -> bool {
-    let mut wrong_place_counter = 0;
-    for (sorted_value, permutation_value) in sorted_vector.iter().zip(permutation.iter()) {
+fn validate_and_attempt_solvability(sorted_vector: &Vec<TileType>, permutation: &mut Vec<TileType>) -> bool {
+    let mut wrong_placed = vec![];
+    for ((sorted_index,sorted_value), (permutation_index, permutation_value)) 
+        in sorted_vector.iter().enumerate().zip(permutation.iter().enumerate()) 
+    {
         if sorted_value != permutation_value{
-            wrong_place_counter += 1;
+            wrong_placed.push((
+                sorted_index,
+                permutation_value,
+                permutation_index
+            ));
         }
     }
-    wrong_place_counter % 2 == 0
+    if wrong_placed.len() % 2 == 0 {
+        true
+    }else{
+        attempt_solvability(&mut wrong_placed, permutation);
+        wrong_placed.len() % 2 == 0
+    }
+}
+
+/// tries to replace a wrong-placed with another wrong-placed that's shouldn't be in its place
+/// in order to make their amount even
+fn attempt_solvability(wrong_placed: &mut Vec<(usize, &TileType, usize)>, permutation: &mut Vec<TileType>){
+    //TODO: take first from wrong placed, binary search for its value in the rest of the wrong placed
+    //if found- check that the value there isn't equal to the index of the first 
+    //  (or both will be put in the correct place, redundant switch)
+    //if it isn't equal- switch their places in the permutation
+    //if no places were switched, remove the first wrong placed from the vector and keep searching
 }
 
 
