@@ -1,4 +1,4 @@
-use crate::logic::{enums::basic_direction, grid};
+use crate::logic::{enums::basic_direction, data_structure::grid_related};
 
 #[derive(Debug)]
 pub enum BoardGenerationError{
@@ -17,7 +17,7 @@ pub enum ItemNotFoundInMapError{
 
 #[derive(Debug)]
 pub enum TileMoveError{
-    NoTileInCell(grid::grid_location::GridLocation),
+    NoTileInCell(grid_related::grid_location::GridLocation),
     BoardFrozenToPlayer (String),
     IndexOutOfGridBounds (String),
     NoEmptyNeighbor (String),

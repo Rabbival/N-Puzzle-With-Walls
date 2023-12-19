@@ -39,9 +39,12 @@ pub mod prelude {
             board_size::*,
             state::*,
         },
-        grid::{
-            grid::*,
-            grid_location::*,
+        data_structure::{
+            grid_related::{
+                grid::*,
+                grid_location::*,
+            },
+            indexed_value::*,
         },
         board_manager::*,
         tile_dictionary::*,

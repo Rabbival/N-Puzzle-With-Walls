@@ -28,6 +28,13 @@ impl TileType{
             TileType::Numbered(num) => Some(*num as usize),
         }
     }
+
+    pub fn to_number_forced(&self, empty_value: usize) -> usize {
+        match self{
+            TileType::Empty => empty_value,
+            TileType::Numbered(num) => *num as usize
+        }
+    }
 }
 
 // enable comparison to &TileType from both sides

@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 pub mod enums;
 pub mod board_manager;
-pub mod grid;
+pub mod data_structure;
 pub mod tile_dictionary;
 pub mod tile_type_board;
 pub mod board_builder;

@@ -97,7 +97,7 @@ fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<TileType>)
         permutation = vec![];
         for _index in 0..sorted_vector.len(){
             let chosen_index=rng.gen_range(0..cloned_sorted_size);
-            permutation.push(cloned_sorted.remove(chosen_index));
+            permutation.push(cloned_sorted.swap_remove(chosen_index));
             cloned_sorted_size -= 1;
         }
         if validate_and_attempt_solvability(sorted_vector, &mut permutation){
@@ -111,33 +111,58 @@ fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<TileType>)
 
 fn validate_and_attempt_solvability(sorted_vector: &Vec<TileType>, permutation: &mut Vec<TileType>) -> bool {
     let mut wrong_placed = vec![];
-    for ((sorted_index,sorted_value), (permutation_index, permutation_value)) 
-        in sorted_vector.iter().enumerate().zip(permutation.iter().enumerate()) 
+    for ((item_index, sorted_value), permutation_value) 
+        in sorted_vector.iter().enumerate().zip(permutation.iter()) 
     {
         if sorted_value != permutation_value{
-            wrong_placed.push((
-                sorted_index,
-                permutation_value,
-                permutation_index
-            ));
+            wrong_placed.push(
+                IndexedValue::<usize>{
+                    index: item_index,
+                    value: permutation_value.to_number_forced(permutation.len())
+                }
+            );
         }
     }
     if wrong_placed.len() % 2 == 0 {
         true
     }else{
-        //attempt_solvability(&mut wrong_placed, permutation);
-        wrong_placed.len() % 2 == 0
+        attempt_solvability(&mut wrong_placed, permutation)
     }
 }
 
 /// tries to replace a wrong-placed with another wrong-placed that's shouldn't be in its place
 /// in order to make their amount even
-fn attempt_solvability(wrong_placed: &mut Vec<(usize, &TileType, usize)>, permutation: &mut Vec<TileType>){
-    //TODO: take first from wrong placed, binary search for its value in the rest of the wrong placed
-    //if found- check that the value there isn't equal to the index of the first 
-    //  (or both will be put in the correct place, redundant switch)
-    //if it isn't equal- switch their places in the permutation
-    //if no places were switched, remove the first wrong placed from the vector and keep searching
+/// returns whether the attempt was successful
+fn attempt_solvability(wrong_placed: &mut Vec<IndexedValue::<usize>>, permutation: &mut Vec<TileType>)
+-> bool
+{
+    while let Some(wrong_placed_element) = wrong_placed.pop(){
+        let numeric_value = wrong_placed_element.value;
+        //in a solved board, numbers start at 1 at index 0
+        let correct_location=numeric_value-1;
+        //if it wasn't found, the corresponding number is correct 
+        //and thus switching would keep an odd number of wrong-placed
+        if let Ok(index_in_wrongs) = wrong_placed
+            .binary_search_by_key(
+                &correct_location, 
+                |&indexed_value| indexed_value.index
+            )
+        {
+            let elememt_in_correct_location 
+                = wrong_placed.get(index_in_wrongs);
+            //we can unwrap directly since it was returned as Ok()
+            let number_in_correct_location = elememt_in_correct_location.unwrap().value;
+            //putting two wrong numbers in the right place keeps the number of wrongs odd
+            if number_in_correct_location != (wrong_placed_element.index - 1) {
+                permutation.swap(
+                    wrong_placed_element.index, 
+                    elememt_in_correct_location.unwrap().index
+                );
+                break;
+            }
+        }
+    }
+    false
 }
 
 
