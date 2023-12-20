@@ -7,7 +7,7 @@ enum GameState {
     Game
 }
 
-#[derive(Component, Default)]
+#[derive(Component, Default, PartialEq, Eq)]
 pub enum OnScreenTag{
     #[default]
     Menu,
