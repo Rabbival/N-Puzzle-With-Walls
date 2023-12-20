@@ -4,8 +4,14 @@ use crate::prelude::*;
 enum GameState {
     #[default]
     Menu,
-    Game,
-    Paused
+    Game
+}
+
+#[derive(Component, Default)]
+pub enum OnScreenTag{
+    #[default]
+    Menu,
+    Game
 }
 
 
@@ -15,6 +21,14 @@ impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_state::<GameState>()
+            .add_systems(
+                OnExit(GameState::Game), 
+                remove_on_game_screen_tagged
+            )
         ;
     }
+}
+
+fn remove_on_game_screen_tagged(){
+    //send an event to graphics
 }

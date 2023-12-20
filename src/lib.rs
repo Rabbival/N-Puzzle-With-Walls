@@ -6,6 +6,7 @@ mod costume_event;
 mod output;
 mod input;
 mod logic;
+mod bundles;
 
 pub mod prelude {
     pub use bevy::reflect::TypeUuid;
@@ -16,8 +17,9 @@ pub mod prelude {
     pub use crate::system_sets::*;
     pub use crate::costume_event::{
         EventPlugins,
-        reset_event::ResetEventPlugin,
-        move_tile_event::MoveTileEventPlugin
+        reset_event::*,
+        move_tile_event::*,
+        screen_unloading_event::*,
     };
     pub use crate::input::{
         InputPlugin,
@@ -64,4 +66,5 @@ pub mod prelude {
         tile_dictionary::*,
         tile_type_board::*,
     };
+    pub use crate::bundles::tile_bundle::*;
 }

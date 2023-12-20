@@ -44,7 +44,10 @@ fn spawn_tiles(
                     transform: Transform::from_translation(tile_spawn_location),
                     ..default()
                 },
-                *tile_type_from_cell
+                TileBundle{
+                    tile_type: *tile_type_from_cell,
+                    tag: OnScreenTag::Game
+                }
             )).with_children(|parent|{
                 parent.spawn(Text2dBundle {
                     text: Text {
