@@ -3,10 +3,11 @@ use crate::prelude::*;
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 enum GameState {
     #[default]
-    Splash,
     Menu,
     Game,
+    Paused
 }
+
 
 pub struct GameStatePlugin;
 

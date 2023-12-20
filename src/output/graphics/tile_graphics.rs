@@ -1,11 +1,9 @@
 use crate::{prelude::*, logic::tile_dictionary, costume_event::{reset_event, move_tile_event}};
 use bevy::{prelude::*, utils::HashMap};
 
-use super::print_to_console;
+pub struct TileGraphicsPlugin;
 
-pub struct GraphicsPlugin;
-
-impl Plugin for GraphicsPlugin {
+impl Plugin for TileGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(PostStartup, spawn_tiles)
@@ -156,7 +154,7 @@ fn move_existing_tiles_after_reset(
             &tile_dictionary.single().entity_by_tile_type,
             &mut tile_transforms
         ){
-            print_to_console::print_entity_related_error(error);
+            print_entity_related_error(error);
         }
     }
 }

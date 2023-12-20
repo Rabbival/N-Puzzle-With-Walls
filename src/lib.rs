@@ -28,7 +28,11 @@ pub mod prelude {
         camera::*,
         asset_loader::*,
         error_handler::*,
-        graphics::*,
+        graphics::{
+            GraphicsPlugin,
+            tile_graphics::*,
+            ui_graphics::*,
+        },
         print_to_console::*,
     };
     pub use crate::logic::{
@@ -40,11 +44,14 @@ pub mod prelude {
             permutation_builder::*,
             brute_force_builder::*,
         },
+        states::{
+            StatePlugin,
+            game_state::*,
+        },
         enums::{
             basic_direction::*,
             tile_type::*,
             board_size::*,
-            state::*,
         },
         data_structure::{
             grid_related::{
