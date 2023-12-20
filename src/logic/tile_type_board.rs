@@ -13,6 +13,19 @@ pub struct TileTypeBoard {
 
 //constructors
 impl TileTypeBoard{
+    pub fn from_grid_and_empty_loc(
+        grid: &Grid<TileType>,
+        empty_tile_location: &GridLocation
+    ) -> Self
+    {
+        Self { 
+            grid: grid.clone(), 
+            empty_tile_location: *empty_tile_location, 
+            ignore_player_input: true
+        }
+    }
+
+    ///puts empty tile at the last tile of the grid
     pub fn from_grid(grid: &Grid<TileType>) -> Self{
         let grid_side_length = grid.get_side_length();
         Self { 

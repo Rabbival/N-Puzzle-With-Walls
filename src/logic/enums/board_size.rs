@@ -23,10 +23,10 @@ impl BoardSize{
     pub fn to_random_turns_range(&self) -> (u8, u8) {
         match *self{
             BoardSize::Tiny=> (10, 20),
-            BoardSize::Small=> (30, 40),
-            BoardSize::Medium=> (60, 80),
-            BoardSize::Large=> (100, 120),
-            BoardSize::Giant=> (180, 200),
+            BoardSize::Small=> (35, 50),
+            BoardSize::Medium=> (70, 100),
+            BoardSize::Large=> (120, 180),
+            BoardSize::Giant=> (200, 255),
         }
     }
 }

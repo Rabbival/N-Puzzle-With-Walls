@@ -75,10 +75,14 @@ fn generate_board_by_vector_permutation(
     let permutation 
         = make_valid_permutation_out_of_vector(&sorted_tiles)?;
     let mut grid=Grid::new(*board.get_side_length());
+    let mut empty_grid_location = &GridLocation::default(); //there should always be an empty tile
     for (location, value) in sorted_indexes.iter().zip(permutation.iter()){
         grid.set(location, *value);
+        if value == TileType::Empty {
+            empty_grid_location = *location;
+        }
     }
-    Ok(TileTypeBoard::from_grid(&grid))
+    Ok(TileTypeBoard::from_grid_and_empty_loc(&grid, empty_grid_location))
 }
 
 fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<TileType>) 
