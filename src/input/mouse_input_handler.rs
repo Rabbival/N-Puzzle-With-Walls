@@ -87,7 +87,7 @@ fn handle_mouse_click(
 
 #[cfg(test)]
 mod tests {
-    use crate::logic::solved_board_builder;
+    use crate::logic::board_building::solved_board_builder;
 
     use super::*;
 

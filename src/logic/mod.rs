@@ -5,9 +5,7 @@ pub mod board_manager;
 pub mod data_structure;
 pub mod tile_dictionary;
 pub mod tile_type_board;
-pub mod board_builder;
-pub mod solved_board_builder;
-
+pub mod board_building;
 
 pub struct BoardPlugins;
 
@@ -15,8 +13,7 @@ impl Plugin for BoardPlugins {
     fn build(&self, app: &mut App) {
         app
             .add_plugins((
-                SolvedBoardBuilderPlugin,
-                BoardBuilderPlugin,
+                BoardBuildingPlugins,
                 BoardManagerPlugin
             ))
             ;

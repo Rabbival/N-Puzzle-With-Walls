@@ -33,6 +33,13 @@ pub mod prelude {
     };
     pub use crate::logic::{
         BoardPlugins,
+        board_building::{
+            BoardBuildingPlugins,
+            solved_board_builder::*,
+            board_builder::*,
+            permutation_builder::*,
+            brute_force_builder::*,
+        },
         enums::{
             basic_direction::*,
             tile_type::*,
@@ -49,7 +56,5 @@ pub mod prelude {
         board_manager::*,
         tile_dictionary::*,
         tile_type_board::*,
-        board_builder::*,
-        solved_board_builder::*,
     };
 }
