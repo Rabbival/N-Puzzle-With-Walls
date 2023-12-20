@@ -42,6 +42,7 @@ fn spawn_tiles(
                     texture_atlas: sprite_atlas.0.clone(),
                     sprite: TextureAtlasSprite::new(tile_type_from_cell.to_atlas_index()),
                     transform: Transform::from_translation(tile_spawn_location),
+                    visibility: Visibility::Visible,
                     ..default()
                 },
                 TileBundle{

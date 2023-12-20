@@ -13,14 +13,20 @@ impl Plugin for GraphicsPlugin {
                 TileGraphicsPlugin,
                 UiGraphicsPlugin,
             ))
-            
+            .add_systems(Update, (
+                    despawn_entities_with_tag,
+                    toggle_visibility_for_entities_with_tag
+                )
+                .chain()
+                .in_set(CostumeSystemSets::ChangesBasedOnInput)
+            )
             ;
     }
 }
 
-/// hides all entities with component specified in ::<>
+/// despawns all entities with that tag
 fn despawn_entities_with_tag(
-    mut event_listener: EventReader<HideElementsWithTag>,
+    mut event_listener: EventReader<DespawnElementsWithTag>,
     to_despawn: Query<(Entity, &OnScreenTag)>, 
     mut commands: Commands
 ) {
@@ -34,15 +40,19 @@ fn despawn_entities_with_tag(
 }
 
 
-/// despawns all entities with component specified in ::<>
-fn hide_entities_with_tag(
-    mut event_listener: EventReader<DespawnElementsWithTag>,
+/// hides if visible, shows if hidden- all entities with that tag
+fn toggle_visibility_for_entities_with_tag(
+    mut event_listener: EventReader<ToggleVisibilityForElementsWithTag>,
     mut to_despawn: Query<(&mut Visibility, &OnScreenTag)>, 
 ) {
     for tag_container in event_listener.read(){
         for (mut visibility, entity_tag) in to_despawn.iter_mut() {
             if tag_container.0 == *entity_tag{
-                *visibility = Visibility::Hidden;
+                if *visibility == Visibility::Hidden {
+                    *visibility = Visibility::Visible;
+                } else if *visibility == Visibility::Visible{
+                    *visibility = Visibility::Hidden;
+                }
             }
         }
     }
