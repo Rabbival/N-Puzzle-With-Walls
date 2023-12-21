@@ -9,13 +9,18 @@ const PRESSED_BUTTON: Color = Color::rgb(0.3, 0.3, 0.3);
 #[derive(Component)]
 struct SelectedOptionTag;
 
-#[derive(Component)]
-struct MenuButtonAction(BoardSize);
+#[derive(Component, Debug)]
+pub enum MenuButtonAction{
+    ChangeSize(BoardSize),
+    ChangeWallTilesCount(u8),
+    ChangeEmptyCount(u8),
+    ChangeGenerationMethod
+}
 
 
-pub struct UiGraphicsPlugin;
+pub struct MenuGraphicsPlugin;
 
-impl Plugin for UiGraphicsPlugin {
+impl Plugin for MenuGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Startup, settings_menu_setup)
@@ -54,12 +59,26 @@ fn menu_action(
     mut game_state: ResMut<NextState<GameState>>,
     mut board_size_res: ResMut<BoardSize>
 ) {
-    for (interaction, menu_button_action) in &interaction_query {
+    for (interaction, menu_button_action) in interaction_query.iter() {
         if *interaction == Interaction::Pressed {
-            *board_size_res = menu_button_action.0;
+            match menu_button_action{
+                MenuButtonAction::ChangeSize(board_size)=> {
+                    *board_size_res = *board_size;
+                },
+                MenuButtonAction::ChangeWallTilesCount(walls_count)=> {
+
+                },
+                MenuButtonAction::ChangeEmptyCount(empty_count)=> {
+
+                },
+                MenuButtonAction::ChangeGenerationMethod=> {
+
+                }
+            };
+            
             input_event_writer.send(reset_event::ResetBoardLogic{reroll_solved: true});
 
-            game_log(GameLog::BoardSizeChanged(menu_button_action.0));
+            game_log(GameLog::BoardSettingsChanged(menu_button_action));
             game_state.set(GameState::Game);
         }
     }
@@ -67,9 +86,9 @@ fn menu_action(
 
 fn settings_menu_setup(mut commands: Commands) {
     let button_style = Style {
-        width: Val::Px(200.0),
-        height: Val::Px(65.0),
-        margin: UiRect::all(Val::Px(20.0)),
+        width: Val::Px(150.0),
+        height: Val::Px(50.0),
+        margin: UiRect::all(Val::Px(15.0)),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         ..default()
@@ -80,6 +99,7 @@ fn settings_menu_setup(mut commands: Commands) {
         ..default()
     };
 
+    //size changers
     commands
         .spawn((
             NodeBundle {
@@ -87,7 +107,7 @@ fn settings_menu_setup(mut commands: Commands) {
                     width: Val::Percent(100.0),
                     height: Val::Percent(100.0),
                     align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
+                    justify_content: JustifyContent::Start,
                     ..default()
                 },
                 visibility: Visibility::Hidden,
@@ -107,6 +127,12 @@ fn settings_menu_setup(mut commands: Commands) {
                     ..default()
                 })
                 .with_children(|parent| {
+                    //title
+                    parent.spawn(TextBundle::from_section(
+                        String::from("Board Sizes"),
+                        button_text_style.clone(),
+                    ));
+                    //buttons
                     for board_size in BoardSize::as_list(){
                         parent
                             .spawn((
@@ -115,7 +141,7 @@ fn settings_menu_setup(mut commands: Commands) {
                                     background_color: NORMAL_BUTTON.into(),
                                     ..default()
                                 },
-                                MenuButtonAction(board_size)
+                                MenuButtonAction::ChangeSize(board_size)
                             ))
                             .with_children(|parent| {
                                 parent.spawn(TextBundle::from_section(

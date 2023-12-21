@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use crate::prelude::*;
 
 pub enum GameLog<'a>{
-    BoardSizeChanged(BoardSize),
+    BoardSettingsChanged(&'a MenuButtonAction),
     TilesMoved(&'a TileType, &'a GridLocation),
     Victory
 }
@@ -60,8 +60,8 @@ pub fn print_possible_solution<T: Iterator<Item = BasicDirection>>(reversed_dire
 
 pub fn game_log(log: GameLog){
     match log{
-        GameLog::BoardSizeChanged(new_size)=>{
-            info!("board size changed to {:?}", new_size);
+        GameLog::BoardSettingsChanged(menu_button_action)=>{
+            info!("new setting set: {:?}", menu_button_action);
         },
         GameLog::TilesMoved(tile_type, location)=>{
             info!("{:?} tile moved to {:?}", *tile_type, *location);

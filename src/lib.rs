@@ -33,7 +33,7 @@ pub mod prelude {
         graphics::{
             GraphicsPlugin,
             tile_graphics::*,
-            ui_graphics::*,
+            menu_graphics::*,
         },
         print_to_console::*,
     };

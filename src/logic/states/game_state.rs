@@ -3,16 +3,16 @@ use crate::prelude::*;
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum GameState {
     #[default]
-    Game,
-    Menu
+    Menu,
+    Game
 }
 
 /// tags should only be given to parents as we despawn recursively and visibility is inherited
 #[derive(Component, Default, PartialEq, Eq, Debug)]
 pub enum OnScreenTag{
     #[default]
-    Game,
-    Menu
+    Menu,
+    Game
 }
 
 

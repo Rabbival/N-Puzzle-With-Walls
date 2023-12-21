@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub mod tile_graphics;
-pub mod ui_graphics;
+pub mod menu_graphics;
 
 
 pub struct GraphicsPlugin;
@@ -11,7 +11,7 @@ impl Plugin for GraphicsPlugin {
         app
             .add_plugins((
                 TileGraphicsPlugin,
-                UiGraphicsPlugin,
+                MenuGraphicsPlugin,
             ))
             .add_systems(Update, (
                     despawn_entities_with_tag,
