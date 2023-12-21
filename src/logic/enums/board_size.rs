@@ -2,7 +2,7 @@ use crate::prelude::*;
 use enum_iterator::{all, Sequence};
 use std::fmt;
 
-#[derive(Resource, Sequence, Debug)]
+#[derive(Resource, Sequence, Debug, Clone, Copy)]
 pub enum BoardSize{
     Tiny,
     Small,
@@ -12,7 +12,6 @@ pub enum BoardSize{
 }
 
 impl BoardSize{
-
     pub fn as_list() -> Vec<BoardSize>{
         all::<BoardSize>().collect::<Vec<BoardSize>>()
     }

@@ -9,6 +9,9 @@ const PRESSED_BUTTON: Color = Color::rgb(0.3, 0.3, 0.3);
 #[derive(Component)]
 struct SelectedOptionTag;
 
+#[derive(Component)]
+struct MenuButtonAction(BoardSize);
+
 
 pub struct UiGraphicsPlugin;
 
@@ -17,8 +20,10 @@ impl Plugin for UiGraphicsPlugin {
         app
             .add_systems(Startup, settings_menu_setup)
             .add_systems(
-                Update,
-                update_button_color.run_if(in_state(GameState::Menu)),
+                Update,(
+                update_button_color,
+                menu_action
+                ).run_if(in_state(GameState::Menu)),
             );
     }
 }
@@ -36,6 +41,25 @@ fn update_button_color(
             (Interaction::Hovered, Some(_)) => HOVERED_PRESSED_BUTTON.into(),
             (Interaction::Hovered, None) => HOVERED_BUTTON.into(),
             (Interaction::None, None) => NORMAL_BUTTON.into(),
+        }
+    }
+}
+
+fn menu_action(
+    interaction_query: Query<
+        (&Interaction, &MenuButtonAction),
+        (Changed<Interaction>, With<Button>),
+    >,
+    mut game_state: ResMut<NextState<GameState>>,
+    mut board_size_res: ResMut<BoardSize>
+) {
+    for (interaction, menu_button_action) in &interaction_query {
+        if *interaction == Interaction::Pressed {
+            game_state.set(GameState::Game);
+            *board_size_res = menu_button_action.0;
+
+            info!("board size changed to {:?}", menu_button_action.0);
+
         }
     }
 }
@@ -82,22 +106,23 @@ fn settings_menu_setup(mut commands: Commands) {
                     ..default()
                 })
                 .with_children(|parent| {
-                    for size in BoardSize::as_list(){
+                    for board_size in BoardSize::as_list(){
                         parent
-                            .spawn(
+                            .spawn((
                                 ButtonBundle {
                                     style: button_style.clone(),
                                     background_color: NORMAL_BUTTON.into(),
                                     ..default()
-                                }
-                            )
+                                },
+                                MenuButtonAction(board_size)
+                            ))
                             .with_children(|parent| {
                                 parent.spawn(TextBundle::from_section(
-                                    size.to_string(),
+                                    board_size.to_string(),
                                     button_text_style.clone(),
                                 ));
                             });
-                     }
+                    }
              });
         });
 }
