@@ -13,7 +13,7 @@ impl Plugin for SolvedBoardBuilderPlugin {
 
 fn spawn_solved_board(
     mut commands: Commands,
-    board_size: Res<BoardSize>
+    board_size: Res<BoardSize>,
 ){
     commands.spawn((generate_solved_board(board_size.to_grid_side_length()), SolvedBoard));
 }

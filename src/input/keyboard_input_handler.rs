@@ -90,7 +90,7 @@ fn listen_for_reset(
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
-        input_event_writer.send(reset_event::ResetBoardLogic);
+        input_event_writer.send(reset_event::ResetBoardLogic{reroll_solved: false});
     }
 }
 

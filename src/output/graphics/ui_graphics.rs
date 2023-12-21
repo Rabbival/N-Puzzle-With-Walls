@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, costume_event::reset_event};
 
 const NORMAL_BUTTON: Color = Color::rgb(0.1, 0.1, 0.1);
 const HOVERED_BUTTON: Color = Color::rgb(0.2, 0.2, 0.2);
@@ -46,6 +46,7 @@ fn update_button_color(
 }
 
 fn menu_action(
+    mut input_event_writer: EventWriter<reset_event::ResetBoardLogic>,
     interaction_query: Query<
         (&Interaction, &MenuButtonAction),
         (Changed<Interaction>, With<Button>),
@@ -55,11 +56,11 @@ fn menu_action(
 ) {
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
-            game_state.set(GameState::Game);
             *board_size_res = menu_button_action.0;
+            input_event_writer.send(reset_event::ResetBoardLogic{reroll_solved: true});
 
-            info!("board size changed to {:?}", menu_button_action.0);
-
+            game_log(GameLog::BoardSizeChanged(menu_button_action.0));
+            game_state.set(GameState::Game);
         }
     }
 }

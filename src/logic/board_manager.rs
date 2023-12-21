@@ -77,12 +77,16 @@ fn check_if_solved(game_board: &mut TileTypeBoard, solved_grid: &Grid<TileType>)
 pub fn reset_board(
     mut reset_listener: EventReader<reset_event::ResetBoardLogic>,
     mut graphics_event_writer: EventWriter<reset_event::ResetBoardGraphics>,
-    solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
+    mut solved_board_query: Query<&mut TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     board_size_res: Res<BoardSize>
 ){
-    for _reset_request in reset_listener.read(){
-        let solved_grid=&solved_board_query.single().grid;
+    for reset_request in reset_listener.read(){
+        let mut solved_board = solved_board_query.single_mut();
+        if reset_request.reroll_solved {
+            *solved_board = generate_solved_board(board_size_res.to_grid_side_length());
+        }
+        let solved_grid = &solved_board.grid;
         let mut game_board=game_board_query.single_mut();
         for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
             let attempt_result=

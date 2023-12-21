@@ -5,7 +5,9 @@ use bevy::prelude::*;
 pub struct ResetBoardGraphics;
 
 #[derive (Event, Default)]
-pub struct ResetBoardLogic;
+pub struct ResetBoardLogic{
+    pub reroll_solved: bool
+}
 
 pub struct ResetEventPlugin;
 
