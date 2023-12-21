@@ -13,14 +13,8 @@ pub enum BoardSize{
 
 impl BoardSize{
 
-    pub fn as_strings() -> Vec<String>{
-        vec![String::from("quack")]
-
-        // all::<BoardSize>()
-        //     .map(|board_size|{
-        //         board_size.to_string()
-        //     })
-        //     .collect::<Vec<String>>()
+    pub fn as_list() -> Vec<BoardSize>{
+        all::<BoardSize>().collect::<Vec<BoardSize>>()
     }
 
     pub fn to_grid_side_length(&self) -> u8 {
@@ -44,13 +38,8 @@ impl BoardSize{
     }
 }
 
-
 impl fmt::Display for BoardSize {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // Write strictly the first element into the supplied output
-        // stream: `f`. Returns `fmt::Result` which indicates whether the
-        // operation succeeded or failed. Note that `write!` uses syntax which
-        // is very similar to `println!`.
-        write!(f, "{}", self)
+        write!(f, "{:?}", self)
     }
 }

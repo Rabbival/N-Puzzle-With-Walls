@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
-const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.25, 0.65, 0.25);
-const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
+const NORMAL_BUTTON: Color = Color::rgb(0.1, 0.1, 0.1);
+const HOVERED_BUTTON: Color = Color::rgb(0.2, 0.2, 0.2);
+const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.3, 0.3, 0.3);
+const PRESSED_BUTTON: Color = Color::rgb(0.3, 0.3, 0.3);
 
 /// Which option is currently selected
 #[derive(Component)]
@@ -78,11 +78,11 @@ fn settings_menu_setup(mut commands: Commands) {
                         align_items: AlignItems::Center,
                         ..default()
                     },
-                    background_color: Color::CRIMSON.into(),
+                    background_color: Color::INDIGO.into(),
                     ..default()
                 })
                 .with_children(|parent| {
-                    for size_text in BoardSize::as_strings(){
+                    for size in BoardSize::as_list(){
                         parent
                             .spawn(
                                 ButtonBundle {
@@ -93,7 +93,7 @@ fn settings_menu_setup(mut commands: Commands) {
                             )
                             .with_children(|parent| {
                                 parent.spawn(TextBundle::from_section(
-                                    size_text,
+                                    size.to_string(),
                                     button_text_style.clone(),
                                 ));
                             });

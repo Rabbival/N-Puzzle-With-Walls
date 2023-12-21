@@ -11,11 +11,17 @@ impl Plugin for MouseInputHandlerPlugin {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<CursorPosition>()
-            .add_systems(Update, (update_cursor, listen_for_mouse_click).chain());
+            .add_systems(Update, (
+                    update_cursor_in_game_world, 
+                    listen_for_mouse_click_in_game
+                )
+                .run_if(in_state(GameState::Game))
+                .chain()
+            );
     }
 }
 
-fn update_cursor(
+fn update_cursor_in_game_world(
     mut cursor: ResMut<CursorPosition>,
     windows: Query<&Window>,
     camera: Query<(&Camera, &GlobalTransform)>,
@@ -33,7 +39,7 @@ fn update_cursor(
     }
 }
 
-fn listen_for_mouse_click(
+fn listen_for_mouse_click_in_game(
     mut logic_event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
     mouse: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,

@@ -27,9 +27,8 @@ pub fn generate_board_by_vector_permutation(
             empty_grid_location = *location;
         }
     }
-    let mut generated_board=
+    let generated_board=
         TileTypeBoard::from_grid_and_empty_loc(&grid, empty_grid_location);
-    generated_board.ignore_player_input=false;
     Ok(generated_board)
 }
 

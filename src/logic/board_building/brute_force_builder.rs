@@ -57,7 +57,6 @@ pub fn brute_force_generate_game_board(
         .rev()
         .copied();
     print_to_console::print_possible_solution(reveresed_shift_order);
-    board.ignore_player_input=false;
     Ok(board)
 }
 

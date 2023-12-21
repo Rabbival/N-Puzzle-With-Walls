@@ -6,7 +6,7 @@ impl Plugin for KeyboardInputHandlerPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Update, (
-                        move_tiles_with_keyboard,
+                        move_tiles_with_keyboard.run_if(in_state(GameState::Game)),
                         listen_for_reset, 
                         open_menu
                     )
