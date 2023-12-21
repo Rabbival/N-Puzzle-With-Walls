@@ -58,10 +58,10 @@ fn handle_mouse_click(
     game_board: &TileTypeBoard,
 ) -> Result<(), error_handler::TileMoveError>
 {
+    if game_board.ignore_player_input{
+        return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
+    }
     if let Some(optional_occupied_tile_location) = GridLocation::from_world(&game_board.grid, cursor_position) {
-        if game_board.ignore_player_input{
-            return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
-        }
         if !game_board.occupied(&optional_occupied_tile_location)? {
             return Err(error_handler::TileMoveError::PressedEmptySlot(String::from("pressed an empty slot")));
         }
@@ -120,11 +120,13 @@ mod tests {
         event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>
     )-> bool
     {
+        let mut board=TileTypeBoard::default();
+        board.ignore_player_input=false;
         let location_search_outcome=
             handle_mouse_click(
                 event_writer,
                 position_to_check, 
-                &TileTypeBoard::default(),
+                &board,
             );
         match location_search_outcome{
             Err(error_handler::TileMoveError::IndexOutOfGridBounds(_))=> true,

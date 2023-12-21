@@ -23,13 +23,27 @@ impl Plugin for GameStatePlugin {
         app
             .add_state::<GameState>()
             .add_systems(
-                OnExit(GameState::Game), 
-                remove_on_game_screen_tagged
-            )
+                OnExit(GameState::Game), (
+                toggle_visibility_for_game_screen_elements,
+                toggle_board_lock
+            ))
+            .add_systems(
+                OnEnter(GameState::Game), (
+                toggle_visibility_for_game_screen_elements,
+                toggle_board_lock
+            ))
         ;
     }
 }
 
-fn remove_on_game_screen_tagged(){
-    //send an event to graphics
+
+fn toggle_visibility_for_game_screen_elements(
+    mut visibility_toggle_event_writer: EventWriter<ToggleVisibilityForElementsWithTag>
+){
+    visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(OnScreenTag::Game));
+}
+
+fn toggle_board_lock(mut game_board_query: Query<&mut TileTypeBoard,With<GameBoard>>){
+    let current_lock_state=&mut game_board_query.single_mut().ignore_player_input;
+    *current_lock_state = ! *current_lock_state;
 }

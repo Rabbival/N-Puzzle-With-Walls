@@ -17,22 +17,20 @@ impl Plugin for KeyboardInputHandlerPlugin {
     }
 }
 
-/// Give GameState a toggle function?
-/// 
-/// what should happen here is changing the game state to menu.
-/// The logic, which will sit in the game state mod, will:
-/// * lock the board
-/// * send for a visibility toggle in graphics
-///     * for things tagged as Game (so that they will disapper)
-///     * for things tagged as Menu (so that they will appear)
 fn open_menu(
+    game_state: Res<State<GameState>>,
     mut next_state: ResMut<NextState<GameState>>,
-    mut visibility_toggle_event_writer: EventWriter<ToggleVisibilityForElementsWithTag>,
     keyboard_input: Res<Input<KeyCode>>,
 ){
     if keyboard_input.just_pressed(KeyCode::Space){
-        //next_state.
-        visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(OnScreenTag::Game));
+        match game_state.get() {
+            GameState::Game => {
+                next_state.set(GameState::Menu);
+            },
+            GameState::Menu => {
+                next_state.set(GameState::Game);
+            }
+        }
     }
 }
 
