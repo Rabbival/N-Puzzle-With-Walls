@@ -48,6 +48,7 @@ pub mod prelude {
             board_builder::*,
             permutation_builder::*,
             brute_force_builder::*,
+            board_properties::*,
         },
         states::{
             StatePlugin,
@@ -57,9 +58,6 @@ pub mod prelude {
             basic_direction::*,
             tile_type::*,
             board_properties::{
-                BoardProperties,
-                UnappliedToBoardProperties,
-                BoardPropertiesPlugin,
                 board_size::*,
                 generation_method::*,
                 wall_tiles_change::*,
