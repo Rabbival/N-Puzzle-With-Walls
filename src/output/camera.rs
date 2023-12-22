@@ -22,7 +22,7 @@ fn spawn_camera(
     let solved_board=solved_board_query.single();
     let grid_side_length= *solved_board.get_side_length();
     
-    let camera_zoom = grid_side_length as f32 * ATLAS_CELL_SQUARE_SIZE / screen_setup::WINDOW_RESOLUTION;
+    let camera_zoom = grid_side_length as f32 * ATLAS_CELL_SQUARE_SIZE / screen_setup::BOARD_SIZE_IN_PIXELS;
     zoom.0=camera_zoom;
 
     let mut camera = Camera2dBundle::default();

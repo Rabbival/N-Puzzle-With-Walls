@@ -20,6 +20,7 @@ pub mod prelude {
         reset_event::*,
         move_tile_event::*,
         screen_unloading_event::*,
+        ui_event::*,
     };
     pub use crate::input::{
         InputPlugin,

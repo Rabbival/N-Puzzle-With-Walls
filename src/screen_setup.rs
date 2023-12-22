@@ -2,7 +2,8 @@ use bevy::window::WindowResolution;
 
 use crate::prelude::*;
 
-pub const WINDOW_RESOLUTION: f32 = 600.0;
+pub const WINDOW_RESOLUTION: f32 = 720.0;
+pub const BOARD_SIZE_IN_PIXELS: f32 = 600.0;
 
 pub struct ScreenSetupPlugin;
 

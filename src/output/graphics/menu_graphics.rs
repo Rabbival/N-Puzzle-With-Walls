@@ -1,4 +1,4 @@
-use crate::{prelude::*, costume_event::reset_event};
+use crate::{prelude::*, costume_event::{reset_event, ui_event}};
 
 const NORMAL_BUTTON: Color = Color::rgb(0.1, 0.1, 0.1);
 const HOVERED_BUTTON: Color = Color::rgb(0.2, 0.2, 0.2);
@@ -14,7 +14,8 @@ pub enum MenuButtonAction{
     ChangeSize(BoardSize),
     ChangeWallTilesCount(u8),
     ChangeEmptyCount(u8),
-    ChangeGenerationMethod
+    ChangeGenerationMethod,
+    GenerateBoard
 }
 
 
@@ -24,6 +25,12 @@ impl Plugin for MenuGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Startup, settings_menu_setup)
+            .add_systems(Startup, (
+                    spawn_generate_button,
+                    spawn_size_options,
+                )
+                .after(settings_menu_setup)
+            )
             .add_systems(
                 Update,(
                 update_button_color,
@@ -73,18 +80,23 @@ fn menu_action(
                 },
                 MenuButtonAction::ChangeGenerationMethod=> {
 
+                },
+                MenuButtonAction::GenerateBoard=>{
+                    input_event_writer.send(reset_event::ResetBoardLogic{reroll_solved: true});
+                    game_state.set(GameState::Game);
                 }
             };
-            
-            input_event_writer.send(reset_event::ResetBoardLogic{reroll_solved: true});
 
             game_log(GameLog::BoardSettingsChanged(menu_button_action));
-            game_state.set(GameState::Game);
         }
     }
 }
 
-fn settings_menu_setup(mut commands: Commands) {
+fn settings_menu_setup(
+    mut button_event_writer: EventWriter<ui_event::SpawnButtons>,
+    mut big_button_event_writer: EventWriter<ui_event::SpawnBigButtons>,
+    mut commands: Commands
+) {
     let button_style = Style {
         width: Val::Px(150.0),
         height: Val::Px(50.0),
@@ -93,21 +105,51 @@ fn settings_menu_setup(mut commands: Commands) {
         align_items: AlignItems::Center,
         ..default()
     };
+    let big_button_style = Style {
+        width: Val::Px(300.0),
+        height: Val::Px(80.0),
+        margin: UiRect::all(Val::Px(20.0)),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    };
+
+    let big_button_text_style = TextStyle {
+        font_size: 60.0 ,
+        ..default()
+    };
 
     let button_text_style = TextStyle {
         font_size: 40.0 ,
         ..default()
     };
 
-    //size changers
-    commands
+    button_event_writer.send(ui_event::SpawnButtons{
+        button_style,
+        button_text_style
+    });
+    big_button_event_writer.send(ui_event::SpawnBigButtons{
+        big_button_style,
+        big_button_text_style
+    });
+}
+
+fn spawn_generate_button(
+    mut big_button_event_reader: EventReader<ui_event::SpawnBigButtons>,
+    mut commands: Commands
+){
+    for big_button_event in big_button_event_reader.read(){
+        let button_style=&big_button_event.big_button_style;
+        let button_text_style=&big_button_event.big_button_text_style;
+
+        commands
         .spawn((
             NodeBundle {
                 style: Style {
                     width: Val::Percent(100.0),
                     height: Val::Percent(100.0),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Start,
+                    align_items: AlignItems::End,
+                    justify_content: JustifyContent::Center,
                     ..default()
                 },
                 visibility: Visibility::Hidden,
@@ -117,39 +159,86 @@ fn settings_menu_setup(mut commands: Commands) {
         ))
         .with_children(|parent| {
             parent
-                .spawn(NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::Column,
-                        align_items: AlignItems::Center,
+                .spawn((
+                    ButtonBundle {
+                        style: button_style.clone(),
+                        background_color: NORMAL_BUTTON.into(),
                         ..default()
                     },
-                    background_color: Color::INDIGO.into(),
-                    ..default()
-                })
+                    MenuButtonAction::GenerateBoard
+                ))
                 .with_children(|parent| {
-                    //title
                     parent.spawn(TextBundle::from_section(
-                        String::from("Board Sizes"),
+                        "Generate",
                         button_text_style.clone(),
                     ));
-                    //buttons
-                    for board_size in BoardSize::as_list(){
-                        parent
-                            .spawn((
-                                ButtonBundle {
-                                    style: button_style.clone(),
-                                    background_color: NORMAL_BUTTON.into(),
-                                    ..default()
-                                },
-                                MenuButtonAction::ChangeSize(board_size)
-                            ))
-                            .with_children(|parent| {
-                                parent.spawn(TextBundle::from_section(
-                                    board_size.to_string(),
-                                    button_text_style.clone(),
-                                ));
-                            });
-                    }
-             });
-        });
+                });
+            });
+    }
+}
+
+fn spawn_size_options(
+    mut button_event_reader: EventReader<ui_event::SpawnButtons>,
+    mut commands: Commands
+){
+    for button_event in button_event_reader.read(){
+        let button_style=&button_event.button_style;
+        let button_text_style=&button_event.button_text_style;
+
+        commands
+            .spawn((
+                NodeBundle {
+                    style: Style {
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Start,
+                        ..default()
+                    },
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                OnScreenTag::Menu,
+            ))
+            .with_children(|parent| {
+                parent
+                    .spawn(NodeBundle {
+                        style: Style {
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::Center,
+                            ..default()
+                        },
+                        background_color: Color::INDIGO.into(),
+                        ..default()
+                    })
+                    .with_children(|parent| {
+                        //title
+                        parent.spawn(TextBundle::from_section(
+                            String::from("Board Sizes"),
+                            button_text_style.clone(),
+                        ));
+                        //buttons
+                        for board_size in BoardSize::as_list(){
+                            parent
+                                .spawn((
+                                    ButtonBundle {
+                                        style: button_style.clone(),
+                                        background_color: NORMAL_BUTTON.into(),
+                                        ..default()
+                                    },
+                                    MenuButtonAction::ChangeSize(board_size)
+                                ))    
+                                .with_children(|parent| {
+                                    parent.spawn(TextBundle::from_section(
+                                        board_size.to_string(),
+                                        button_text_style.clone(),
+                                    ));
+                                });
+                                // if board_size == BoardSize::default() {
+                                //     button_entity_commands.insert(SelectedOptionTag)
+                                // }
+                        }
+                });
+            });
+    }
 }
