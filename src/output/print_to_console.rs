@@ -3,6 +3,7 @@ use std::fmt::Debug;
 use crate::prelude::*;
 
 pub enum GameLog<'a>{
+    NewBoardGenerated,
     BoardSettingsChanged(&'a MenuButtonAction),
     TilesMoved(&'a TileType, &'a GridLocation),
     Victory
@@ -60,6 +61,9 @@ pub fn print_possible_solution<T: Iterator<Item = BasicDirection>>(reversed_dire
 
 pub fn game_log(log: GameLog){
     match log{
+        GameLog::NewBoardGenerated=>{
+            info!("a new board was generated!");
+        },
         GameLog::BoardSettingsChanged(menu_button_action)=>{
             info!("new setting set: {:?}", menu_button_action);
         },

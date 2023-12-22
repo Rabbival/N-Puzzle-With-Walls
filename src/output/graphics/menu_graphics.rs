@@ -94,8 +94,7 @@ fn menu_action(
 
 fn settings_menu_setup(
     mut button_event_writer: EventWriter<ui_event::SpawnButtons>,
-    mut big_button_event_writer: EventWriter<ui_event::SpawnBigButtons>,
-    mut commands: Commands
+    mut big_button_event_writer: EventWriter<ui_event::SpawnBigButtons>
 ) {
     let button_style = Style {
         width: Val::Px(150.0),
@@ -219,7 +218,7 @@ fn spawn_size_options(
                         ));
                         //buttons
                         for board_size in BoardSize::as_list(){
-                            parent
+                            let mut button_entity = parent
                                 .spawn((
                                     ButtonBundle {
                                         style: button_style.clone(),
@@ -227,16 +226,16 @@ fn spawn_size_options(
                                         ..default()
                                     },
                                     MenuButtonAction::ChangeSize(board_size)
-                                ))    
-                                .with_children(|parent| {
+                                ));    
+                                button_entity.with_children(|parent| {
                                     parent.spawn(TextBundle::from_section(
                                         board_size.to_string(),
                                         button_text_style.clone(),
                                     ));
                                 });
-                                // if board_size == BoardSize::default() {
-                                //     button_entity_commands.insert(SelectedOptionTag)
-                                // }
+                                if board_size == BoardSize::default() {
+                                    button_entity.insert(SelectedOptionTag);
+                                }
                         }
                 });
             });
