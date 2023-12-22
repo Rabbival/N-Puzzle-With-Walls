@@ -26,6 +26,7 @@ impl Plugin for BoardPropertiesPlugin {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<BoardProperties>()
+            .init_resource::<UnappliedToBoardProperties>()
             ;
     }
 }
