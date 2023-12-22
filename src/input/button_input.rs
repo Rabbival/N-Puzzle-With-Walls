@@ -26,6 +26,7 @@ fn handle_menu_buttons(
     mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
     mut game_state: ResMut<NextState<GameState>>,
     mut board_prop_res: ResMut<BoardProperties>,
+    mut unapplied_to_prop_res: ResMut<UnappliedToBoardProperties>,
     mut commands: Commands
 ) {
     for (
@@ -40,10 +41,10 @@ fn handle_menu_buttons(
                     board_prop_res.size = *new_board_size;
                 },
                 MenuButtonAction::ChangeEmptyTilesCount(new_empty_count)=> {
-
+                    board_prop_res.empty_count = *new_empty_count;
                 },
                 MenuButtonAction::ChangeGenerationMethod(generation_method)=> {
-
+                    board_prop_res.generation_method = *generation_method;
                 },
                 MenuButtonAction::GenerateBoard=>{
                     input_event_writer.send(reset_event::ResetBoardLogic{reroll_solved: true});
@@ -52,13 +53,13 @@ fn handle_menu_buttons(
                 MenuButtonAction::ChangeWallTilesCount(wall_count_action)=> {
                     match wall_count_action{
                         WallTilesChange::Apply=> {
-                            //board_prop_res.wall_count = *new_walls_count;
+                            board_prop_res.wall_count = unapplied_to_prop_res.wall_count;
                         },
                         WallTilesChange::Increase=> {
-
+                            unapplied_to_prop_res.wall_count += 1;
                         },
                         WallTilesChange::Decrease=> {
-
+                            unapplied_to_prop_res.wall_count -= 1;
                         }
                     }
                 }

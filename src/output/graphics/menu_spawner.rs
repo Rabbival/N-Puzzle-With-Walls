@@ -5,6 +5,13 @@ use super::menu_graphics;
 pub const DEFAULT_EMPTY_COUNT: u8 = 1;
 pub const DEFAULT_WALL_COUNT: u8 = 0;
 
+/// Which option is currently selected
+#[derive(Component)]
+pub struct SelectedOptionTag;
+
+#[derive(Component)]
+pub struct ApplyButtonTag;
+
 pub struct MenuSpanwerPlugin;
 
 impl Plugin for MenuSpanwerPlugin {

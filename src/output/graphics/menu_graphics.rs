@@ -5,29 +5,6 @@ pub const HOVERED_BUTTON: Color = Color::rgb(0.2, 0.2, 0.2);
 pub const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.3, 0.3, 0.3);
 pub const PRESSED_BUTTON: Color = Color::rgb(0.3, 0.3, 0.3);
 
-/// Which option is currently selected
-#[derive(Component)]
-pub struct SelectedOptionTag;
-
-#[derive(Component)]
-pub struct ApplyButtonTag;
-
-#[derive(Component, Debug)]
-pub enum MenuButtonAction{
-    ChangeSize(BoardSize),
-    ChangeWallTilesCount(WallTilesChange),
-    ChangeEmptyTilesCount(u8),
-    ChangeGenerationMethod(BoardGenerationMethod),
-    GenerateBoard
-}
-
-#[derive(Debug)]
-pub enum WallTilesChange{
-    Increase,
-    Decrease,
-    Apply
-}
-
 
 pub struct MenuGraphicsPlugin;
 
@@ -56,6 +33,14 @@ fn update_button_color(
         }
     }
 }
+
+fn update_wall_tiles_count_visuals(
+    unapplied_to_prop_res: Res<UnappliedToBoardProperties>,
+    //TODO: listen for change detection
+){
+    //TODO: have text that appear there spawn with a tag, then fetch it with a query and change it
+}
+
 
 pub fn set_color_to_normal(background_color: &mut BackgroundColor){
     *background_color = NORMAL_BUTTON.into();

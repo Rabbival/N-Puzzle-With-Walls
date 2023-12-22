@@ -58,9 +58,12 @@ pub mod prelude {
             tile_type::*,
             board_properties::{
                 BoardProperties,
+                UnappliedToBoardProperties,
                 BoardPropertiesPlugin,
                 board_size::*,
                 generation_method::*,
+                wall_tiles_change::*,
+                menu_button_action::*,
             },
         },
         data_structure::{
