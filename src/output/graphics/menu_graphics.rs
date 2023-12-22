@@ -1,5 +1,4 @@
-use crate::{prelude::*, costume_event::reset_event};
-use std::mem;
+use crate::prelude::*;
 
 pub const NORMAL_BUTTON: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const HOVERED_BUTTON: Color = Color::rgb(0.2, 0.2, 0.2);
@@ -36,10 +35,7 @@ impl Plugin for MenuGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(
-                Update,(
-                update_button_color,
-                menu_action
-                ).run_if(in_state(GameState::Menu)),
+                Update,(update_button_color).run_if(in_state(GameState::Menu)),
             );
     }
 }
@@ -61,74 +57,6 @@ fn update_button_color(
     }
 }
 
-fn menu_action(
-    mut input_event_writer: EventWriter<reset_event::ResetBoardLogic>,
-    mut interaction_query: Query<
-        (&Interaction, &MenuButtonAction, Entity),
-        (Changed<Interaction>, With<Button>),
-    >,
-    mut currently_chosen: Query<
-        (Entity, &mut BackgroundColor, &MenuButtonAction), 
-        (With<SelectedOptionTag>, Without<ApplyButtonTag>)
-        >,
-    mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
-    mut game_state: ResMut<NextState<GameState>>,
-    mut board_prop_res: ResMut<BoardProperties>,
-    mut commands: Commands
-) {
-    for (
-        interaction, 
-        menu_button_action, 
-        entity
-    ) 
-    in interaction_query.iter_mut() {
-        if *interaction == Interaction::Pressed {
-            match menu_button_action{
-                MenuButtonAction::ChangeSize(new_board_size)=> {
-                    board_prop_res.size = *new_board_size;
-                },
-                MenuButtonAction::ChangeWallTilesCount(new_walls_count)=> {
-
-                },
-                MenuButtonAction::ChangeEmptyTilesCount(new_empty_count)=> {
-
-                },
-                MenuButtonAction::ChangeGenerationMethod(generation_method)=> {
-
-                },
-                MenuButtonAction::GenerateBoard=>{
-                    input_event_writer.send(reset_event::ResetBoardLogic{reroll_solved: true});
-                    game_state.set(GameState::Game);
-                }
-            };
-
-            if let MenuButtonAction::ChangeWallTilesCount(pending_change) = menu_button_action{
-                let (apply_button, mut apply_button_color) = apply_button_query.single_mut();
-                match pending_change{
-                    WallTilesChange::Apply=> {
-                        //doesn't change a thing if it's already chosen
-                        commands.entity(entity).insert(SelectedOptionTag);
-                    },
-                    WallTilesChange::Increase | WallTilesChange::Decrease=> {
-                        *apply_button_color = NORMAL_BUTTON.into();
-                        commands.entity(apply_button).remove::<SelectedOptionTag>();
-                    }
-                }
-            } else {
-                for (
-                    previous_button, 
-                    mut previous_color, 
-                    menu_button_action_of_chosen
-                ) in currently_chosen.iter_mut(){
-                    if mem::discriminant(menu_button_action) == mem::discriminant(menu_button_action_of_chosen){
-                        *previous_color = NORMAL_BUTTON.into();
-                        commands.entity(previous_button).remove::<SelectedOptionTag>();
-                        commands.entity(entity).insert(SelectedOptionTag);
-                    }  
-                }
-            }
-
-            game_log(GameLog::BoardSettingsChanged(menu_button_action));
-        }
-    }
+pub fn set_color_to_normal(background_color: &mut BackgroundColor){
+    *background_color = NORMAL_BUTTON.into();
 }

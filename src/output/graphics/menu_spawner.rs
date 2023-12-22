@@ -401,7 +401,11 @@ fn spawn_tile_counter(
                                     background_color: menu_graphics::NORMAL_BUTTON.into(),
                                     ..default()
                                 },
-                                MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),
+
+
+                                MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),                                
+                                
+                                
                                 SelectedOptionTag,
                                 ApplyButtonTag
                             ));    

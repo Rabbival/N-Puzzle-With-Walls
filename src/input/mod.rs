@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 pub mod mouse_input_handler;
 pub mod keyboard_input_handler;
+pub mod button_input;
 
 pub struct InputPlugin;
 
@@ -10,7 +11,8 @@ impl Plugin for InputPlugin {
         app
             .add_plugins((
                 KeyboardInputHandlerPlugin, 
-                MouseInputHandlerPlugin
+                MouseInputHandlerPlugin,
+                ButtonInputPlugin
             ))
             ;
     }

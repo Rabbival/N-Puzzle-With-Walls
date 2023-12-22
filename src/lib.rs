@@ -25,7 +25,8 @@ pub mod prelude {
     pub use crate::input::{
         InputPlugin,
         mouse_input_handler::*,
-        keyboard_input_handler::*
+        keyboard_input_handler::*,
+        button_input::*,
     };
     pub use crate::output::{
         camera::*,
