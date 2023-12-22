@@ -12,6 +12,14 @@ pub struct SpawnBigButtons{
     pub big_button_text_style: TextStyle
 }
 
+#[derive (Event, Default)]
+pub struct SpawnTileCountButtons{
+    pub regular_button_style: Style,
+    pub regular_button_text_style: TextStyle,
+    pub thin_button_style: Style,
+    pub thin_button_text_style: TextStyle
+}
+
 
 pub struct UiEventPlugin;
 
@@ -20,6 +28,7 @@ impl Plugin for UiEventPlugin {
         app
             .add_event::<SpawnButtons>()
             .add_event::<SpawnBigButtons>()
+            .add_event::<SpawnTileCountButtons>()
             ;
     }
 }

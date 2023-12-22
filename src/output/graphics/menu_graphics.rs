@@ -10,13 +10,23 @@ pub const PRESSED_BUTTON: Color = Color::rgb(0.3, 0.3, 0.3);
 #[derive(Component)]
 pub struct SelectedOptionTag;
 
+#[derive(Component)]
+pub struct ApplyButtonTag;
+
 #[derive(Component, Debug)]
 pub enum MenuButtonAction{
     ChangeSize(BoardSize),
-    ChangeWallTilesCount(u8),
+    ChangeWallTilesCount(WallTilesChange),
     ChangeEmptyTilesCount(u8),
     ChangeGenerationMethod(BoardGenerationMethod),
     GenerateBoard
+}
+
+#[derive(Debug)]
+pub enum WallTilesChange{
+    Increase,
+    Decrease,
+    Apply
 }
 
 
@@ -57,7 +67,11 @@ fn menu_action(
         (&Interaction, &MenuButtonAction, Entity),
         (Changed<Interaction>, With<Button>),
     >,
-    mut currently_chosen: Query<(Entity, &mut BackgroundColor, &MenuButtonAction), With<SelectedOptionTag>>,
+    mut currently_chosen: Query<
+        (Entity, &mut BackgroundColor, &MenuButtonAction), 
+        (With<SelectedOptionTag>, Without<ApplyButtonTag>)
+        >,
+    mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
     mut game_state: ResMut<NextState<GameState>>,
     mut board_prop_res: ResMut<BoardProperties>,
     mut commands: Commands
@@ -88,16 +102,30 @@ fn menu_action(
                 }
             };
 
-            for (
-                previous_button, 
-                mut previous_color, 
-                menu_button_action_of_chosen
-            ) in currently_chosen.iter_mut(){
-                if mem::discriminant(menu_button_action) == mem::discriminant(menu_button_action_of_chosen) {
-                    *previous_color = NORMAL_BUTTON.into();
-                    commands.entity(previous_button).remove::<SelectedOptionTag>();
-                    commands.entity(entity).insert(SelectedOptionTag);
-                }  
+            if let MenuButtonAction::ChangeWallTilesCount(pending_change) = menu_button_action{
+                let (apply_button, mut apply_button_color) = apply_button_query.single_mut();
+                match pending_change{
+                    WallTilesChange::Apply=> {
+                        //doesn't change a thing if it's already chosen
+                        commands.entity(entity).insert(SelectedOptionTag);
+                    },
+                    WallTilesChange::Increase | WallTilesChange::Decrease=> {
+                        *apply_button_color = NORMAL_BUTTON.into();
+                        commands.entity(apply_button).remove::<SelectedOptionTag>();
+                    }
+                }
+            } else {
+                for (
+                    previous_button, 
+                    mut previous_color, 
+                    menu_button_action_of_chosen
+                ) in currently_chosen.iter_mut(){
+                    if mem::discriminant(menu_button_action) == mem::discriminant(menu_button_action_of_chosen){
+                        *previous_color = NORMAL_BUTTON.into();
+                        commands.entity(previous_button).remove::<SelectedOptionTag>();
+                        commands.entity(entity).insert(SelectedOptionTag);
+                    }  
+                }
             }
 
             game_log(GameLog::BoardSettingsChanged(menu_button_action));

@@ -1,7 +1,22 @@
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+use enum_iterator::{all, Sequence};
+use std::fmt;
+
+#[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum BoardGenerationMethod{
     #[default]
-    Automatic,
+    Auto,
     Manual,
-    FromDataBase
+    Load
+}
+
+impl BoardGenerationMethod{
+    pub fn as_list() -> Vec<BoardGenerationMethod>{
+        all::<BoardGenerationMethod>().collect::<Vec<BoardGenerationMethod>>()
+    }
+}
+
+impl fmt::Display for BoardGenerationMethod {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
