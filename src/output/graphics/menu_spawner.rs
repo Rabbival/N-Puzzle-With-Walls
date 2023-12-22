@@ -57,13 +57,9 @@ fn menu_setup(
     let thin_button_style = Style {
         width: Val::Px(50.0),
         height: Val::Px(50.0),
-        margin: UiRect::all(Val::Px(10.0)),
+        margin: UiRect::all(Val::Px(15.0)),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
-        ..default()
-    };
-    let thin_button_text_style = TextStyle {
-        font_size: 30.0 ,
         ..default()
     };
 
@@ -77,9 +73,8 @@ fn menu_setup(
     });
     tile_count_buttons_event_writer.send(ui_event::SpawnTileCountButtons{
         regular_button_style: button_style,
-        regular_button_text_style: button_text_style,
         thin_button_style,
-        thin_button_text_style
+        button_text_style
     });
 }
 
@@ -290,9 +285,8 @@ fn spawn_tile_counter(
 ){
     for button_event in button_event_reader.read(){
         let regular_button_style= &button_event.regular_button_style;
-        let regular_button_text_style= &button_event.regular_button_text_style;
         let thin_button_style = &button_event.thin_button_style;
-        let thin_button_text_style = &button_event.thin_button_text_style;
+        let button_text_style = &button_event.button_text_style;
 
         commands
             .spawn((
@@ -324,7 +318,7 @@ fn spawn_tile_counter(
                         //title - empty
                         parent.spawn(TextBundle::from_section(
                             String::from("Empty Tiles"),
-                            regular_button_text_style.clone(),
+                            button_text_style.clone(),
                         ));
                         //buttons - empty
                         for (action, text) in [
@@ -347,7 +341,7 @@ fn spawn_tile_counter(
                                 button_entity.with_children(|parent| {
                                     parent.spawn(TextBundle::from_section(
                                         text,
-                                        thin_button_text_style.clone(),
+                                        button_text_style.clone(),
                                     ));
                                 });
                                 if empty_tiles_count == DEFAULT_EMPTY_COUNT {
@@ -358,7 +352,7 @@ fn spawn_tile_counter(
                         //title - walls
                         parent.spawn(TextBundle::from_section(
                             String::from("Wall Tiles"),
-                            regular_button_text_style.clone(),
+                            button_text_style.clone(),
                         ));
                         //buttons - walls
                         parent.spawn(NodeBundle {
@@ -372,15 +366,13 @@ fn spawn_tile_counter(
                         .with_children(|parent| {
                             for (action, text) in [
                                 (Some(MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Decrease)), "<"),
-                                (None, 
-                                    std::str::from_utf8(&vec![DEFAULT_WALL_COUNT]).unwrap()
-                                ),
+                                (None, " _ "),
                                 (Some(MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Increase)), ">"),
                             ]{
                                 if action.is_none() {
                                     parent.spawn(TextBundle::from_section(
                                         text,
-                                        regular_button_text_style.clone(),
+                                        button_text_style.clone(),
                                     ));    
                                 }else{
                                     let mut arrow_button_entity = parent
@@ -395,7 +387,7 @@ fn spawn_tile_counter(
                                     arrow_button_entity.with_children(|parent| {
                                         parent.spawn(TextBundle::from_section(
                                             text,
-                                            thin_button_text_style.clone(),
+                                            button_text_style.clone(),
                                         ));
                                     });
                                 }
@@ -416,7 +408,7 @@ fn spawn_tile_counter(
                         apply_button_entity.with_children(|parent| {
                             parent.spawn(TextBundle::from_section(
                                 "Apply",
-                                regular_button_text_style.clone(),
+                                button_text_style.clone(),
                             ));
                         });
                 });
