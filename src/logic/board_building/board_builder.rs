@@ -24,12 +24,12 @@ impl Plugin for BoardBuilderPlugin {
 fn spawn_game_board(
     mut commands: Commands, 
     query: Query<&TileTypeBoard, With<SolvedBoard>>,
-    board_size_res: Res<BoardSize>
+    board_prop_res: Res<BoardProperties>
 ){
     let solved_board=query.single();
     let attempt_result=generate_game_board(
         solved_board.clone(),
-        board_size_res.to_random_turns_range()
+        board_prop_res.size.to_random_turns_range()
     );
     if let Ok(board) = attempt_result { 
         commands.spawn((

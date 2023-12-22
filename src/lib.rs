@@ -55,7 +55,12 @@ pub mod prelude {
         enums::{
             basic_direction::*,
             tile_type::*,
-            board_size::*,
+            board_properties::{
+                BoardProperties,
+                BoardPropertiesPlugin,
+                board_size::*,
+                generation_method::*,
+            },
         },
         data_structure::{
             grid_related::{

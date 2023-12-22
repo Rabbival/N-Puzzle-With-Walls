@@ -6,16 +6,15 @@ impl Plugin for SolvedBoardBuilderPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(PreStartup, spawn_solved_board)
-            .insert_resource(BoardSize::Giant)
             ;
     }
 }
 
 fn spawn_solved_board(
     mut commands: Commands,
-    board_size: Res<BoardSize>,
+    board_prop_res: Res<BoardProperties>,
 ){
-    commands.spawn((generate_solved_board(board_size.to_grid_side_length()), SolvedBoard));
+    commands.spawn((generate_solved_board(board_prop_res.size.to_grid_side_length()), SolvedBoard));
 }
 
 /// public for the sake of testing

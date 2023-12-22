@@ -1,4 +1,5 @@
 use crate::{prelude::*, costume_event::reset_event};
+use std::mem;
 
 pub const NORMAL_BUTTON: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const HOVERED_BUTTON: Color = Color::rgb(0.2, 0.2, 0.2);
@@ -13,8 +14,8 @@ pub struct SelectedOptionTag;
 pub enum MenuButtonAction{
     ChangeSize(BoardSize),
     ChangeWallTilesCount(u8),
-    ChangeEmptyCount(u8),
-    ChangeGenerationMethod,
+    ChangeEmptyTilesCount(u8),
+    ChangeGenerationMethod(BoardGenerationMethod),
     GenerateBoard
 }
 
@@ -58,39 +59,27 @@ fn menu_action(
     >,
     mut currently_chosen: Query<(Entity, &mut BackgroundColor, &MenuButtonAction), With<SelectedOptionTag>>,
     mut game_state: ResMut<NextState<GameState>>,
-    mut board_size_res: ResMut<BoardSize>,
+    mut board_prop_res: ResMut<BoardProperties>,
     mut commands: Commands
 ) {
     for (
         interaction, 
         menu_button_action, 
-        mut entity
+        entity
     ) 
     in interaction_query.iter_mut() {
         if *interaction == Interaction::Pressed {
             match menu_button_action{
-                MenuButtonAction::ChangeSize(board_size)=> {
-                    *board_size_res = *board_size;
-
-                    for (
-                        previous_button, 
-                        mut previous_color, 
-                        menu_button_action_of_chosen
-                    ) in currently_chosen.iter_mut(){
-                        if let MenuButtonAction::ChangeSize(_) = menu_button_action_of_chosen {
-                            *previous_color = NORMAL_BUTTON.into();
-                            commands.entity(previous_button).remove::<SelectedOptionTag>();
-                            commands.entity(entity).insert(SelectedOptionTag);
-                        }  
-                    }
+                MenuButtonAction::ChangeSize(new_board_size)=> {
+                    board_prop_res.size = *new_board_size;
                 },
-                MenuButtonAction::ChangeWallTilesCount(walls_count)=> {
+                MenuButtonAction::ChangeWallTilesCount(new_walls_count)=> {
 
                 },
-                MenuButtonAction::ChangeEmptyCount(empty_count)=> {
+                MenuButtonAction::ChangeEmptyTilesCount(new_empty_count)=> {
 
                 },
-                MenuButtonAction::ChangeGenerationMethod=> {
+                MenuButtonAction::ChangeGenerationMethod(generation_method)=> {
 
                 },
                 MenuButtonAction::GenerateBoard=>{
@@ -98,6 +87,18 @@ fn menu_action(
                     game_state.set(GameState::Game);
                 }
             };
+
+            for (
+                previous_button, 
+                mut previous_color, 
+                menu_button_action_of_chosen
+            ) in currently_chosen.iter_mut(){
+                if mem::discriminant(menu_button_action) == mem::discriminant(menu_button_action_of_chosen) {
+                    *previous_color = NORMAL_BUTTON.into();
+                    commands.entity(previous_button).remove::<SelectedOptionTag>();
+                    commands.entity(entity).insert(SelectedOptionTag);
+                }  
+            }
 
             game_log(GameLog::BoardSettingsChanged(menu_button_action));
         }

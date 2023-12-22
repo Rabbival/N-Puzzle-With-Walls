@@ -15,7 +15,8 @@ impl Plugin for BoardPlugins {
         app
             .add_plugins((
                 BoardBuildingPlugins,
-                BoardManagerPlugin
+                BoardManagerPlugin,
+                BoardPropertiesPlugin
             ))
             ;
     }

@@ -1,8 +1,7 @@
-use crate::prelude::*;
 use enum_iterator::{all, Sequence};
 use std::fmt;
 
-#[derive(Resource, Sequence, Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum BoardSize{
     Tiny,
     #[default]
