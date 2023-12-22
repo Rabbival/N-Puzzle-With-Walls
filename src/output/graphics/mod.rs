@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 pub mod tile_graphics;
 pub mod menu_graphics;
+pub mod menu_spawner;
 
 
 pub struct GraphicsPlugin;
@@ -12,6 +13,7 @@ impl Plugin for GraphicsPlugin {
             .add_plugins((
                 TileGraphicsPlugin,
                 MenuGraphicsPlugin,
+                MenuSpanwerPlugin
             ))
             .add_systems(Update, (
                     despawn_entities_with_tag,

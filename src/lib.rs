@@ -35,6 +35,7 @@ pub mod prelude {
             GraphicsPlugin,
             tile_graphics::*,
             menu_graphics::*,
+            menu_spawner::*,
         },
         print_to_console::*,
     };
