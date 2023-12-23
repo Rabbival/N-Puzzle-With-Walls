@@ -1,82 +1,24 @@
 use crate::{prelude::*, costume_event::{ui_event, board_set_event}, output::{print_to_console, graphics::menu_graphics}};
 
-pub const DEFAULT_EMPTY_COUNT: u8 = 1;
-pub const DEFAULT_WALL_COUNT: u8 = 0;
 
-#[derive(Component)]
-pub struct AppliedBoardProperties;
-#[derive(Component)]
-pub struct PlannedBoardProperties;
+pub struct UpdateBoardPropertiesPlugin;
 
-#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
-pub struct BoardProperties{
-    pub size: BoardSize,
-    pub wall_count: u8,
-    pub empty_count: u8,
-    pub generation_method: BoardGenerationMethod,
-}
-
-/// intended to keep track of the numbers not yet applied
-#[derive(Resource, Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub struct UnappliedMenuWallCount(pub u8);
-
-
-pub struct BoardPropertiesPlugin;
-
-impl Plugin for BoardPropertiesPlugin {
+impl Plugin for UpdateBoardPropertiesPlugin {
     fn build(&self, app: &mut App) {
         app
-            .init_resource::<UnappliedMenuWallCount>()
-            .add_systems(PreStartup, create_current_and_planned_board_properties)
             .add_systems(Update, (
-                set_menu_elements_to_fit_current,
-                    (
                         general_update_planned_board_properties,
                         update_wall_count,
-                        set_applied_and_begin_generation
+                        set_applied_props, 
+                        begin_generation_and_game
                     )
                     .chain()
                     .run_if(in_state(GameState::Menu))
-            ))
+            )
             ;
     }
 }
 
-fn create_current_and_planned_board_properties(
-    mut commands: Commands
-){
-    commands.spawn((
-        BoardProperties::default(),
-        AppliedBoardProperties
-    ));
-    commands.spawn((
-        BoardProperties::default(),
-        PlannedBoardProperties
-    ));
-}
-
-/// resets the number in the menu to the current (previously chosen) number
-fn set_menu_elements_to_fit_current(
-    mut event_writer: EventWriter<SetMenuElementsToFitCurrent>,
-    mut event_listener: EventReader<SetPlannedPropertiesToFitCurrent>,
-    mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
-    applied_board_prop_query: Query<
-        &BoardProperties, 
-        (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
-    >,
-    mut planned_board_prop_query: Query<
-        &mut BoardProperties, 
-        (With<PlannedBoardProperties>, Without<AppliedBoardProperties>)
-    >,
-){
-    for _event in event_listener.read(){
-        let current_props = applied_board_prop_query.single();
-        let mut planned_props = planned_board_prop_query.single_mut();
-        unapplied_menu_wall_count.0=current_props.wall_count;
-        *planned_props = *current_props;
-        event_writer.send(SetMenuElementsToFitCurrent);
-    }
-}
 
 /// for the planned board properties updates that don't require special treatment
 fn general_update_planned_board_properties(
@@ -153,18 +95,17 @@ fn update_wall_count(
     }
 }
 
-fn set_applied_and_begin_generation(
+
+fn set_applied_props(
     mut button_event_listener: EventReader<ui_event::ButtonPressed>,
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction), 
         (With<SelectedOptionTag>, Without<ApplyButtonTag>)
     >,
-    mut spawn_board_event_writer: EventWriter<board_set_event::SpawnBoardWithNewSettings>,
     mut currently_applied: Query<
         Entity,
         (With<AppliedOptionTag>, Without<SelectedOptionTag>)
     >,
-    mut game_state: ResMut<NextState<GameState>>,
     mut applied_board_prop_query: Query<
         &mut BoardProperties, 
         (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
@@ -189,26 +130,20 @@ fn set_applied_and_begin_generation(
             for (previous_button, _ , _ ) in currently_chosen.iter_mut(){
                 commands.entity(previous_button).insert(AppliedOptionTag);
             }
-
-            // update applied props
-            let mut applied_props = applied_board_prop_query.single_mut();
-            *applied_props = *planned_board_prop;
-
-            spawn_board_event_writer.send(board_set_event::SpawnBoardWithNewSettings);
-            game_state.set(GameState::Game);
-            print_to_console::game_log(GameLog::NewBoardGenerated);
         }
     }
 }
 
-
-impl Default for BoardProperties{
-    fn default() -> Self {
-        Self { 
-            size: BoardSize::default(), 
-            wall_count: DEFAULT_WALL_COUNT, 
-            empty_count: DEFAULT_EMPTY_COUNT, 
-            generation_method: BoardGenerationMethod::default(), 
+fn begin_generation_and_game(
+    mut button_event_listener: EventReader<ui_event::ButtonPressed>,
+    mut spawn_board_event_writer: EventWriter<board_set_event::SpawnBoardWithNewSettings>,
+    mut game_state: ResMut<NextState<GameState>>,
+){
+    for button_event in button_event_listener.read(){
+        if let MenuButtonAction::GenerateBoard = button_event.action{
+            spawn_board_event_writer.send(board_set_event::SpawnBoardWithNewSettings);
+            game_state.set(GameState::Game);
+            print_to_console::game_log(GameLog::NewBoardGenerated);
         }
     }
 }

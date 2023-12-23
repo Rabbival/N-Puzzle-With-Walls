@@ -48,8 +48,12 @@ pub mod prelude {
             board_builder::*,
             permutation_builder::*,
             brute_force_builder::*,
-            board_properties::*,
             deafult_boards_spawner::*,
+        },
+        board_props::{
+            BoardPropsPlugins,
+            board_properties::*,
+            update_board_properties::*,
         },
         states::{
             StatePlugin,

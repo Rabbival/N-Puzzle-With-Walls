@@ -1,4 +1,4 @@
-use crate::{prelude::*, costume_event::ui_event, logic::board_building::board_properties};
+use crate::{prelude::*, costume_event::ui_event, logic::board_props::board_properties};
 
 use super::menu_graphics;
 

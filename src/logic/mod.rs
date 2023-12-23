@@ -7,6 +7,7 @@ pub mod data_structure;
 pub mod tile_dictionary;
 pub mod tile_type_board;
 pub mod board_building;
+pub mod board_props;
 
 pub struct BoardPlugins;
 
@@ -15,8 +16,8 @@ impl Plugin for BoardPlugins {
         app
             .add_plugins((
                 BoardBuildingPlugins,
+                BoardPropsPlugins,
                 BoardManagerPlugin,
-                BoardPropertiesPlugin
             ))
             ;
     }
