@@ -14,7 +14,6 @@ impl Plugin for TileGraphicsPlugin {
                 .chain()
                 .in_set(CostumeSystemSets::ChangesBasedOnInput)
             )
-            //.add_systems(Update, debug_text_position.run_if(run_once()))
             ;
     }
 }
@@ -23,6 +22,7 @@ fn spawn_tiles(
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
     font: Res<TileTextFont>,
+    mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     mut tile_dictionary: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
 ){
     let mut tile_dictionary_instance=tile_dictionary.single_mut();

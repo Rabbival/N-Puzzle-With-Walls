@@ -3,7 +3,7 @@ use crate::{prelude::*, costume_event::ui_event, logic::board_building::board_pr
 use super::menu_graphics;
 
 /// which option is applied to the current board,
-/// intended for when changing but not applying and reopening the menu
+/// intended for when changing but not applying and reopening the
 #[derive(Component)]
 pub struct AppliedOptionTag;
 
@@ -217,6 +217,7 @@ fn spawn_generation_options(
                                     });
                                     if generation_method == BoardGenerationMethod::default() {
                                         button_entity.insert(SelectedOptionTag);
+                                        button_entity.insert(AppliedOptionTag);
                                     }
                             }
                         });
@@ -284,6 +285,7 @@ fn spawn_size_options(
                                 });
                                 if board_size == BoardSize::default() {
                                     button_entity.insert(SelectedOptionTag);
+                                    button_entity.insert(AppliedOptionTag);
                                 }
                         }
                 });
@@ -358,6 +360,7 @@ fn spawn_tile_counter(
                                 });
                                 if empty_tiles_count == board_properties::DEFAULT_EMPTY_COUNT {
                                     button_entity.insert(SelectedOptionTag);
+                                    button_entity.insert(AppliedOptionTag);
                                 }
                         }
 

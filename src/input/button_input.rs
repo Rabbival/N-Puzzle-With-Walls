@@ -151,22 +151,29 @@ fn set_chosen_options_to_fit_current_props(
         (Entity, &mut BackgroundColor, &MenuButtonAction), 
         (With<SelectedOptionTag>, Without<AppliedOptionTag>)
     >,
-    mut currently_applied: Query<Entity,(With<AppliedOptionTag>, Without<SelectedOptionTag>)>,
+    mut currently_applied: Query<
+        (Entity, &mut BackgroundColor) , 
+        (With<AppliedOptionTag>, Without<SelectedOptionTag>)
+    >,
     mut commands: Commands
 ){
     for _event in event_listener.read(){
         // remove from previously chosen and not applied
         for (
-            previous_button, 
-            mut previous_color, 
+            chosen_not_applied, 
+            mut not_applied_button_color, 
             _
         ) in currently_chosen.iter_mut(){
-            menu_graphics::set_color_to_normal(&mut previous_color);
-            commands.entity(previous_button).remove::<SelectedOptionTag>();
+            menu_graphics::set_color_to_normal(&mut not_applied_button_color);
+            commands.entity(chosen_not_applied).remove::<SelectedOptionTag>();
         }
 
         // put the chosen mark in the currently applied ones
-        for should_be_marked_chosen in currently_applied.iter_mut(){
+        for (
+            should_be_marked_chosen,
+            mut should_be_marked_button_color, 
+        ) in currently_applied.iter_mut(){
+            menu_graphics::set_color_to_pressed(&mut should_be_marked_button_color);
             commands.entity(should_be_marked_chosen).insert(SelectedOptionTag);
         }
     }

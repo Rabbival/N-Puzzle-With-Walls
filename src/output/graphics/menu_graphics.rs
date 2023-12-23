@@ -49,3 +49,7 @@ fn update_wall_tiles_count_visuals(
 pub fn set_color_to_normal(background_color: &mut BackgroundColor){
     *background_color = NORMAL_BUTTON.into();
 }
+
+pub fn set_color_to_pressed(background_color: &mut BackgroundColor){
+    *background_color = PRESSED_BUTTON.into();
+}
