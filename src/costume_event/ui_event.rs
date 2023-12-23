@@ -19,6 +19,12 @@ pub struct SpawnTileCountButtons{
     pub button_text_style: TextStyle
 }
 
+#[derive (Event)]
+pub struct ButtonPressed{
+    pub entity: Entity,
+    pub action: MenuButtonAction
+}
+
 
 pub struct UiEventPlugin;
 
@@ -28,6 +34,7 @@ impl Plugin for UiEventPlugin {
             .add_event::<SpawnButtons>()
             .add_event::<SpawnBigButtons>()
             .add_event::<SpawnTileCountButtons>()
+            .add_event::<ButtonPressed>()
             ;
     }
 }
