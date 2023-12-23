@@ -15,34 +15,31 @@ impl Plugin for BoardBuilderPlugin {
     fn build(&self, app: &mut App) {
         app
             //important to run before we draw it in graphics.rs
-            .add_systems(Startup, spawn_game_board)
+            .add_systems(Update, spawn_game_board)
             ;
     }
 }
 
 
 fn spawn_game_board(
-    mut commands: Commands, 
-    query: Query<&TileTypeBoard, With<SolvedBoard>>,
-    applied_board_prop_query: Query<
-        &BoardProperties, 
-        (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
-    >,
+    mut event_listener: EventReader<SpawnBoardWithNewSettings>,
+    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
+    mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    applied_board_prop_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
 ){
-    let solved_board=query.single();
-    let board_size = applied_board_prop_query.single().size;
-    let attempt_result=generate_game_board(
-        solved_board.clone(),
-        board_size.to_random_turns_range()
-    );
-    if let Ok(board) = attempt_result { 
-        commands.spawn((
-            board,
-            GameBoard
-        ));
-    }
-    else{
-        print_to_console::couldnt_generate_board();
+    for _event in event_listener.read(){
+        let solved_board=solved_board_query.single();
+        let board_size = applied_board_prop_query.single().size;
+        let attempt_result=generate_game_board(
+            solved_board.clone(),
+            board_size.to_random_turns_range()
+        );
+        if let Ok(board) = attempt_result { 
+            *game_board_query.single_mut() = board;
+        }
+        else{
+            print_to_console::couldnt_generate_board();
+        }
     }
 }
 

@@ -1,27 +1,17 @@
 use crate::prelude::*;
 
-pub struct SolvedBoardBuilderPlugin;
+// pub struct SolvedBoardBuilderPlugin;
 
-impl Plugin for SolvedBoardBuilderPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_systems(PreStartup, spawn_solved_board)
-            ;
-    }
-}
+// impl Plugin for SolvedBoardBuilderPlugin {
+//     fn build(&self, app: &mut App) {
+//         app
+//             .add_systems(PreStartup, generate_solved_board)
+//             ;
+//     }
+// }
 
-fn spawn_solved_board(
-    mut commands: Commands,
-    applied_board_prop_query: Query<
-        &BoardProperties, 
-        (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
-    >,
-){
-    let board_size = applied_board_prop_query.single().size;
-    commands.spawn((generate_solved_board(board_size.to_grid_side_length()), SolvedBoard));
-}
 
-/// public for the sake of testing
+
 pub fn generate_solved_board(grid_side_length: u8) -> TileTypeBoard{
     let mut solved_board = TileTypeBoard::new(grid_side_length);
     let grid_side_length_u32 = grid_side_length as u32;

@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::{error_handler, print_to_console}, costume_event::{reset_event, move_tile_event}};
+use crate::{prelude::*, output::{error_handler, print_to_console}, costume_event::{board_set_event, move_tile_event}};
 
 pub struct BoardManagerPlugin;
 
@@ -75,14 +75,11 @@ fn check_if_solved(game_board: &mut TileTypeBoard, solved_grid: &Grid<TileType>)
 
 
 pub fn reset_board(
-    mut reset_listener: EventReader<reset_event::ResetBoardLogic>,
-    mut graphics_event_writer: EventWriter<reset_event::ResetBoardGraphics>,
+    mut reset_listener: EventReader<board_set_event::ResetBoardWithCurrentSettings>,
+    mut graphics_event_writer: EventWriter<board_set_event::MoveExistingTilesGraphics>,
     mut solved_board_query: Query<&mut TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
-    applied_board_prop_query: Query<
-        &BoardProperties, 
-        (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
-    >,
+    applied_board_prop_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
 ){
     for reset_request in reset_listener.read(){
         let mut solved_board = solved_board_query.single_mut();
@@ -101,7 +98,7 @@ pub fn reset_board(
              //generation successful
             if let Ok(board) = attempt_result { 
                 *game_board=board;
-                graphics_event_writer.send(reset_event::ResetBoardGraphics);
+                graphics_event_writer.send(board_set_event::MoveExistingTilesGraphics);
                 return;
             }
         }

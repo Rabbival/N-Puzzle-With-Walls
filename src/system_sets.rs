@@ -4,7 +4,8 @@ use bevy::prelude::*;
 pub enum CostumeSystemSets{
     InputListening,
     InputHandling,
-    ChangesBasedOnInput
+    ChangesBasedOnInput,
+    PostChangesBasedOnInput
 }
 
 pub struct SystemSetsPlugin;
@@ -16,6 +17,7 @@ impl Plugin for SystemSetsPlugin {
                 CostumeSystemSets::InputListening,
                 CostumeSystemSets::InputHandling,
                 CostumeSystemSets::ChangesBasedOnInput,
+                CostumeSystemSets::PostChangesBasedOnInput
                 ).chain())
             ;
     }

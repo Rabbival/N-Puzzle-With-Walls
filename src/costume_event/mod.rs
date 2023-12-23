@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub mod reset_event;
+pub mod board_set_event;
 pub mod move_tile_event;
 pub mod screen_unloading_event;
 pub mod ui_event;

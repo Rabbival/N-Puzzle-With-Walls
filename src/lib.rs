@@ -17,7 +17,7 @@ pub mod prelude {
     pub use crate::system_sets::*;
     pub use crate::costume_event::{
         EventPlugins,
-        reset_event::*,
+        board_set_event::*,
         move_tile_event::*,
         screen_unloading_event::*,
         ui_event::*,
@@ -49,6 +49,7 @@ pub mod prelude {
             permutation_builder::*,
             brute_force_builder::*,
             board_properties::*,
+            deafult_boards_spawner::*,
         },
         states::{
             StatePlugin,

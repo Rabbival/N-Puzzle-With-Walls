@@ -1,4 +1,4 @@
-use crate::{prelude::*, costume_event::reset_event, output::{print_to_console, graphics::menu_graphics}};
+use crate::{prelude::*, costume_event::board_set_event, output::{print_to_console, graphics::menu_graphics}};
 use std::mem;
 
 pub struct ButtonInputPlugin;
@@ -18,7 +18,7 @@ impl Plugin for ButtonInputPlugin {
 
 
 fn handle_menu_buttons(
-    mut input_event_writer: EventWriter<reset_event::ResetBoardLogic>,
+    mut input_event_writer: EventWriter<board_set_event::SpawnBoardWithNewSettings>,
     mut interaction_query: Query<
         (&Interaction, &MenuButtonAction, Entity),
         (Changed<Interaction>, With<Button>),
@@ -63,7 +63,7 @@ fn handle_menu_buttons(
                     planned_board_prop.generation_method = *generation_method;
                 },
                 MenuButtonAction::GenerateBoard=>{
-                    input_event_writer.send(reset_event::ResetBoardLogic{reroll_solved: true});
+                    input_event_writer.send(board_set_event::SpawnBoardWithNewSettings);
                     game_state.set(GameState::Game);
                 },
                 MenuButtonAction::ChangeWallTilesCount(wall_count_action)=> {

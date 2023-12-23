@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::tile_dictionary, costume_event::{reset_event, move_tile_event}};
+use crate::{prelude::*, logic::tile_dictionary, costume_event::{board_set_event, move_tile_event}};
 use bevy::{prelude::*, utils::HashMap};
 
 pub struct TileGraphicsPlugin;
@@ -23,7 +23,6 @@ fn spawn_tiles(
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
     font: Res<TileTextFont>,
-    mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     mut tile_dictionary: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
 ){
     let mut tile_dictionary_instance=tile_dictionary.single_mut();
@@ -147,7 +146,7 @@ fn extract_tile_entity(
 
 
 fn move_existing_tiles_after_reset(
-    mut graphics_reset_listener: EventReader<reset_event::ResetBoardGraphics>,
+    mut graphics_reset_listener: EventReader<board_set_event::MoveExistingTilesGraphics>,
     mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
     mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
