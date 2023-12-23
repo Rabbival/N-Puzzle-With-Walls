@@ -64,7 +64,7 @@ fn toggle_visibility_for_menu_screen_elements(
 }
 
 fn set_menu_indicators_to_fit_current(
-    mut event_writer: EventWriter<SetMenuElementsToFitCurrent>
+    mut event_writer: EventWriter<SetPlannedPropertiesToFitCurrent>
 ){
-    event_writer.send(SetMenuElementsToFitCurrent);
+    event_writer.send(SetPlannedPropertiesToFitCurrent);
 }

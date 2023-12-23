@@ -1,4 +1,4 @@
-use crate::logic::{enums::{basic_direction, board_properties::wall_tiles_change}, data_structure::grid_related};
+use crate::logic::{enums::{basic_direction, board_property_enums::wall_tiles_change}, data_structure::grid_related};
 
 #[derive(Debug)]
 pub enum MenuError{

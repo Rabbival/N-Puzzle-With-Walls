@@ -11,10 +11,10 @@ pub fn generate_board_by_vector_permutation(
     let mut sorted_indexes=vec![];
     for (index, optional_tile) in solved_board_iterator{
         sorted_indexes.push(index);
-        if optional_tile.is_none(){
-            return Err(error_handler::BoardGenerationError::GridError(GridError::IteratorYieldedNone));
+        if let Some(tile) = optional_tile{
+            sorted_tiles.push(*tile);
         }else{
-            sorted_tiles.push(*optional_tile.unwrap());
+            return Err(error_handler::BoardGenerationError::GridError(GridError::IteratorYieldedNone));
         }
     }
     let permutation 

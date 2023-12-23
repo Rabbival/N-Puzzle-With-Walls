@@ -1,11 +1,13 @@
-use crate::{prelude::*, costume_event::ui_event};
+use crate::{prelude::*, costume_event::ui_event, logic::board_building::board_properties};
 
 use super::menu_graphics;
 
-pub const DEFAULT_EMPTY_COUNT: u8 = 1;
-pub const DEFAULT_WALL_COUNT: u8 = 0;
+/// which option is applied to the current board,
+/// intended for when changing but not applying and reopening the menu
+#[derive(Component)]
+pub struct AppliedOptionTag;
 
-/// Which option is currently selected
+/// which option is currently selected
 #[derive(Component)]
 pub struct SelectedOptionTag;
 
@@ -354,7 +356,7 @@ fn spawn_tile_counter(
                                         button_text_style.clone(),
                                     ));
                                 });
-                                if empty_tiles_count == DEFAULT_EMPTY_COUNT {
+                                if empty_tiles_count == board_properties::DEFAULT_EMPTY_COUNT {
                                     button_entity.insert(SelectedOptionTag);
                                 }
                         }

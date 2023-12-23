@@ -79,12 +79,16 @@ pub fn reset_board(
     mut graphics_event_writer: EventWriter<reset_event::ResetBoardGraphics>,
     mut solved_board_query: Query<&mut TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
-    board_prop_res: Res<BoardProperties>
+    applied_board_prop_query: Query<
+        &BoardProperties, 
+        (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
+    >,
 ){
     for reset_request in reset_listener.read(){
         let mut solved_board = solved_board_query.single_mut();
+        let size = applied_board_prop_query.single().size;
         if reset_request.reroll_solved {
-            *solved_board = generate_solved_board(board_prop_res.size.to_grid_side_length());
+            *solved_board = generate_solved_board(size.to_grid_side_length());
         }
         let solved_grid = &solved_board.grid;
         let mut game_board=game_board_query.single_mut();
@@ -92,7 +96,7 @@ pub fn reset_board(
             let attempt_result=
                 generate_game_board(
                     TileTypeBoard::from_grid(solved_grid), 
-                    board_prop_res.size.to_random_turns_range()
+                    size.to_random_turns_range()
                 );
              //generation successful
             if let Ok(board) = attempt_result { 

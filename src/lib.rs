@@ -57,7 +57,7 @@ pub mod prelude {
         enums::{
             basic_direction::*,
             tile_type::*,
-            board_properties::{
+            board_property_enums::{
                 board_size::*,
                 generation_method::*,
                 wall_tiles_change::*,

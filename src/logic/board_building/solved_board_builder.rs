@@ -12,9 +12,13 @@ impl Plugin for SolvedBoardBuilderPlugin {
 
 fn spawn_solved_board(
     mut commands: Commands,
-    board_prop_res: Res<BoardProperties>,
+    applied_board_prop_query: Query<
+        &BoardProperties, 
+        (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
+    >,
 ){
-    commands.spawn((generate_solved_board(board_prop_res.size.to_grid_side_length()), SolvedBoard));
+    let board_size = applied_board_prop_query.single().size;
+    commands.spawn((generate_solved_board(board_size.to_grid_side_length()), SolvedBoard));
 }
 
 /// public for the sake of testing
