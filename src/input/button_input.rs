@@ -124,6 +124,9 @@ fn handle_menu_buttons(
                     // update applied props
                     let mut applied_props = applied_board_prop_query.single_mut();
                     *applied_props = *planned_board_prop;
+
+                    print_to_console::game_log(GameLog::NewBoardGenerated);
+                    break;
                 },
                 _ => {
                     for (
