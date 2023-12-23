@@ -22,11 +22,11 @@ fn handle_menu_buttons(
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction), 
         (With<SelectedOptionTag>, Without<ApplyButtonTag>)
-        >,
+    >,
     mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
     mut game_state: ResMut<NextState<GameState>>,
     mut board_prop_res: ResMut<BoardProperties>,
-    mut unapplied_to_prop_res: ResMut<UnappliedToBoardProperties>,
+    mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
     mut commands: Commands
 ) {
     for (
@@ -53,13 +53,27 @@ fn handle_menu_buttons(
                 MenuButtonAction::ChangeWallTilesCount(wall_count_action)=> {
                     match wall_count_action{
                         WallTilesChange::Apply=> {
-                            board_prop_res.wall_count = unapplied_to_prop_res.wall_count;
+                            board_prop_res.wall_count = unapplied_menu_wall_count.0;
                         },
                         WallTilesChange::Increase=> {
-                            unapplied_to_prop_res.wall_count += 1;
+                            if unapplied_menu_wall_count.0 < board_prop_res.size.wall_count_upper_bound(){
+                                unapplied_menu_wall_count.0 += 1;
+                            }else{
+                                print_to_console::print_menu_error(
+                                    MenuError::CantGoBeyondTileCountBounds(*wall_count_action)
+                                );
+                                break;
+                            }
                         },
                         WallTilesChange::Decrease=> {
-                            unapplied_to_prop_res.wall_count -= 1;
+                            if unapplied_menu_wall_count.0 > 0{
+                                unapplied_menu_wall_count.0 -= 1;
+                            }else{
+                                print_to_console::print_menu_error(
+                                    MenuError::CantGoBeyondTileCountBounds(*wall_count_action)
+                                );
+                                break;
+                            }
                         }
                     }
                 }

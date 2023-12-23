@@ -12,6 +12,9 @@ pub struct SelectedOptionTag;
 #[derive(Component)]
 pub struct ApplyButtonTag;
 
+#[derive(Component)]
+pub struct WallCountTextTag;
+
 pub struct MenuSpanwerPlugin;
 
 impl Plugin for MenuSpanwerPlugin {
@@ -377,10 +380,12 @@ fn spawn_tile_counter(
                                 (Some(MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Increase)), ">"),
                             ]{
                                 if action.is_none() {
-                                    parent.spawn(TextBundle::from_section(
-                                        text,
-                                        button_text_style.clone(),
-                                    ));    
+                                    parent.spawn((TextBundle::from_section(
+                                            text,
+                                            button_text_style.clone(),
+                                        ),
+                                        WallCountTextTag
+                                    ));  
                                 }else{
                                     let mut arrow_button_entity = parent
                                     .spawn((
@@ -408,11 +413,7 @@ fn spawn_tile_counter(
                                     background_color: menu_graphics::NORMAL_BUTTON.into(),
                                     ..default()
                                 },
-
-
                                 MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),                                
-                                
-                                
                                 SelectedOptionTag,
                                 ApplyButtonTag
                             ));    

@@ -6,6 +6,9 @@ pub struct DespawnElementsWithTag(pub OnScreenTag);
 #[derive (Event, Default)]
 pub struct ToggleVisibilityForElementsWithTag(pub OnScreenTag);
 
+#[derive (Event, Default)]
+pub struct SetMenuElementsToFitCurrent;
+
 
 pub struct ScreenUnloadingEventPlugin;
 
@@ -14,6 +17,7 @@ impl Plugin for ScreenUnloadingEventPlugin {
         app
             .add_event::<DespawnElementsWithTag>()
             .add_event::<ToggleVisibilityForElementsWithTag>()
+            .add_event::<SetMenuElementsToFitCurrent>()
             ;
     }
 }

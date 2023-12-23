@@ -12,8 +12,11 @@ impl Plugin for MenuGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(
-                Update,(update_button_color).run_if(in_state(GameState::Menu)),
-            );
+                Update,(
+                    (update_button_color).run_if(in_state(GameState::Menu)),
+                    (update_wall_tiles_count_visuals).run_if(resource_changed::<UnappliedMenuWallCount>())
+                ))
+            ;
     }
 }
 
@@ -35,10 +38,11 @@ fn update_button_color(
 }
 
 fn update_wall_tiles_count_visuals(
-    unapplied_to_prop_res: Res<UnappliedToBoardProperties>,
-    //TODO: listen for change detection
+    unapplied_menu_wall_count: Res<UnappliedMenuWallCount>,
+    mut wall_count_text_query: Query<&mut Text , With<WallCountTextTag>>
 ){
-    //TODO: have text that appear there spawn with a tag, then fetch it with a query and change it
+    let mut text = wall_count_text_query.single_mut();
+    text.sections[0].value = unapplied_menu_wall_count.0.to_string();
 }
 
 

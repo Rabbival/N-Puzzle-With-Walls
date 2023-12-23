@@ -1,4 +1,9 @@
-use crate::logic::{enums::basic_direction, data_structure::grid_related};
+use crate::logic::{enums::{basic_direction, board_properties::wall_tiles_change}, data_structure::grid_related};
+
+#[derive(Debug)]
+pub enum MenuError{
+    CantGoBeyondTileCountBounds(wall_tiles_change::WallTilesChange)
+}
 
 #[derive(Debug)]
 pub enum BoardGenerationError{

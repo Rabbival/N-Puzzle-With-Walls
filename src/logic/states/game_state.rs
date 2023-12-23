@@ -39,6 +39,7 @@ impl Plugin for GameStatePlugin {
             .add_systems(
                 OnEnter(GameState::Menu), (
                 toggle_visibility_for_menu_screen_elements,
+                set_menu_indicators_to_fit_current
             ))
         ;
     }
@@ -60,4 +61,10 @@ fn toggle_visibility_for_menu_screen_elements(
     mut visibility_toggle_event_writer: EventWriter<ToggleVisibilityForElementsWithTag>
 ){
     visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(OnScreenTag::Menu));
+}
+
+fn set_menu_indicators_to_fit_current(
+    mut event_writer: EventWriter<SetMenuElementsToFitCurrent>
+){
+    event_writer.send(SetMenuElementsToFitCurrent);
 }

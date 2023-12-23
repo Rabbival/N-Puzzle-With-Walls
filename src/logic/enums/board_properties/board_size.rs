@@ -35,6 +35,16 @@ impl BoardSize{
             BoardSize::Giant=> (200, 255),
         }
     }
+
+    pub fn wall_count_upper_bound(&self) -> u8 {
+        match *self{
+            BoardSize::Tiny=> 2,
+            BoardSize::Small=> 6,
+            BoardSize::Medium=> 9,
+            BoardSize::Large=> 18,
+            BoardSize::Giant=> 42,
+        }
+    }
 }
 
 impl fmt::Display for BoardSize {
