@@ -55,6 +55,9 @@ fn handle_menu_buttons(
             match menu_button_action{
                 MenuButtonAction::ChangeSize(new_board_size)=> {
                     planned_board_prop.size = *new_board_size;
+                    if unapplied_menu_wall_count.0 > new_board_size.wall_count_upper_bound(){
+                        unapplied_menu_wall_count.0 = new_board_size.wall_count_upper_bound();
+                    }
                 },
                 MenuButtonAction::ChangeEmptyTilesCount(new_empty_count)=> {
                     planned_board_prop.empty_count = *new_empty_count;
