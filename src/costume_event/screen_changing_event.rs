@@ -13,9 +13,9 @@ pub struct SetPlannedPropertiesToFitCurrent;
 pub struct SetMenuElementsToFitCurrent;
 
 
-pub struct ScreenUnloadingEventPlugin;
+pub struct ScreenChangingEventPlugin;
 
-impl Plugin for ScreenUnloadingEventPlugin {
+impl Plugin for ScreenChangingEventPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<DespawnElementsWithTag>()

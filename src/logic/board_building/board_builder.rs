@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::{print_to_console, error_handler}};
+use crate::{prelude::*, output::{print_to_console, error_handler}, costume_event::board_set_event};
 
 use super::{permutation_builder, brute_force_builder};
 
@@ -22,7 +22,7 @@ impl Plugin for BoardBuilderPlugin {
 
 
 fn spawn_game_board(
-    mut event_listener: EventReader<SpawnBoardWithNewSettings>,
+    mut event_listener: EventReader<board_set_event::SpawnBoardWithNewSettings>,
     solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_prop_query: Query<&BoardProperties, With<AppliedBoardProperties>>,

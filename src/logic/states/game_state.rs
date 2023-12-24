@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, costume_event::screen_changing_event};
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum GameState {
@@ -47,7 +47,7 @@ impl Plugin for GameStatePlugin {
 
 
 fn toggle_visibility_for_game_screen_elements(
-    mut visibility_toggle_event_writer: EventWriter<ToggleVisibilityForElementsWithTag>
+    mut visibility_toggle_event_writer: EventWriter<screen_changing_event::ToggleVisibilityForElementsWithTag>
 ){
     visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(OnScreenTag::Game));
 }
@@ -58,13 +58,13 @@ fn toggle_board_lock(mut game_board_query: Query<&mut TileTypeBoard,With<GameBoa
 }
 
 fn toggle_visibility_for_menu_screen_elements(
-    mut visibility_toggle_event_writer: EventWriter<ToggleVisibilityForElementsWithTag>
+    mut visibility_toggle_event_writer: EventWriter<screen_changing_event::ToggleVisibilityForElementsWithTag>
 ){
     visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(OnScreenTag::Menu));
 }
 
 fn set_menu_indicators_to_fit_current(
-    mut event_writer: EventWriter<SetPlannedPropertiesToFitCurrent>
+    mut event_writer: EventWriter<screen_changing_event::SetPlannedPropertiesToFitCurrent>
 ){
     event_writer.send(SetPlannedPropertiesToFitCurrent);
 }

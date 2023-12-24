@@ -19,7 +19,7 @@ pub mod prelude {
         EventPlugins,
         board_set_event::*,
         move_tile_event::*,
-        screen_unloading_event::*,
+        screen_changing_event::*,
         ui_event::*,
     };
     pub use crate::input::{
@@ -55,9 +55,12 @@ pub mod prelude {
             board_properties::*,
             update_board_properties::*,
         },
-        states::{
-            StatePlugin,
-            game_state::*,
+        data_structure::{
+            grid_related::{
+                grid::*,
+                grid_location::*,
+            },
+            indexed_value::*,
         },
         enums::{
             basic_direction::*,
@@ -69,12 +72,13 @@ pub mod prelude {
                 menu_button_action::*,
             },
         },
-        data_structure::{
-            grid_related::{
-                grid::*,
-                grid_location::*,
-            },
-            indexed_value::*,
+        states::{
+            StatePlugin,
+            game_state::*,
+        },
+        ui_logic::{
+            UiLogicPlugin,
+            menu_ui_logic::*
         },
         board_manager::*,
         tile_dictionary::*,

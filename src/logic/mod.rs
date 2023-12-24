@@ -8,6 +8,7 @@ pub mod tile_dictionary;
 pub mod tile_type_board;
 pub mod board_building;
 pub mod board_props;
+pub mod ui_logic;
 
 pub struct BoardPlugins;
 
@@ -18,6 +19,7 @@ impl Plugin for BoardPlugins {
                 BoardBuildingPlugins,
                 BoardPropsPlugins,
                 BoardManagerPlugin,
+                UiLogicPlugin
             ))
             ;
     }

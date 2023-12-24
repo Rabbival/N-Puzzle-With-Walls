@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, costume_event::screen_changing_event};
 
 pub const DEFAULT_EMPTY_COUNT: u8 = 1;
 pub const DEFAULT_WALL_COUNT: u8 = 0;
@@ -49,8 +49,8 @@ fn create_current_and_planned_board_properties(
 
 /// resets the number in the menu to the current (previously chosen) number
 fn set_menu_elements_to_fit_current_configuration(
-    mut event_writer: EventWriter<SetMenuElementsToFitCurrent>,
-    mut event_listener: EventReader<SetPlannedPropertiesToFitCurrent>,
+    mut event_writer: EventWriter<screen_changing_event::SetMenuElementsToFitCurrent>,
+    mut event_listener: EventReader<screen_changing_event::SetPlannedPropertiesToFitCurrent>,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
     applied_board_prop_query: Query<
         &BoardProperties, 
