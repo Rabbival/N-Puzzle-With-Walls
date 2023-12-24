@@ -1,5 +1,5 @@
 use crate::{prelude::*, costume_event::{ui_event, board_set_event}, output::{print_to_console, graphics::menu_graphics}};
-
+use std::mem;
 
 pub struct UpdateBoardPropertiesPlugin;
 
@@ -28,10 +28,17 @@ fn general_update_planned_board_properties(
         (With<PlannedBoardProperties>, Without<AppliedBoardProperties>)
     >,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
+    mut currently_chosen: Query<
+        (Entity, &mut BackgroundColor, &MenuButtonAction), 
+        (With<SelectedOptionTag>, Without<ApplyButtonTag>)
+    >,
+    mut commands: Commands,
 ){
     for button_event in button_event_listener.read(){
         let mut planned_board_prop = planned_board_prop_query.single_mut();
-        match button_event.action{
+        let menu_button_action = button_event.action;
+        let pressed_button_entity = button_event.entity;
+        match menu_button_action{
             MenuButtonAction::ChangeSize(new_board_size)=> {
                 planned_board_prop.size = new_board_size;
                 if unapplied_menu_wall_count.0 > new_board_size.wall_count_upper_bound(){
@@ -45,6 +52,18 @@ fn general_update_planned_board_properties(
                 planned_board_prop.generation_method = generation_method;
             },
             _=> continue,
+        }
+
+        for (
+            previous_button, 
+            mut previous_color, 
+            menu_button_action_of_chosen
+        ) in currently_chosen.iter_mut(){
+            if mem::discriminant(&menu_button_action) == mem::discriminant(menu_button_action_of_chosen){
+                menu_graphics::set_color_to_normal(&mut previous_color);
+                commands.entity(previous_button).remove::<SelectedOptionTag>();
+                commands.entity(pressed_button_entity).insert(SelectedOptionTag);
+            }  
         }
     }
 }

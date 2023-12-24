@@ -23,11 +23,6 @@ fn handle_menu_buttons(
         (&Interaction, &MenuButtonAction, Entity),
         (Changed<Interaction>, With<Button>),
     >,
-    mut currently_chosen: Query<
-        (Entity, &mut BackgroundColor, &MenuButtonAction), 
-        (With<SelectedOptionTag>, Without<ApplyButtonTag>)
-    >,
-    mut commands: Commands,
 ) {
     for (
         interaction, 
@@ -48,18 +43,6 @@ fn handle_menu_buttons(
                 if mem::discriminant(wall_count_action) != mem::discriminant(&WallTilesChange::Apply){
                     continue;
                 }
-            }
-
-            for (
-                previous_button, 
-                mut previous_color, 
-                menu_button_action_of_chosen
-            ) in currently_chosen.iter_mut(){
-                if mem::discriminant(menu_button_action) == mem::discriminant(menu_button_action_of_chosen){
-                    menu_graphics::set_color_to_normal(&mut previous_color);
-                    commands.entity(previous_button).remove::<SelectedOptionTag>();
-                    commands.entity(entity).insert(SelectedOptionTag);
-                }  
             }
 
             print_to_console::game_log(GameLog::BoardSettingsChanged(menu_button_action));
