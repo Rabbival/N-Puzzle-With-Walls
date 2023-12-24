@@ -86,11 +86,13 @@ fn move_into_empty_from_direction(
 }
 
 fn listen_for_reset(
-    mut input_event_writer: EventWriter<board_set_event::ResetBoardWithCurrentSettings>,
+    mut input_event_writer: EventWriter<board_set_event::ConductANewBoardBuilding>,
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
-        input_event_writer.send(board_set_event::ResetBoardWithCurrentSettings{reroll_solved: false});
+        input_event_writer.send(board_set_event::ConductANewBoardBuilding{
+            reroll_solved: false
+        });
     }
 }
 

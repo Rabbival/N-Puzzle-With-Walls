@@ -7,7 +7,7 @@ impl Plugin for BoardManagerPlugin {
         app    
             .add_systems(Update, (
                     move_tile_logic,
-                    reset_board
+                    conduct_new_board_building
                 )
                 .chain()
                 .in_set(InputSystemSets::InputHandling)
@@ -16,6 +16,30 @@ impl Plugin for BoardManagerPlugin {
     }
 }
 
+pub fn conduct_new_board_building(
+    mut event_listener: EventReader<board_set_event::ConductANewBoardBuilding>,
+    mut graphics_event_writer: EventWriter<board_set_event::MoveExistingTilesGraphics>,
+    
+    //put here event writer for board builder
+
+    existing_tiles: Query<Entity, With<TileType>>
+){
+    for build_conduction_request in event_listener.read(){
+        //make sure the board builder also gets notified 
+        //whether a new solved board should be created
+
+
+
+                // if existing_tiles.iter().len() == 
+        //     power( board_size.to_grid_side_length() )
+        // {
+        // // // // example: graphics_event_writer.send(board_set_event::MoveExistingTilesGraphics); 
+        //     //don't mess with spawns oe despawns
+        // }else{
+        //     //calculate what should be spawned or de and summon their events
+        // }
+    }
+}
 
 /// graphics switched before logic for the sake of graphics function readability
 pub fn move_tile_logic(
@@ -70,38 +94,5 @@ fn check_if_solved(game_board: &mut TileTypeBoard, solved_grid: &Grid<TileType>)
     if game_board.grid == *solved_grid {
         print_to_console::game_log(GameLog::Victory);
         game_board.ignore_player_input=true;
-    }
-}
-
-
-pub fn reset_board(
-    mut reset_listener: EventReader<board_set_event::ResetBoardWithCurrentSettings>,
-    mut graphics_event_writer: EventWriter<board_set_event::MoveExistingTilesGraphics>,
-    mut solved_board_query: Query<&mut TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
-    mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
-    applied_board_prop_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
-){
-    for reset_request in reset_listener.read(){
-        let mut solved_board = solved_board_query.single_mut();
-        let size = applied_board_prop_query.single().size;
-        if reset_request.reroll_solved {
-            *solved_board = generate_solved_board(size.to_grid_side_length());
-        }
-        let solved_grid = &solved_board.grid;
-        let mut game_board=game_board_query.single_mut();
-        for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
-            let attempt_result=
-                generate_game_board(
-                    TileTypeBoard::from_grid(solved_grid), 
-                    size.to_random_turns_range()
-                );
-             //generation successful
-            if let Ok(board) = attempt_result { 
-                *game_board=board;
-                graphics_event_writer.send(board_set_event::MoveExistingTilesGraphics);
-                return;
-            }
-        }
-        print_to_console::couldnt_generate_board();
     }
 }

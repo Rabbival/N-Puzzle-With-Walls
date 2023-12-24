@@ -5,7 +5,7 @@ use crate::prelude::*;
 // impl Plugin for SolvedBoardBuilderPlugin {
 //     fn build(&self, app: &mut App) {
 //         app
-//             .add_systems(PreStartup, generate_solved_board)
+//             .add_systems(Update, generate_solved_board)
 //             ;
 //     }
 // }

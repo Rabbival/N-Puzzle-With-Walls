@@ -15,29 +15,39 @@ impl Plugin for BoardBuilderPlugin {
     fn build(&self, app: &mut App) {
         app
             //important to run before we draw it in graphics.rs
-            .add_systems(Update, spawn_game_board)
+            .add_systems(Update, build_a_new_board)
             ;
     }
 }
 
 
-fn spawn_game_board(
-    mut event_listener: EventReader<board_set_event::SpawnBoardWithNewSettings>,
-    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
-    mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+fn build_a_new_board(
+    //listen to board manager instead
+    //mut event_listener: EventReader<board_set_event::BuildNewBoard>,
+    
+    
+    mut solved_board_query: Query<&mut TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
+    mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_prop_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
 ){
-    for _event in event_listener.read(){
-        let solved_board=solved_board_query.single();
+    for build_request in event_listener.read(){
+        let mut solved_board = solved_board_query.single_mut();
         let board_size = applied_board_prop_query.single().size;
-        let attempt_result=generate_game_board(
-            solved_board.clone(),
-            board_size.to_random_turns_range()
-        );
-        if let Ok(board) = attempt_result { 
-            *game_board_query.single_mut() = board;
+        if build_request.reroll_solved {
+            *solved_board = generate_solved_board(board_size.to_grid_side_length());
         }
-        else{
+        let solved_grid = &solved_board.grid;
+        let mut game_board=game_board_query.single_mut();
+        let attempt_result=
+            generate_game_board(
+                TileTypeBoard::from_grid(solved_grid), 
+                board_size.to_random_turns_range()
+            );
+        //generation successful
+        if let Ok(board) = attempt_result { 
+            *game_board=board;
+            
+        }else{
             print_to_console::couldnt_generate_board();
         }
     }
