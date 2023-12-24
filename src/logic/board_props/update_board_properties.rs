@@ -54,6 +54,7 @@ fn general_update_planned_board_properties(
             _=> continue,
         }
 
+        // take care of selected option tag
         for (
             previous_button, 
             mut previous_color, 
@@ -75,17 +76,36 @@ fn update_wall_count(
         &mut BoardProperties, 
         (With<PlannedBoardProperties>, Without<AppliedBoardProperties>)
     >,
+    mut currently_chosen: Query<
+        (Entity, &mut BackgroundColor, &MenuButtonAction), 
+        (With<SelectedOptionTag>, Without<ApplyButtonTag>)
+    >,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
     mut commands: Commands,
 ){
     for button_event in button_event_listener.read(){
         if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action{
+            let menu_button_action = button_event.action;
+            let pressed_button_entity = button_event.entity;
             let mut planned_board_prop = planned_board_prop_query.single_mut();
             let (apply_button, mut apply_button_color) = apply_button_query.single_mut();
             match wall_count_action{
                 WallTilesChange::Apply=> {
                     planned_board_prop.wall_count = unapplied_menu_wall_count.0;
                     commands.entity(button_event.entity).insert(SelectedOptionTag);
+
+                    // take care of selected option tag
+                    for (
+                        previous_button, 
+                        mut previous_color, 
+                        menu_button_action_of_chosen
+                    ) in currently_chosen.iter_mut(){
+                        if mem::discriminant(&menu_button_action) == mem::discriminant(menu_button_action_of_chosen){
+                            menu_graphics::set_color_to_normal(&mut previous_color);
+                            commands.entity(previous_button).remove::<SelectedOptionTag>();
+                            commands.entity(pressed_button_entity).insert(SelectedOptionTag);
+                        }  
+                    }
                 },
                 WallTilesChange::Increase | WallTilesChange::Decrease=> {
                     menu_graphics::set_color_to_normal(&mut apply_button_color);
