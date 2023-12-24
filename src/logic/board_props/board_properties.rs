@@ -28,7 +28,10 @@ impl Plugin for BoardPropertiesPlugin {
         app
             .init_resource::<UnappliedMenuWallCount>()
             .add_systems(PreStartup, create_current_and_planned_board_properties)
-            .add_systems(Update, set_menu_elements_to_fit_current_configuration)
+            .add_systems(Update, 
+                set_menu_elements_to_fit_current_configuration
+                    .in_set(StateChangeSystemSets::PrepareToHandleStateChange)
+            )
                  
             ;
     }

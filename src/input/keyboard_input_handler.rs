@@ -11,7 +11,7 @@ impl Plugin for KeyboardInputHandlerPlugin {
                         open_menu
                     )
                     .chain()
-                    .in_set(CostumeSystemSets::InputListening)
+                    .in_set(InputSystemSets::InputListening)
                 )
             ;
     }

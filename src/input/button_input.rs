@@ -10,8 +10,10 @@ impl Plugin for ButtonInputPlugin {
                 Update,(
                     handle_menu_buttons, 
                 )
-                .run_if(in_state(GameState::Menu)),
-            );
+                .run_if(in_state(GameState::Menu))
+                .in_set(InputSystemSets::InputListening)
+            )
+            ;
     }
 }
 

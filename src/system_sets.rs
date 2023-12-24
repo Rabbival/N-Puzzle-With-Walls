@@ -1,11 +1,19 @@
 use bevy::prelude::*;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
-pub enum CostumeSystemSets{
+pub enum InputSystemSets{
     InputListening,
     InputHandling,
+    PreparationForChanges,
     ChangesBasedOnInput,
-    PostChangesBasedOnInput
+    PostMainChanges
+}
+
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
+pub enum StateChangeSystemSets{
+    StateChangeListening,
+    PrepareToHandleStateChange,
+    HandleStateChange
 }
 
 pub struct SystemSetsPlugin;
@@ -14,10 +22,16 @@ impl Plugin for SystemSetsPlugin {
     fn build(&self, app: &mut App) {
         app
             .configure_sets(Update,(
-                CostumeSystemSets::InputListening,
-                CostumeSystemSets::InputHandling,
-                CostumeSystemSets::ChangesBasedOnInput,
-                CostumeSystemSets::PostChangesBasedOnInput
+                InputSystemSets::InputListening,
+                InputSystemSets::InputHandling,
+                InputSystemSets::PreparationForChanges,
+                InputSystemSets::ChangesBasedOnInput,
+                InputSystemSets::PostMainChanges
+                ).chain())
+            .configure_sets(Update,(
+                StateChangeSystemSets::StateChangeListening,
+                StateChangeSystemSets::PrepareToHandleStateChange,
+                StateChangeSystemSets::HandleStateChange
                 ).chain())
             ;
     }

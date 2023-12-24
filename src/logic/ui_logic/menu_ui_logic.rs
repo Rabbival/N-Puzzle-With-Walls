@@ -7,11 +7,12 @@ impl Plugin for MenuUiLogicPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Update, (
-                    set_chosen_options_to_fit_current_props,
-                    update_menu_ui_after_press_general,
-                    update_wall_count_menu_ui,
-                    set_applied_props
-                    
+                    set_chosen_options_to_fit_current_props.in_set(StateChangeSystemSets::HandleStateChange),
+                    (
+                        update_menu_ui_after_press_general,
+                        update_wall_count_menu_ui,
+                        set_applied_props
+                    ).in_set(InputSystemSets::InputHandling)
                 )
                 .run_if(in_state(GameState::Menu))
             )

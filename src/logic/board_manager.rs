@@ -10,7 +10,7 @@ impl Plugin for BoardManagerPlugin {
                     reset_board
                 )
                 .chain()
-                .in_set(CostumeSystemSets::InputHandling)
+                .in_set(InputSystemSets::InputHandling)
             )
             ;
     }

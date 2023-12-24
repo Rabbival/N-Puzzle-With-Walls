@@ -12,6 +12,7 @@ impl Plugin for UpdateBoardPropertiesPlugin {
                     )
                     .chain()//chained because count needs size and generation needs everything set
                     .run_if(in_state(GameState::Menu))
+                    .in_set(InputSystemSets::InputHandling)
             )
             ;
     }
@@ -90,6 +91,7 @@ fn update_wall_count(
 
 fn set_applied_props_and_begin_generation(
     mut button_event_listener: EventReader<ui_event::ButtonPressed>,
+    mut spawn_board_event_writer: EventWriter<board_set_event::SpawnBoardWithNewSettings>,
     mut applied_board_prop_query: Query<
         &mut BoardProperties, 
         (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
@@ -98,7 +100,6 @@ fn set_applied_props_and_begin_generation(
         &mut BoardProperties, 
         (With<PlannedBoardProperties>, Without<AppliedBoardProperties>)
     >,
-    mut spawn_board_event_writer: EventWriter<board_set_event::SpawnBoardWithNewSettings>,
     mut game_state: ResMut<NextState<GameState>>,
 ){
     for button_event in button_event_listener.read(){

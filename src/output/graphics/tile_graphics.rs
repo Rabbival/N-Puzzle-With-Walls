@@ -12,7 +12,7 @@ impl Plugin for TileGraphicsPlugin {
                     move_existing_tiles_after_reset,
                 )
                 .chain()
-                .in_set(CostumeSystemSets::ChangesBasedOnInput)
+                .in_set(InputSystemSets::ChangesBasedOnInput)
             )
             ;
     }

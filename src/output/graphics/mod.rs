@@ -20,7 +20,7 @@ impl Plugin for GraphicsPlugin {
                     toggle_visibility_for_entities_with_tag
                 )
                 .chain()
-                .in_set(CostumeSystemSets::ChangesBasedOnInput)
+                .in_set(StateChangeSystemSets::HandleStateChange)
             )
             ;
     }

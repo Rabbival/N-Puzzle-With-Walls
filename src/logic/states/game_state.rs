@@ -24,23 +24,25 @@ impl Plugin for GameStatePlugin {
             .add_state::<GameState>()
             .add_systems(
                 OnExit(GameState::Game), (
-                toggle_visibility_for_game_screen_elements,
+                toggle_visibility_for_game_screen_elements.in_set(StateChangeSystemSets::StateChangeListening),
                 toggle_board_lock
             ))
             .add_systems(
                 OnEnter(GameState::Game), (
-                toggle_visibility_for_game_screen_elements,
+                toggle_visibility_for_game_screen_elements.in_set(StateChangeSystemSets::StateChangeListening),
                 toggle_board_lock
             ))
             .add_systems(
                 OnExit(GameState::Menu), (
-                toggle_visibility_for_menu_screen_elements,
-            ))
+                    toggle_visibility_for_menu_screen_elements,
+                ).in_set(StateChangeSystemSets::StateChangeListening)
+            )
             .add_systems(
                 OnEnter(GameState::Menu), (
-                toggle_visibility_for_menu_screen_elements,
-                set_menu_indicators_to_fit_current
-            ))
+                    toggle_visibility_for_menu_screen_elements,
+                    set_menu_indicators_to_fit_current
+                ).in_set(StateChangeSystemSets::StateChangeListening)
+            )
         ;
     }
 }

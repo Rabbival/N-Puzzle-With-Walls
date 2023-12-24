@@ -17,6 +17,7 @@ impl Plugin for MouseInputHandlerPlugin {
                 )
                 .run_if(in_state(GameState::Game))
                 .chain()
+                .in_set(InputSystemSets::InputListening)
             );
     }
 }
