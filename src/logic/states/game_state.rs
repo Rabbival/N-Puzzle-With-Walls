@@ -7,7 +7,7 @@ pub enum GameState {
     Game
 }
 
-/// tags should only be given to parents as we despawn recursively and visibility is inherited
+/// tags should only be given to parents because visibility is inherited
 #[derive(Component, Default, PartialEq, Eq, Debug)]
 pub enum OnScreenTag{
     #[default]

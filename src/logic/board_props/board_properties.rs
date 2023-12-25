@@ -29,11 +29,19 @@ impl Plugin for BoardPropertiesPlugin {
             .init_resource::<UnappliedMenuWallCount>()
             .add_systems(PreStartup, create_current_and_planned_board_properties)
             .add_systems(Update, 
-                set_menu_elements_to_fit_current_configuration
+                set_planned_props_to_fit_current
                     .in_set(StateChangeSystemSets::PrepareToHandleStateChange)
             )
                  
             ;
+    }
+}
+
+impl BoardProperties{
+    pub fn get_copy_of_max_tiletype(&self) -> TileType{
+        let board_size = self.size.to_grid_side_length();
+        let tile_count = board_size * board_size;
+        TileType::new(Some((tile_count - self.empty_count - self.wall_count) as u32)) 
     }
 }
 
@@ -50,8 +58,8 @@ fn create_current_and_planned_board_properties(
     ));
 }
 
-/// resets the number in the menu to the current (previously chosen) number
-fn set_menu_elements_to_fit_current_configuration(
+/// sets the one that appears in the menu to fit the current configuration
+fn set_planned_props_to_fit_current(
     mut event_writer: EventWriter<screen_changing_event::SetMenuElementsToFitCurrent>,
     mut event_listener: EventReader<screen_changing_event::SetPlannedPropertiesToFitCurrent>,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,

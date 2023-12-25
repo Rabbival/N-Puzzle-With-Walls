@@ -1,17 +1,5 @@
 use crate::prelude::*;
 
-// pub struct SolvedBoardBuilderPlugin;
-
-// impl Plugin for SolvedBoardBuilderPlugin {
-//     fn build(&self, app: &mut App) {
-//         app
-//             .add_systems(Update, generate_solved_board)
-//             ;
-//     }
-// }
-
-
-
 pub fn generate_solved_board(grid_side_length: u8) -> TileTypeBoard{
     let mut solved_board = TileTypeBoard::new(grid_side_length);
     let grid_side_length_u32 = grid_side_length as u32;

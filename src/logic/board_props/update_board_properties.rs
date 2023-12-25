@@ -92,6 +92,7 @@ fn update_wall_count(
 fn set_applied_props_and_begin_generation(
     mut button_event_listener: EventReader<ui_event::ButtonPressed>,
     mut spawn_board_event_writer: EventWriter<board_set_event::BuildNewBoard>,
+    mut spawn_or_despawn_tiles_event_writer: EventWriter<SpawnOrDispawnTiles>,
     mut applied_board_prop_query: Query<
         &mut BoardProperties, 
         (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
@@ -106,11 +107,26 @@ fn set_applied_props_and_begin_generation(
         if let MenuButtonAction::GenerateBoard = button_event.action{
             let planned_board_prop = planned_board_prop_query.single_mut();
             let mut applied_props = applied_board_prop_query.single_mut();
-            *applied_props = *planned_board_prop;
-
+            
             spawn_board_event_writer.send(board_set_event::BuildNewBoard{
                 reroll_solved: true
             });
+            spawn_or_despawn_tiles_event_writer.send(board_set_event::SpawnOrDispawnTiles{
+                max_tiletype: NewAndFormer { 
+                    new: planned_board_prop.get_copy_of_max_tiletype(), 
+                    former: applied_props.get_copy_of_max_tiletype()
+                },
+                empty_count: NewAndFormer { 
+                    new: planned_board_prop.empty_count, 
+                    former: applied_props.empty_count 
+                },
+                wall_count: NewAndFormer { 
+                    new: planned_board_prop.wall_count, 
+                    former: applied_props.wall_count 
+                }
+            });
+            *applied_props = *planned_board_prop;
+
             game_state.set(GameState::Game);
             print_to_console::game_log(GameLog::NewBoardGenerated);
         }

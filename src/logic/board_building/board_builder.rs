@@ -15,7 +15,9 @@ impl Plugin for BoardBuilderPlugin {
     fn build(&self, app: &mut App) {
         app
             //important to run before we draw it in graphics.rs
-            .add_systems(Update, build_a_new_board)
+            .add_systems(Update, 
+                build_a_new_board.in_set(InputSystemSets::ChangesBasedOnInput)
+            )
             ;
     }
 }
@@ -31,10 +33,7 @@ fn build_a_new_board(
         let mut solved_board_entity = solved_board_query.single_mut();
         let board_size = applied_board_prop_query.single().size;
         if build_request.reroll_solved {
-            let new_solved_board = generate_solved_board(board_size.to_grid_side_length());
-            //calculate the difference in tiles of different types here 
-            //then change an object of differences and have graphics listen to changes in it
-            *solved_board_entity = new_solved_board;
+            *solved_board_entity = generate_solved_board(board_size.to_grid_side_length());
         }
         let solved_grid = &solved_board_entity.grid;
         let mut game_board=game_board_query.single_mut();

@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::tile_dictionary, costume_event::move_tile_event};
+use crate::{prelude::*, logic::tile_dictionary, costume_event::{move_tile_event, board_set_event}};
 use bevy::{prelude::*, utils::HashMap};
 
 pub struct TileGraphicsPlugin;
@@ -8,17 +8,73 @@ impl Plugin for TileGraphicsPlugin {
         app
             //.add_systems(PostStartup, spawn_tiles)
             .add_systems(Update, (
-                    switch_tile_entity_positions,
-                    //on change: move_existing_tiles_after_reset,
+                switch_tile_entity_positions
+                    .in_set(InputSystemSets::ChangesBasedOnInput),
+                (
+                    move_existing_tiles,
+                    spawn_or_despawn_tiles,
                 )
                 .chain()
-                .in_set(InputSystemSets::ChangesBasedOnInput)
-            )
+                .in_set(InputSystemSets::PostMainChanges)
+            ))
             ;
     }
 }
 
-fn spawn_tiles(
+
+fn move_existing_tiles(
+    mut event_listener: EventReader<board_set_event::BuildNewBoard>,
+    mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
+    tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
+    mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
+){
+    for _event in event_listener.read(){
+        if let Err(error) = move_existing_tiles_after_reset_inner(
+            &mut board_query.single_mut().grid,
+            &tile_dictionary.single().entity_by_tile_type,
+            &mut tile_transforms
+        ){
+            print_entity_related_error(error);
+        }
+    }
+}
+
+fn move_existing_tiles_after_reset_inner(
+    grid: &mut Grid<TileType>,
+    tile_dictionary: &HashMap<TileType,Option<Entity>>,
+    tile_transforms: &mut Query<(&mut Transform, With<TileType>)>,
+)-> Result<(),EntityRelatedCustomError>
+{
+    for (grid_location, cell_reference) in grid.iter_mut(){
+        if let Some(tile_type_from_cell) = cell_reference{
+            let spawn_location_before_atlas_square_size=grid_location.to_world();
+            match tile_dictionary.get(tile_type_from_cell){
+                None=> { return Err(EntityRelatedCustomError::ItemNotInMap
+                    (ItemNotFoundInMapError::EntityNotFoundInMap)); },
+                Some(optional_entity)=> { 
+                    match optional_entity{
+                        None=>{return Err(EntityRelatedCustomError::NoEntity);},
+                        Some(entity)=>{
+                            if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
+                                tile_transform.0.translation= Vec3::new(
+                                    spawn_location_before_atlas_square_size.x, 
+                                    spawn_location_before_atlas_square_size.y, 
+                                    0.0
+                                );
+                            }else{
+                                return Err(EntityRelatedCustomError::EntityNotInQuery);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn spawn_or_despawn_tiles(
+    mut event_listener: EventReader<SpawnOrDispawnTiles>,
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
     font: Res<TileTextFont>,
@@ -142,56 +198,4 @@ fn extract_tile_entity(
             }
         }
     }
-}
-
-
-fn move_existing_tiles_after_reset(
-
-    //listen to changes in difference between board object
-    
-    mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
-    tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
-    mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
-){
-    if let Err(error) = move_existing_tiles_after_reset_inner(
-        &mut board_query.single_mut().grid,
-        &tile_dictionary.single().entity_by_tile_type,
-        &mut tile_transforms
-    ){
-        print_entity_related_error(error);
-    }
-}
-
-fn move_existing_tiles_after_reset_inner(
-    grid: &mut Grid<TileType>,
-    tile_dictionary: &HashMap<TileType,Option<Entity>>,
-    tile_transforms: &mut Query<(&mut Transform, With<TileType>)>,
-)-> Result<(),EntityRelatedCustomError>
-{
-    for (grid_location, cell_reference) in grid.iter_mut(){
-        if let Some(tile_type_from_cell) = cell_reference{
-            let spawn_location_before_atlas_square_size=grid_location.to_world();
-            match tile_dictionary.get(tile_type_from_cell){
-                None=> { return Err(EntityRelatedCustomError::ItemNotInMap
-                    (ItemNotFoundInMapError::EntityNotFoundInMap)); },
-                Some(optional_entity)=> { 
-                    match optional_entity{
-                        None=>{return Err(EntityRelatedCustomError::NoEntity);},
-                        Some(entity)=>{
-                            if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
-                                tile_transform.0.translation= Vec3::new(
-                                    spawn_location_before_atlas_square_size.x, 
-                                    spawn_location_before_atlas_square_size.y, 
-                                    0.0
-                                );
-                            }else{
-                                return Err(EntityRelatedCustomError::EntityNotInQuery);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    Ok(())
 }

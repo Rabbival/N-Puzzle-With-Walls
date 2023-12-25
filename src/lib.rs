@@ -48,7 +48,7 @@ pub mod prelude {
             board_builder::*,
             permutation_builder::*,
             brute_force_builder::*,
-            deafult_boards_spawner::*,
+            board_entities_spawner::*,
         },
         board_props::{
             BoardPropsPlugins,
@@ -61,6 +61,7 @@ pub mod prelude {
                 grid_location::*,
             },
             indexed_value::*,
+            new_and_former::*,
         },
         enums::{
             basic_direction::*,
