@@ -91,7 +91,7 @@ fn update_wall_count(
 
 fn set_applied_props_and_begin_generation(
     mut button_event_listener: EventReader<ui_event::ButtonPressed>,
-    mut spawn_board_event_writer: EventWriter<board_set_event::ConductANewBoardBuilding>,
+    mut spawn_board_event_writer: EventWriter<board_set_event::BuildNewBoard>,
     mut applied_board_prop_query: Query<
         &mut BoardProperties, 
         (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
@@ -108,7 +108,7 @@ fn set_applied_props_and_begin_generation(
             let mut applied_props = applied_board_prop_query.single_mut();
             *applied_props = *planned_board_prop;
 
-            spawn_board_event_writer.send(board_set_event::ConductANewBoardBuilding{
+            spawn_board_event_writer.send(board_set_event::BuildNewBoard{
                 reroll_solved: true
             });
             game_state.set(GameState::Game);

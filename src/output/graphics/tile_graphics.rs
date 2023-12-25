@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::tile_dictionary, costume_event::{board_set_event, move_tile_event}};
+use crate::{prelude::*, logic::tile_dictionary, costume_event::move_tile_event};
 use bevy::{prelude::*, utils::HashMap};
 
 pub struct TileGraphicsPlugin;
@@ -6,10 +6,10 @@ pub struct TileGraphicsPlugin;
 impl Plugin for TileGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(PostStartup, spawn_tiles)
+            //.add_systems(PostStartup, spawn_tiles)
             .add_systems(Update, (
                     switch_tile_entity_positions,
-                    move_existing_tiles_after_reset,
+                    //on change: move_existing_tiles_after_reset,
                 )
                 .chain()
                 .in_set(InputSystemSets::ChangesBasedOnInput)
@@ -146,19 +146,19 @@ fn extract_tile_entity(
 
 
 fn move_existing_tiles_after_reset(
-    mut graphics_reset_listener: EventReader<board_set_event::MoveExistingTilesGraphics>,
+
+    //listen to changes in difference between board object
+    
     mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
     mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
 ){
-    for _reset_request in graphics_reset_listener.read(){
-        if let Err(error) = move_existing_tiles_after_reset_inner(
-            &mut board_query.single_mut().grid,
-            &tile_dictionary.single().entity_by_tile_type,
-            &mut tile_transforms
-        ){
-            print_entity_related_error(error);
-        }
+    if let Err(error) = move_existing_tiles_after_reset_inner(
+        &mut board_query.single_mut().grid,
+        &tile_dictionary.single().entity_by_tile_type,
+        &mut tile_transforms
+    ){
+        print_entity_related_error(error);
     }
 }
 

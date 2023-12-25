@@ -22,21 +22,21 @@ impl Plugin for BoardBuilderPlugin {
 
 
 fn build_a_new_board(
-    //listen to board manager instead
-    //mut event_listener: EventReader<board_set_event::BuildNewBoard>,
-    
-    
+    mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     mut solved_board_query: Query<&mut TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_prop_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
 ){
     for build_request in event_listener.read(){
-        let mut solved_board = solved_board_query.single_mut();
+        let mut solved_board_entity = solved_board_query.single_mut();
         let board_size = applied_board_prop_query.single().size;
         if build_request.reroll_solved {
-            *solved_board = generate_solved_board(board_size.to_grid_side_length());
+            let new_solved_board = generate_solved_board(board_size.to_grid_side_length());
+            //calculate the difference in tiles of different types here 
+            //then change an object of differences and have graphics listen to changes in it
+            *solved_board_entity = new_solved_board;
         }
-        let solved_grid = &solved_board.grid;
+        let solved_grid = &solved_board_entity.grid;
         let mut game_board=game_board_query.single_mut();
         let attempt_result=
             generate_game_board(

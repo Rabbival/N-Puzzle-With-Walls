@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::{error_handler, print_to_console}, costume_event::{board_set_event, move_tile_event}};
+use crate::{prelude::*, output::{error_handler, print_to_console}, costume_event::move_tile_event};
 
 pub struct BoardManagerPlugin;
 
@@ -7,37 +7,12 @@ impl Plugin for BoardManagerPlugin {
         app    
             .add_systems(Update, (
                     move_tile_logic,
-                    conduct_new_board_building
+                    
                 )
                 .chain()
                 .in_set(InputSystemSets::InputHandling)
             )
             ;
-    }
-}
-
-pub fn conduct_new_board_building(
-    mut event_listener: EventReader<board_set_event::ConductANewBoardBuilding>,
-    mut graphics_event_writer: EventWriter<board_set_event::MoveExistingTilesGraphics>,
-    
-    //put here event writer for board builder
-
-    existing_tiles: Query<Entity, With<TileType>>
-){
-    for build_conduction_request in event_listener.read(){
-        //make sure the board builder also gets notified 
-        //whether a new solved board should be created
-
-
-
-                // if existing_tiles.iter().len() == 
-        //     power( board_size.to_grid_side_length() )
-        // {
-        // // // // example: graphics_event_writer.send(board_set_event::MoveExistingTilesGraphics); 
-        //     //don't mess with spawns oe despawns
-        // }else{
-        //     //calculate what should be spawned or de and summon their events
-        // }
     }
 }
 
