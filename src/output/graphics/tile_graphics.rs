@@ -139,7 +139,7 @@ fn spawn_tiles(
                 texture_atlas: sprite_atlas.0.clone(),
                 sprite: TextureAtlasSprite::new(tile_type_to_spawn.to_atlas_index()),
                 transform: Transform::from_translation(spawn_location),
-                visibility: Visibility::Hidden, //so entering game on launch toggles is visible
+                visibility: Visibility::Visible,
                 ..default()
             },
             TileBundle{
