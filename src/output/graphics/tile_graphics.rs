@@ -1,6 +1,9 @@
 use crate::{prelude::*, logic::tile_dictionary, costume_event::{move_tile_event, board_set_event}};
 use bevy::{prelude::*, utils::HashMap};
 
+#[derive(Component)]
+pub struct StayForNextBoardTag;
+
 pub struct TileGraphicsPlugin;
 
 impl Plugin for TileGraphicsPlugin {
@@ -12,8 +15,8 @@ impl Plugin for TileGraphicsPlugin {
                     .in_set(InputSystemSets::ChangesBasedOnInput),
                 (
                     move_existing_tiles,
-                    spawn_or_despawn_tiles,
-                    (spawn_tiles,despawn_tiles)
+                    despawn_unused_tiles_and_clear_tag,
+                    spawn_tiles,   
                 )
                 .chain()
                 .in_set(InputSystemSets::PostMainChanges)
@@ -28,43 +31,58 @@ fn move_existing_tiles(
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
-    mut tile_transforms: Query<(&mut Transform, With<TileType>)>,
+    mut tile_transforms: Query<&mut Transform, With<TileType>>,
+    mut commands: Commands
 ){
-    for _event in event_listener.read(){
-        if let Err(error) = move_existing_tiles_after_reset_inner(
-            event_writer,
+    for event in event_listener.read(){
+        if let Err(error) = move_existing_tiles_inner(
+            &mut event_writer,
+            &event.reroll_solved,
             &mut board_query.single_mut().grid,
             &tile_dictionary.single().entity_by_tile_type,
-            &mut tile_transforms
+            &mut tile_transforms,
+            &mut commands
         ){
             print_entity_related_error(error);
         }
     }
 }
 
-fn move_existing_tiles_after_reset_inner(
-    mut event_writer: EventWriter<board_set_event::SpawnTileInLocation>,
+fn move_existing_tiles_inner(
+    event_writer: &mut EventWriter<board_set_event::SpawnTileInLocation>,
+    solved_rerolled: &bool,
     grid: &mut Grid<TileType>,
     tile_dictionary: &HashMap<TileType,Option<Entity>>,
-    tile_transforms: &mut Query<(&mut Transform, With<TileType>)>,
+    tile_transforms: &mut Query<&mut Transform, With<TileType>>,
+    commands: &mut Commands
 )-> Result<(),EntityRelatedCustomError>
 {
     for (grid_location, cell_reference) in grid.iter_mut(){
         if let Some(tile_type_from_cell) = cell_reference{
-            let spawn_location_before_atlas_square_size=grid_location.to_world();
+            let spawn_location=grid_location.to_world();
             match tile_dictionary.get(tile_type_from_cell){
-                None=> { return Err(EntityRelatedCustomError::ItemNotInMap
-                    (ItemNotFoundInMapError::EntityNotFoundInMap)); },
+                // the tile doesn't exist yet and thus should be created there when we're done
+                None=> { 
+                    if *solved_rerolled {
+                        event_writer.send(board_set_event::SpawnTileInLocation{
+                            tiletype: *tile_type_from_cell,
+                            location: spawn_location
+                        })
+                    }else{
+                        return Err(EntityRelatedCustomError::ItemNotInMap
+                            (ItemNotFoundInMapError::EntityNotFoundInMap));
+                    }
+                 },
+                // the tile exists and should therefore be moved
                 Some(optional_entity)=> { 
                     match optional_entity{
                         None=>{return Err(EntityRelatedCustomError::NoEntity);},
                         Some(entity)=>{
                             if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
-                                tile_transform.0.translation= Vec3::new(
-                                    spawn_location_before_atlas_square_size.x, 
-                                    spawn_location_before_atlas_square_size.y, 
-                                    0.0
-                                );
+                                tile_transform.translation= spawn_location;
+                                if *solved_rerolled{
+                                    commands.entity(*entity).insert(StayForNextBoardTag);
+                                }
                             }else{
                                 return Err(EntityRelatedCustomError::EntityNotInQuery);
                             }
@@ -77,80 +95,85 @@ fn move_existing_tiles_after_reset_inner(
     Ok(())
 }
 
-
-fn spawn_or_despawn_tiles(
-    mut event_listener: EventReader<SpawnOrDispawnTiles>,
-    mut commands: Commands,
-    sprite_atlas: Res<SpriteAtlas>,
-    font: Res<TileTextFont>,
-    mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
-    mut tile_dictionary: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
+fn despawn_unused_tiles_and_clear_tag(
+    tagged_tiles: Query<Entity, With<TileType>>,
+    untagged_tiles: Query<Entity, With<TileType>>,
+    mut commands: Commands
 ){
-    for spawn_or_despawn_request in event_listener.read(){
-        let mut tile_dictionary_instance=tile_dictionary.single_mut();
-        for (grid_location, cell_reference) in board_query.single_mut().grid.iter_mut(){
-            if let Some(tile_type_from_cell) = cell_reference{
-                let grid_location_in_world=grid_location.to_world();
-                let tile_spawn_location=Vec3::new(
-                    grid_location_in_world.x,
-                    grid_location_in_world.y,
-                    0.0
-                );
-                let text_spawn_loc_relative=Vec3::Z;
-
-                let tile_entity_id=commands.spawn((
-                    SpriteSheetBundle {
-                        texture_atlas: sprite_atlas.0.clone(),
-                        sprite: TextureAtlasSprite::new(tile_type_from_cell.to_atlas_index()),
-                        transform: Transform::from_translation(tile_spawn_location),
-                        visibility: Visibility::Hidden, //so entering game on launch toggles is visible
-                        ..default()
-                    },
-                    TileBundle{
-                        tile_type: *tile_type_from_cell,
-                        tag: OnScreenTag::Game
-                    }
-                )).with_children(|parent|{
-                    parent.spawn(Text2dBundle {
-                        text: Text {
-                            sections: vec![TextSection::new(
-                                    match tile_type_from_cell.to_number(){
-                                        None=> String::from(""),
-                                        Some(number)=> number.to_string()
-                                    },
-                                    TextStyle {
-                                        font: font.0.clone(),
-                                        font_size: 29.0,
-                                        color: Color::INDIGO
-                                    }
-                                )],
-                            alignment: TextAlignment::Center,
-                            linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
-                        },
-                        transform: Transform::from_translation(text_spawn_loc_relative),
-                        ..default()
-                    });
-                }).id();
-
-                tile_dictionary_instance.entity_by_tile_type.insert(
-                    *tile_type_from_cell, 
-                    Some(tile_entity_id)
-                );
-            }
-        }
+    // if the solved board didn't reroll and thus none was tagged and none shall spawn
+    if tagged_tiles.is_empty(){
+        return;
+    }
+    // delete all unused
+    for tile_entity in untagged_tiles.iter(){
+        commands.entity(tile_entity).despawn_recursive();
+    }
+    // delete tags from the ones left
+    for tile_entity in tagged_tiles.iter(){
+        commands.entity(tile_entity).remove::<StayForNextBoardTag>();
     }
 }
 
-//listen to spawn or dis
-fn spawn_tiles(){
+fn spawn_tiles(
+    mut event_listener: EventReader<board_set_event::SpawnTileInLocation>,
+    mut commands: Commands,
+    sprite_atlas: Res<SpriteAtlas>,
+    font: Res<TileTextFont>,
+    mut tile_dictionary: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
+){
+    if event_listener.is_empty(){
+        return;
+    }
+    let mut tile_dictionary_instance=tile_dictionary.single_mut();
+    for spawn_request in event_listener.read(){
+        let tile_type_to_spawn = spawn_request.tiletype;
+        let spawn_location = Vec3::new(
+            spawn_request.location.x,
+            spawn_request.location.y,
+            0.0
+        );
+        let text_spawn_loc_relative=Vec3::Z;        
 
+        let tile_entity_id=commands.spawn((
+            SpriteSheetBundle {
+                texture_atlas: sprite_atlas.0.clone(),
+                sprite: TextureAtlasSprite::new(tile_type_to_spawn.to_atlas_index()),
+                transform: Transform::from_translation(spawn_location),
+                visibility: Visibility::Hidden, //so entering game on launch toggles is visible
+                ..default()
+            },
+            TileBundle{
+                tile_type: tile_type_to_spawn,
+                tag: OnScreenTag::Game
+            }
+        )).with_children(|parent|{
+            parent.spawn(Text2dBundle {
+                text: Text {
+                    sections: vec![TextSection::new(
+                            match tile_type_to_spawn.to_number(){
+                                None=> String::from(""),
+                                Some(number)=> number.to_string()
+                            },
+                            TextStyle {
+                                font: font.0.clone(),
+                                font_size: 29.0,
+                                color: Color::INDIGO
+                            }
+                        )],
+                    alignment: TextAlignment::Center,
+                    linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
+                },
+                transform: Transform::from_translation(text_spawn_loc_relative),
+                ..default()
+            });
+        }).id();
+
+        tile_dictionary_instance.entity_by_tile_type.insert(
+            tile_type_to_spawn, 
+            Some(tile_entity_id)
+        );
+    }
 }
-
-//listen to spawn or dis
-fn despawn_tiles(){
-
-}
-
 
 
 fn switch_tile_entity_positions(

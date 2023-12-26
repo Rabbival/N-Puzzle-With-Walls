@@ -10,7 +10,7 @@ pub struct BuildNewBoard{
 #[derive (Event, Default)]
 pub struct SpawnTileInLocation{
     pub tiletype: TileType,
-    pub location: GridLocation
+    pub location: Vec3
 }
 
 pub struct ResetEventPlugin;
