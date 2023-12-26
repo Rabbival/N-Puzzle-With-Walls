@@ -1,6 +1,4 @@
-use bevy::prelude::*;
-
-use crate::prelude::{TileType, NewAndFormer};
+use crate::prelude::*;
 
 
 #[derive (Event, Default)]
@@ -10,10 +8,9 @@ pub struct BuildNewBoard{
 
 /// contains the current and previous values
 #[derive (Event, Default)]
-pub struct SpawnOrDispawnTiles{
-    pub max_tiletype: NewAndFormer<TileType>,
-    pub empty_count: NewAndFormer<u8>,
-    pub wall_count: NewAndFormer<u8>
+pub struct SpawnTileInLocation{
+    pub tiletype: TileType,
+    pub location: GridLocation
 }
 
 pub struct ResetEventPlugin;
@@ -22,7 +19,7 @@ impl Plugin for ResetEventPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<BuildNewBoard>()
-            .add_event::<SpawnOrDispawnTiles>()
+            .add_event::<SpawnTileInLocation>()
             ;
     }
 }

@@ -13,6 +13,7 @@ impl Plugin for TileGraphicsPlugin {
                 (
                     move_existing_tiles,
                     spawn_or_despawn_tiles,
+                    (spawn_tiles,despawn_tiles)
                 )
                 .chain()
                 .in_set(InputSystemSets::PostMainChanges)
@@ -23,6 +24,7 @@ impl Plugin for TileGraphicsPlugin {
 
 
 fn move_existing_tiles(
+    mut event_writer: EventWriter<board_set_event::SpawnTileInLocation>,
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
@@ -30,6 +32,7 @@ fn move_existing_tiles(
 ){
     for _event in event_listener.read(){
         if let Err(error) = move_existing_tiles_after_reset_inner(
+            event_writer,
             &mut board_query.single_mut().grid,
             &tile_dictionary.single().entity_by_tile_type,
             &mut tile_transforms
@@ -40,6 +43,7 @@ fn move_existing_tiles(
 }
 
 fn move_existing_tiles_after_reset_inner(
+    mut event_writer: EventWriter<board_set_event::SpawnTileInLocation>,
     grid: &mut Grid<TileType>,
     tile_dictionary: &HashMap<TileType,Option<Entity>>,
     tile_transforms: &mut Query<(&mut Transform, With<TileType>)>,
@@ -73,6 +77,7 @@ fn move_existing_tiles_after_reset_inner(
     Ok(())
 }
 
+
 fn spawn_or_despawn_tiles(
     mut event_listener: EventReader<SpawnOrDispawnTiles>,
     mut commands: Commands,
@@ -81,58 +86,71 @@ fn spawn_or_despawn_tiles(
     mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     mut tile_dictionary: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
 ){
-    let mut tile_dictionary_instance=tile_dictionary.single_mut();
-    for (grid_location, cell_reference) in board_query.single_mut().grid.iter_mut(){
-        if let Some(tile_type_from_cell) = cell_reference{
-            let grid_location_in_world=grid_location.to_world();
-            let tile_spawn_location=Vec3::new(
-                grid_location_in_world.x,
-                grid_location_in_world.y,
-                0.0
-            );
-            let text_spawn_loc_relative=Vec3::Z;
+    for spawn_or_despawn_request in event_listener.read(){
+        let mut tile_dictionary_instance=tile_dictionary.single_mut();
+        for (grid_location, cell_reference) in board_query.single_mut().grid.iter_mut(){
+            if let Some(tile_type_from_cell) = cell_reference{
+                let grid_location_in_world=grid_location.to_world();
+                let tile_spawn_location=Vec3::new(
+                    grid_location_in_world.x,
+                    grid_location_in_world.y,
+                    0.0
+                );
+                let text_spawn_loc_relative=Vec3::Z;
 
-            let tile_entity_id=commands.spawn((
-                SpriteSheetBundle {
-                    texture_atlas: sprite_atlas.0.clone(),
-                    sprite: TextureAtlasSprite::new(tile_type_from_cell.to_atlas_index()),
-                    transform: Transform::from_translation(tile_spawn_location),
-                    visibility: Visibility::Hidden, //so entering game on launch toggles is visible
-                    ..default()
-                },
-                TileBundle{
-                    tile_type: *tile_type_from_cell,
-                    tag: OnScreenTag::Game
-                }
-            )).with_children(|parent|{
-                parent.spawn(Text2dBundle {
-                    text: Text {
-                        sections: vec![TextSection::new(
-                                match tile_type_from_cell.to_number(){
-                                    None=> String::from(""),
-                                    Some(number)=> number.to_string()
-                                },
-                                TextStyle {
-                                    font: font.0.clone(),
-                                    font_size: 29.0,
-                                    color: Color::INDIGO
-                                }
-                            )],
-                        alignment: TextAlignment::Center,
-                        linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
+                let tile_entity_id=commands.spawn((
+                    SpriteSheetBundle {
+                        texture_atlas: sprite_atlas.0.clone(),
+                        sprite: TextureAtlasSprite::new(tile_type_from_cell.to_atlas_index()),
+                        transform: Transform::from_translation(tile_spawn_location),
+                        visibility: Visibility::Hidden, //so entering game on launch toggles is visible
+                        ..default()
                     },
-                    transform: Transform::from_translation(text_spawn_loc_relative),
-                    ..default()
-                });
-            }).id();
+                    TileBundle{
+                        tile_type: *tile_type_from_cell,
+                        tag: OnScreenTag::Game
+                    }
+                )).with_children(|parent|{
+                    parent.spawn(Text2dBundle {
+                        text: Text {
+                            sections: vec![TextSection::new(
+                                    match tile_type_from_cell.to_number(){
+                                        None=> String::from(""),
+                                        Some(number)=> number.to_string()
+                                    },
+                                    TextStyle {
+                                        font: font.0.clone(),
+                                        font_size: 29.0,
+                                        color: Color::INDIGO
+                                    }
+                                )],
+                            alignment: TextAlignment::Center,
+                            linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
+                        },
+                        transform: Transform::from_translation(text_spawn_loc_relative),
+                        ..default()
+                    });
+                }).id();
 
-            tile_dictionary_instance.entity_by_tile_type.insert(
-                *tile_type_from_cell, 
-                Some(tile_entity_id)
-            );
+                tile_dictionary_instance.entity_by_tile_type.insert(
+                    *tile_type_from_cell, 
+                    Some(tile_entity_id)
+                );
+            }
         }
     }
 }
+
+//listen to spawn or dis
+fn spawn_tiles(){
+
+}
+
+//listen to spawn or dis
+fn despawn_tiles(){
+
+}
+
 
 
 fn switch_tile_entity_positions(

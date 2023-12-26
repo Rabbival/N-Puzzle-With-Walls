@@ -11,7 +11,7 @@ pub enum BoardGenerationError{
     DirectionCouldntBeFlipped,
     ItemNotInMap(ItemNotFoundInMapError),
     TileMoveError,
-    GridError(GridError)
+    GridError(GridError),
 }
 
 #[derive(Debug)]

@@ -61,7 +61,6 @@ pub mod prelude {
                 grid_location::*,
             },
             indexed_value::*,
-            new_and_former::*,
         },
         enums::{
             basic_direction::*,
