@@ -29,23 +29,33 @@ fn general_update_planned_board_properties(
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
 ){
     for button_event in button_event_listener.read(){
-        let mut planned_board_prop = planned_board_prop_query.single_mut();
-        let menu_button_action = button_event.action;
-        match menu_button_action{
-            MenuButtonAction::ChangeSize(new_board_size)=> {
-                planned_board_prop.size = new_board_size;
-                if unapplied_menu_wall_count.0 > new_board_size.wall_count_upper_bound(){
-                    unapplied_menu_wall_count.0 = new_board_size.wall_count_upper_bound();
-                }
-            },
-            MenuButtonAction::ChangeEmptyTilesCount(new_empty_count)=> {
-                planned_board_prop.empty_count = new_empty_count;
-            },
-            MenuButtonAction::ChangeGenerationMethod(generation_method)=> {
-                planned_board_prop.generation_method = generation_method;
-            },
-            _=> continue,
-        }
+        general_update_planned_board_properties_inner(
+            &button_event.action,
+            &mut planned_board_prop_query.single_mut(),
+            &mut unapplied_menu_wall_count
+        );
+    }
+}
+
+fn general_update_planned_board_properties_inner(
+    menu_button_action: &MenuButtonAction,
+    planned_board_prop: &mut BoardProperties,
+    unapplied_menu_wall_count: &mut UnappliedMenuWallCount,
+){
+    match menu_button_action{
+        MenuButtonAction::ChangeSize(new_board_size)=> {
+            planned_board_prop.size = *new_board_size;
+            if unapplied_menu_wall_count.0 > new_board_size.wall_count_upper_bound(){
+                unapplied_menu_wall_count.0 = new_board_size.wall_count_upper_bound();
+            }
+        },
+        MenuButtonAction::ChangeEmptyTilesCount(new_empty_count)=> {
+            planned_board_prop.empty_count = *new_empty_count;
+        },
+        MenuButtonAction::ChangeGenerationMethod(generation_method)=> {
+            planned_board_prop.generation_method = *generation_method;
+        },
+        _=> {},
     }
 }
 
@@ -59,32 +69,43 @@ fn update_wall_count(
 ){
     for button_event in button_event_listener.read(){
         if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action{
-            let mut planned_board_prop = planned_board_prop_query.single_mut();
-            match wall_count_action{
-                WallTilesChange::Apply=> {
-                    planned_board_prop.wall_count = unapplied_menu_wall_count.0;
-                },
-                WallTilesChange::Increase | WallTilesChange::Decrease=> {
-                    if let WallTilesChange::Increase = wall_count_action{
-                        if unapplied_menu_wall_count.0 < planned_board_prop.size.wall_count_upper_bound(){
-                            unapplied_menu_wall_count.0 += 1;
-                        }else{
-                            print_to_console::print_menu_error(
-                                MenuError::CantGoBeyondTileCountBounds(wall_count_action)
-                            );
-                        }
-                    }else{
-                        if unapplied_menu_wall_count.0 > 0{
-                            unapplied_menu_wall_count.0 -= 1;
-                        }else{
-                            print_to_console::print_menu_error(
-                                MenuError::CantGoBeyondTileCountBounds(wall_count_action)
-                            );
-                        }
-                    }
+            update_wall_count_inner(
+                &wall_count_action,
+                &mut planned_board_prop_query.single_mut(),
+                &mut unapplied_menu_wall_count
+            );
+        }      
+    }
+}
+
+fn update_wall_count_inner(
+    wall_count_action: &WallTilesChange,
+    planned_board_prop: &mut BoardProperties,
+    unapplied_menu_wall_count: &mut UnappliedMenuWallCount,
+){
+    match wall_count_action{
+        WallTilesChange::Apply=> {
+            planned_board_prop.wall_count = unapplied_menu_wall_count.0;
+        },
+        WallTilesChange::Increase | WallTilesChange::Decrease=> {
+            if let WallTilesChange::Increase = wall_count_action{
+                if unapplied_menu_wall_count.0 < planned_board_prop.size.wall_count_upper_bound(){
+                    unapplied_menu_wall_count.0 += 1;
+                }else{
+                    print_to_console::print_menu_error(
+                        MenuError::CantGoBeyondTileCountBounds(*wall_count_action)
+                    );
+                }
+            }else{
+                if unapplied_menu_wall_count.0 > 0{
+                    unapplied_menu_wall_count.0 -= 1;
+                }else{
+                    print_to_console::print_menu_error(
+                        MenuError::CantGoBeyondTileCountBounds(*wall_count_action)
+                    );
                 }
             }
-        }      
+        }
     }
 }
 
@@ -119,5 +140,147 @@ fn set_applied_props_and_begin_generation(
             game_state.set(GameState::Game);
             print_to_console::game_log(GameLog::NewBoardGenerated);
         }
+    }
+}
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const DECREASE_REQUEST: WallTilesChange = WallTilesChange::Decrease;
+    const INCREASE_REQUEST: WallTilesChange = WallTilesChange::Increase;
+
+    #[test]
+    fn check_wall_count_cant_go_down_from_zero(){
+        assert!(try_going_down_from_zero(
+            &mut UnappliedMenuWallCount(0),
+            &mut BoardProperties::default()
+        ));
+        assert!(try_going_up_from_zero(
+            &mut UnappliedMenuWallCount(0),
+            &mut BoardProperties::default()
+        ))
+    }
+
+    fn try_going_down_from_zero(
+        current_unapplied_wall_count: &mut UnappliedMenuWallCount,
+        planned_board_prop: &mut BoardProperties
+    )-> bool {
+        update_wall_count_inner(
+            &DECREASE_REQUEST,
+            planned_board_prop,
+            current_unapplied_wall_count,
+        );
+        current_unapplied_wall_count.0 == 0
+    }
+
+    fn try_going_up_from_zero(
+        current_unapplied_wall_count: &mut UnappliedMenuWallCount,
+        planned_board_prop: &mut BoardProperties
+    )-> bool {
+        update_wall_count_inner(
+            &INCREASE_REQUEST,
+            planned_board_prop,
+            current_unapplied_wall_count,
+        );
+        current_unapplied_wall_count.0 > 0
+    }
+
+
+    #[test]
+    fn check_wall_count_cant_go_up_from_max_for_size(){
+        assert!(try_going_up_from_max_for_size(
+            &mut UnappliedMenuWallCount(BoardProperties::default().size.wall_count_upper_bound()),
+            &mut BoardProperties::default()
+        ));
+        assert!(try_going_down_from_max_for_size(
+            &mut UnappliedMenuWallCount(BoardProperties::default().size.wall_count_upper_bound()),
+            &mut BoardProperties::default()
+        ));
+        assert!(try_going_up_from_max_after_size_change(
+            BoardSize::Small,
+            BoardSize::Large
+        ))
+    }
+
+    fn try_going_up_from_max_for_size(
+        current_unapplied_wall_count: &mut UnappliedMenuWallCount,
+        planned_board_prop: &mut BoardProperties
+    )-> bool {
+        update_wall_count_inner(
+            &INCREASE_REQUEST,
+            planned_board_prop,
+            current_unapplied_wall_count,
+        );
+        current_unapplied_wall_count.0 == planned_board_prop.size.wall_count_upper_bound()
+    }
+
+    fn try_going_down_from_max_for_size(
+        current_unapplied_wall_count: &mut UnappliedMenuWallCount,
+        planned_board_prop: &mut BoardProperties
+    )-> bool {
+        update_wall_count_inner(
+            &DECREASE_REQUEST,
+            planned_board_prop,
+            current_unapplied_wall_count,
+        );
+        current_unapplied_wall_count.0 < planned_board_prop.size.wall_count_upper_bound()
+    }
+
+    fn try_going_up_from_max_after_size_change(
+        smaller_board_size: BoardSize,
+        bigger_board_size: BoardSize
+    )-> bool {
+        let mut planned_board_prop = BoardProperties::default();
+        planned_board_prop.size = smaller_board_size;
+        let smaller_size_wall_count_upper_bound = planned_board_prop.size.wall_count_upper_bound();
+        let mut current_unapplied_wall_count 
+            = UnappliedMenuWallCount(smaller_size_wall_count_upper_bound);
+
+        update_wall_count_inner(
+            &INCREASE_REQUEST,
+            &mut planned_board_prop,
+            &mut current_unapplied_wall_count,
+        );
+        let first_check = current_unapplied_wall_count.0 == smaller_size_wall_count_upper_bound;
+
+        planned_board_prop.size = bigger_board_size;
+        update_wall_count_inner(
+            &INCREASE_REQUEST,
+            &mut planned_board_prop,
+            &mut current_unapplied_wall_count,
+        );
+        let second_check = current_unapplied_wall_count.0 > smaller_size_wall_count_upper_bound;
+        first_check && second_check
+    }
+
+
+    #[test]
+    fn check_wall_count_becoming_smaller_size_max_when_above_it(){
+        assert!(goes_down_to_new_max_if_larger(
+            BoardSize::Small,
+            BoardSize::Large
+        ))
+    }
+
+    fn goes_down_to_new_max_if_larger(
+        smaller_board_size: BoardSize,
+        bigger_board_size: BoardSize
+    ) -> bool {
+        let mut planned_board_prop = BoardProperties::default();
+        planned_board_prop.size = bigger_board_size;
+        let bigger_size_wall_count_upper_bound = planned_board_prop.size.wall_count_upper_bound();
+        let mut current_unapplied_wall_count 
+            = UnappliedMenuWallCount(bigger_size_wall_count_upper_bound);
+        
+        general_update_planned_board_properties_inner(
+            &MenuButtonAction::ChangeSize(smaller_board_size),
+            &mut planned_board_prop,
+            &mut current_unapplied_wall_count
+        );
+
+        current_unapplied_wall_count.0 == smaller_board_size.wall_count_upper_bound()
     }
 }

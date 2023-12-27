@@ -24,7 +24,7 @@ pub fn move_tile_logic(
     solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
 ){    
     for switch_tile_request in logic_event_reader.read(){
-        if let Err(move_error)=inner_move_tile_logic(
+        if let Err(move_error)=move_tile_logic_inner(
             &mut graphics_event_writer, 
             switch_tile_request.occupied_tile_location, 
             switch_tile_request.empty_tile_location, 
@@ -37,7 +37,7 @@ pub fn move_tile_logic(
 }
 
 /// graphics switched before logic for the sake of graphics function readability
-pub fn inner_move_tile_logic(
+pub fn move_tile_logic_inner(
     graphics_event_writer: &mut EventWriter<move_tile_event::SwitchTilesGraphics>,
     occupied_tile_location: GridLocation, 
     empty_tile_location: GridLocation, 

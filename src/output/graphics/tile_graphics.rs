@@ -152,6 +152,7 @@ fn spawn_tiles(
                 tile_type: tile_type_to_spawn,
                 tag: OnScreenTag::Game
             },
+            StayForNextBoardTag,
         )).with_children(|parent|{
             parent.spawn(Text2dBundle {
                 text: Text {
@@ -173,7 +174,6 @@ fn spawn_tiles(
                 ..default()
             });
         }).id();
-
         tile_dictionary_instance.entity_by_tile_type.insert(
             tile_type_to_spawn, 
             Some(tile_entity_id)
