@@ -96,16 +96,22 @@ fn move_existing_tiles_inner(
 }
 
 fn despawn_unused_tiles_and_clear_tag(
-    tagged_tiles: Query<Entity, With<TileType>>,
-    untagged_tiles: Query<Entity, With<TileType>>,
+    tagged_tiles: Query<Entity, (With<TileType>, With<StayForNextBoardTag>)>,
+    untagged_tiles: Query<(Entity, &TileType), Without<StayForNextBoardTag>>,
+    mut tile_dictionary_query: Query<
+        &mut tile_dictionary::TileDictionary, 
+        With<tile_dictionary::TileDictionaryTag>
+    >,
     mut commands: Commands
 ){
-    // if the solved board didn't reroll and thus none was tagged and none shall spawn
+    // the only time the function should be used is when a solved board of a smaller size was generated
     if tagged_tiles.is_empty(){
         return;
     }
+
     // delete all unused
-    for tile_entity in untagged_tiles.iter(){
+    for (tile_entity, tile_type) in untagged_tiles.iter(){
+        tile_dictionary_query.single_mut().entity_by_tile_type.remove(tile_type);
         commands.entity(tile_entity).despawn_recursive();
     }
     // delete tags from the ones left
@@ -139,13 +145,13 @@ fn spawn_tiles(
                 texture_atlas: sprite_atlas.0.clone(),
                 sprite: TextureAtlasSprite::new(tile_type_to_spawn.to_atlas_index()),
                 transform: Transform::from_translation(spawn_location),
-                visibility: Visibility::Visible,
+                visibility: Visibility::Hidden, 
                 ..default()
             },
             TileBundle{
                 tile_type: tile_type_to_spawn,
                 tag: OnScreenTag::Game
-            }
+            },
         )).with_children(|parent|{
             parent.spawn(Text2dBundle {
                 text: Text {

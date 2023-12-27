@@ -9,6 +9,7 @@ impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Startup, spawn_camera)
+            .add_systems(Update, adjust_camera_zoom_to_new_settings)
             .init_resource::<CameraZoom>()
         ;
     }
@@ -16,21 +17,24 @@ impl Plugin for CameraPlugin {
 
 fn spawn_camera(
     mut commands: Commands,
-    solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
-    mut zoom: ResMut<CameraZoom>
 ) {
-    let solved_board=solved_board_query.single();
-    let grid_side_length= *solved_board.get_side_length();
+    commands.spawn(Camera2dBundle::default());
+}
+
+fn adjust_camera_zoom_to_new_settings(
+    mut event_listener: EventReader<SetCameraAccordingToNewSettings>,
+    mut camera_zoom: ResMut<CameraZoom>,   
+    mut camera_query:  Query<(&mut Transform, &mut OrthographicProjection), With<Camera2d>>
+){
+    for set_request in event_listener.read(){
+        let grid_side_length = set_request.new_grid_side_length;
+        let new_camera_zoom = grid_side_length as f32 * ATLAS_CELL_SQUARE_SIZE / screen_setup::BOARD_SIZE_IN_PIXELS;
     
-    let camera_zoom = grid_side_length as f32 * ATLAS_CELL_SQUARE_SIZE / screen_setup::BOARD_SIZE_IN_PIXELS;
-    zoom.0=camera_zoom;
+        let (mut camera_transform, mut camera_projection) = camera_query.single_mut();
+        camera_transform.translation.x = (grid_side_length-1) as f32 / 2.0 * ATLAS_CELL_SQUARE_SIZE;
+        camera_transform.translation.y = -1.0 * (grid_side_length-1) as f32 / 2.0 * ATLAS_CELL_SQUARE_SIZE;
+        camera_projection.scale=new_camera_zoom;
 
-    let mut camera = Camera2dBundle::default();
-    camera.transform.translation.x = (grid_side_length-1) as f32 / 2.0 * ATLAS_CELL_SQUARE_SIZE;
-    camera.transform.translation.y = -1.0 * (grid_side_length-1) as f32 / 2.0 * ATLAS_CELL_SQUARE_SIZE;
-    camera.projection.scale=camera_zoom;
-
-    commands.spawn(
-        camera
-    );
+        camera_zoom.0=new_camera_zoom;
+    }
 }

@@ -5,7 +5,7 @@ pub enum InputSystemSets{
     InputListening,
     InputHandling,
     ChangesBasedOnInput,
-    PostMainChanges
+    PostMainChanges,
 }
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
@@ -24,7 +24,7 @@ impl Plugin for SystemSetsPlugin {
                 InputSystemSets::InputListening,
                 InputSystemSets::InputHandling,
                 InputSystemSets::ChangesBasedOnInput,
-                InputSystemSets::PostMainChanges
+                InputSystemSets::PostMainChanges,
                 ).chain())
             .configure_sets(Update,(
                 StateChangeSystemSets::StateChangeListening,

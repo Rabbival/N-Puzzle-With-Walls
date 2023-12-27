@@ -92,6 +92,7 @@ fn update_wall_count(
 fn set_applied_props_and_begin_generation(
     mut button_event_listener: EventReader<ui_event::ButtonPressed>,
     mut spawn_board_event_writer: EventWriter<board_set_event::BuildNewBoard>,
+    mut camera_adjustmant_event_writer: EventWriter<SetCameraAccordingToNewSettings>,
     mut applied_board_prop_query: Query<
         &mut BoardProperties, 
         (With<AppliedBoardProperties>, Without<PlannedBoardProperties>)
@@ -109,6 +110,9 @@ fn set_applied_props_and_begin_generation(
             
             spawn_board_event_writer.send(board_set_event::BuildNewBoard{
                 reroll_solved: true
+            });
+            camera_adjustmant_event_writer.send(board_set_event::SetCameraAccordingToNewSettings{
+                new_grid_side_length: planned_board_prop.size.to_grid_side_length()
             });
             *applied_props = *planned_board_prop;
 

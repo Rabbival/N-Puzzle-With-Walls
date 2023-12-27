@@ -13,6 +13,12 @@ pub struct SpawnTileInLocation{
     pub location: Vec3
 }
 
+#[derive (Event)]
+pub struct SetCameraAccordingToNewSettings{
+    pub new_grid_side_length: u8
+}
+
+
 pub struct ResetEventPlugin;
 
 impl Plugin for ResetEventPlugin {
@@ -20,6 +26,7 @@ impl Plugin for ResetEventPlugin {
         app
             .add_event::<BuildNewBoard>()
             .add_event::<SpawnTileInLocation>()
+            .add_event::<SetCameraAccordingToNewSettings>()
             ;
     }
 }
