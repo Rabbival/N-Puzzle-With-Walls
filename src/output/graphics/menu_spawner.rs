@@ -121,7 +121,7 @@ fn spawn_generate_button(
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                background_color: Color::INDIGO.into(),
+                background_color: Color::PURPLE.into(),
                 ..default()
             }).with_children(|parent| {
                 parent
