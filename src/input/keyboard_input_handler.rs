@@ -1,18 +1,21 @@
 use crate::{prelude::*, logic::enums::basic_direction, output::{print_to_console, error_handler}, costume_event::{board_set_event, move_tile_event}};
+use bevy::app::AppExit;
 
 pub struct KeyboardInputHandlerPlugin;
 
 impl Plugin for KeyboardInputHandlerPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, (
+            .add_systems(Update, ((
                         move_tiles_with_keyboard.run_if(in_state(GameState::Game)),
                         listen_for_reset, 
                         open_menu
                     )
                     .chain()
-                    .in_set(InputSystemSets::InputListening)
-                )
+                    .in_set(InputSystemSets::InputListening),
+                    
+                    listen_for_app_closing
+                ))
             ;
     }
 }
@@ -93,6 +96,15 @@ fn listen_for_reset(
         input_event_writer.send(board_set_event::BuildNewBoard{
             reroll_solved: false
         });
+    }
+}
+
+fn listen_for_app_closing(
+    mut app_exit_events: EventWriter<AppExit>,    
+    keyboard_input: Res<Input<KeyCode>>
+){
+    if keyboard_input.just_pressed(KeyCode::Escape){
+        app_exit_events.send(AppExit);
     }
 }
 
