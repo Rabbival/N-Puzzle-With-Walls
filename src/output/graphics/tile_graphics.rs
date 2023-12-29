@@ -153,24 +153,31 @@ fn spawn_tiles(
                 tag: OnScreenTag::Game
             },
             StayForNextBoardTag,
-        )).with_children(|parent|{
-            parent.spawn(Text2dBundle {
-                text: Text {
-                    sections: vec![TextSection::new(
-                            tile_type_to_spawn.to_tile_index().to_string(),
-                            TextStyle {
-                                font: font.0.clone(),
-                                font_size: 29.0,
-                                color: Color::INDIGO
-                            }
-                        )],
-                    alignment: TextAlignment::Center,
-                    linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
-                },
-                transform: Transform::from_translation(text_spawn_loc_relative),
-                ..default()
-            });
-        }).id();
+        )).id();
+
+        // create texts for numbered tiles and attach them as their children
+        if let TileType::Numbered(num) = tile_type_to_spawn {
+            let tile_text_entity_id = commands.spawn(
+                Text2dBundle {
+                    text: Text {
+                        sections: vec![TextSection::new(
+                            num.to_string(),
+                                TextStyle {
+                                    font: font.0.clone(),
+                                    font_size: 29.0,
+                                    color: Color::INDIGO
+                                }
+                            )],
+                        alignment: TextAlignment::Center,
+                        linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
+                    },
+                    transform: Transform::from_translation(text_spawn_loc_relative),
+                    ..default()
+                }
+            ).id();
+            commands.entity(tile_entity_id).add_child(tile_text_entity_id);
+        }
+
         tile_dictionary_instance.entity_by_tile_type.insert(
             tile_type_to_spawn, 
             Some(tile_entity_id)
