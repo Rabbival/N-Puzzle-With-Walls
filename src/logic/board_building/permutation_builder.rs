@@ -26,7 +26,7 @@ pub fn generate_board_by_vector_permutation(
     let mut empty_grid_location = &GridLocation::default(); //there should always be an empty tile
     for (location, content) in sorted_grid_locations.iter().zip(permutation.iter()){
         grid.set(location, *content);
-        if content.value == TileType::Empty {
+        if content.tile_type == TileType::Empty {
             empty_grid_location = *location;
         }
     }

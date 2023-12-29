@@ -5,4 +5,3 @@ pub struct TileBundle{
     pub tile: Tile,
     pub tag: OnScreenTag
 }
-

@@ -1,7 +1,6 @@
-use crate::prelude::*;
 use enum_iterator::{all, Sequence};
 
-#[derive(Component, Clone, Copy, PartialEq, Eq, Debug, Hash, Default, Sequence)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, Default, Sequence)]
 pub enum TileType {
     #[default]
     Empty,

@@ -31,7 +31,7 @@ fn move_existing_tiles(
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     board_query: Query<&TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
-    mut tile_transforms: Query<&mut Transform, With<TileType>>,
+    mut tile_transforms: Query<&mut Transform, With<Tile>>,
     mut commands: Commands
 ){
     for event in event_listener.read(){
@@ -53,7 +53,7 @@ fn move_existing_tiles_inner(
     solved_rerolled: &bool,
     grid: &Grid<Tile>,
     tile_dictionary: &HashMap<Tile,Option<Entity>>,
-    tile_transforms: &mut Query<&mut Transform, With<TileType>>,
+    tile_transforms: &mut Query<&mut Transform, With<Tile>>,
     commands: &mut Commands
 )-> Result<(),EntityRelatedCustomError>
 {
@@ -143,7 +143,7 @@ fn spawn_tiles(
         let tile_entity_id=commands.spawn((
             SpriteSheetBundle {
                 texture_atlas: sprite_atlas.0.clone(),
-                sprite: TextureAtlasSprite::new(tile_to_spawn.value.to_atlas_index()),
+                sprite: TextureAtlasSprite::new(tile_to_spawn.tile_type.to_atlas_index()),
                 transform: Transform::from_translation(spawn_location),
                 visibility: Visibility::Hidden, 
                 ..default()
@@ -156,7 +156,7 @@ fn spawn_tiles(
         )).id();
 
         // create texts for numbered tiles and attach them as their children
-        if tile_to_spawn.value == TileType::Numbered {
+        if tile_to_spawn.tile_type == TileType::Numbered {
             let tile_text_entity_id = commands.spawn(
                 Text2dBundle {
                     text: Text {
@@ -190,7 +190,7 @@ fn switch_tile_entity_positions(
     mut graphics_switch_tiles_listener: EventReader<move_tile_event::SwitchTilesGraphics>,
     mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
-    mut tile_transforms: Query<&mut Transform, With<TileType>>,
+    mut tile_transforms: Query<&mut Transform, With<Tile>>,
 ){
     for tile_switch_request in graphics_switch_tiles_listener.read(){
         if let Err(move_error) = switch_tile_entity_positions_inner(
@@ -206,7 +206,7 @@ fn switch_tile_entity_positions(
 }
 
 fn switch_tile_entity_positions_inner(
-    tile_transforms: &mut Query<&mut Transform, With<TileType>>,
+    tile_transforms: &mut Query<&mut Transform, With<Tile>>,
     tile_dictionary: &HashMap<Tile,Option<Entity>>,
     grid: &Grid<Tile>,
     first_grid_location: &GridLocation, 

@@ -61,7 +61,7 @@ impl TileTypeBoard {
     pub fn index_tile_of_type(&mut self, tile_type_to_index: TileType){
         let only_that_type_iter = self.grid.iter_mut().filter(|(_, optional_tile)|{
             if let Some(tile_type_in_tile) = optional_tile{
-                return tile_type_in_tile.value == tile_type_to_index;
+                return tile_type_in_tile.tile_type == tile_type_to_index;
             }
             // shouldn't be, but in case it's a None
             false
@@ -83,7 +83,7 @@ impl TileTypeBoard {
     {
         self.none_check(first)?;
         self.none_check(second)?;
-        if self.get(first).unwrap().value == TileType::Empty {
+        if self.get(first).unwrap().tile_type == TileType::Empty {
             self.empty_tile_location= *second;
         }else{
             self.empty_tile_location= *first;
@@ -120,7 +120,7 @@ impl TileTypeBoard {
             = self.grid.get_all_direct_neighbor_locations(origin);
         for (dir, loc) in self.grid.get_all_direct_neighbor_locations(origin){
             if let Some(value_in_cell) = self.grid.get(&loc){
-                if TileType::Wall == value_in_cell.value{
+                if TileType::Wall == value_in_cell.tile_type{
                     direct_neighbor_locations.remove(&dir);
                 }
             }
@@ -186,7 +186,7 @@ impl TileTypeBoard{
     {
         self.none_check(location)?;
         if self.valid_index(location){
-            match self.get(location).unwrap().value{
+            match self.get(location).unwrap().tile_type{
                 TileType::Empty => {return Ok(false);},
                 TileType::Numbered | TileType::Wall => {return Ok(true);}
             }
@@ -204,7 +204,7 @@ impl TileTypeBoard{
     pub fn iter_filtered(&self) -> impl Iterator<Item = (&GridLocation, Option<&Tile>)> + '_ {
         self.grid.iter().filter(|(_, optional_tile)|{
             if let Some(tile) = *optional_tile{
-                return tile.value != TileType::Wall;
+                return tile.tile_type != TileType::Wall;
             }
             // shouldn't be, but in case it's a None
             false
