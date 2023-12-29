@@ -156,11 +156,13 @@ fn spawn_tiles(
         )).id();
 
         // create texts for numbered tiles and attach them as their children
-        if let TileType::Numbered(num) = tile_type_to_spawn {
+        if tile_type_to_spawn == TileType::Numbered {
             let tile_text_entity_id = commands.spawn(
                 Text2dBundle {
                     text: Text {
                         sections: vec![TextSection::new(
+
+                            // TODO: index plus one here
                             num.to_string(),
                                 TextStyle {
                                     font: font.0.clone(),

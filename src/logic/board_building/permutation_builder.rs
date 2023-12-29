@@ -32,7 +32,7 @@ pub fn generate_board_by_vector_permutation(
     }
     let mut generated_board=
         TileTypeBoard::from_grid_and_empty_loc(&grid, empty_grid_location);
-    generated_board.index_walls();
+    generated_board.index_tile_of_type(TileType::Wall(0));
     Ok(generated_board)
 }
 

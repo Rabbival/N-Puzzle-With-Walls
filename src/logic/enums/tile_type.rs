@@ -1,26 +1,25 @@
 use crate::prelude::*;
+use enum_iterator::{all, Sequence};
 
-#[derive(Component, Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[derive(Component, Clone, Copy, PartialEq, Eq, Debug, Hash, Default, Sequence)]
 pub enum TileType {
-    Empty(u32),
-    Numbered(u32),
-    Wall(u32)
+    #[default]
+    Empty,
+    Numbered,
+    Wall
 }
 
 impl TileType{
     pub fn to_atlas_index(&self) -> usize{
         match self{
-            TileType::Empty(_) => 0,
-            TileType::Numbered(_) => 1,
-            TileType::Wall(_) => 2,
+            TileType::Empty => 0,
+            TileType::Numbered => 1,
+            TileType::Wall => 2,
         }
     }
 
-    pub fn to_tile_index(&self) -> u32{
-        match self{
-            TileType::Empty(index) | TileType::Wall(index) => *index,
-            TileType::Numbered(num) => *num,
-        }
+    pub fn get_tile_types_as_vec() -> Vec<Self>{
+        all::<Self>().collect::<Vec<_>>()
     }
 }
 
@@ -33,11 +32,5 @@ impl PartialEq<&TileType> for TileType{
 impl PartialEq<TileType> for &TileType{
     fn eq(&self, other: &TileType) -> bool {
         *self==other
-    }
-}
-
-impl Default for TileType{
-    fn default() -> Self {
-        Self::Empty(0)
     }
 }
