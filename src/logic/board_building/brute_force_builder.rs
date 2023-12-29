@@ -24,20 +24,18 @@ pub fn brute_force_generate_game_board(
         let mut optional_directions=
             board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
 
-        //don't want to shift back and forth
-        let opposite_of_previous_shift=previous_shift_direction.opposite_direction();
-        if opposite_of_previous_shift.is_none(){
-            return Err(error_handler::BoardGenerationError::DirectionCouldntBeFlipped);
-        }
-        optional_directions.remove(&opposite_of_previous_shift.unwrap());
-
-        if optional_directions.len() == 0 {
-            break; //go to a dead end, returning to a valid place might take a while
+        //don't want to shift back and forth, unless it's a dead end in which it has to turn back
+        if optional_directions.len() > 1 {
+            let opposite_of_previous_shift=previous_shift_direction.opposite_direction();
+            if opposite_of_previous_shift.is_none(){
+                return Err(error_handler::BoardGenerationError::DirectionCouldntBeFlipped);
+            }
+            optional_directions.remove(&opposite_of_previous_shift.unwrap());
         }
 
         //choose, register, update board
         let valid_directions:Vec<&BasicDirection>=optional_directions.keys().clone().collect(); 
-        let chosen_shift_index=rng.gen_range(0..optional_directions.len());
+        let chosen_shift_index=rng.gen_range(0..valid_directions.len());
         let chosen_direction=valid_directions[chosen_shift_index];
         let chosen_location_option=optional_directions.get(chosen_direction);
         if chosen_location_option.is_none(){
