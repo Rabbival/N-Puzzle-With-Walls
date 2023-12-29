@@ -6,11 +6,18 @@ pub fn generate_solved_board(grid_side_length: u8) -> TileTypeBoard{
     for i in 0..grid_side_length_u32{
         for j in 0..grid_side_length_u32{
             let location = GridLocation::new(i as i32, j as i32);
-            solved_board.set(&location, TileType::new(Some(i*grid_side_length_u32+j+1)));
+            solved_board.set(&location, TileType::Numbered(i*grid_side_length_u32+j+1));
         }
     }
     let empty_tile_location=GridLocation::new((grid_side_length_u32-1) as i32, (grid_side_length_u32-1) as i32);
-    solved_board.set(&empty_tile_location, TileType::new(None));
+    solved_board.set(&empty_tile_location, TileType::Empty);
+
+
+    //Testing wall locations
+    solved_board.set(&GridLocation{row: 1, col: 1}, TileType::Wall);
+    solved_board.set(&GridLocation{row: 1, col: 3}, TileType::Wall);
+
+
     solved_board.empty_tile_location=empty_tile_location;
     solved_board.ignore_player_input=true;
     solved_board

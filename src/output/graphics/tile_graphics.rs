@@ -29,7 +29,7 @@ impl Plugin for TileGraphicsPlugin {
 fn move_existing_tiles(
     mut event_writer: EventWriter<board_set_event::SpawnTileInLocation>,
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
-    mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
+    board_query: Query<&TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
     mut tile_transforms: Query<&mut Transform, With<TileType>>,
     mut commands: Commands
@@ -38,7 +38,7 @@ fn move_existing_tiles(
         if let Err(error) = move_existing_tiles_inner(
             &mut event_writer,
             &event.reroll_solved,
-            &mut board_query.single_mut().grid,
+            &board_query.single().grid,
             &tile_dictionary.single().entity_by_tile_type,
             &mut tile_transforms,
             &mut commands
@@ -51,44 +51,54 @@ fn move_existing_tiles(
 fn move_existing_tiles_inner(
     event_writer: &mut EventWriter<board_set_event::SpawnTileInLocation>,
     solved_rerolled: &bool,
-    grid: &mut Grid<TileType>,
+    grid: &Grid<TileType>,
     tile_dictionary: &HashMap<TileType,Option<Entity>>,
     tile_transforms: &mut Query<&mut Transform, With<TileType>>,
     commands: &mut Commands
 )-> Result<(),EntityRelatedCustomError>
 {
-    for (grid_location, cell_reference) in grid.iter_mut(){
-        if let Some(tile_type_from_cell) = cell_reference{
-            let spawn_location=grid_location.to_world();
-            match tile_dictionary.get(tile_type_from_cell){
-                // the tile doesn't exist yet and thus should be created there when we're done
-                None=> { 
-                    if *solved_rerolled {
-                        event_writer.send(board_set_event::SpawnTileInLocation{
-                            tiletype: *tile_type_from_cell,
-                            location: spawn_location
-                        })
-                    }else{
-                        return Err(EntityRelatedCustomError::ItemNotInMap
-                            (ItemNotFoundInMapError::EntityNotFoundInMap));
-                    }
-                 },
-                // the tile exists and should therefore be moved
-                Some(optional_entity)=> { 
-                    match optional_entity{
-                        None=>{return Err(EntityRelatedCustomError::NoEntity);},
-                        Some(entity)=>{
-                            if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
-                                tile_transform.translation= spawn_location;
-                                if *solved_rerolled{
-                                    commands.entity(*entity).insert(StayForNextBoardTag);
+    for (grid_location, cell_reference) in grid.iter(){
+        let spawn_location=grid_location.to_world();
+        match cell_reference{
+            Some(tile_type_from_cell) => {
+                match tile_dictionary.get(tile_type_from_cell){
+                    // the tile doesn't exist yet and thus should be created at that location
+                    None=> { 
+                        if *solved_rerolled {
+                            event_writer.send(board_set_event::SpawnTileInLocation{
+                                tiletype: *tile_type_from_cell,
+                                location: spawn_location
+                            })
+                        }else{
+                            return Err(EntityRelatedCustomError::ItemNotInMap
+                                (ItemNotFoundInMapError::EntityNotFoundInMap));
+                        }
+                     },
+                    // the tile exists and should therefore be moved
+                    Some(optional_entity)=> { 
+                        match optional_entity{
+                            None=>{return Err(EntityRelatedCustomError::NoEntity);},
+                            Some(entity)=>{
+                                if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
+                                    tile_transform.translation= spawn_location;
+                                    if *solved_rerolled{
+                                        commands.entity(*entity).insert(StayForNextBoardTag);
+                                    }
+                                }else{
+                                    return Err(EntityRelatedCustomError::EntityNotInQuery);
                                 }
-                            }else{
-                                return Err(EntityRelatedCustomError::EntityNotInQuery);
                             }
                         }
                     }
                 }
+            },
+            // a delibarate None tile is a wall
+            None => {
+                
+                //has to be sent to a new function
+                //the problem with not sending it to the dictionary is that we'll always destroy all the walls 
+                //instead of reusing them
+                
             }
         }
     }

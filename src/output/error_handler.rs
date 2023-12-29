@@ -28,7 +28,8 @@ pub enum TileMoveError{
     NoEmptyNeighbor (String),
     PressedEmptySlot (String),
     NoOccupiedTileInThatDirection (basic_direction::BasicDirection),
-    EntityRelated(EntityRelatedCustomError)
+    EntityRelated(EntityRelatedCustomError),
+    TriedToSwitchWithAWall
 }
 
 #[derive(Debug)]

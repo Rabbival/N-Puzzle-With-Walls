@@ -92,21 +92,6 @@ impl TileTypeBoard {
         self.grid.get_all_direct_neighbor_locations(origin)
     }
 
-    pub fn occupied(&self, location: &GridLocation) -> Result<bool, error_handler::TileMoveError> {
-        self.none_check(location)?;
-        if self.valid_index(location){
-            match self.get(location).unwrap(){
-                TileType::Empty=> {return Ok(false);},
-                TileType::Numbered(_)=> {return Ok(true);}
-            }
-        }
-        Ok(false)
-    }
-
-    pub fn valid_index(&self, location: &GridLocation) -> bool {
-        self.grid.valid_index(location)
-    }
-
     fn none_check(&self, location: &GridLocation)-> Result<(), error_handler::TileMoveError>{
         match self.get(location) {
             None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
@@ -137,6 +122,33 @@ impl TileTypeBoard{
     /// returns an option with the previous value
     pub fn set_and_get_former(&mut self, location: &GridLocation, value: TileType)-> Option<TileType>{
         self.grid.set_and_get_former(location, value)
+    }
+
+    /// removes and returns former, or None if there was none
+    pub fn remove(&mut self, location: &GridLocation)-> Option<TileType> {
+        if self.valid_index(location){
+            self.grid.remove(location)
+        }else{
+            None
+        }
+    }
+
+    // returns whether it's not empty
+    pub fn occupied(&self, location: &GridLocation) 
+        -> Result<bool, error_handler::TileMoveError> 
+    {
+        self.none_check(location)?;
+        if self.valid_index(location){
+            match self.get(location).unwrap(){
+                TileType::Empty=> {return Ok(false);},
+                TileType::Numbered(_) | TileType::Wall => {return Ok(true);}
+            }
+        }
+        Ok(false)
+    }
+
+    pub fn valid_index(&self, location: &GridLocation) -> bool {
+        self.grid.valid_index(location)
     }
 }
 

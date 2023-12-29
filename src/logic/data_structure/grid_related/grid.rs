@@ -55,6 +55,15 @@ impl<T> Grid<T> {
         }
     }
 
+    /// removes and returns former, or None if there was none
+    pub fn remove(&mut self, location: &GridLocation)-> Option<T> {
+        if self.valid_index(location){
+            self.grid.remove(location)?
+        }else{
+            None
+        }
+    }
+
     /// also returns false if the location is invalid, so remember to check that if relevant
     pub fn occupied(&self, location: &GridLocation) -> bool {
         if self.valid_index(location){
@@ -115,23 +124,17 @@ impl<T> Grid<T>{
 impl<T> Grid<T> {
     /// only returns Some(&T)
     pub fn iter(&self) -> impl Iterator<Item = (&GridLocation, Option<&T>)> + '_ {
-        self.grid
-            .iter()
+        self.iter_with_none()
             .filter(|(_, optional_value)|
                 optional_value.is_some())
-            .map(|(location, optional_value)|{
-                (location, optional_value.as_ref())
-            })
     }
 
 
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = (&GridLocation, Option<&mut T>)> + '_ {
+    pub fn iter_with_none(&self) -> impl Iterator<Item = (&GridLocation, Option<&T>)> + '_ {
         self.grid
-            .iter_mut()
-            .filter(|(_, optional_value)|
-                optional_value.is_some())
+            .iter()
             .map(|(location, optional_value)|{
-                (location, optional_value.as_mut())
+                (location, optional_value.as_ref())
             })
     }
 }

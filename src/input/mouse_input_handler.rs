@@ -68,26 +68,29 @@ fn handle_mouse_click(
     if game_board.ignore_player_input{
         return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
     }
-    if let Some(optional_occupied_tile_location) = GridLocation::from_world(&game_board.grid, cursor_position) {
-        if !game_board.occupied(&optional_occupied_tile_location)? {
-            return Err(error_handler::TileMoveError::PressedEmptySlot(String::from("pressed an empty slot")));
+    match GridLocation::from_world(&game_board.grid, cursor_position){
+        Some(optional_occupied_tile_location) => {
+            if !game_board.occupied(&optional_occupied_tile_location)? {
+                return Err(error_handler::TileMoveError::PressedEmptySlot(String::from("pressed an empty slot")));
+            }
+            let occupied_tile_location=optional_occupied_tile_location;
+            let optional_empty_neighbor_location= 
+                game_board.get_empty_neighbor(&occupied_tile_location)?;
+            if optional_empty_neighbor_location.is_none(){
+                return Err(error_handler::TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor")));
+            }
+            let empty_neighbor_location=optional_empty_neighbor_location.unwrap();
+    
+            logic_event_writer.send(move_tile_event::SwitchTilesLogic{
+                occupied_tile_location,
+                empty_tile_location: empty_neighbor_location
+            });
+    
+            Ok(())
+        },
+        None => {
+            Err(error_handler::TileMoveError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
         }
-        let occupied_tile_location=optional_occupied_tile_location;
-        let optional_empty_neighbor_location= 
-            game_board.get_empty_neighbor(&occupied_tile_location)?;
-        if optional_empty_neighbor_location.is_none(){
-            return Err(error_handler::TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor")));
-        }
-        let empty_neighbor_location=optional_empty_neighbor_location.unwrap();
-
-        logic_event_writer.send(move_tile_event::SwitchTilesLogic{
-            occupied_tile_location,
-            empty_tile_location: empty_neighbor_location
-        });
-
-        Ok(())
-    }else{
-        Err(error_handler::TileMoveError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
     }
 }
 
@@ -207,7 +210,7 @@ mod tests {
     fn test_empty_slot(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>)-> bool{
         let mut board=TileTypeBoard::default();
         board.ignore_player_input=false;
-        board.set(&GridLocation::new(0, 0), TileType::new(None));
+        board.set(&GridLocation::new(0, 0), TileType::Empty);
         let location_validation_outcome=
             handle_mouse_click(
                 event_writer,
@@ -227,7 +230,7 @@ mod tests {
         let mut board: TileTypeBoard=solved_board_builder::generate_solved_board(DEFAULT_BOARD_SIDE_LENGTH);
         board.ignore_player_input=false;
         let empty_tile_location=board.empty_tile_location;
-        board.set(&empty_tile_location, TileType::new(Some(16)));
+        board.set(&empty_tile_location, TileType::Numbered(16));
         let location_validation_outcome=
             handle_mouse_click(
                 event_writer,
