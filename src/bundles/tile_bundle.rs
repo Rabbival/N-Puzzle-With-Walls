@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Bundle)]
 pub struct TileBundle{
-    pub tile_type: TileType,
+    pub indexed_tile_type: IndexedValue<TileType>,
     pub tag: OnScreenTag
 }
 

@@ -65,7 +65,7 @@ fn move_existing_tiles_inner(
                 None=> { 
                     if *solved_rerolled {
                         event_writer.send(board_set_event::SpawnTileInLocation{
-                            tiletype: *tile_type_from_cell,
+                            indexed_tiletype: *tile_type_from_cell,
                             location: spawn_location
                         })
                     }else{
@@ -96,8 +96,8 @@ fn move_existing_tiles_inner(
 }
 
 fn despawn_unused_tiles_and_clear_tag(
-    tagged_tiles: Query<Entity, (With<TileType>, With<StayForNextBoardTag>)>,
-    untagged_tiles: Query<(Entity, &TileType), Without<StayForNextBoardTag>>,
+    tagged_tiles: Query<Entity, (With<IndexedValue<TileType>>, With<StayForNextBoardTag>)>,
+    untagged_tiles: Query<(Entity, &IndexedValue<TileType>), Without<StayForNextBoardTag>>,
     mut tile_dictionary_query: Query<
         &mut tile_dictionary::TileDictionary, 
         With<tile_dictionary::TileDictionaryTag>
@@ -132,7 +132,7 @@ fn spawn_tiles(
     }
     let mut tile_dictionary_instance=tile_dictionary.single_mut();
     for spawn_request in event_listener.read(){
-        let tile_type_to_spawn = spawn_request.tiletype;
+        let tile_type_to_spawn = spawn_request.indexed_tiletype;
         let spawn_location = Vec3::new(
             spawn_request.location.x,
             spawn_request.location.y,
@@ -143,27 +143,27 @@ fn spawn_tiles(
         let tile_entity_id=commands.spawn((
             SpriteSheetBundle {
                 texture_atlas: sprite_atlas.0.clone(),
-                sprite: TextureAtlasSprite::new(tile_type_to_spawn.to_atlas_index()),
+                sprite: TextureAtlasSprite::new(tile_type_to_spawn.value.to_atlas_index()),
                 transform: Transform::from_translation(spawn_location),
                 visibility: Visibility::Hidden, 
                 ..default()
             },
             TileBundle{
-                tile_type: tile_type_to_spawn,
+                indexed_tile_type: tile_type_to_spawn,
                 tag: OnScreenTag::Game
             },
             StayForNextBoardTag,
         )).id();
 
         // create texts for numbered tiles and attach them as their children
-        if tile_type_to_spawn == TileType::Numbered {
+        if tile_type_to_spawn.value == TileType::Numbered {
             let tile_text_entity_id = commands.spawn(
                 Text2dBundle {
                     text: Text {
                         sections: vec![TextSection::new(
 
                             // TODO: index plus one here
-                            num.to_string(),
+                            (tile_type_to_spawn.index+1).to_string(),
                                 TextStyle {
                                     font: font.0.clone(),
                                     font_size: 29.0,
@@ -209,8 +209,8 @@ fn switch_tile_entity_positions(
 
 fn switch_tile_entity_positions_inner(
     tile_transforms: &mut Query<&mut Transform, With<TileType>>,
-    tile_dictionary: &HashMap<TileType,Option<Entity>>,
-    grid: &Grid<TileType>,
+    tile_dictionary: &HashMap<IndexedValue<TileType>,Option<Entity>>,
+    grid: &Grid<IndexedValue<TileType>>,
     first_grid_location: &GridLocation, 
     second_grid_location: &GridLocation
 ) -> Result<(),TileMoveError>
@@ -227,8 +227,8 @@ fn switch_tile_entity_positions_inner(
 }
 
 fn extract_tile_entity(
-    tile_dictionary: &HashMap<TileType,Option<Entity>>,
-    grid: &Grid<TileType>,
+    tile_dictionary: &HashMap<IndexedValue<TileType>,Option<Entity>>,
+    grid: &Grid<IndexedValue<TileType>>,
     grid_location: &GridLocation
 ) -> Result<Entity,TileMoveError>
 {
