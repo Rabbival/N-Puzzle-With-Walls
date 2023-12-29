@@ -66,8 +66,5 @@ pub fn generate_game_board(
         }
     }
 
-
-    Ok(TileTypeBoard::default())
-
-    // brute_force_builder::brute_force_generate_game_board(solved_board.clone(), generation_range)
+    brute_force_builder::brute_force_generate_game_board(solved_board.clone(), generation_range)
 }

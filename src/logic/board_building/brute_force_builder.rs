@@ -31,6 +31,10 @@ pub fn brute_force_generate_game_board(
         }
         optional_directions.remove(&opposite_of_previous_shift.unwrap());
 
+        if optional_directions.len() == 0 {
+            break; //go to a dead end, returning to a valid place might take a while
+        }
+
         //choose, register, update board
         let valid_directions:Vec<&BasicDirection>=optional_directions.keys().clone().collect(); 
         let chosen_shift_index=rng.gen_range(0..optional_directions.len());
