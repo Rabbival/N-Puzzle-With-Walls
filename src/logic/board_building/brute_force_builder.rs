@@ -22,7 +22,7 @@ pub fn brute_force_generate_game_board(
     let mut previous_shift_direction = BasicDirection::Up; 
     for _shift in 0..location_shift_count{
         let mut optional_directions=
-            board.get_all_direct_neighbor_locations(&empty_tile_location);
+            board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
 
         //don't want to shift back and forth
         let opposite_of_previous_shift=previous_shift_direction.opposite_direction();
@@ -42,8 +42,8 @@ pub fn brute_force_generate_game_board(
         }
         let chosen_location=chosen_location_option.unwrap();
         if board.switch_tiles_by_location(&empty_tile_location, chosen_location).is_err(){
-                return Err(error_handler::BoardGenerationError::TileMoveError);
-            }
+            return Err(error_handler::BoardGenerationError::TileMoveError);
+        }
         
         //get ready for next choice
         empty_tile_location=board.empty_tile_location;

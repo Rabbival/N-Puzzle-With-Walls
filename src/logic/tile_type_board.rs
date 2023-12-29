@@ -51,6 +51,31 @@ impl TileTypeBoard{
 }
 
 impl TileTypeBoard {
+    /// provides indexes to walls 
+    pub fn index_walls(&mut self){
+        let only_walls_iter = self.grid.iter_mut().filter(|(_, optional_tile)|{
+            if let Some(tile) = optional_tile{
+                if let TileType::Wall(_) = tile {
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+            // shouldn't be, but in case it's a None
+            false
+        }).map(|(_, wall)|{
+                wall
+            }
+        );
+        let mut fixed_wall_index: u32 = 0;
+        for wall in only_walls_iter{
+            if let TileType::Wall(current_index)= wall.unwrap(){
+                *current_index = fixed_wall_index;
+            }
+            fixed_wall_index += 1;
+        }
+    }
+
     /// assumes one is empty
     pub fn switch_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation)
     -> Result<(), error_handler::TileMoveError>
@@ -71,7 +96,7 @@ impl TileTypeBoard {
     }
 
     pub fn get_direct_neighbors_of_empty(&self) -> HashMap<BasicDirection, GridLocation>{
-        self.get_all_direct_neighbor_locations(&self.empty_tile_location) 
+        self.grid.get_all_direct_neighbor_locations(&self.empty_tile_location) 
     }
 
     pub fn get_empty_neighbor(&self, origin: &GridLocation) 
@@ -86,10 +111,20 @@ impl TileTypeBoard {
         Ok(None)
     }
 
-    pub fn get_all_direct_neighbor_locations(&self, origin: &GridLocation) 
+    /// only returns occupied ones that aren't walls
+    pub fn get_direct_neighbor_locations_walls_excluded(&self, origin: &GridLocation) 
         -> HashMap<BasicDirection, GridLocation>
     {
-        self.grid.get_all_direct_neighbor_locations(origin)
+        let mut direct_neighbor_locations 
+            = self.grid.get_all_direct_neighbor_locations(origin);
+        for (dir, loc) in self.grid.get_all_direct_neighbor_locations(origin){
+            if let Some(value_in_cell) = self.grid.get(&loc){
+                if let TileType::Wall(_) = value_in_cell{
+                    direct_neighbor_locations.remove(&dir);
+                }
+            }
+        }
+        direct_neighbor_locations
     }
 
     fn none_check(&self, location: &GridLocation)-> Result<(), error_handler::TileMoveError>{

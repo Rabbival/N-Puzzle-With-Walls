@@ -19,7 +19,10 @@ pub fn generate_board_by_vector_permutation(
     }
     let permutation 
         = make_valid_permutation_out_of_vector(&sorted_tiles)?;
-    let mut grid=Grid::new(*board.get_side_length());
+    let mut grid=Grid::new_with_default_values(
+        *board.get_side_length(),
+        TileType::Wall(0)
+    );
     let mut empty_grid_location = &GridLocation::default(); //there should always be an empty tile
     for (location, value) in sorted_indexes.iter().zip(permutation.iter()){
         grid.set(location, *value);
@@ -27,8 +30,9 @@ pub fn generate_board_by_vector_permutation(
             empty_grid_location = *location;
         }
     }
-    let generated_board=
+    let mut generated_board=
         TileTypeBoard::from_grid_and_empty_loc(&grid, empty_grid_location);
+    generated_board.index_walls();
     Ok(generated_board)
 }
 

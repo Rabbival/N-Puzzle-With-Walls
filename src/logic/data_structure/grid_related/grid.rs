@@ -81,6 +81,26 @@ impl<T> Grid<T> {
     }
 }
 
+//special constructor
+impl<T: Copy> Grid<T>{
+        /// initialize all cells to something
+        pub fn new_with_default_values(grid_side_length: u8, default_value: T) -> Self {
+            let mut grid = HashMap::<GridLocation, Option<T>>::new();
+            for row in 0..grid_side_length{
+                for col in 0..grid_side_length{
+                    grid.insert(
+                        GridLocation { row: row as i32, col: col as i32 }, 
+                        Some(default_value)
+                    );
+                }
+            }
+            Self {
+                grid_side_length,
+                grid
+            }
+        }
+}
+
 impl<T> Grid<T>{
     /// only returns occupied ones 
     pub fn get_all_direct_neighbor_locations(&self, origin: &GridLocation) 
@@ -130,6 +150,17 @@ impl<T> Grid<T> {
                 optional_value.is_some())
             .map(|(location, optional_value)|{
                 (location, optional_value.as_ref())
+            })
+    }
+
+    /// returns without Nones
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (&GridLocation, Option<&mut T>)> + '_ {
+        self.grid
+            .iter_mut()
+            .filter(|(_, optional_value)|
+                optional_value.is_some())
+            .map(|(location, optional_value)|{
+                (location, optional_value.as_mut())
             })
     }
 }
