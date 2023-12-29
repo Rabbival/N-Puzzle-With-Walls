@@ -57,7 +57,7 @@ impl TileTypeBoard {
     {
         self.none_check(first)?;
         self.none_check(second)?;
-        if self.get(first).unwrap()==TileType::Empty{
+        if let TileType::Empty(_) = self.get(first).unwrap() {
             self.empty_tile_location= *second;
         }else{
             self.empty_tile_location= *first;
@@ -140,8 +140,8 @@ impl TileTypeBoard{
         self.none_check(location)?;
         if self.valid_index(location){
             match self.get(location).unwrap(){
-                TileType::Empty=> {return Ok(false);},
-                TileType::Numbered(_) | TileType::Wall => {return Ok(true);}
+                TileType::Empty(_)=> {return Ok(false);},
+                TileType::Numbered(_) | TileType::Wall(_) => {return Ok(true);}
             }
         }
         Ok(false)
@@ -157,7 +157,7 @@ impl TileTypeBoard{
     pub fn iter_filtered(&self) -> impl Iterator<Item = (&GridLocation, Option<&TileType>)> + '_ {
         self.grid.iter().filter(|(_, optional_tile)|{
             if let Some(tile) = *optional_tile{
-                if tile == TileType::Wall {
+                if let TileType::Wall(_) = tile {
                     return false;
                 }else{
                     return true;

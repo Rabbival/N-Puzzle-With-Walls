@@ -23,7 +23,7 @@ pub fn generate_board_by_vector_permutation(
     let mut empty_grid_location = &GridLocation::default(); //there should always be an empty tile
     for (location, value) in sorted_indexes.iter().zip(permutation.iter()){
         grid.set(location, *value);
-        if value == TileType::Empty {
+        if let TileType::Empty(_) = value {
             empty_grid_location = *location;
         }
     }
@@ -71,10 +71,12 @@ fn validate_and_attempt_solvability(sorted_vector: &Vec<TileType>, permutation: 
         in sorted_vector.iter().enumerate().zip(permutation.iter()) 
     {
         if sorted_value != permutation_value{
+
+            // can replace with a counter if I give up attempting solvability
             wrong_placed.push(
-                IndexedValue::<usize>{
+                IndexedValue::<TileType>{
                     index: item_index,
-                    value: permutation_value.to_number_forced(permutation.len())
+                    value: *permutation_value
                 }
             );
         }
@@ -82,44 +84,46 @@ fn validate_and_attempt_solvability(sorted_vector: &Vec<TileType>, permutation: 
     if wrong_placed.len() % 2 == 0 {
         true
     }else{
-        attempt_solvability(&mut wrong_placed, permutation)
+
+        false
+        // attempt_solvability(&mut wrong_placed, permutation)
     }
 }
 
-/// tries to replace a wrong-placed with another wrong-placed that's shouldn't be in its place
-/// in order to make their amount even
-/// returns whether the attempt was successful
-fn attempt_solvability(wrong_placed: &mut Vec<IndexedValue::<usize>>, permutation: &mut Vec<TileType>)
--> bool
-{
-    while let Some(wrong_placed_element) = wrong_placed.pop(){
-        let numeric_value = wrong_placed_element.value;
-        //in a solved board, numbers start at 1 at index 0
-        let correct_location=numeric_value-1;
-        //if it wasn't found, the corresponding number is correct 
-        //and thus switching would keep an odd number of wrong-placed
-        if let Ok(index_in_wrongs) = wrong_placed
-            .binary_search_by_key(
-                &correct_location, 
-                |&indexed_value| indexed_value.index
-            )
-        {
-            let elememt_in_correct_location 
-                = wrong_placed.get(index_in_wrongs);
-            //we can unwrap directly since it was returned as Ok()
-            let number_in_correct_location = elememt_in_correct_location.unwrap().value;
-            //putting two wrong numbers in the right place keeps the number of wrongs odd
-            if number_in_correct_location != (wrong_placed_element.index - 1) {
-                permutation.swap(
-                    wrong_placed_element.index, 
-                    elememt_in_correct_location.unwrap().index
-                );
-                break;
-            }
-        }
-    }
-    false
-}
+// /// tries to replace a wrong-placed with another wrong-placed that's shouldn't be in its place
+// /// in order to make their amount even
+// /// returns whether the attempt was successful
+// fn attempt_solvability(wrong_placed: &mut Vec<IndexedValue::<usize>>, permutation: &mut Vec<TileType>)
+// -> bool
+// {
+//     while let Some(wrong_placed_element) = wrong_placed.pop(){
+//         let numeric_value = wrong_placed_element.value;
+//         //in a solved board, numbers start at 1 at index 0
+//         let correct_location=numeric_value-1;
+//         //if it wasn't found, the corresponding number is correct 
+//         //and thus switching would keep an odd number of wrong-placed
+//         if let Ok(index_in_wrongs) = wrong_placed
+//             .binary_search_by_key(
+//                 &correct_location, 
+//                 |&indexed_value| indexed_value.index
+//             )
+//         {
+//             let elememt_in_correct_location 
+//                 = wrong_placed.get(index_in_wrongs);
+//             //we can unwrap directly since it was returned as Ok()
+//             let number_in_correct_location = elememt_in_correct_location.unwrap().value;
+//             //putting two wrong numbers in the right place keeps the number of wrongs odd
+//             if number_in_correct_location != (wrong_placed_element.index - 1) {
+//                 permutation.swap(
+//                     wrong_placed_element.index, 
+//                     elememt_in_correct_location.unwrap().index
+//                 );
+//                 break;
+//             }
+//         }
+//     }
+//     false
+// }
 
 
 

@@ -210,7 +210,7 @@ mod tests {
     fn test_empty_slot(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>)-> bool{
         let mut board=TileTypeBoard::default();
         board.ignore_player_input=false;
-        board.set(&GridLocation::new(0, 0), TileType::Empty);
+        board.set(&GridLocation::new(0, 0), TileType::Empty(0));
         let location_validation_outcome=
             handle_mouse_click(
                 event_writer,

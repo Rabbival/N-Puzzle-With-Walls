@@ -157,10 +157,7 @@ fn spawn_tiles(
             parent.spawn(Text2dBundle {
                 text: Text {
                     sections: vec![TextSection::new(
-                            match tile_type_to_spawn.to_number(){
-                                None=> String::from(""),
-                                Some(number)=> number.to_string()
-                            },
+                            tile_type_to_spawn.to_tile_index().to_string(),
                             TextStyle {
                                 font: font.0.clone(),
                                 font_size: 29.0,
