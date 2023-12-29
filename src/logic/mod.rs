@@ -9,6 +9,7 @@ pub mod tile_type_board;
 pub mod board_building;
 pub mod board_props;
 pub mod ui_logic;
+pub mod tile;
 
 pub struct BoardPlugins;
 

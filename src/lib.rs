@@ -83,6 +83,7 @@ pub mod prelude {
         board_manager::*,
         tile_dictionary::*,
         tile_type_board::*,
+        tile::*,
     };
     pub use crate::bundles::tile_bundle::*;
 }

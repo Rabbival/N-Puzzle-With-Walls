@@ -5,7 +5,7 @@ use crate::prelude::*;
 pub enum GameLog<'a>{
     NewBoardGenerated,
     BoardSettingsChanged(&'a MenuButtonAction),
-    TilesMoved(&'a IndexedValue<TileType>, &'a GridLocation),
+    TilesMoved(&'a Tile, &'a GridLocation),
     Victory
 }
 

@@ -21,7 +21,7 @@ pub fn generate_board_by_vector_permutation(
         = make_valid_permutation_out_of_vector(&sorted_tiles)?;
     let mut grid=Grid::new_with_default_values(
         *board.get_side_length(),
-        IndexedValue::<TileType>::new(TileType::Wall)
+        Tile::new(TileType::Wall)
     );
     let mut empty_grid_location = &GridLocation::default(); //there should always be an empty tile
     for (location, content) in sorted_grid_locations.iter().zip(permutation.iter()){
@@ -36,8 +36,8 @@ pub fn generate_board_by_vector_permutation(
     Ok(generated_board)
 }
 
-fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<IndexedValue<TileType>>) 
--> Result<Vec<IndexedValue<TileType>>, error_handler::BoardGenerationError> 
+fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<Tile>) 
+-> Result<Vec<Tile>, error_handler::BoardGenerationError> 
 {
     let mut permutation_result
         = Err(error_handler::BoardGenerationError::VectorPermutationGenerationFailed);
@@ -70,8 +70,8 @@ fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<IndexedValue<TileTyp
 /// NTS, IMPORTANT: this version only solves for no obstacle board with odd side length
 /// tis but an example
 fn validate_and_attempt_solvability(
-    sorted_vector: &Vec<IndexedValue<TileType>>, 
-    permutation: &mut Vec<IndexedValue<TileType>>
+    sorted_vector: &Vec<Tile>, 
+    permutation: &mut Vec<Tile>
 ) 
 -> bool 
 {
@@ -83,7 +83,7 @@ fn validate_and_attempt_solvability(
 
             // can replace with a counter if I give up attempting solvability
             wrong_placed.push(
-                IndexedValue::<IndexedValue::<TileType>>{
+                IndexedValue::<Tile>{
                     index: item_index,
                     value: *permutation_value
                 }

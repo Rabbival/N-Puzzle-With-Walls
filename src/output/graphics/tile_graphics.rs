@@ -51,8 +51,8 @@ fn move_existing_tiles(
 fn move_existing_tiles_inner(
     event_writer: &mut EventWriter<board_set_event::SpawnTileInLocation>,
     solved_rerolled: &bool,
-    grid: &Grid<IndexedValue<TileType>>,
-    tile_dictionary: &HashMap<IndexedValue<TileType>,Option<Entity>>,
+    grid: &Grid<Tile>,
+    tile_dictionary: &HashMap<Tile,Option<Entity>>,
     tile_transforms: &mut Query<&mut Transform, With<TileType>>,
     commands: &mut Commands
 )-> Result<(),EntityRelatedCustomError>
@@ -96,8 +96,8 @@ fn move_existing_tiles_inner(
 }
 
 fn despawn_unused_tiles_and_clear_tag(
-    tagged_tiles: Query<Entity, (With<IndexedValue<TileType>>, With<StayForNextBoardTag>)>,
-    untagged_tiles: Query<(Entity, &IndexedValue<TileType>), Without<StayForNextBoardTag>>,
+    tagged_tiles: Query<Entity, (With<Tile>, With<StayForNextBoardTag>)>,
+    untagged_tiles: Query<(Entity, &Tile), Without<StayForNextBoardTag>>,
     mut tile_dictionary_query: Query<
         &mut tile_dictionary::TileDictionary, 
         With<tile_dictionary::TileDictionaryTag>
@@ -209,8 +209,8 @@ fn switch_tile_entity_positions(
 
 fn switch_tile_entity_positions_inner(
     tile_transforms: &mut Query<&mut Transform, With<TileType>>,
-    tile_dictionary: &HashMap<IndexedValue<TileType>,Option<Entity>>,
-    grid: &Grid<IndexedValue<TileType>>,
+    tile_dictionary: &HashMap<Tile,Option<Entity>>,
+    grid: &Grid<Tile>,
     first_grid_location: &GridLocation, 
     second_grid_location: &GridLocation
 ) -> Result<(),TileMoveError>
@@ -227,8 +227,8 @@ fn switch_tile_entity_positions_inner(
 }
 
 fn extract_tile_entity(
-    tile_dictionary: &HashMap<IndexedValue<TileType>,Option<Entity>>,
-    grid: &Grid<IndexedValue<TileType>>,
+    tile_dictionary: &HashMap<Tile,Option<Entity>>,
+    grid: &Grid<Tile>,
     grid_location: &GridLocation
 ) -> Result<Entity,TileMoveError>
 {

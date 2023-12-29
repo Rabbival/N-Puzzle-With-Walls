@@ -5,7 +5,7 @@ pub const DEFAULT_BOARD_SIDE_LENGTH: u8 = 4;
 #[derive(Component, Clone, Debug)]
 pub struct TileTypeBoard {
     /// even if the location is empty, TileTypeBoard's location should have an empty tile (and NOT a None)
-    pub grid: Grid<IndexedValue<TileType>>,
+    pub grid: Grid<Tile>,
     pub empty_tile_location: GridLocation,
     ///appear as frozen to player
     pub ignore_player_input: bool
@@ -14,7 +14,7 @@ pub struct TileTypeBoard {
 //constructors
 impl TileTypeBoard{
     pub fn from_grid_and_empty_loc(
-        grid: &Grid<IndexedValue<TileType>>,
+        grid: &Grid<Tile>,
         empty_tile_location: &GridLocation
     ) -> Self
     {
@@ -26,7 +26,7 @@ impl TileTypeBoard{
     }
 
     ///puts empty tile at the last tile of the grid
-    pub fn from_grid(grid: &Grid<IndexedValue<TileType>>) -> Self{
+    pub fn from_grid(grid: &Grid<Tile>) -> Self{
         let grid_side_length = grid.get_side_length();
         Self { 
             grid: grid.clone(), 
@@ -61,11 +61,7 @@ impl TileTypeBoard {
     pub fn index_tile_of_type(&mut self, tile_type_to_index: TileType){
         let only_that_type_iter = self.grid.iter_mut().filter(|(_, optional_tile)|{
             if let Some(tile_type_in_tile) = optional_tile{
-                if tile_type_in_tile.value == &tile_type_to_index {
-                    return true;
-                }else{
-                    return false;
-                }
+                return tile_type_in_tile.value == tile_type_to_index;
             }
             // shouldn't be, but in case it's a None
             false
@@ -73,10 +69,11 @@ impl TileTypeBoard {
                 indexed_value
             }
         );
-        let mut fixed_index: u32 = 0;
-        for tile_of_type_to_index in only_that_type_iter{
+
+        for (fixed_index, tile_of_type_to_index) 
+            in (0_u32..).zip(only_that_type_iter)
+        {
             tile_of_type_to_index.unwrap().index = fixed_index as usize;
-            fixed_index += 1;
         }
     }
 
@@ -132,8 +129,8 @@ impl TileTypeBoard {
     }
 
     /// returns true if it was None and the value was inserted
-    pub fn set_if_empty(&mut self, location: &GridLocation, content: IndexedValue<TileType>) -> bool{
-        if let None = self.grid.get(location){
+    pub fn set_if_empty(&mut self, location: &GridLocation, content: Tile) -> bool{
+        if self.grid.get(location).is_none() {
             self.grid.set(location, content);
             return true;
         }
@@ -154,28 +151,28 @@ impl TileTypeBoard{
         self.grid.get_side_length()
     }
 
-    pub fn get(&self, location: &GridLocation) -> Option<&IndexedValue<TileType>> {
+    pub fn get(&self, location: &GridLocation) -> Option<&Tile> {
         self.grid.get(location)
     }
 
-    pub fn get_mut(&mut self, location: &GridLocation) -> Option<&mut IndexedValue<TileType>> {
+    pub fn get_mut(&mut self, location: &GridLocation) -> Option<&mut Tile> {
         self.grid.get_mut(location)
     }
 
     /// returns whether insertion was successful
-    pub fn set(&mut self, location: &GridLocation, content: IndexedValue<TileType>) -> bool {
+    pub fn set(&mut self, location: &GridLocation, content: Tile) -> bool {
         self.grid.set(location, content)
     }
 
     /// returns an option with the previous value
-    pub fn set_and_get_former(&mut self, location: &GridLocation, content: IndexedValue<TileType>)
-    -> Option<IndexedValue<TileType>>
+    pub fn set_and_get_former(&mut self, location: &GridLocation, content: Tile)
+    -> Option<Tile>
     {
         self.grid.set_and_get_former(location, content)
     }
 
     /// removes and returns former, or None if there was none
-    pub fn remove(&mut self, location: &GridLocation)-> Option<IndexedValue<TileType>> {
+    pub fn remove(&mut self, location: &GridLocation)-> Option<Tile> {
         if self.valid_index(location){
             self.grid.remove(location)
         }else{
@@ -204,14 +201,10 @@ impl TileTypeBoard{
 
 // iterators
 impl TileTypeBoard{
-    pub fn iter_filtered(&self) -> impl Iterator<Item = (&GridLocation, Option<&IndexedValue<TileType>>)> + '_ {
+    pub fn iter_filtered(&self) -> impl Iterator<Item = (&GridLocation, Option<&Tile>)> + '_ {
         self.grid.iter().filter(|(_, optional_tile)|{
             if let Some(tile) = *optional_tile{
-                if tile.value == TileType::Wall {
-                    return false;
-                }else{
-                    return true;
-                }
+                return tile.value != TileType::Wall;
             }
             // shouldn't be, but in case it's a None
             false
