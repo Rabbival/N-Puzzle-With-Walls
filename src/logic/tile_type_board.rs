@@ -100,7 +100,7 @@ impl TileTypeBoard {
     }
 }
 
-//shorter access to grid's basic functions
+//manipulation (or short access) to the grid's functions
 impl TileTypeBoard{
     pub fn get_side_length(&self)-> &u8 {
         self.grid.get_side_length()
@@ -149,6 +149,23 @@ impl TileTypeBoard{
 
     pub fn valid_index(&self, location: &GridLocation) -> bool {
         self.grid.valid_index(location)
+    }
+}
+
+// iterators
+impl TileTypeBoard{
+    pub fn iter_filtered(&self) -> impl Iterator<Item = (&GridLocation, Option<&TileType>)> + '_ {
+        self.grid.iter().filter(|(_, optional_tile)|{
+            if let Some(tile) = *optional_tile{
+                if tile == TileType::Wall {
+                    return false;
+                }else{
+                    return true;
+                }
+            }
+            // shouldn't be, but in case it's a None
+            false
+        })
     }
 }
 

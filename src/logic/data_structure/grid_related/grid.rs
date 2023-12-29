@@ -120,19 +120,14 @@ impl<T> Grid<T>{
     }
 }
 
-//iterators
+//iterators and filter
 impl<T> Grid<T> {
-    /// only returns Some(&T)
+    /// returns without Nones
     pub fn iter(&self) -> impl Iterator<Item = (&GridLocation, Option<&T>)> + '_ {
-        self.iter_with_none()
-            .filter(|(_, optional_value)|
-                optional_value.is_some())
-    }
-
-
-    pub fn iter_with_none(&self) -> impl Iterator<Item = (&GridLocation, Option<&T>)> + '_ {
         self.grid
             .iter()
+            .filter(|(_, optional_value)|
+                optional_value.is_some())
             .map(|(location, optional_value)|{
                 (location, optional_value.as_ref())
             })

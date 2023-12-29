@@ -6,7 +6,7 @@ pub fn generate_board_by_vector_permutation(
     board: TileTypeBoard
 ) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
 {
-    let solved_board_iterator = board.grid.iter();
+    let solved_board_iterator = board.iter_filtered();
     let mut sorted_tiles=vec![];
     let mut sorted_indexes=vec![];
     for (index, optional_tile) in solved_board_iterator{
