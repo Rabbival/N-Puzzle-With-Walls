@@ -51,8 +51,8 @@ fn move_existing_tiles(
 fn move_existing_tiles_inner(
     event_writer: &mut EventWriter<board_set_event::SpawnTileInLocation>,
     solved_rerolled: &bool,
-    grid: &Grid<TileType>,
-    tile_dictionary: &HashMap<TileType,Option<Entity>>,
+    grid: &Grid<IndexedValue<TileType>>,
+    tile_dictionary: &HashMap<IndexedValue<TileType>,Option<Entity>>,
     tile_transforms: &mut Query<&mut Transform, With<TileType>>,
     commands: &mut Commands
 )-> Result<(),EntityRelatedCustomError>

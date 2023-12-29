@@ -69,8 +69,8 @@ impl TileTypeBoard {
             }
             // shouldn't be, but in case it's a None
             false
-        }).map(|(_, wall)|{
-                wall
+        }).map(|(_, indexed_value)|{
+                indexed_value
             }
         );
         let mut fixed_index: u32 = 0;

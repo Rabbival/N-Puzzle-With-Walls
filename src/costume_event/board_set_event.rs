@@ -9,7 +9,7 @@ pub struct BuildNewBoard{
 /// contains the current and previous values
 #[derive (Event, Default)]
 pub struct SpawnTileInLocation{
-    pub tiletype: TileType,
+    pub indexed_tiletype: IndexedValue<TileType>,
     pub location: Vec3
 }
 

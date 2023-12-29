@@ -37,14 +37,6 @@ impl Plugin for BoardPropertiesPlugin {
     }
 }
 
-impl BoardProperties{
-    pub fn get_copy_of_max_tiletype(&self) -> TileType{
-        let board_size = self.size.to_grid_side_length();
-        let tile_count = board_size * board_size;
-        TileType::Numbered((tile_count - self.empty_count - self.wall_count) as u32) 
-    }
-}
-
 fn create_current_and_planned_board_properties(
     mut commands: Commands
 ){
