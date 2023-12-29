@@ -42,7 +42,7 @@ pub fn move_tile_logic_inner(
     occupied_tile_location: GridLocation, 
     empty_tile_location: GridLocation, 
     game_board: &mut TileTypeBoard,
-    solved_grid: &Grid<TileType>,
+    solved_grid: &Grid<IndexedValue<TileType>>,
 ) -> Result<(), error_handler::TileMoveError>
 {    
     graphics_event_writer.send(move_tile_event::SwitchTilesGraphics{
@@ -65,7 +65,7 @@ pub fn move_tile_logic_inner(
 }
 
 /// also freezes the board if it is solved
-fn check_if_solved(game_board: &mut TileTypeBoard, solved_grid: &Grid<TileType>){
+fn check_if_solved(game_board: &mut TileTypeBoard, solved_grid: &Grid<IndexedValue<TileType>>){
     if game_board.grid == *solved_grid {
         print_to_console::game_log(GameLog::Victory);
         game_board.ignore_player_input=true;

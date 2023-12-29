@@ -5,7 +5,7 @@ use crate::prelude::*;
 pub enum GameLog<'a>{
     NewBoardGenerated,
     BoardSettingsChanged(&'a MenuButtonAction),
-    TilesMoved(&'a TileType, &'a GridLocation),
+    TilesMoved(&'a IndexedValue<TileType>, &'a GridLocation),
     Victory
 }
 
@@ -17,8 +17,8 @@ pub fn game_log(log: GameLog){
         GameLog::BoardSettingsChanged(menu_button_action)=>{
             info!("new setting set: {:?}", menu_button_action);
         },
-        GameLog::TilesMoved(tile_type, location)=>{
-            info!("{:?} tile moved to {:?}", *tile_type, *location);
+        GameLog::TilesMoved(indexed_tile_type, location)=>{
+            info!("{:?} tile moved to {:?}", *indexed_tile_type, *location);
         },
         GameLog::Victory=>{
             info!("puzzle solved!");

@@ -8,10 +8,10 @@ pub fn generate_board_by_vector_permutation(
 {
     let solved_board_iterator = board.iter_filtered();
     let mut sorted_tiles=vec![];
-    let mut sorted_indexes=vec![];
-    for (index, optional_tile) in solved_board_iterator{
-        sorted_indexes.push(index);
+    let mut sorted_grid_locations=vec![];
+    for (sorted_grid_location, optional_tile) in solved_board_iterator{
         if let Some(tile) = optional_tile{
+            sorted_grid_locations.push(sorted_grid_location);
             sorted_tiles.push(*tile);
         }else{
             return Err(error_handler::BoardGenerationError::GridError(GridError::IteratorYieldedNone));
@@ -21,23 +21,23 @@ pub fn generate_board_by_vector_permutation(
         = make_valid_permutation_out_of_vector(&sorted_tiles)?;
     let mut grid=Grid::new_with_default_values(
         *board.get_side_length(),
-        TileType::Wall(0)
+        IndexedValue::<TileType>::new(TileType::Wall)
     );
     let mut empty_grid_location = &GridLocation::default(); //there should always be an empty tile
-    for (location, value) in sorted_indexes.iter().zip(permutation.iter()){
-        grid.set(location, *value);
-        if let TileType::Empty(_) = value {
+    for (location, content) in sorted_grid_locations.iter().zip(permutation.iter()){
+        grid.set(location, *content);
+        if content.value == TileType::Empty {
             empty_grid_location = *location;
         }
     }
     let mut generated_board=
         TileTypeBoard::from_grid_and_empty_loc(&grid, empty_grid_location);
-    generated_board.index_tile_of_type(TileType::Wall(0));
+    generated_board.index_tile_of_type(TileType::Wall);
     Ok(generated_board)
 }
 
-fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<TileType>) 
--> Result<Vec<TileType>, error_handler::BoardGenerationError> 
+fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<IndexedValue<TileType>>) 
+-> Result<Vec<IndexedValue<TileType>>, error_handler::BoardGenerationError> 
 {
     let mut permutation_result
         = Err(error_handler::BoardGenerationError::VectorPermutationGenerationFailed);
@@ -69,7 +69,12 @@ fn make_valid_permutation_out_of_vector(sorted_vector: &Vec<TileType>)
 
 /// NTS, IMPORTANT: this version only solves for no obstacle board with odd side length
 /// tis but an example
-fn validate_and_attempt_solvability(sorted_vector: &Vec<TileType>, permutation: &mut Vec<TileType>) -> bool {
+fn validate_and_attempt_solvability(
+    sorted_vector: &Vec<IndexedValue<TileType>>, 
+    permutation: &mut Vec<IndexedValue<TileType>>
+) 
+-> bool 
+{
     let mut wrong_placed = vec![];
     for ((item_index, sorted_value), permutation_value) 
         in sorted_vector.iter().enumerate().zip(permutation.iter()) 
@@ -78,7 +83,7 @@ fn validate_and_attempt_solvability(sorted_vector: &Vec<TileType>, permutation: 
 
             // can replace with a counter if I give up attempting solvability
             wrong_placed.push(
-                IndexedValue::<TileType>{
+                IndexedValue::<IndexedValue::<TileType>>{
                     index: item_index,
                     value: *permutation_value
                 }
