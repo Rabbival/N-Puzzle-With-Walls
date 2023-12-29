@@ -5,7 +5,7 @@ pub struct TileDictionaryTag;
 
 #[derive(Component)]
 pub struct TileDictionary{
-    pub entity_by_tile_type: HashMap<Tile,Option<Entity>>
+    pub entity_by_tile: HashMap<Tile,Option<Entity>>
 }
 
 pub struct TileDictionaryPlugin;
@@ -19,7 +19,7 @@ impl Plugin for TileDictionaryPlugin {
 fn spawn_tile_dictionary(mut commands: Commands){
     commands.spawn((
         TileDictionary{
-            entity_by_tile_type: HashMap::<Tile,Option::<Entity>>::new()
+            entity_by_tile: HashMap::<Tile,Option::<Entity>>::new()
         },
         TileDictionaryTag
     ));

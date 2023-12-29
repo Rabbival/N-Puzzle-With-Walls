@@ -17,8 +17,8 @@ pub fn game_log(log: GameLog){
         GameLog::BoardSettingsChanged(menu_button_action)=>{
             info!("new setting set: {:?}", menu_button_action);
         },
-        GameLog::TilesMoved(indexed_tile_type, location)=>{
-            info!("{:?} tile moved to {:?}", *indexed_tile_type, *location);
+        GameLog::TilesMoved(tile, location)=>{
+            info!("{:?} tile moved to {:?}", *tile, *location);
         },
         GameLog::Victory=>{
             info!("puzzle solved!");

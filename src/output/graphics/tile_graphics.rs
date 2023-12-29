@@ -39,7 +39,7 @@ fn move_existing_tiles(
             &mut event_writer,
             &event.reroll_solved,
             &board_query.single().grid,
-            &tile_dictionary.single().entity_by_tile_type,
+            &tile_dictionary.single().entity_by_tile,
             &mut tile_transforms,
             &mut commands
         ){
@@ -65,7 +65,7 @@ fn move_existing_tiles_inner(
                 None=> { 
                     if *solved_rerolled {
                         event_writer.send(board_set_event::SpawnTileInLocation{
-                            indexed_tiletype: *tile_type_from_cell,
+                            tile: *tile_type_from_cell,
                             location: spawn_location
                         })
                     }else{
@@ -111,7 +111,7 @@ fn despawn_unused_tiles_and_clear_tag(
 
     // delete all unused
     for (tile_entity, tile_type) in untagged_tiles.iter(){
-        tile_dictionary_query.single_mut().entity_by_tile_type.remove(tile_type);
+        tile_dictionary_query.single_mut().entity_by_tile.remove(tile_type);
         commands.entity(tile_entity).despawn_recursive();
     }
     // delete tags from the ones left
@@ -132,7 +132,7 @@ fn spawn_tiles(
     }
     let mut tile_dictionary_instance=tile_dictionary.single_mut();
     for spawn_request in event_listener.read(){
-        let tile_type_to_spawn = spawn_request.indexed_tiletype;
+        let tile_to_spawn = spawn_request.tile;
         let spawn_location = Vec3::new(
             spawn_request.location.x,
             spawn_request.location.y,
@@ -143,27 +143,25 @@ fn spawn_tiles(
         let tile_entity_id=commands.spawn((
             SpriteSheetBundle {
                 texture_atlas: sprite_atlas.0.clone(),
-                sprite: TextureAtlasSprite::new(tile_type_to_spawn.value.to_atlas_index()),
+                sprite: TextureAtlasSprite::new(tile_to_spawn.value.to_atlas_index()),
                 transform: Transform::from_translation(spawn_location),
                 visibility: Visibility::Hidden, 
                 ..default()
             },
             TileBundle{
-                indexed_tile_type: tile_type_to_spawn,
+                tile: tile_to_spawn,
                 tag: OnScreenTag::Game
             },
             StayForNextBoardTag,
         )).id();
 
         // create texts for numbered tiles and attach them as their children
-        if tile_type_to_spawn.value == TileType::Numbered {
+        if tile_to_spawn.value == TileType::Numbered {
             let tile_text_entity_id = commands.spawn(
                 Text2dBundle {
                     text: Text {
                         sections: vec![TextSection::new(
-
-                            // TODO: index plus one here
-                            (tile_type_to_spawn.index+1).to_string(),
+                            (tile_to_spawn.index+1).to_string(),
                                 TextStyle {
                                     font: font.0.clone(),
                                     font_size: 29.0,
@@ -180,8 +178,8 @@ fn spawn_tiles(
             commands.entity(tile_entity_id).add_child(tile_text_entity_id);
         }
 
-        tile_dictionary_instance.entity_by_tile_type.insert(
-            tile_type_to_spawn, 
+        tile_dictionary_instance.entity_by_tile.insert(
+            tile_to_spawn, 
             Some(tile_entity_id)
         );
     }
@@ -197,7 +195,7 @@ fn switch_tile_entity_positions(
     for tile_switch_request in graphics_switch_tiles_listener.read(){
         if let Err(move_error) = switch_tile_entity_positions_inner(
             &mut tile_transforms,
-            &tile_dictionary.single().entity_by_tile_type,
+            &tile_dictionary.single().entity_by_tile,
             &board_query.single_mut().grid,
             &tile_switch_request.first_grid_location,
             &tile_switch_request.second_grid_location,

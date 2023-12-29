@@ -65,8 +65,8 @@ impl TileTypeBoard {
             }
             // shouldn't be, but in case it's a None
             false
-        }).map(|(_, indexed_value)|{
-                indexed_value
+        }).map(|(_, optional_tile)|{
+                optional_tile
             }
         );
 
