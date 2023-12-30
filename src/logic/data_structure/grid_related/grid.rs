@@ -13,7 +13,7 @@ impl<T> Grid<T>{
         if self.grid.is_empty(){
             return true;
         }
-        let mut cells_locations_with_visited_mark: HashMap<&GridLocation, bool>=
+        let mut cells_locations_with_added_mark: HashMap<&GridLocation, bool>=
             self
             .iter()
             .map(|(location, _)| {
@@ -21,7 +21,7 @@ impl<T> Grid<T>{
             })
             .collect();
         let first_location 
-            = cells_locations_with_visited_mark.get_key_value_mut(
+            = cells_locations_with_added_mark.get_key_value_mut(
                 self.grid.keys().next().unwrap()
             ).unwrap();
         *first_location.1 = true;
@@ -34,26 +34,32 @@ impl<T> Grid<T>{
                 .collect();
         let mut cells_visited_counter = 1; //already visited the first
         while ! locations_to_visit.is_empty(){
-            self.breath_first_count(
+            self.depth_first_count(
                 &mut locations_to_visit,
-                &mut cells_locations_with_visited_mark
+                &mut cells_locations_with_added_mark
             );
             cells_visited_counter += 1;
         }
+
+
+        //debug
+        info!("visited {:?} tiles, when should have visited {:?}",
+            cells_visited_counter,
+            self.iter().collect::<Vec<_>>().len() as u32
+                );
+
+
         //check that we found everything that's defined (and not None)
         cells_visited_counter == self.iter().collect::<Vec<_>>().len() as u32
     }
 
     /// assumes vec not to be empty and hash-map to have all locations in vec
-    fn breath_first_count(
+    fn depth_first_count(
         &self,
         locations_to_visit: &mut Vec<GridLocation>,
-        cells_locations_with_visited_mark: &mut HashMap<&GridLocation, bool>
+        cells_locations_with_added_mark: &mut HashMap<&GridLocation, bool>
     ){
         let next_tile_to_check = locations_to_visit.pop().unwrap();
-        let visited_mark_for_next_tile 
-            = cells_locations_with_visited_mark.get_mut(&next_tile_to_check).unwrap();
-        *visited_mark_for_next_tile = true;
         let next_tile_neighbors 
             = self.get_all_direct_neighbor_locations(&next_tile_to_check);
         let mut new_locations_to_visit : Vec<GridLocation>
@@ -61,10 +67,15 @@ impl<T> Grid<T>{
                 .values()
                 //only add the ones not yet visited
                 .filter(|next_tile_neighbor_location|{
-                    *cells_locations_with_visited_mark.get(next_tile_neighbor_location).unwrap()
+                    ! *cells_locations_with_added_mark.get(next_tile_neighbor_location).unwrap()
                 })
                 .copied()
                 .collect();
+        for new_location in new_locations_to_visit.clone(){
+            let addeded_mark_for_new_location
+                = cells_locations_with_added_mark.get_mut(&new_location).unwrap();
+            *addeded_mark_for_new_location = true;
+        }
         locations_to_visit.append(&mut new_locations_to_visit);
     }
 

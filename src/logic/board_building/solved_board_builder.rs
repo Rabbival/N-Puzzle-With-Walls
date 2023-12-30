@@ -37,6 +37,8 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> TileTypeBoard{
         }
     }
 
+    info!("{:?}", solved_board.grid.is_strongly_connected());
+
     solved_board.index_all_tile_types();
     solved_board.empty_tile_location=empty_tile_location;
     solved_board.ignore_player_input=true;
