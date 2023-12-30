@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::utils::hashbrown::HashMap;
 
 use crate::prelude::*;
 
@@ -9,6 +9,35 @@ pub struct Grid<T> {
 }
 
 impl<T> Grid<T>{
+    pub fn is_strongly_connected(&self) -> bool {
+        if self.grid.is_empty(){
+            return true;
+        }
+        let mut cells_locations_as_visited: HashMap<&GridLocation, bool>=
+            self
+            .iter()
+            .map(|(location, _)| {
+                (location, false)
+            })
+            .collect();
+        let first_location 
+            = cells_locations_as_visited.get_key_value_mut(
+                self.grid.keys().into_iter().next().unwrap()
+            ).unwrap();
+        *first_location.1 = true;
+
+        //TODO: push all neighbors not visited into a stack
+        // then take the next from the stack and do the same to it until the stack runs out
+        // count a counter each time you mark one as visited, then check that the counter equals the self.grid.len()
+
+        for neighbor_location in 
+            self.get_all_direct_neighbor_locations(first_location.0)
+        {
+
+        }
+        true
+    }
+
     /// only returns occupied ones 
     pub fn get_all_direct_neighbor_locations(&self, origin: &GridLocation) 
     -> HashMap<BasicDirection, GridLocation>
@@ -82,7 +111,7 @@ impl<T> Grid<T>{
         edge_vector
     }
 
-    pub fn all_locations_as_ves(&self) -> Vec<GridLocation>{
+    pub fn all_locations_as_vec(&self) -> Vec<GridLocation>{
         let mut all_locations_vector = vec![];
         for col in 0..(self.grid_side_length as i32){
             for row in 0..(self.grid_side_length as i32){

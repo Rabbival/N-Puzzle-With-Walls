@@ -47,7 +47,7 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8) -> Vec<GridLoc
     let mut rng = rand::thread_rng();
     let mut wall_spawn_locations = vec![];
     let mut neighbor_count_grid = initialize_neighbor_count_grid(grid_side_length);
-    let mut possible_spawn_locations = neighbor_count_grid.all_locations_as_ves();
+    let mut possible_spawn_locations = neighbor_count_grid.all_locations_as_vec();
 
     // NTS: if MIN_NEIGHBORS will be changed to 2, should start without the corners' neighbors,
     //      if 3, we should also start without neighbors of edges
@@ -70,10 +70,6 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8) -> Vec<GridLoc
             let neighbor_location = neighbor.1;
             let neighbor_value = neighbor_count_grid.get_mut(&neighbor_location).unwrap();
             *neighbor_value -= 1;
-
-
-            info!("neighbor at {:?} now has value {:?}", neighbor_location, *neighbor_value);
-
 
             // if a neigbor of the chosen location got to the threshold
             if *neighbor_value == MIN_NEIGHBORS{
@@ -99,9 +95,6 @@ fn remove_by_value(location_to_forbid: &GridLocation, possible_spawn_locations: 
     if let Some(index_to_remove) =  optional_index_to_remove {
         possible_spawn_locations.swap_remove(index_to_remove);
     }
-
-    info!("tile at {:?} is now forbidden for wall spawn", location_to_forbid);
-
 }
 
 fn initialize_neighbor_count_grid(grid_side_length: u8) -> Grid<u8>{
