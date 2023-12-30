@@ -13,7 +13,7 @@ impl<T> Grid<T>{
         if self.grid.is_empty(){
             return true;
         }
-        let mut cells_locations_as_visited: HashMap<&GridLocation, bool>=
+        let mut cells_locations_with_visited_mark: HashMap<&GridLocation, bool>=
             self
             .iter()
             .map(|(location, _)| {
@@ -21,20 +21,36 @@ impl<T> Grid<T>{
             })
             .collect();
         let first_location 
-            = cells_locations_as_visited.get_key_value_mut(
+            = cells_locations_with_visited_mark.get_key_value_mut(
                 self.grid.keys().into_iter().next().unwrap()
             ).unwrap();
         *first_location.1 = true;
-
-        //TODO: push all neighbors not visited into a stack
-        // then take the next from the stack and do the same to it until the stack runs out
-        // count a counter each time you mark one as visited, then check that the counter equals the self.grid.len()
-
-        for neighbor_location in 
-            self.get_all_direct_neighbor_locations(first_location.0)
-        {
-
+        let first_location_neighbors = self.get_all_direct_neighbor_locations(first_location.0);
+        let mut locations_to_visit : Vec<&GridLocation>
+            = first_location_neighbors
+                .values()
+                .collect();
+        let mut cells_visited_counter = 1; //already visited the first
+        while ! locations_to_visit.is_empty(){
+            self.breath_first_count(
+                &mut cells_visited_counter,
+                &mut locations_to_visit,
+                &mut cells_locations_with_visited_mark
+            );
         }
+        //check that we found everything that's defined (and not None)
+        cells_visited_counter == self.iter().collect::<Vec<_>>().len() as u32
+    }
+
+    fn breath_first_count(
+        &self,
+        cells_visited_counter: &mut u32,
+        locations_to_visit: &mut Vec<&GridLocation>,
+        cells_locations_with_visited_mark: &mut HashMap<&GridLocation, bool>
+    ) -> bool
+    {
+        
+
         true
     }
 
