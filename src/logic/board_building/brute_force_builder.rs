@@ -2,10 +2,8 @@ use crate::{prelude::*, output::{print_to_console, error_handler}};
 
 use rand::Rng;
 
-/// a permutation that was made from shifts in a solved board 
-/// would always be solvable (if we shift in reverse)
 pub fn brute_force_generate_game_board(
-    mut board: TileTypeBoard,
+    solved_board: &TileTypeBoard,
     generation_range: (u8, u8)
 ) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
 {
@@ -15,7 +13,8 @@ pub fn brute_force_generate_game_board(
     if location_shift_count%2 == 0 {
         location_shift_count+=1;
     }
-    let mut empty_tile_location=board.empty_tile_location;
+    let mut empty_tile_location=solved_board.empty_tile_location;
+    let mut board = solved_board.clone();
 
     let mut shift_direction_sequence:Vec<BasicDirection> = vec!();
     //we'll never shift with the location below on the first shift since there's none

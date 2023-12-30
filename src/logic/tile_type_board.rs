@@ -58,7 +58,7 @@ impl TileTypeBoard {
     }
 
     /// provides indexes to a type of tile
-    pub fn index_tile_of_type(&mut self, tile_type_to_index: TileType){
+    fn index_tile_of_type(&mut self, tile_type_to_index: TileType){
         let only_that_type_iter = self.grid.iter_mut().filter(|(_, optional_tile)|{
             if let Some(tile_type_in_tile) = optional_tile{
                 return tile_type_in_tile.tile_type == tile_type_to_index;

@@ -59,12 +59,12 @@ pub fn generate_game_board(
 {
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
         let attempt_result
-            =permutation_builder::generate_board_by_vector_permutation(solved_board.clone());
+            =permutation_builder::generate_board_by_vector_permutation(&solved_board);
          //generation successful
         if let Ok(board) = attempt_result { 
             return Ok(board); 
         }
     }
 
-    brute_force_builder::brute_force_generate_game_board(solved_board.clone(), generation_range)
+    brute_force_builder::brute_force_generate_game_board(&solved_board, generation_range)
 }

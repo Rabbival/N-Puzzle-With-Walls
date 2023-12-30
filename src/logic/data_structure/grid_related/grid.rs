@@ -8,6 +8,45 @@ pub struct Grid<T> {
     grid: HashMap<GridLocation, Option<T>>
 }
 
+impl<T> Grid<T>{
+    /// only returns occupied ones 
+    pub fn get_all_direct_neighbor_locations(&self, origin: &GridLocation) 
+    -> HashMap<BasicDirection, GridLocation>
+    {
+        let mut valid_neighbors:HashMap<BasicDirection, GridLocation>=HashMap::new();
+        for dir in BasicDirection::get_directions_as_vec(){
+            if let Some(neighbor_location) = self.occupied_neighbor_location(origin, &dir){
+                valid_neighbors.insert(dir,neighbor_location);
+            }
+        }
+        valid_neighbors
+    }
+
+    fn occupied_neighbor_location(
+            &self, 
+            origin: &GridLocation, 
+            dir: &BasicDirection
+        ) -> Option<GridLocation>
+        {
+        let neighbor_location = self.neighbor_location(origin, dir);
+        if self.occupied(&neighbor_location){
+            Some(neighbor_location)
+        }else{
+            None
+        }
+    }
+
+    //returns a location without checking if it's valid
+    pub fn neighbor_location(&self, origin: &GridLocation, dir: &BasicDirection) -> GridLocation{
+        match dir{
+            BasicDirection::Up=>GridLocation::new(origin.row-1, origin.col),
+            BasicDirection::Right=>GridLocation::new(origin.row, origin.col+1),
+            BasicDirection::Down=>GridLocation::new(origin.row+1, origin.col),
+            BasicDirection::Left=>GridLocation::new(origin.row, origin.col-1)
+        }
+    }
+}
+
 //basics
 impl<T> Grid<T> {
     pub fn new(grid_side_length: u8) -> Self {
@@ -78,65 +117,6 @@ impl<T> Grid<T> {
             && location.row >= 0
             && location.col < self.grid_side_length as i32
             && location.row < self.grid_side_length as i32
-    }
-}
-
-//special constructor
-impl<T: Copy> Grid<T>{
-        /// initialize all cells to something
-        pub fn new_with_default_values(grid_side_length: u8, default_value: T) -> Self {
-            let mut grid = HashMap::<GridLocation, Option<T>>::new();
-            for row in 0..grid_side_length{
-                for col in 0..grid_side_length{
-                    grid.insert(
-                        GridLocation { row: row as i32, col: col as i32 }, 
-                        Some(default_value)
-                    );
-                }
-            }
-            Self {
-                grid_side_length,
-                grid
-            }
-        }
-}
-
-impl<T> Grid<T>{
-    /// only returns occupied ones 
-    pub fn get_all_direct_neighbor_locations(&self, origin: &GridLocation) 
-    -> HashMap<BasicDirection, GridLocation>
-    {
-        let mut valid_neighbors:HashMap<BasicDirection, GridLocation>=HashMap::new();
-        for dir in BasicDirection::get_directions_as_vec(){
-            if let Some(neighbor_location) = self.occupied_neighbor_location(origin, &dir){
-                valid_neighbors.insert(dir,neighbor_location);
-            }
-        }
-        valid_neighbors
-    }
-
-    fn occupied_neighbor_location(
-            &self, 
-            origin: &GridLocation, 
-            dir: &BasicDirection
-        ) -> Option<GridLocation>
-        {
-        let neighbor_location = self.neighbor_location(origin, dir);
-        if self.occupied(&neighbor_location){
-            Some(neighbor_location)
-        }else{
-            None
-        }
-    }
-
-    //returns a location without checking if it's valid
-    pub fn neighbor_location(&self, origin: &GridLocation, dir: &BasicDirection) -> GridLocation{
-        match dir{
-            BasicDirection::Up=>GridLocation::new(origin.row-1, origin.col),
-            BasicDirection::Right=>GridLocation::new(origin.row, origin.col+1),
-            BasicDirection::Down=>GridLocation::new(origin.row+1, origin.col),
-            BasicDirection::Left=>GridLocation::new(origin.row, origin.col-1)
-        }
     }
 }
 

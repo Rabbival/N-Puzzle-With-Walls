@@ -2,11 +2,12 @@ use crate::{prelude::*, output::error_handler};
 
 use rand::Rng;
 
+/// builds a new board based on the one it gets
 pub fn generate_board_by_vector_permutation(
-    board: TileTypeBoard
+    solved_board: &TileTypeBoard
 ) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
 {
-    let solved_board_iterator = board.iter_filtered();
+    let solved_board_iterator = solved_board.iter_filtered();
     let mut sorted_tiles=vec![];
     let mut sorted_grid_locations=vec![];
     for (sorted_grid_location, optional_tile) in solved_board_iterator{
@@ -19,10 +20,8 @@ pub fn generate_board_by_vector_permutation(
     }
     let permutation 
         = make_valid_permutation_out_of_vector(&sorted_tiles)?;
-    let mut grid=Grid::new_with_default_values(
-        *board.get_side_length(),
-        Tile::new(TileType::Wall)
-    );
+
+    let mut grid = solved_board.grid.clone();
     let mut empty_grid_location = &GridLocation::default(); //there should always be an empty tile
     for (location, content) in sorted_grid_locations.iter().zip(permutation.iter()){
         grid.set(location, *content);
@@ -30,9 +29,8 @@ pub fn generate_board_by_vector_permutation(
             empty_grid_location = *location;
         }
     }
-    let mut generated_board=
+    let generated_board=
         TileTypeBoard::from_grid_and_empty_loc(&grid, empty_grid_location);
-    generated_board.index_tile_of_type(TileType::Wall);
     Ok(generated_board)
 }
 
