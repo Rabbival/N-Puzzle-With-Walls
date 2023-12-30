@@ -5,14 +5,17 @@ pub struct UpdateBoardPropertiesPlugin;
 impl Plugin for UpdateBoardPropertiesPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, (
-                        general_update_planned_board_properties,
-                        update_wall_count,
-                        set_applied_props_and_begin_generation
+            .add_systems(Update, ((
+                            general_update_planned_board_properties,
+                            update_wall_count_unapplied,
+                            set_applied_props_and_begin_generation
+                        )
+                        .chain()
+                        .in_set(InputSystemSets::InputHandling),
+                        apply_wall_count_to_planned_props.in_set(InputSystemSets::PostMainChanges)
                     )
-                    .chain()//chained because count needs size and generation needs everything set
                     .run_if(in_state(GameState::Menu))
-                    .in_set(InputSystemSets::InputHandling)
+                    
             )
             ;
     }
@@ -66,47 +69,31 @@ fn general_update_planned_board_properties_inner(
     }
 }
 
-fn update_wall_count(
+fn update_wall_count_unapplied(
     mut button_event_listener: EventReader<ui_event::ButtonPressed>,
-    mut apply_button_event_listener: EventReader<ui_event::ApplyButtonPressed>,
-    mut planned_board_prop_query: Query<
-        &mut BoardProperties, 
+    planned_board_prop_query: Query<
+        &BoardProperties, 
         (With<PlannedBoardProperties>, Without<AppliedBoardProperties>)
     >,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
 ){
     for button_event in button_event_listener.read(){
         if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action{
-            update_wall_count_inner(
+            update_wall_count_unapplied_inner(
                 &wall_count_action,
-                &mut planned_board_prop_query.single_mut(),
-                &mut unapplied_menu_wall_count
-            );
-        }      
-    }
-    for apply_button_event in apply_button_event_listener.read(){
-        if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) 
-            = apply_button_event.action
-        {
-            update_wall_count_inner(
-                &wall_count_action,
-                &mut planned_board_prop_query.single_mut(),
+                &planned_board_prop_query.single(),
                 &mut unapplied_menu_wall_count
             );
         }      
     }
 }
 
-fn update_wall_count_inner(
+fn update_wall_count_unapplied_inner(
     wall_count_action: &WallTilesChange,
-    planned_board_prop: &mut BoardProperties,
+    planned_board_prop: &BoardProperties,
     unapplied_menu_wall_count: &mut UnappliedMenuWallCount,
 ){
     match wall_count_action{
-        WallTilesChange::Apply=> {
-            planned_board_prop.wall_count = unapplied_menu_wall_count.0;
-            print_to_console::game_log(GameLog::WallCountSet(planned_board_prop.wall_count));
-        },
         WallTilesChange::Increase | WallTilesChange::Decrease=> {
             if let WallTilesChange::Increase = wall_count_action{
                 if unapplied_menu_wall_count.0 < planned_board_prop.size.wall_count_upper_bound(){
@@ -126,6 +113,28 @@ fn update_wall_count_inner(
                 }
             }
         }
+        _ => {}
+    }
+}
+
+fn apply_wall_count_to_planned_props(
+    mut apply_button_event_listener: EventReader<ui_event::ApplyButtonPressed>,
+    mut planned_board_prop_query: Query<
+        &mut BoardProperties, 
+        (With<PlannedBoardProperties>, Without<AppliedBoardProperties>)
+    >,
+    unapplied_menu_wall_count: Res<UnappliedMenuWallCount>,
+){
+    for apply_button_event in apply_button_event_listener.read(){
+        if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) 
+            = apply_button_event.action
+        {
+            if let WallTilesChange::Apply = wall_count_action {
+                let mut planned_board_prop = planned_board_prop_query.single_mut();
+                planned_board_prop.wall_count = unapplied_menu_wall_count.0;
+                print_to_console::game_log(GameLog::WallCountSet(planned_board_prop.wall_count));
+            }
+        }      
     }
 }
 
@@ -188,7 +197,7 @@ mod tests {
         current_unapplied_wall_count: &mut UnappliedMenuWallCount,
         planned_board_prop: &mut BoardProperties
     )-> bool {
-        update_wall_count_inner(
+        update_wall_count_unapplied_inner(
             &DECREASE_REQUEST,
             planned_board_prop,
             current_unapplied_wall_count,
@@ -200,7 +209,7 @@ mod tests {
         current_unapplied_wall_count: &mut UnappliedMenuWallCount,
         planned_board_prop: &mut BoardProperties
     )-> bool {
-        update_wall_count_inner(
+        update_wall_count_unapplied_inner(
             &INCREASE_REQUEST,
             planned_board_prop,
             current_unapplied_wall_count,
@@ -229,7 +238,7 @@ mod tests {
         current_unapplied_wall_count: &mut UnappliedMenuWallCount,
         planned_board_prop: &mut BoardProperties
     )-> bool {
-        update_wall_count_inner(
+        update_wall_count_unapplied_inner(
             &INCREASE_REQUEST,
             planned_board_prop,
             current_unapplied_wall_count,
@@ -241,7 +250,7 @@ mod tests {
         current_unapplied_wall_count: &mut UnappliedMenuWallCount,
         planned_board_prop: &mut BoardProperties
     )-> bool {
-        update_wall_count_inner(
+        update_wall_count_unapplied_inner(
             &DECREASE_REQUEST,
             planned_board_prop,
             current_unapplied_wall_count,
@@ -259,7 +268,7 @@ mod tests {
         let mut current_unapplied_wall_count 
             = UnappliedMenuWallCount(smaller_size_wall_count_upper_bound);
 
-        update_wall_count_inner(
+            update_wall_count_unapplied_inner(
             &INCREASE_REQUEST,
             &mut planned_board_prop,
             &mut current_unapplied_wall_count,
@@ -267,7 +276,7 @@ mod tests {
         let first_check = current_unapplied_wall_count.0 == smaller_size_wall_count_upper_bound;
 
         planned_board_prop.size = bigger_board_size;
-        update_wall_count_inner(
+        update_wall_count_unapplied_inner(
             &INCREASE_REQUEST,
             &mut planned_board_prop,
             &mut current_unapplied_wall_count,
