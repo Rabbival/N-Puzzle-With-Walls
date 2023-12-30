@@ -25,6 +25,11 @@ pub struct ButtonPressed{
     pub action: MenuButtonAction
 }
 
+#[derive (Event)]
+pub struct ApplyButtonPressed{
+    pub action: MenuButtonAction
+}
+
 
 pub struct UiEventPlugin;
 
@@ -35,6 +40,7 @@ impl Plugin for UiEventPlugin {
             .add_event::<SpawnBigButtons>()
             .add_event::<SpawnTileCountButtons>()
             .add_event::<ButtonPressed>()
+            .add_event::<ApplyButtonPressed>()
             ;
     }
 }

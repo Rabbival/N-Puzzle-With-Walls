@@ -10,9 +10,10 @@ impl Plugin for MenuUiLogicPlugin {
                     set_chosen_options_to_fit_current_props.in_set(StateChangeSystemSets::HandleStateChange),
                     (
                         update_menu_ui_after_press_general,
-                        update_wall_count_menu_ui,
+                        increase_or_decrease_wall_count_menu_ui_update,
                         set_applied_props
-                    ).in_set(InputSystemSets::InputHandling)
+                    ).in_set(InputSystemSets::InputHandling),
+                    apply_wall_count_menu_ui_update.in_set(InputSystemSets::PostMainChanges),
                 )
                 .run_if(in_state(GameState::Menu))
             )
@@ -93,41 +94,36 @@ fn update_menu_ui_after_press_general(
     }
 }
 
-fn update_wall_count_menu_ui(
+fn increase_or_decrease_wall_count_menu_ui_update(
     mut button_event_listener: EventReader<ui_event::ButtonPressed>,
     mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
-    mut currently_chosen: Query<
-        (Entity, &mut BackgroundColor, &MenuButtonAction), 
-        (With<SelectedOptionTag>, Without<ApplyButtonTag>)
-    >,
     mut commands: Commands,
 ){
     for button_event in button_event_listener.read(){
         if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action{
-            let menu_button_action = button_event.action;
-            let pressed_button_entity = button_event.entity;
             let (apply_button, mut apply_button_color) = apply_button_query.single_mut();
             match wall_count_action{
-                WallTilesChange::Apply=> {
-                    commands.entity(button_event.entity).insert(SelectedOptionTag);
-
-                    // take care of selected option tag
-                    for (
-                        previous_button, 
-                        mut previous_color, 
-                        menu_button_action_of_chosen
-                    ) in currently_chosen.iter_mut(){
-                        if mem::discriminant(&menu_button_action) == mem::discriminant(menu_button_action_of_chosen){
-                            menu_graphics::set_color_to_normal(&mut previous_color);
-                            commands.entity(previous_button).remove::<SelectedOptionTag>();
-                            commands.entity(pressed_button_entity).insert(SelectedOptionTag);
-                        }  
-                    }
-                },
                 WallTilesChange::Increase | WallTilesChange::Decrease=> {
                     menu_graphics::set_color_to_normal(&mut apply_button_color);
                     commands.entity(apply_button).remove::<SelectedOptionTag>();
-                }
+                },
+                _ => {}
+            }
+        }      
+    }
+}
+
+fn apply_wall_count_menu_ui_update(
+    mut apply_button_event_listener: EventReader<ui_event::ApplyButtonPressed>,
+    mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
+    mut commands: Commands,
+){
+    for button_event in apply_button_event_listener.read(){
+        if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action{
+            if let WallTilesChange::Apply = wall_count_action{
+                let (apply_button_entity, mut apply_button_color) = apply_button_query.single_mut();
+                commands.entity(apply_button_entity).insert(SelectedOptionTag);
+                menu_graphics::set_color_to_pressed(&mut apply_button_color);
             }
         }      
     }

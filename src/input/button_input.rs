@@ -1,5 +1,4 @@
 use crate::{prelude::*, costume_event::ui_event, output::print_to_console};
-use std::mem;
 
 pub struct ButtonInputPlugin;
 
@@ -20,33 +19,37 @@ impl Plugin for ButtonInputPlugin {
 
 fn handle_menu_buttons(
     mut button_event_writer: EventWriter<ui_event::ButtonPressed>,
+    mut apply_button_event_writer: EventWriter<ui_event::ApplyButtonPressed>,
     mut interaction_query: Query<
-        (&Interaction, &MenuButtonAction, Entity),
+        (&Interaction, &MenuButtonAction, Entity, Option<&ApplyButtonTag>),
         (Changed<Interaction>, With<Button>),
     >,
 ) {
     for (
         interaction, 
         menu_button_action, 
-        entity
+        entity,
+        optional_apply_button_tag
     ) 
     in interaction_query.iter_mut() {
         if *interaction == Interaction::Pressed {
-            button_event_writer.send(ui_event::ButtonPressed{
-                entity,
-                action: *menu_button_action
-            });
-
-            if let MenuButtonAction::GenerateBoard = menu_button_action{
-                continue;
+            if let Some(_) = optional_apply_button_tag{
+                apply_button_event_writer.send(ui_event::ApplyButtonPressed{
+                    action: *menu_button_action
+                });
+            }else{
+                button_event_writer.send(ui_event::ButtonPressed{
+                    entity,
+                    action: *menu_button_action
+                });
             }
-            if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = menu_button_action{
-                if mem::discriminant(wall_count_action) != mem::discriminant(&WallTilesChange::Apply){
-                    continue;
+
+            match menu_button_action{
+                MenuButtonAction::GenerateBoard | MenuButtonAction::ChangeWallTilesCount(_) => {},
+                _ => {
+                    print_to_console::game_log(GameLog::BoardSettingsChanged(menu_button_action));
                 }
             }
-
-            print_to_console::game_log(GameLog::BoardSettingsChanged(menu_button_action));
         }
     }
 }
