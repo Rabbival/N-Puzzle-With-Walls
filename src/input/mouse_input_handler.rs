@@ -118,8 +118,8 @@ mod tests {
         ));
         assert!(test_index_out_of_bound(
             Vec2::new(
-                DEFAULT_BOARD_SIDE_LENGTH as f32 * ATLAS_CELL_SQUARE_SIZE, 
-                DEFAULT_BOARD_SIDE_LENGTH as f32 * ATLAS_CELL_SQUARE_SIZE
+                BoardSize::default().to_grid_side_length() as f32 * ATLAS_CELL_SQUARE_SIZE, 
+                BoardSize::default().to_grid_side_length() as f32 * ATLAS_CELL_SQUARE_SIZE
             ),
             &mut event_writer
         ));
@@ -230,7 +230,7 @@ mod tests {
     }
 
     fn test_no_empty_neighbor(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>)-> bool{
-        let mut board: TileTypeBoard=solved_board_builder::generate_solved_board(DEFAULT_BOARD_SIDE_LENGTH);
+        let mut board: TileTypeBoard=solved_board_builder::generate_solved_board(&BoardProperties::default());
         board.ignore_player_input=false;
         let empty_tile_location=board.empty_tile_location;
         board.set(&empty_tile_location, Tile { index: 16, tile_type: TileType::Numbered });

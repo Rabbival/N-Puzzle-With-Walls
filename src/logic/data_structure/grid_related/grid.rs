@@ -47,6 +47,42 @@ impl<T> Grid<T>{
     }
 }
 
+// get a group of tiles as vector
+impl<T> Grid<T>{
+    pub fn corner_locations(&self) -> Vec<GridLocation>{
+        let end_of_line = (self.grid_side_length-1) as i32;
+        vec![
+            GridLocation::new(0, 0),
+            GridLocation::new(0, end_of_line),
+            GridLocation::new(end_of_line, 0),
+            GridLocation::new(end_of_line, end_of_line),
+        ]
+    }
+
+    pub fn edges_without_corners_locations(&self) -> Vec<GridLocation>{
+        let end_of_line = (self.grid_side_length-1) as i32;
+        let mut edge_vector = vec![];
+        for i in 1..end_of_line{
+            edge_vector.push(GridLocation { row: 0, col: i }); //upper line
+            edge_vector.push(GridLocation { row: end_of_line, col: i }); //buttom line
+            edge_vector.push(GridLocation { row: i, col: 0 }); //left line
+            edge_vector.push(GridLocation { row: i, col: end_of_line }); //right line
+        }
+        edge_vector
+    }
+
+    pub fn all_locations_no_edges(&self) -> Vec<GridLocation>{
+        let end_of_line = (self.grid_side_length-1) as i32;
+        let mut edge_vector = vec![];
+        for col in 1..end_of_line{
+            for row in 1..end_of_line{
+                edge_vector.push(GridLocation { row, col }); 
+            }
+        }
+        edge_vector
+    }
+}
+
 //basics
 impl<T> Grid<T> {
     pub fn new(grid_side_length: u8) -> Self {

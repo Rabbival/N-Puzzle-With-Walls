@@ -27,20 +27,20 @@ fn build_a_new_board(
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     mut solved_board_query: Query<&mut TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
-    applied_board_prop_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
+    applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
 ){
     for build_request in event_listener.read(){
         let mut solved_board_entity = solved_board_query.single_mut();
-        let board_size = applied_board_prop_query.single().size;
+        let applied_props = applied_board_props_query.single();
         if build_request.reroll_solved {
-            *solved_board_entity = generate_solved_board(board_size.to_grid_side_length());
+            *solved_board_entity = generate_solved_board(applied_props);
         }
         let solved_grid = &solved_board_entity.grid;
         let mut game_board=game_board_query.single_mut();
         let attempt_result=
             generate_game_board(
                 TileTypeBoard::from_grid(solved_grid), 
-                board_size.to_random_turns_range()
+                applied_props.size.to_random_turns_range()
             );
         //generation successful
         if let Ok(board) = attempt_result { 

@@ -45,18 +45,21 @@ pub fn move_tile_logic_inner(
     solved_grid: &Grid<Tile>,
 ) -> Result<(), error_handler::TileMoveError>
 {    
-    graphics_event_writer.send(move_tile_event::SwitchTilesGraphics{
-        first_grid_location: occupied_tile_location,
-        second_grid_location: empty_tile_location
-    });
-    if game_board.get(&occupied_tile_location).is_none() {
+    let optional_occupied_tile = game_board.get(&occupied_tile_location);
+    if optional_occupied_tile.is_none() {
         return Err(error_handler::TileMoveError::NoTileInCell(occupied_tile_location));
+    } else if optional_occupied_tile.unwrap().tile_type == TileType::Wall {
+        return Err(error_handler::TileMoveError::TriedToSwitchWithAWall);
     }
     print_to_console::game_log(GameLog::TilesMoved(
         game_board.get(&occupied_tile_location).unwrap(),
         &empty_tile_location
     ));
 
+    graphics_event_writer.send(move_tile_event::SwitchTilesGraphics{
+        first_grid_location: occupied_tile_location,
+        second_grid_location: empty_tile_location
+    });
     game_board.switch_tiles_by_location(&empty_tile_location, &occupied_tile_location)?;
 
     check_if_solved(game_board, solved_grid);

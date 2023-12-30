@@ -1,7 +1,5 @@
 use crate::{prelude::*, output::error_handler};
 
-pub const DEFAULT_BOARD_SIDE_LENGTH: u8 = 4;
-
 #[derive(Component, Clone, Debug)]
 pub struct TileTypeBoard {
     /// even if the location is empty, TileTypeBoard's location should have an empty tile (and NOT a None)
@@ -129,7 +127,7 @@ impl TileTypeBoard {
     }
 
     /// returns true if it was None and the value was inserted
-    pub fn set_if_empty(&mut self, location: &GridLocation, content: Tile) -> bool{
+    pub fn set_if_none(&mut self, location: &GridLocation, content: Tile) -> bool{
         if self.grid.get(location).is_none() {
             self.grid.set(location, content);
             return true;
@@ -214,6 +212,6 @@ impl TileTypeBoard{
 
 impl Default for TileTypeBoard{
     fn default() -> Self {
-        Self::new(DEFAULT_BOARD_SIDE_LENGTH)
+        Self::new(BoardSize::default().to_grid_side_length())
     }
 }
