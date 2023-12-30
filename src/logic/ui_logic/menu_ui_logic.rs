@@ -119,12 +119,11 @@ fn apply_wall_count_menu_ui_update(
     mut commands: Commands,
 ){
     for button_event in apply_button_event_listener.read(){
-        if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action{
-            if let WallTilesChange::Apply = wall_count_action{
-                let (apply_button_entity, mut apply_button_color) = apply_button_query.single_mut();
-                commands.entity(apply_button_entity).insert(SelectedOptionTag);
-                menu_graphics::set_color_to_pressed(&mut apply_button_color);
-            }
+        if let MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply) = button_event.action{
+            let (apply_button_entity, mut apply_button_color) 
+                = apply_button_query.single_mut();
+            commands.entity(apply_button_entity).insert(SelectedOptionTag);
+            menu_graphics::set_color_to_pressed(&mut apply_button_color);
         }      
     }
 }

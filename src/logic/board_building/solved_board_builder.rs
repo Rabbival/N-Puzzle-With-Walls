@@ -53,7 +53,7 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8) -> Vec<GridLoc
     //      if 3, we should also start without neighbors of edges
 
     for _ in 0..wall_count{
-        if possible_spawn_locations.len() == 0 {
+        if possible_spawn_locations.is_empty() {
             break;
         }
         let chosen_wall_location_index = rng.gen_range(0..possible_spawn_locations.len());

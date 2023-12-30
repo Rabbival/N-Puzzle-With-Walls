@@ -81,7 +81,7 @@ fn update_wall_count_unapplied(
         if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action{
             update_wall_count_unapplied_inner(
                 &wall_count_action,
-                &planned_board_prop_query.single(),
+                planned_board_prop_query.single(),
                 &mut unapplied_menu_wall_count
             );
         }      
@@ -126,14 +126,12 @@ fn apply_wall_count_to_planned_props(
     unapplied_menu_wall_count: Res<UnappliedMenuWallCount>,
 ){
     for apply_button_event in apply_button_event_listener.read(){
-        if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) 
+        if let MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply) 
             = apply_button_event.action
         {
-            if let WallTilesChange::Apply = wall_count_action {
-                let mut planned_board_prop = planned_board_prop_query.single_mut();
-                planned_board_prop.wall_count = unapplied_menu_wall_count.0;
-                print_to_console::game_log(GameLog::WallCountSet(planned_board_prop.wall_count));
-            }
+            let mut planned_board_prop = planned_board_prop_query.single_mut();
+            planned_board_prop.wall_count = unapplied_menu_wall_count.0;
+            print_to_console::game_log(GameLog::WallCountSet(planned_board_prop.wall_count));
         }      
     }
 }

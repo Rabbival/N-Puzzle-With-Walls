@@ -22,36 +22,50 @@ impl<T> Grid<T>{
             .collect();
         let first_location 
             = cells_locations_with_visited_mark.get_key_value_mut(
-                self.grid.keys().into_iter().next().unwrap()
+                self.grid.keys().next().unwrap()
             ).unwrap();
         *first_location.1 = true;
         let first_location_neighbors = self.get_all_direct_neighbor_locations(first_location.0);
-        let mut locations_to_visit : Vec<&GridLocation>
+        let mut locations_to_visit : Vec<GridLocation>
             = first_location_neighbors
                 .values()
+                .clone()
+                .copied()
                 .collect();
         let mut cells_visited_counter = 1; //already visited the first
         while ! locations_to_visit.is_empty(){
             self.breath_first_count(
-                &mut cells_visited_counter,
                 &mut locations_to_visit,
                 &mut cells_locations_with_visited_mark
             );
+            cells_visited_counter += 1;
         }
         //check that we found everything that's defined (and not None)
         cells_visited_counter == self.iter().collect::<Vec<_>>().len() as u32
     }
 
+    /// assumes vec not to be empty and hash-map to have all locations in vec
     fn breath_first_count(
         &self,
-        cells_visited_counter: &mut u32,
-        locations_to_visit: &mut Vec<&GridLocation>,
+        locations_to_visit: &mut Vec<GridLocation>,
         cells_locations_with_visited_mark: &mut HashMap<&GridLocation, bool>
-    ) -> bool
-    {
-        
-
-        true
+    ){
+        let next_tile_to_check = locations_to_visit.pop().unwrap();
+        let visited_mark_for_next_tile 
+            = cells_locations_with_visited_mark.get_mut(&next_tile_to_check).unwrap();
+        *visited_mark_for_next_tile = true;
+        let next_tile_neighbors 
+            = self.get_all_direct_neighbor_locations(&next_tile_to_check);
+        let mut new_locations_to_visit : Vec<GridLocation>
+            = next_tile_neighbors
+                .values()
+                //only add the ones not yet visited
+                .filter(|next_tile_neighbor_location|{
+                    *cells_locations_with_visited_mark.get(next_tile_neighbor_location).unwrap()
+                })
+                .copied()
+                .collect();
+        locations_to_visit.append(&mut new_locations_to_visit);
     }
 
     /// only returns occupied ones 
