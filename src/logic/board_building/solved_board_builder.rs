@@ -59,28 +59,49 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8) -> Vec<GridLoc
         let chosen_wall_location_index = rng.gen_range(0..possible_spawn_locations.len());
         let chosen_wall_location = possible_spawn_locations[chosen_wall_location_index];
         wall_spawn_locations.push(chosen_wall_location);
+        //can't choose the same tile again
+        remove_by_value(
+            &chosen_wall_location, 
+            &mut possible_spawn_locations
+        );
         for neighbor in 
             neighbor_count_grid.get_all_direct_neighbor_locations(&chosen_wall_location)
         {
             let neighbor_location = neighbor.1;
             let neighbor_value = neighbor_count_grid.get_mut(&neighbor_location).unwrap();
             *neighbor_value -= 1;
+
+
+            info!("neighbor at {:?} now has value {:?}", neighbor_location, *neighbor_value);
+
+
             // if a neigbor of the chosen location got to the threshold
             if *neighbor_value == MIN_NEIGHBORS{
                 // we can't put a wall in its neighbor or it'll go below threshold
                 for neighbor_to_forbid in 
                     neighbor_count_grid.get_all_direct_neighbor_locations(&neighbor_location)
                 {
-                    let optional_index_to_remove = possible_spawn_locations.iter()
-                        .position(|x| *x == neighbor_to_forbid.1);
-                    if let Some(index_to_remove) =  optional_index_to_remove {
-                        possible_spawn_locations.swap_remove(index_to_remove);
-                    }
+                    remove_by_value(
+                        &neighbor_to_forbid.1, 
+                        &mut possible_spawn_locations
+                    );
                 }
             }
         }
     }
     wall_spawn_locations
+}
+
+fn remove_by_value(location_to_forbid: &GridLocation, possible_spawn_locations: &mut Vec<GridLocation>){
+    let optional_index_to_remove = possible_spawn_locations.iter()
+        .position(|x| *x == *location_to_forbid);
+    //could be that it was removed before by a different neighbor
+    if let Some(index_to_remove) =  optional_index_to_remove {
+        possible_spawn_locations.swap_remove(index_to_remove);
+    }
+
+    info!("tile at {:?} is now forbidden for wall spawn", location_to_forbid);
+
 }
 
 fn initialize_neighbor_count_grid(grid_side_length: u8) -> Grid<u8>{
