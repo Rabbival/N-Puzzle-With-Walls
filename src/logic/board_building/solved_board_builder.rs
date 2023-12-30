@@ -1,20 +1,19 @@
 use crate::prelude::*;
+use rand::Rng;
+
+const MIN_NEIGHBORS: u8 = 1;
 
 pub fn generate_solved_board(applied_props: &BoardProperties) -> TileTypeBoard{
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut solved_board = TileTypeBoard::new(grid_side_length);
     let grid_side_length_u32 = grid_side_length as u32;
 
-    //Testing wall locations
-    let test_vec = vec![
-        GridLocation{row: 1, col: 1},
-        GridLocation{row: 1, col: 3},
-        GridLocation{row: 3, col: 0},
-        GridLocation{row: 3, col: 1},
-        GridLocation{row: 3, col: 2},
-        GridLocation{row: 3, col: 3},
-    ];
-    spawn_walls_in_locations(test_vec , &mut solved_board);
+    if applied_props.wall_count > 0 {
+        spawn_walls_in_locations(
+            determine_wall_locations(applied_props.wall_count, grid_side_length), 
+            &mut solved_board
+        );
+    }
 
     let mut empty_tile_counter = applied_props.empty_count;
     'outer_for: for i in (0..grid_side_length_u32).rev(){
@@ -44,9 +43,44 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> TileTypeBoard{
     solved_board
 }
 
-fn determine_wall_locations(grid_side_length: u8){
+fn determine_wall_locations(wall_count: u8, grid_side_length: u8) -> Vec<GridLocation>{
+    let mut rng = rand::thread_rng();
+    let mut wall_spawn_locations = vec![];
     let mut neighbor_count_grid = initialize_neighbor_count_grid(grid_side_length);
+    let mut possible_spawn_locations = neighbor_count_grid.all_locations_as_ves();
 
+    // NTS: if MIN_NEIGHBORS will be changed to 2, should start without the corners' neighbors,
+    //      if 3, we should also start without neighbors of edges
+
+    for _ in 0..wall_count{
+        if possible_spawn_locations.len() == 0 {
+            break;
+        }
+        let chosen_wall_location_index = rng.gen_range(0..possible_spawn_locations.len());
+        let chosen_wall_location = possible_spawn_locations[chosen_wall_location_index];
+        wall_spawn_locations.push(chosen_wall_location);
+        for neighbor in 
+            neighbor_count_grid.get_all_direct_neighbor_locations(&chosen_wall_location)
+        {
+            let neighbor_location = neighbor.1;
+            let neighbor_value = neighbor_count_grid.get_mut(&neighbor_location).unwrap();
+            *neighbor_value -= 1;
+            // if a neigbor of the chosen location got to the threshold
+            if *neighbor_value == MIN_NEIGHBORS{
+                // we can't put a wall in its neighbor or it'll go below threshold
+                for neighbor_to_forbid in 
+                    neighbor_count_grid.get_all_direct_neighbor_locations(&neighbor_location)
+                {
+                    let optional_index_to_remove = possible_spawn_locations.iter()
+                        .position(|x| *x == neighbor_to_forbid.1);
+                    if let Some(index_to_remove) =  optional_index_to_remove {
+                        possible_spawn_locations.swap_remove(index_to_remove);
+                    }
+                }
+            }
+        }
+    }
+    wall_spawn_locations
 }
 
 fn initialize_neighbor_count_grid(grid_side_length: u8) -> Grid<u8>{

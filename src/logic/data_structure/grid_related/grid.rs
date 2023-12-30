@@ -81,6 +81,16 @@ impl<T> Grid<T>{
         }
         edge_vector
     }
+
+    pub fn all_locations_as_ves(&self) -> Vec<GridLocation>{
+        let mut all_locations_vector = vec![];
+        for col in 0..(self.grid_side_length as i32){
+            for row in 0..(self.grid_side_length as i32){
+                all_locations_vector.push(GridLocation { row, col }); 
+            }
+        }
+        all_locations_vector
+    }
 }
 
 //basics
