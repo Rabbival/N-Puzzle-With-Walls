@@ -212,7 +212,7 @@ mod tests {
         board.ignore_player_input=false;
         board.set(
             &GridLocation::new(0, 0), 
-            Tile { index: 0, tile_type: TileType::Numbered }
+            Tile { index: 0, tile_type: TileType::Empty }
         );
         let location_validation_outcome=
             handle_mouse_click(
