@@ -1,4 +1,4 @@
-use crate::{prelude::*, output:: error_handler, costume_event::{board_set_event, ui_event}};
+use crate::{prelude::*, output::{ error_handler, print_to_console}, costume_event::{board_set_event, ui_event}};
 
 use super::{permutation_builder, brute_force_builder};
 
@@ -29,6 +29,7 @@ fn build_a_new_board(
     mut solved_board_query: Query<&mut TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
+    mut game_state: ResMut<NextState<GameState>>,
 ){
     for build_request in event_listener.read(){
         let mut solved_board_entity = solved_board_query.single_mut();
@@ -38,7 +39,8 @@ fn build_a_new_board(
                 Ok(board) =>  *solved_board_entity = board,
                 Err(error) => {
                     generation_error_event_writer
-                        .send(ui_event::ShowGenerationError(error))
+                        .send(ui_event::ShowGenerationError(error));
+                    return;
                 }
             }
             
@@ -52,7 +54,11 @@ fn build_a_new_board(
             );
         //generation successful
         match attempt_result{
-            Ok(board) =>  *game_board=board,
+            Ok(board) =>  {
+                *game_board=board;
+                game_state.set(GameState::Game);
+                print_to_console::game_log(GameLog::NewBoardGenerated);
+            },
             Err(error) => {
                 generation_error_event_writer
                     .send(ui_event::ShowGenerationError(error))

@@ -149,7 +149,6 @@ fn set_applied_props_and_begin_generation(
         &mut BoardProperties,
         (With<PlannedBoardProperties>, Without<AppliedBoardProperties>)
     >,
-    mut game_state: ResMut<NextState<GameState>>,
 ){
     for button_event in button_event_listener.read(){
         if let MenuButtonAction::GenerateBoard = button_event.action{
@@ -163,9 +162,6 @@ fn set_applied_props_and_begin_generation(
                 new_grid_side_length: planned_board_prop.size.to_grid_side_length()
             });
             *applied_props = *planned_board_prop;
-
-            game_state.set(GameState::Game);
-            print_to_console::game_log(GameLog::NewBoardGenerated);
         }
     }
 }
