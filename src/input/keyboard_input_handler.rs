@@ -20,19 +20,11 @@ impl Plugin for KeyboardInputHandlerPlugin {
 }
 
 fn open_menu(
-    game_state: Res<State<GameState>>,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut menu_toggle_event_writer: EventWriter<app_event::ToggleMenu>,
     keyboard_input: Res<Input<KeyCode>>,
 ){
     if keyboard_input.just_pressed(KeyCode::Space){
-        match game_state.get() {
-            GameState::Game => {
-                next_state.set(GameState::Menu);
-            },
-            GameState::Menu => {
-                next_state.set(GameState::Game);
-            }
-        }
+        menu_toggle_event_writer.send(app_event::ToggleMenu)
     }
 }
 
@@ -92,6 +84,7 @@ fn listen_for_reset(
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
+
         input_event_writer.send(board_set_event::BuildNewBoard{
             reroll_solved: false
         });

@@ -3,6 +3,7 @@ use crate::prelude::*;
 pub mod tile_graphics;
 pub mod menu_graphics;
 pub mod menu_spawner;
+pub mod eternal_buttons_spawner;
 
 
 pub struct GraphicsPlugin;
@@ -13,7 +14,8 @@ impl Plugin for GraphicsPlugin {
             .add_plugins((
                 TileGraphicsPlugin,
                 MenuGraphicsPlugin,
-                MenuSpanwerPlugin
+                MenuSpanwerPlugin,
+                EternalButtonsSpanwerPlugin
             ))
             .add_systems(Update, 
                 toggle_visibility_for_entities_with_tag

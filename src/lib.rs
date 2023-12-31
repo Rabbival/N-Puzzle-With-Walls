@@ -31,15 +31,16 @@ pub mod prelude {
         button_input::*,
     };
     pub use crate::output::{
-        camera::*,
-        asset_loader::*,
-        error_handler::*,
         graphics::{
             GraphicsPlugin,
             tile_graphics::*,
             menu_graphics::*,
             menu_spawner::*,
+            eternal_buttons_spawner::*,
         },
+        camera::*,
+        asset_loader::*,
+        error_handler::*,
         print_to_console::*,
     };
     pub use crate::logic::{
@@ -67,6 +68,7 @@ pub mod prelude {
         enums::{
             basic_direction::*,
             tile_type::*,
+            eternal_button_action::*,
             board_property_enums::{
                 board_size::*,
                 generation_method::*,

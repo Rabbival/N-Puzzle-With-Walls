@@ -1,4 +1,4 @@
-use crate::{prelude::*, costume_event::screen_changing_event};
+use crate::{prelude::*, costume_event::{screen_changing_event, app_event}};
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum GameState {
@@ -22,6 +22,7 @@ impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_state::<GameState>()
+            .add_systems(Update, toggle_menu)
             .add_systems(
                 OnExit(GameState::Game), (
                 toggle_visibility_for_game_screen_elements.in_set(StateChangeSystemSets::StateChangeListening),
@@ -44,6 +45,24 @@ impl Plugin for GameStatePlugin {
                 ).in_set(StateChangeSystemSets::StateChangeListening)
             )
         ;
+    }
+}
+
+
+fn toggle_menu(
+    mut event_listener: EventReader<app_event::ToggleMenu>,
+    game_state: Res<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
+){
+    for _ in event_listener.read(){
+        match game_state.get() {
+            GameState::Game => {
+                next_state.set(GameState::Menu);
+            },
+            GameState::Menu => {
+                next_state.set(GameState::Game);
+            }
+        }
     }
 }
 

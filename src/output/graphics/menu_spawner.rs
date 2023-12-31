@@ -23,26 +23,27 @@ pub struct BoardGenerationTextTag;
 #[derive(Component)]
 pub struct ButtonText;
 
+
 pub struct MenuSpanwerPlugin;
 
 impl Plugin for MenuSpanwerPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, menu_setup)
             .add_systems(Startup, (
-                    spawn_exit_button,
+                menu_setup,
+                (
                     spawn_generate_button,
                     spawn_size_options,
                     spawn_generation_options,
                     spawn_tile_counter,
                 )
                 .after(menu_setup)
-            );
+            ));
     }
 }
 
-
-fn menu_setup(
+/// public to let eternal buttons spawner execute after it
+pub fn menu_setup(
     mut button_event_writer: EventWriter<ui_spawn_event::SpawnButtons>,
     mut big_button_event_writer: EventWriter<ui_spawn_event::SpawnBigButtons>,
     mut tile_count_buttons_event_writer: EventWriter<ui_spawn_event::SpawnTileCountButtons>,
@@ -107,58 +108,6 @@ fn menu_setup(
     });
 }
 
-fn spawn_exit_button(
-    mut eternal_buttons_event_reader: EventReader<ui_spawn_event::SpawnEternalButtons>,
-    mut commands: Commands
-){
-    for eternal_button_event in eternal_buttons_event_reader.read(){
-        let button_style=&eternal_button_event.thin_button_style;
-        let button_text_style=&eternal_button_event.button_text_style;
-
-        commands
-        .spawn(
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::Start,
-                    justify_content: JustifyContent::End,
-                    ..default()
-                },
-                visibility: Visibility::Visible,
-                ..default()
-            })
-        .with_children(|parent| {
-            parent
-            .spawn(NodeBundle {
-                style: Style {
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                background_color: Color::DARK_GRAY.into(),
-                ..default()
-            }).with_children(|parent| {
-                parent
-                .spawn((
-                    ButtonBundle {
-                        style: button_style.clone(),
-                        background_color: menu_graphics::NORMAL_BUTTON.into(),
-                        ..default()
-                    },
-                    MenuButtonAction::EndGame
-                ))
-                .with_children(|parent| {
-                    parent.spawn((TextBundle::from_section(
-                            "X",
-                            button_text_style.clone(),
-                        ),
-                    ));
-                });
-            });
-        });
-    }
-}
 
 fn spawn_generate_button(
     mut big_button_event_reader: EventReader<ui_spawn_event::SpawnBigButtons>,
