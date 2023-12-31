@@ -1,11 +1,11 @@
-use crate::logic::{enums::{basic_direction, board_property_enums::wall_tiles_change}, data_structure::grid_related};
+use crate::{prelude::*, costume_event::ui_event};
 
 #[derive(Debug)]
 pub enum MenuError{
-    CantGoBeyondTileCountBounds(wall_tiles_change::WallTilesChange)
+    CantGoBeyondTileCountBounds(WallTilesChange)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum BoardGenerationError{
     VectorPermutationGenerationFailed,
     DirectionCouldntBeFlipped,
@@ -15,7 +15,7 @@ pub enum BoardGenerationError{
     CouldntPlaceAllWalls
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum ItemNotFoundInMapError{
     DirectionNotFoundInMap,
     EntityNotFoundInMap 
@@ -23,24 +23,44 @@ pub enum ItemNotFoundInMapError{
 
 #[derive(Debug)]
 pub enum TileMoveError{
-    NoTileInCell(grid_related::grid_location::GridLocation),
+    NoTileInCell(GridLocation),
     BoardFrozenToPlayer (String),
     IndexOutOfGridBounds (String),
     NoEmptyNeighbor (String),
     PressedEmptySlot (String),
-    NoOccupiedTileInThatDirection (basic_direction::BasicDirection),
+    NoOccupiedTileInThatDirection (BasicDirection),
     EntityRelated(EntityRelatedCustomError),
     TriedToSwitchWithAWall
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum EntityRelatedCustomError{
     NoEntity,
     EntityNotInQuery,
     ItemNotInMap(ItemNotFoundInMapError)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum GridError{
     IteratorYieldedNone,
+}
+
+
+pub struct ErrorHandlerPlugin;
+
+impl Plugin for ErrorHandlerPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .add_systems(Update, board_generation_error_handler)
+        ;
+    }
+}
+
+
+pub fn board_generation_error_handler(
+    mut event_listener: EventReader<ui_event::ShowGenerationError>,
+){
+    for generation_error in event_listener.read(){
+        print_board_generation_error(generation_error.0);
+    }
 }

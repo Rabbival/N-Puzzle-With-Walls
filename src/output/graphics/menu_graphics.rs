@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, costume_event::ui_event};
 
 pub const NORMAL_BUTTON: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const HOVERED_BUTTON: Color = Color::rgb(0.2, 0.2, 0.2);
@@ -13,7 +13,10 @@ impl Plugin for MenuGraphicsPlugin {
         app
             .add_systems(
                 Update,(
-                    (update_button_color).run_if(in_state(GameState::Menu)),
+                    (
+                        update_button_color,
+                        flash_generation_text_red
+                    ).run_if(in_state(GameState::Menu)),
                     (update_wall_tiles_count_visuals).run_if(resource_changed::<UnappliedMenuWallCount>())
                 ))
             ;
@@ -45,6 +48,14 @@ fn update_wall_tiles_count_visuals(
     text.sections[0].value = unapplied_menu_wall_count.0.to_string();
 }
 
+fn flash_generation_text_red(
+    mut event_listener: EventReader<ui_event::ShowGenerationError>,
+    mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>
+){
+    for _ in event_listener.read(){
+        generation_text_query.single_mut().sections[0].style.color = Color::ORANGE_RED;
+    }
+}
 
 pub fn set_color_to_normal(background_color: &mut BackgroundColor){
     *background_color = NORMAL_BUTTON.into();

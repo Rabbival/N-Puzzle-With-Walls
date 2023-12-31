@@ -30,6 +30,9 @@ pub struct ApplyButtonPressed{
     pub action: MenuButtonAction
 }
 
+#[derive (Event)]
+pub struct ShowGenerationError(pub BoardGenerationError);
+
 
 pub struct UiEventPlugin;
 
@@ -41,6 +44,7 @@ impl Plugin for UiEventPlugin {
             .add_event::<SpawnTileCountButtons>()
             .add_event::<ButtonPressed>()
             .add_event::<ApplyButtonPressed>()
+            .add_event::<ShowGenerationError>()
             ;
     }
 }

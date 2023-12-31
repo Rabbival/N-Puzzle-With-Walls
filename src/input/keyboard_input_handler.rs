@@ -149,7 +149,8 @@ mod tests {
         event_writer: &mut EventWriter::<move_tile_event::SwitchTilesLogic>
     )-> bool
     {
-        let mut board=solved_board_builder::generate_solved_board(&BoardProperties::default());
+        let mut board
+            =solved_board_builder::generate_solved_board(&BoardProperties::default()).unwrap();
         board.ignore_player_input=false;
         let direction_check_outcome=
             move_into_empty_from_direction(

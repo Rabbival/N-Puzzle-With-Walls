@@ -1,25 +1,21 @@
-use crate::{prelude::*, output::{error_handler, print_to_console}};
+use crate::{prelude::*, output::error_handler};
 use bevy::utils::hashbrown::HashMap;
 use rand::Rng;
 
 const MIN_NEIGHBORS: u8 = 2;
 
-pub fn generate_solved_board(applied_props: &BoardProperties) -> TileTypeBoard{
+pub fn generate_solved_board(applied_props: &BoardProperties) -> Result<TileTypeBoard, BoardGenerationError>{
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut solved_board = TileTypeBoard::new(grid_side_length);
     let grid_side_length_u32 = grid_side_length as u32;
 
     if applied_props.wall_count > 0 {
         let wall_locations 
-            = determine_wall_locations(applied_props.wall_count, grid_side_length);
-        if wall_locations.is_err(){
-            print_to_console::couldnt_generate_board();
-        }else{
-            spawn_walls_in_locations(
-                wall_locations.unwrap(), 
-                &mut solved_board
-            );
-        }
+            = determine_wall_locations(applied_props.wall_count, grid_side_length)?;
+        spawn_walls_in_locations(
+            wall_locations, 
+            &mut solved_board
+        );
     }
 
     let mut empty_tile_counter = applied_props.empty_count;
@@ -47,7 +43,7 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> TileTypeBoard{
     solved_board.index_all_tile_types();
     solved_board.empty_tile_location=empty_tile_location;
     solved_board.ignore_player_input=true;
-    solved_board
+    Ok(solved_board)
 }
 
 fn determine_wall_locations(wall_count: u8, grid_side_length: u8) 

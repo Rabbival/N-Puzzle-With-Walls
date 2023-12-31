@@ -17,6 +17,9 @@ pub struct ApplyButtonTag;
 #[derive(Component)]
 pub struct WallCountTextTag;
 
+#[derive(Component)]
+pub struct BoardGenerationTextTag;
+
 pub struct MenuSpanwerPlugin;
 
 impl Plugin for MenuSpanwerPlugin {
@@ -134,9 +137,11 @@ fn spawn_generate_button(
                     MenuButtonAction::GenerateBoard
                 ))
                 .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Generate",
-                        button_text_style.clone(),
+                    parent.spawn((TextBundle::from_section(
+                            "Generate",
+                            button_text_style.clone(),
+                        ),
+                        BoardGenerationTextTag,
                     ));
                 });
             });

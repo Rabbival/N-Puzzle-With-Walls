@@ -12,7 +12,8 @@ pub fn main() {
         .add_plugins((
             SystemSetsPlugin,
             EventPlugins,
-            GameStatePlugin
+            GameStatePlugin,
+            ErrorHandlerPlugin
         ))
         //costume
         .add_plugins((

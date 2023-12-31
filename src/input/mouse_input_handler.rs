@@ -230,7 +230,8 @@ mod tests {
     }
 
     fn test_no_empty_neighbor(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>)-> bool{
-        let mut board: TileTypeBoard=solved_board_builder::generate_solved_board(&BoardProperties::default());
+        let mut board: TileTypeBoard
+            =solved_board_builder::generate_solved_board(&BoardProperties::default()).unwrap();
         board.ignore_player_input=false;
         let empty_tile_location=board.empty_tile_location;
         board.set(&empty_tile_location, Tile { index: 16, tile_type: TileType::Numbered });

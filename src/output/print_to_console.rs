@@ -53,8 +53,8 @@ pub fn print_menu_error(menu_error: MenuError){
     }
 }
 
-pub fn couldnt_generate_board(){
-    panic!("couldn't generate board");
+pub fn print_board_generation_error(error: BoardGenerationError){
+    error!("{:?}", error);
 }
 
 pub fn print_tile_move_error(move_error: TileMoveError){

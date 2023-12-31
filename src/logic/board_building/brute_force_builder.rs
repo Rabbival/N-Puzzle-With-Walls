@@ -72,7 +72,8 @@ mod tests {
     #[test]
     fn several_attempts_at_generating_unsolved_boards(){
         const ATTEMPT_COUNT: u8 = 10;
-        let solved_board=generate_solved_board(&BoardProperties::default());
+        let solved_board
+            =generate_solved_board(&BoardProperties::default()).unwrap();
         for _ in 0..ATTEMPT_COUNT{
             assert_ne!(solved_board.grid, 
                 match generate_game_board(solved_board.clone(), RANDOM_RANGE_FOR_TESTING){

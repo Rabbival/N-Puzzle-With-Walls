@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::{print_to_console, error_handler}, costume_event::board_set_event};
+use crate::{prelude::*, output:: error_handler, costume_event::{board_set_event, ui_event}};
 
 use super::{permutation_builder, brute_force_builder};
 
@@ -25,6 +25,7 @@ impl Plugin for BoardBuilderPlugin {
 
 fn build_a_new_board(
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
+    mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
     mut solved_board_query: Query<&mut TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
@@ -33,7 +34,14 @@ fn build_a_new_board(
         let mut solved_board_entity = solved_board_query.single_mut();
         let applied_props = applied_board_props_query.single();
         if build_request.reroll_solved {
-            *solved_board_entity = generate_solved_board(applied_props);
+            match  generate_solved_board(applied_props){
+                Ok(board) =>  *solved_board_entity = board,
+                Err(error) => {
+                    generation_error_event_writer
+                        .send(ui_event::ShowGenerationError(error))
+                }
+            }
+            
         }
         let solved_grid = &solved_board_entity.grid;
         let mut game_board=game_board_query.single_mut();
@@ -43,11 +51,12 @@ fn build_a_new_board(
                 applied_props.size.to_random_turns_range()
             );
         //generation successful
-        if let Ok(board) = attempt_result { 
-            *game_board=board;
-            
-        }else{
-            print_to_console::couldnt_generate_board();
+        match attempt_result{
+            Ok(board) =>  *game_board=board,
+            Err(error) => {
+                generation_error_event_writer
+                    .send(ui_event::ShowGenerationError(error))
+            }
         }
     }
 }
