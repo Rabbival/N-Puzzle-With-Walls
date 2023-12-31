@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, output::{error_handler, print_to_console}};
 use rand::Rng;
 
 const MIN_NEIGHBORS: u8 = 1;
@@ -9,10 +9,16 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> TileTypeBoard{
     let grid_side_length_u32 = grid_side_length as u32;
 
     if applied_props.wall_count > 0 {
-        spawn_walls_in_locations(
-            determine_wall_locations(applied_props.wall_count, grid_side_length), 
-            &mut solved_board
-        );
+        let wall_locations 
+            = determine_wall_locations(applied_props.wall_count, grid_side_length);
+        if wall_locations.is_err(){
+            print_to_console::couldnt_generate_board();
+        }else{
+            spawn_walls_in_locations(
+                wall_locations.unwrap(), 
+                &mut solved_board
+            );
+        }
     }
 
     let mut empty_tile_counter = applied_props.empty_count;
@@ -37,15 +43,15 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> TileTypeBoard{
         }
     }
 
-    info!("{:?}", solved_board.grid.is_strongly_connected());
-
     solved_board.index_all_tile_types();
     solved_board.empty_tile_location=empty_tile_location;
     solved_board.ignore_player_input=true;
     solved_board
 }
 
-fn determine_wall_locations(wall_count: u8, grid_side_length: u8) -> Vec<GridLocation>{
+fn determine_wall_locations(wall_count: u8, grid_side_length: u8) 
+-> Result<Vec<GridLocation>, error_handler::BoardGenerationError>
+{
     let mut rng = rand::thread_rng();
     let mut wall_spawn_locations = vec![];
     let mut neighbor_count_grid = initialize_neighbor_count_grid(grid_side_length);
@@ -55,11 +61,31 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8) -> Vec<GridLoc
     //      if 3, we should also start without neighbors of edges
 
     for _ in 0..wall_count{
-        if possible_spawn_locations.is_empty() {
-            break;
+        let mut chosen_wall_location = GridLocation::default();
+        while ! possible_spawn_locations.is_empty(){
+            let chosen_wall_location_index = rng.gen_range(0..possible_spawn_locations.len());
+            chosen_wall_location = possible_spawn_locations[chosen_wall_location_index];
+    
+            //check if removing that tile keeps the graph connected, 
+            //if not - put it back, and reroll
+            let chosen_tile_value = neighbor_count_grid.remove(&chosen_wall_location);
+            if neighbor_count_grid.is_connected_graph(){
+                break;
+            }else{
+                neighbor_count_grid.set(&chosen_wall_location, chosen_tile_value.unwrap());
+            }
+            // whether it's because the chosen location is illegal 
+            // or because we don't want to choose the same place twice
+            remove_by_value(
+                &chosen_wall_location, 
+                &mut possible_spawn_locations
+            );
         }
-        let chosen_wall_location_index = rng.gen_range(0..possible_spawn_locations.len());
-        let chosen_wall_location = possible_spawn_locations[chosen_wall_location_index];
+        if possible_spawn_locations.is_empty() {
+            return Err(error_handler::BoardGenerationError::CouldntPlaceAllWalls);
+        }
+
+
         wall_spawn_locations.push(chosen_wall_location);
         //can't choose the same tile again
         remove_by_value(
@@ -87,7 +113,7 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8) -> Vec<GridLoc
             }
         }
     }
-    wall_spawn_locations
+    Ok(wall_spawn_locations)
 }
 
 fn remove_by_value(location_to_forbid: &GridLocation, possible_spawn_locations: &mut Vec<GridLocation>){

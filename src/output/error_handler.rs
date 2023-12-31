@@ -12,6 +12,7 @@ pub enum BoardGenerationError{
     ItemNotInMap(ItemNotFoundInMapError),
     TileMoveError,
     GridError(GridError),
+    CouldntPlaceAllWalls
 }
 
 #[derive(Debug)]

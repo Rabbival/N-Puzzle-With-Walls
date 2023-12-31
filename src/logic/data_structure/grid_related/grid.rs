@@ -9,7 +9,7 @@ pub struct Grid<T> {
 }
 
 impl<T> Grid<T>{
-    pub fn is_strongly_connected(&self) -> bool {
+    pub fn is_connected_graph(&self) -> bool {
         if self.grid.is_empty(){
             return true;
         }
@@ -34,14 +34,6 @@ impl<T> Grid<T>{
             );
             cells_visited_counter += 1;
         }
-
-
-        //debug
-        info!("visited {:?} tiles, when should have visited {:?}",
-            cells_visited_counter,
-            self.iter().collect::<Vec<_>>().len() as u32
-                );
-
 
         //check that we found everything that's defined (and not None)
         cells_visited_counter == self.iter().collect::<Vec<_>>().len() as u32
