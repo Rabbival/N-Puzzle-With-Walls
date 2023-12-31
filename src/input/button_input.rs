@@ -20,6 +20,7 @@ impl Plugin for ButtonInputPlugin {
 fn handle_menu_buttons(
     mut button_event_writer: EventWriter<ui_event::ButtonPressed>,
     mut apply_button_event_writer: EventWriter<ui_event::ApplyButtonPressed>,
+    mut reset_button_text_color_event_writer: EventWriter<ui_event::ResetButtonTextColor>,
     mut interaction_query: Query<
         (&Interaction, &MenuButtonAction, Entity, Option<&ApplyButtonTag>),
         (Changed<Interaction>, With<Button>),
@@ -43,6 +44,9 @@ fn handle_menu_buttons(
                     action: *menu_button_action
                 });
             }
+
+            // if any button was pressed, turn back all the ui text that was turned red
+            reset_button_text_color_event_writer.send(ui_event::ResetButtonTextColor);
 
             match menu_button_action{
                 MenuButtonAction::GenerateBoard | MenuButtonAction::ChangeWallTilesCount(_) => {},

@@ -33,6 +33,9 @@ pub struct ApplyButtonPressed{
 #[derive (Event)]
 pub struct ShowGenerationError(pub BoardGenerationError);
 
+#[derive (Event)]
+pub struct ResetButtonTextColor;
+
 
 pub struct UiEventPlugin;
 
@@ -45,6 +48,7 @@ impl Plugin for UiEventPlugin {
             .add_event::<ButtonPressed>()
             .add_event::<ApplyButtonPressed>()
             .add_event::<ShowGenerationError>()
+            .add_event::<ResetButtonTextColor>()
             ;
     }
 }

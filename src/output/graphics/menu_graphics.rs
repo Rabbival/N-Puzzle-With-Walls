@@ -18,7 +18,8 @@ impl Plugin for MenuGraphicsPlugin {
                 Update,(
                     (
                         update_button_color,
-                        flash_generation_text_red
+                        flash_generation_text_red,
+                        reset_color_for_button_text
                     ).run_if(in_state(GameState::Menu)),
                     (update_wall_tiles_count_visuals).run_if(resource_changed::<UnappliedMenuWallCount>())
                 ))
@@ -51,14 +52,26 @@ fn update_wall_tiles_count_visuals(
     text.sections[0].value = unapplied_menu_wall_count.0.to_string();
 }
 
+
+fn reset_color_for_button_text(
+    mut event_listener: EventReader<ui_event::ResetButtonTextColor>,
+    mut generation_text_query: Query<&mut Text, With<ButtonText>>
+){
+    for _ in event_listener.read(){
+        for mut button_text in generation_text_query.iter_mut(){
+            let button_text_color = &mut button_text.sections[0].style.color;
+            if *button_text_color == RED_TEXT_COLOR {
+                *button_text_color = NORMAL_TEXT_COLOR;
+            }
+        }
+    }
+}
+
 fn flash_generation_text_red(
     mut event_listener: EventReader<ui_event::ShowGenerationError>,
     mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>
 ){
     let generation_text_color = &mut generation_text_query.single_mut().sections[0].style.color;
-    // if *generation_text_color == RED_TEXT_COLOR {
-    //     *generation_text_color = NORMAL_TEXT_COLOR;
-    // }
     for _ in event_listener.read(){
         *generation_text_color = RED_TEXT_COLOR;
     }

@@ -20,6 +20,9 @@ pub struct WallCountTextTag;
 #[derive(Component)]
 pub struct BoardGenerationTextTag;
 
+#[derive(Component)]
+pub struct ButtonText;
+
 pub struct MenuSpanwerPlugin;
 
 impl Plugin for MenuSpanwerPlugin {
@@ -142,6 +145,7 @@ fn spawn_generate_button(
                             button_text_style.clone(),
                         ),
                         BoardGenerationTextTag,
+                        ButtonText,
                     ));
                 });
             });
@@ -215,10 +219,11 @@ fn spawn_generation_options(
                                         MenuButtonAction::ChangeGenerationMethod(generation_method)
                                     ));    
                                     button_entity.with_children(|parent| {
-                                        parent.spawn(TextBundle::from_section(
+                                        parent.spawn((TextBundle::from_section(
                                             generation_method.to_string(),
                                             button_text_style.clone(),
-                                        ));
+                                        ),
+                                        ButtonText));
                                     });
                                     if generation_method == BoardGenerationMethod::default() {
                                         button_entity.insert(SelectedOptionTag);
@@ -283,10 +288,11 @@ fn spawn_size_options(
                                     MenuButtonAction::ChangeSize(board_size)
                                 ));    
                                 button_entity.with_children(|parent| {
-                                    parent.spawn(TextBundle::from_section(
+                                    parent.spawn((TextBundle::from_section(
                                         board_size.to_string(),
                                         button_text_style.clone(),
-                                    ));
+                                    ),
+                                    ButtonText));
                                 });
                                 if board_size == BoardSize::default() {
                                     button_entity.insert(SelectedOptionTag);
@@ -358,10 +364,11 @@ fn spawn_tile_counter(
                                     action
                                 ));    
                                 button_entity.with_children(|parent| {
-                                    parent.spawn(TextBundle::from_section(
+                                    parent.spawn((TextBundle::from_section(
                                         text,
                                         button_text_style.clone(),
-                                    ));
+                                    ),
+                                    ButtonText));
                                 });
                                 if empty_tiles_count == board_properties::DEFAULT_EMPTY_COUNT {
                                     button_entity.insert(SelectedOptionTag);
@@ -407,10 +414,11 @@ fn spawn_tile_counter(
                                         action.unwrap()
                                     ));    
                                     arrow_button_entity.with_children(|parent| {
-                                        parent.spawn(TextBundle::from_section(
+                                        parent.spawn((TextBundle::from_section(
                                             text,
                                             button_text_style.clone(),
-                                        ));
+                                        )
+                                        , ButtonText));
                                     });
                                 }
                             }
@@ -428,10 +436,11 @@ fn spawn_tile_counter(
                                 ApplyButtonTag
                             ));    
                         apply_button_entity.with_children(|parent| {
-                            parent.spawn(TextBundle::from_section(
+                            parent.spawn((TextBundle::from_section(
                                 "Apply",
                                 button_text_style.clone(),
-                            ));
+                            ),
+                            ButtonText));
                         });
                 });
             });
