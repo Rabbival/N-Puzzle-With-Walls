@@ -1,5 +1,4 @@
-use crate::{prelude::*, logic::enums::basic_direction, output::{print_to_console, error_handler}, costume_event::{board_set_event, move_tile_event}};
-use bevy::app::AppExit;
+use crate::{prelude::*, logic::enums::basic_direction, output::{print_to_console, error_handler}, costume_event::{board_set_event, move_tile_event, app_event}};
 
 pub struct KeyboardInputHandlerPlugin;
 
@@ -100,11 +99,11 @@ fn listen_for_reset(
 }
 
 fn listen_for_app_closing(
-    mut app_exit_events: EventWriter<AppExit>,    
+    mut end_game_event_writer: EventWriter<app_event::EndGame>,
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::Escape){
-        app_exit_events.send(AppExit);
+        end_game_event_writer.send(app_event::EndGame);
     }
 }
 

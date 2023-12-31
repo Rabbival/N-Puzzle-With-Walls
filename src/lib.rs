@@ -22,6 +22,7 @@ pub mod prelude {
         screen_changing_event::*,
         ui_event::*,
         ui_spawn_event::*,
+        app_event::*,
     };
     pub use crate::input::{
         InputPlugin,
