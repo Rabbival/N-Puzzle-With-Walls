@@ -5,6 +5,9 @@ pub const HOVERED_BUTTON: Color = Color::rgb(0.2, 0.2, 0.2);
 pub const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.3, 0.3, 0.3);
 pub const PRESSED_BUTTON: Color = Color::rgb(0.3, 0.3, 0.3);
 
+pub const NORMAL_TEXT_COLOR: Color = Color::WHITE;
+pub const RED_TEXT_COLOR: Color = Color::ORANGE_RED;
+
 
 pub struct MenuGraphicsPlugin;
 
@@ -52,8 +55,12 @@ fn flash_generation_text_red(
     mut event_listener: EventReader<ui_event::ShowGenerationError>,
     mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>
 ){
+    let generation_text_color = &mut generation_text_query.single_mut().sections[0].style.color;
+    // if *generation_text_color == RED_TEXT_COLOR {
+    //     *generation_text_color = NORMAL_TEXT_COLOR;
+    // }
     for _ in event_listener.read(){
-        generation_text_query.single_mut().sections[0].style.color = Color::ORANGE_RED;
+        *generation_text_color = RED_TEXT_COLOR;
     }
 }
 

@@ -58,29 +58,28 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
         let mut chosen_wall_location = GridLocation::default();
         let mut neighbors_of_chosen_wall_location 
             = HashMap::<BasicDirection,GridLocation>::new() ;
-        while ! possible_spawn_locations.is_empty(){
+        let mut valid_spawn_location = false;
+        while ! possible_spawn_locations.is_empty() && !valid_spawn_location{
             let chosen_wall_location_index = rng.gen_range(0..possible_spawn_locations.len());
             chosen_wall_location = possible_spawn_locations[chosen_wall_location_index];
     
             //check if removing that tile keeps the graph connected, 
             //if not - put it back, and reroll
             let chosen_tile_value = neighbor_count_grid.remove(&chosen_wall_location);
+            valid_spawn_location = true;
             if neighbor_count_grid.is_connected_graph(){
                 // check whether choosing that location brings a tile bellow the minimal neighbor counts
                 neighbors_of_chosen_wall_location 
                     = neighbor_count_grid.get_all_direct_neighbor_locations(&chosen_wall_location);
-                let mut all_neighbors_stay_valid = true;
                 for neighbor_of_chosen in neighbors_of_chosen_wall_location.values(){
                     if *neighbor_count_grid.get(&neighbor_of_chosen).unwrap() == MIN_NEIGHBORS {
-                        all_neighbors_stay_valid = false;
+                        valid_spawn_location = false;
                         break;
                     }
                 }
-                if all_neighbors_stay_valid {
-                    break; //this location is fine, we can keep searching
-                }
             }else{
                 neighbor_count_grid.set(&chosen_wall_location, chosen_tile_value.unwrap());
+                valid_spawn_location = false;
             }
 
             // whether it's because the chosen location is illegal 
