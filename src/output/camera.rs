@@ -1,8 +1,5 @@
 use crate::{prelude::*, screen_setup};
 
-#[derive(Resource, Default)]
-pub struct CameraZoom(pub f32);
-
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
@@ -10,7 +7,6 @@ impl Plugin for CameraPlugin {
         app
             .add_systems(Startup, spawn_camera)
             .add_systems(Update, adjust_camera_zoom_to_new_settings)
-            .init_resource::<CameraZoom>()
         ;
     }
 }
@@ -23,7 +19,6 @@ fn spawn_camera(
 
 fn adjust_camera_zoom_to_new_settings(
     mut event_listener: EventReader<SetCameraAccordingToNewSettings>,
-    mut camera_zoom: ResMut<CameraZoom>,   
     mut camera_query:  Query<(&mut Transform, &mut OrthographicProjection), With<Camera2d>>
 ){
     for set_request in event_listener.read(){
@@ -34,7 +29,5 @@ fn adjust_camera_zoom_to_new_settings(
         camera_transform.translation.x = (grid_side_length-1) as f32 / 2.0 * ATLAS_CELL_SQUARE_SIZE;
         camera_transform.translation.y = -1.0 * (grid_side_length-1) as f32 / 2.0 * ATLAS_CELL_SQUARE_SIZE;
         camera_projection.scale=new_camera_zoom;
-
-        camera_zoom.0=new_camera_zoom;
     }
 }

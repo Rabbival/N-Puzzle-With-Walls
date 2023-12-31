@@ -1,4 +1,4 @@
-use crate::{prelude::*, costume_event::ui_event, logic::board_props::board_properties};
+use crate::{prelude::*, costume_event::ui_spawn_event, logic::board_props::board_properties};
 
 use super::menu_graphics;
 
@@ -30,10 +30,11 @@ impl Plugin for MenuSpanwerPlugin {
         app
             .add_systems(Startup, menu_setup)
             .add_systems(Startup, (
+                    spawn_exit_button,
                     spawn_generate_button,
                     spawn_size_options,
                     spawn_generation_options,
-                    spawn_tile_counter
+                    spawn_tile_counter,
                 )
                 .after(menu_setup)
             );
@@ -42,9 +43,10 @@ impl Plugin for MenuSpanwerPlugin {
 
 
 fn menu_setup(
-    mut button_event_writer: EventWriter<ui_event::SpawnButtons>,
-    mut big_button_event_writer: EventWriter<ui_event::SpawnBigButtons>,
-    mut tile_count_buttons_event_writer: EventWriter<ui_event::SpawnTileCountButtons>
+    mut button_event_writer: EventWriter<ui_spawn_event::SpawnButtons>,
+    mut big_button_event_writer: EventWriter<ui_spawn_event::SpawnBigButtons>,
+    mut tile_count_buttons_event_writer: EventWriter<ui_spawn_event::SpawnTileCountButtons>,
+    mut eternal_buttons_event_writer: EventWriter<ui_spawn_event::SpawnEternalButtons>
 ) {
     let button_style = Style {
         width: Val::Px(150.0),
@@ -81,23 +83,85 @@ fn menu_setup(
         ..default()
     };
 
-    button_event_writer.send(ui_event::SpawnButtons{
+    let eternal_button_text_style = TextStyle {
+        font_size: 50.0 ,
+        ..default()
+    };
+
+    eternal_buttons_event_writer.send(ui_spawn_event::SpawnEternalButtons{
+        thin_button_style: thin_button_style.clone(),
+        button_text_style: eternal_button_text_style.clone()
+    });
+    button_event_writer.send(ui_spawn_event::SpawnButtons{
         button_style: button_style.clone(),
         button_text_style: button_text_style.clone()
     });
-    big_button_event_writer.send(ui_event::SpawnBigButtons{
+    big_button_event_writer.send(ui_spawn_event::SpawnBigButtons{
         big_button_style,
         big_button_text_style
     });
-    tile_count_buttons_event_writer.send(ui_event::SpawnTileCountButtons{
+    tile_count_buttons_event_writer.send(ui_spawn_event::SpawnTileCountButtons{
         regular_button_style: button_style,
         thin_button_style,
         button_text_style
     });
 }
 
+fn spawn_exit_button(
+    mut eternal_buttons_event_reader: EventReader<ui_spawn_event::SpawnEternalButtons>,
+    mut commands: Commands
+){
+    for eternal_button_event in eternal_buttons_event_reader.read(){
+        let button_style=&eternal_button_event.thin_button_style;
+        let button_text_style=&eternal_button_event.button_text_style;
+
+        commands
+        .spawn(
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::Start,
+                    justify_content: JustifyContent::End,
+                    ..default()
+                },
+                visibility: Visibility::Visible,
+                ..default()
+            })
+        .with_children(|parent| {
+            parent
+            .spawn(NodeBundle {
+                style: Style {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                background_color: Color::DARK_GRAY.into(),
+                ..default()
+            }).with_children(|parent| {
+                parent
+                .spawn((
+                    ButtonBundle {
+                        style: button_style.clone(),
+                        background_color: menu_graphics::NORMAL_BUTTON.into(),
+                        ..default()
+                    },
+                    MenuButtonAction::EndGame
+                ))
+                .with_children(|parent| {
+                    parent.spawn((TextBundle::from_section(
+                            "X",
+                            button_text_style.clone(),
+                        ),
+                    ));
+                });
+            });
+        });
+    }
+}
+
 fn spawn_generate_button(
-    mut big_button_event_reader: EventReader<ui_event::SpawnBigButtons>,
+    mut big_button_event_reader: EventReader<ui_spawn_event::SpawnBigButtons>,
     mut commands: Commands
 ){
     for big_button_event in big_button_event_reader.read(){
@@ -154,7 +218,7 @@ fn spawn_generate_button(
 }
 
 fn spawn_generation_options(
-    mut button_event_reader: EventReader<ui_event::SpawnButtons>,
+    mut button_event_reader: EventReader<ui_spawn_event::SpawnButtons>,
     mut commands: Commands
 ){
     for button_event in button_event_reader.read(){
@@ -237,7 +301,7 @@ fn spawn_generation_options(
 }
 
 fn spawn_size_options(
-    mut button_event_reader: EventReader<ui_event::SpawnButtons>,
+    mut button_event_reader: EventReader<ui_spawn_event::SpawnButtons>,
     mut commands: Commands
 ){
     for button_event in button_event_reader.read(){
@@ -305,7 +369,7 @@ fn spawn_size_options(
 }
 
 fn spawn_tile_counter(
-    mut button_event_reader: EventReader<ui_event::SpawnTileCountButtons>,
+    mut button_event_reader: EventReader<ui_spawn_event::SpawnTileCountButtons>,
     mut commands: Commands
 ){
     for button_event in button_event_reader.read(){

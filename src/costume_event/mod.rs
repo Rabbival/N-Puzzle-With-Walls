@@ -4,6 +4,7 @@ pub mod board_set_event;
 pub mod move_tile_event;
 pub mod screen_changing_event;
 pub mod ui_event;
+pub mod ui_spawn_event;
 
 pub struct EventPlugins;
 
@@ -14,7 +15,8 @@ impl Plugin for EventPlugins {
                 ResetEventPlugin,
                 MoveTileEventPlugin,
                 ScreenChangingEventPlugin,
-                UiEventPlugin
+                UiEventPlugin,
+                UiSpawnEventPlugin
             ))
             ;
     }
