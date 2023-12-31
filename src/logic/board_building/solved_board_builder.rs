@@ -1,7 +1,8 @@
 use crate::{prelude::*, output::{error_handler, print_to_console}};
+use bevy::utils::hashbrown::HashMap;
 use rand::Rng;
 
-const MIN_NEIGHBORS: u8 = 1;
+const MIN_NEIGHBORS: u8 = 2;
 
 pub fn generate_solved_board(applied_props: &BoardProperties) -> TileTypeBoard{
     let grid_side_length = applied_props.size.to_grid_side_length();
@@ -57,11 +58,10 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
     let mut neighbor_count_grid = initialize_neighbor_count_grid(grid_side_length);
     let mut possible_spawn_locations = neighbor_count_grid.all_locations_as_vec();
 
-    // NTS: if MIN_NEIGHBORS will be changed to 2, should start without the corners' neighbors,
-    //      if 3, we should also start without neighbors of edges
-
     for _ in 0..wall_count{
         let mut chosen_wall_location = GridLocation::default();
+        let mut neighbors_of_chosen_wall_location 
+            = HashMap::<BasicDirection,GridLocation>::new() ;
         while ! possible_spawn_locations.is_empty(){
             let chosen_wall_location_index = rng.gen_range(0..possible_spawn_locations.len());
             chosen_wall_location = possible_spawn_locations[chosen_wall_location_index];
@@ -70,12 +70,26 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
             //if not - put it back, and reroll
             let chosen_tile_value = neighbor_count_grid.remove(&chosen_wall_location);
             if neighbor_count_grid.is_connected_graph(){
-                break;
+                // check whether choosing that location brings a tile bellow the minimal neighbor counts
+                neighbors_of_chosen_wall_location 
+                    = neighbor_count_grid.get_all_direct_neighbor_locations(&chosen_wall_location);
+                let mut all_neighbors_stay_valid = true;
+                for neighbor_of_chosen in neighbors_of_chosen_wall_location.values(){
+                    if *neighbor_count_grid.get(&neighbor_of_chosen).unwrap() == MIN_NEIGHBORS {
+                        all_neighbors_stay_valid = false;
+                        break;
+                    }
+                }
+                if all_neighbors_stay_valid {
+                    break; //this location is fine, we can keep searching
+                }
             }else{
                 neighbor_count_grid.set(&chosen_wall_location, chosen_tile_value.unwrap());
             }
+
             // whether it's because the chosen location is illegal 
-            // or because we don't want to choose the same place twice
+            // or because we don't want to choose the same location twice
+            // the chosen location has to be removed from the available ones
             remove_by_value(
                 &chosen_wall_location, 
                 &mut possible_spawn_locations
@@ -85,15 +99,9 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
             return Err(error_handler::BoardGenerationError::CouldntPlaceAllWalls);
         }
 
-
-        wall_spawn_locations.push(chosen_wall_location);
-        //can't choose the same tile again
-        remove_by_value(
-            &chosen_wall_location, 
-            &mut possible_spawn_locations
-        );
-        for neighbor in 
-            neighbor_count_grid.get_all_direct_neighbor_locations(&chosen_wall_location)
+        // if the location was chosen
+        wall_spawn_locations.push(chosen_wall_location);       
+        for neighbor in neighbors_of_chosen_wall_location
         {
             let neighbor_location = neighbor.1;
             let neighbor_value = neighbor_count_grid.get_mut(&neighbor_location).unwrap();
