@@ -1,6 +1,6 @@
 use crate::{prelude::*, costume_event::ui_spawn_event, logic::board_props::board_properties};
 
-use super::menu_graphics;
+use super::ui_graphics;
 
 /// which option is applied to the current board,
 /// intended for when changing but not applying and reopening the
@@ -147,7 +147,7 @@ fn spawn_generate_button(
                 .spawn((
                     ButtonBundle {
                         style: button_style.clone(),
-                        background_color: menu_graphics::NORMAL_BUTTON.into(),
+                        background_color: ui_graphics::NORMAL_BUTTON.into(),
                         ..default()
                     },
                     MenuButtonAction::GenerateBoard
@@ -226,7 +226,7 @@ fn spawn_generation_options(
                                     .spawn((
                                         ButtonBundle {
                                             style: button_style.clone(),
-                                            background_color: menu_graphics::NORMAL_BUTTON.into(),
+                                            background_color: ui_graphics::NORMAL_BUTTON.into(),
                                             ..default()
                                         },
                                         MenuButtonAction::ChangeGenerationMethod(generation_method)
@@ -295,7 +295,7 @@ fn spawn_size_options(
                                 .spawn((
                                     ButtonBundle {
                                         style: button_style.clone(),
-                                        background_color: menu_graphics::NORMAL_BUTTON.into(),
+                                        background_color: ui_graphics::NORMAL_BUTTON.into(),
                                         ..default()
                                     },
                                     MenuButtonAction::ChangeSize(board_size)
@@ -371,7 +371,7 @@ fn spawn_tile_counter(
                                 .spawn((
                                     ButtonBundle {
                                         style: thin_button_style.clone(),
-                                        background_color: menu_graphics::NORMAL_BUTTON.into(),
+                                        background_color: ui_graphics::NORMAL_BUTTON.into(),
                                         ..default()
                                     },
                                     action
@@ -421,7 +421,7 @@ fn spawn_tile_counter(
                                     .spawn((
                                         ButtonBundle {
                                             style: thin_button_style.clone(),
-                                            background_color: menu_graphics::NORMAL_BUTTON.into(),
+                                            background_color: ui_graphics::NORMAL_BUTTON.into(),
                                             ..default()
                                         },
                                         action.unwrap()
@@ -441,7 +441,7 @@ fn spawn_tile_counter(
                             parent.spawn((
                                 ButtonBundle {
                                     style: regular_button_style.clone(),
-                                    background_color: menu_graphics::NORMAL_BUTTON.into(),
+                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
                                     ..default()
                                 },
                                 MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),                                

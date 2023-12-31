@@ -17,6 +17,11 @@ pub struct ShowGenerationError(pub BoardGenerationError);
 #[derive (Event)]
 pub struct ResetButtonTextColor;
 
+#[derive (Event)]
+pub struct ToggleButton{
+    pub entity: Entity
+}
+
 
 pub struct UiEventPlugin;
 
@@ -27,6 +32,7 @@ impl Plugin for UiEventPlugin {
             .add_event::<ApplyButtonPressed>()
             .add_event::<ShowGenerationError>()
             .add_event::<ResetButtonTextColor>()
+            .add_event::<ToggleButton>()
             ;
     }
 }

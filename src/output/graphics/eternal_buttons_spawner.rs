@@ -1,12 +1,14 @@
 use crate::{prelude::*, costume_event::ui_spawn_event};
 
-use super::{menu_graphics, menu_spawner};
+use super::{ui_graphics, menu_spawner};
 
 
 /// buttons that are always on the screen
 #[derive(Component)]
 pub struct EternalButton;
 
+#[derive(Component)]
+pub struct MenuToggleButton;
 
 pub struct EternalButtonsSpanwerPlugin;
 
@@ -58,7 +60,7 @@ fn spawn_exit_button(
                 .spawn((
                     ButtonBundle {
                         style: button_style.clone(),
-                        background_color: menu_graphics::PRESSED_BUTTON.into(),
+                        background_color: ui_graphics::NORMAL_BUTTON.into(),
                         ..default()
                     },
                     EternalButton,
@@ -112,11 +114,13 @@ fn spawn_menu_toggling_button(
                 .spawn((
                     ButtonBundle {
                         style: button_style.clone(),
-                        background_color: menu_graphics::NORMAL_BUTTON.into(),
+                        background_color: ui_graphics::NORMAL_BUTTON.into(),
                         ..default()
                     },
                     EternalButton,
-                    EternalButtonAction::ToggleMenu
+                    EternalButtonAction::ToggleMenu,
+                    SelectedOptionTag,
+                    MenuToggleButton
                 ))
                 .with_children(|parent| {
                     parent.spawn((TextBundle::from_section(

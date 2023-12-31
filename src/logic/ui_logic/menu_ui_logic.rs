@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::graphics::menu_graphics, costume_event::{ui_event, screen_changing_event}};
+use crate::{prelude::*, output::graphics::ui_graphics, costume_event::{ui_event, screen_changing_event}};
 use std::mem;
 
 pub struct MenuUiLogicPlugin;
@@ -41,7 +41,7 @@ fn set_chosen_options_to_fit_current_props(
             mut not_applied_button_color, 
             _
         ) in currently_chosen.iter_mut(){
-            menu_graphics::set_color_to_normal(&mut not_applied_button_color);
+            ui_graphics::set_color_to_normal(&mut not_applied_button_color);
             commands.entity(chosen_not_applied).remove::<SelectedOptionTag>();
         }
 
@@ -50,7 +50,7 @@ fn set_chosen_options_to_fit_current_props(
             should_be_marked_chosen,
             mut should_be_marked_button_color, 
         ) in currently_applied.iter_mut(){
-            menu_graphics::set_color_to_pressed(&mut should_be_marked_button_color);
+            ui_graphics::set_color_to_pressed(&mut should_be_marked_button_color);
             commands.entity(should_be_marked_chosen).insert(SelectedOptionTag);
         }
     }
@@ -86,7 +86,7 @@ fn update_menu_ui_after_press_general(
             menu_button_action_of_chosen
         ) in currently_chosen.iter_mut(){
             if button_action_discriminant == mem::discriminant(menu_button_action_of_chosen){
-                menu_graphics::set_color_to_normal(&mut previous_color);
+                ui_graphics::set_color_to_normal(&mut previous_color);
                 commands.entity(previous_button).remove::<SelectedOptionTag>();
                 commands.entity(pressed_button_entity).insert(SelectedOptionTag);
             }  
@@ -104,7 +104,7 @@ fn increase_or_decrease_wall_count_menu_ui_update(
             let (apply_button, mut apply_button_color) = apply_button_query.single_mut();
             match wall_count_action{
                 WallTilesChange::Increase | WallTilesChange::Decrease=> {
-                    menu_graphics::set_color_to_normal(&mut apply_button_color);
+                    ui_graphics::set_color_to_normal(&mut apply_button_color);
                     commands.entity(apply_button).remove::<SelectedOptionTag>();
                 },
                 _ => {}
@@ -123,7 +123,7 @@ fn apply_wall_count_menu_ui_update(
             let (apply_button_entity, mut apply_button_color) 
                 = apply_button_query.single_mut();
             commands.entity(apply_button_entity).insert(SelectedOptionTag);
-            menu_graphics::set_color_to_pressed(&mut apply_button_color);
+            ui_graphics::set_color_to_pressed(&mut apply_button_color);
         }      
     }
 }

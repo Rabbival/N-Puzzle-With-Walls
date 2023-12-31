@@ -34,7 +34,7 @@ pub mod prelude {
         graphics::{
             GraphicsPlugin,
             tile_graphics::*,
-            menu_graphics::*,
+            ui_graphics::*,
             menu_spawner::*,
             eternal_buttons_spawner::*,
         },
@@ -82,7 +82,8 @@ pub mod prelude {
         },
         ui_logic::{
             UiLogicPlugin,
-            menu_ui_logic::*
+            menu_ui_logic::*,
+            eternal_ui_logic::*
         },
         board_manager::*,
         tile_dictionary::*,

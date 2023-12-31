@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub mod tile_graphics;
-pub mod menu_graphics;
+pub mod ui_graphics;
 pub mod menu_spawner;
 pub mod eternal_buttons_spawner;
 
