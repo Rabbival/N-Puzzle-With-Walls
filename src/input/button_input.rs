@@ -33,7 +33,7 @@ fn handle_menu_buttons(
     ) 
     in interaction_query.iter_mut() {
         if *interaction == Interaction::Pressed {
-            if let Some(_) = optional_apply_button_tag{
+            if optional_apply_button_tag.is_some(){
                 apply_button_event_writer.send(ui_event::ApplyButtonPressed{
                     action: *menu_button_action
                 });

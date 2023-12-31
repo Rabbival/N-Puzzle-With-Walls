@@ -24,15 +24,9 @@ impl<T> Grid<T>{
             = cells_locations_with_added_mark.get_key_value_mut(
                 self.grid.keys().next().unwrap()
             ).unwrap();
-        *first_location.1 = true;
-        let first_location_neighbors = self.get_all_direct_neighbor_locations(first_location.0);
-        let mut locations_to_visit : Vec<GridLocation>
-            = first_location_neighbors
-                .values()
-                .clone()
-                .copied()
-                .collect();
-        let mut cells_visited_counter = 1; //already visited the first
+        *first_location.1 = true; //already added
+        let mut locations_to_visit = vec![**first_location.0];
+        let mut cells_visited_counter = 0;
         while ! locations_to_visit.is_empty(){
             self.depth_first_count(
                 &mut locations_to_visit,
