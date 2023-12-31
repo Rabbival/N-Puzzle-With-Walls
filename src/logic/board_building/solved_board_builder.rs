@@ -72,7 +72,7 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
                 neighbors_of_chosen_wall_location 
                     = neighbor_count_grid.get_all_direct_neighbor_locations(&chosen_wall_location);
                 for neighbor_of_chosen in neighbors_of_chosen_wall_location.values(){
-                    if *neighbor_count_grid.get(&neighbor_of_chosen).unwrap() == MIN_NEIGHBORS {
+                    if *neighbor_count_grid.get(neighbor_of_chosen).unwrap() == MIN_NEIGHBORS {
                         valid_spawn_location = false;
                         break;
                     }
