@@ -26,7 +26,9 @@ pub fn main() {
             TileDictionaryPlugin
         ))
 
-        .add_systems(Update, listen_for_app_close_request)
+        .add_systems(Update, 
+            listen_for_app_close_request.in_set(InputSystemSets::ChangesBasedOnInput)
+        )
         ;
 
     app.run();

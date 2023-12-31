@@ -54,7 +54,7 @@ pub fn print_menu_error(menu_error: MenuError){
 }
 
 pub fn print_board_generation_error(error: BoardGenerationError){
-    error!("{:?}", error);
+    error!("board generation failed! error: {:?}", error);
 }
 
 pub fn print_tile_move_error(move_error: TileMoveError){
