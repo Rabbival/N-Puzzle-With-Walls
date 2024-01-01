@@ -198,9 +198,6 @@ mod tests {
                 Vec2::default(), 
                 &board,
             );
-
-        println!("{:?}", location_validation_outcome);
-
         match location_validation_outcome{
             Err(TileMoveError::NoTileInCell(_))=> true,
             _ => false
@@ -220,9 +217,6 @@ mod tests {
                 Vec2::default(), 
                 &board,
             );
-
-        println!("{:?}", location_validation_outcome);
-
         match location_validation_outcome{
             Err(TileMoveError::PressedEmptySlot(_))=> true,
             _ => false
@@ -234,7 +228,7 @@ mod tests {
             =solved_board_builder::generate_solved_board(&BoardProperties::default()).unwrap();
         board.ignore_player_input=false;
         let empty_tile_location=board.empty_tile_location;
-        board.set(&empty_tile_location, Tile { index: 16, tile_type: TileType::Numbered });
+        board.set(&empty_tile_location, Tile { index: 15, tile_type: TileType::Numbered });
         let location_validation_outcome=
             handle_mouse_click(
                 event_writer,

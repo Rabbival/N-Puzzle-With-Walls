@@ -100,9 +100,10 @@ impl TileTypeBoard {
     {
         for dir in BasicDirection::get_directions_as_vec(){
             let neighbor_location = self.grid.neighbor_location(origin, &dir);
-            self.none_check(&neighbor_location)?;
-            if self.get(&neighbor_location).unwrap().tile_type == TileType::Empty{
-                return Ok(Some(neighbor_location));
+            if let Some(tile_in_cell) = self.get(&neighbor_location){
+                if tile_in_cell.tile_type == TileType::Empty{
+                    return Ok(Some(neighbor_location));
+                }
             }
         }
         Ok(None)
@@ -121,6 +122,7 @@ impl TileTypeBoard {
                 }
             }
         }
+
         direct_neighbor_locations
     }
 
