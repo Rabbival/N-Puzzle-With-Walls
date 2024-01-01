@@ -35,7 +35,7 @@ fn build_a_new_board(
         let mut solved_board_entity = solved_board_query.single_mut();
         let applied_props = applied_board_props_query.single();
         if build_request.reroll_solved {
-            match  generate_solved_board(applied_props){
+            match generate_solved_board(applied_props){
                 Ok(board) =>  *solved_board_entity = board,
                 Err(error) => {
                     generation_error_event_writer
@@ -47,22 +47,35 @@ fn build_a_new_board(
         }
         let solved_grid = &solved_board_entity.grid;
         let mut game_board=game_board_query.single_mut();
-        let attempt_result=
-            generate_game_board(
-                TileTypeBoard::from_grid(solved_grid), 
-                applied_props.size.to_random_turns_range()
-            );
-        //generation successful
-        match attempt_result{
-            Ok(board) =>  {
-                *game_board=board;
-                game_state.set(GameState::Game);
-                print_to_console::game_log(GameLog::NewBoardGenerated);
-            },
+        let optional_newborn_tiletype_board = TileTypeBoard::from_solved_grid(
+            solved_grid, 
+            applied_props.empty_count
+        );
+        match optional_newborn_tiletype_board{
             Err(error) => {
                 generation_error_event_writer
-                    .send(ui_event::ShowGenerationError(error))
-            }
+                .send(ui_event::ShowGenerationError(error));
+                    return;
+            },
+            Ok(newborn_board)=>{
+                let attempt_result=
+                    generate_game_board(
+                        newborn_board, 
+                        applied_props.size.to_random_turns_range()
+                    );
+                //generation successful
+                match attempt_result{
+                    Ok(board) =>  {
+                        *game_board=board;
+                        game_state.set(GameState::Game);
+                        print_to_console::game_log(GameLog::NewBoardGenerated);
+                    },
+                    Err(error) => {
+                        generation_error_event_writer
+                            .send(ui_event::ShowGenerationError(error))
+                    }
+                }
+            } 
         }
     }
 }

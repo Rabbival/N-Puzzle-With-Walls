@@ -4,7 +4,7 @@ use crate::{prelude::*, output::error_handler};
 pub struct TileTypeBoard {
     /// even if the location is empty, TileTypeBoard's location should have an empty tile (and NOT a None)
     pub grid: Grid<Tile>,
-    pub empty_tile_location: GridLocation,
+    pub empty_tile_locations: Vec<GridLocation>,
     ///appear as frozen to player
     pub ignore_player_input: bool
 }
@@ -13,36 +13,42 @@ pub struct TileTypeBoard {
 impl TileTypeBoard{
     pub fn from_grid_and_empty_loc(
         grid: &Grid<Tile>,
-        empty_tile_location: &GridLocation
+        empty_tile_locations: &Vec<GridLocation>
     ) -> Self
     {
         Self { 
             grid: grid.clone(), 
-            empty_tile_location: *empty_tile_location, 
+            empty_tile_locations: *empty_tile_locations, 
             ignore_player_input: true
         }
     }
 
-    ///puts empty tile at the last tile of the grid
-    pub fn from_grid(grid: &Grid<Tile>) -> Self{
+    /// puts empty tile at the last tiles of the grid (that aren't walls)
+    pub fn from_solved_grid(grid: &Grid<Tile>, empty_tiles_count: u8) -> Result<Self, error_handler::BoardGenerationError>{
         let grid_side_length = grid.get_side_length();
-        Self { 
-            grid: grid.clone(), 
-            empty_tile_location: GridLocation { 
-                row: (grid_side_length-1) as i32, 
-                col: (grid_side_length-1) as i32
-            }, 
-            ignore_player_input: true
+        let mut empty_tile_locations = vec![];
+        let mut reversed_iter = Self::iter_filtered_static(grid).rev();
+        for _empty_tile in 0..empty_tiles_count{
+            let next_from_last_avaliable = reversed_iter.next();
+            match next_from_last_avaliable{
+                Some((tile_location, _tile)) => empty_tile_locations.push(tile_location),
+                None => return Err(error_handler::BoardGenerationError::NotEnoughAvailableSpots)
+            };
         }
+        Ok(
+            Self { 
+                grid: grid.clone(), 
+                empty_tile_locations,
+                ignore_player_input: true
+            }
+        )
     }
 
+    /// looks for the empty tiles in the grid
     pub fn new(grid_side_length: u8) -> Self{
         Self { 
             grid: Grid::new(grid_side_length), 
-            empty_tile_location: GridLocation { 
-                row: (grid_side_length-1) as i32, 
-                col: (grid_side_length-1) as i32
-            }, 
+            empty_tile_locations: vec![],
             ignore_player_input: true
         }
     }
@@ -135,6 +141,7 @@ impl TileTypeBoard {
         false
     }
 
+    /// throws an error if the location is either invalid or not initialized
     fn none_check(&self, location: &GridLocation)-> Result<(), error_handler::TileMoveError>{
         match self.get(location) {
             None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
@@ -195,8 +202,15 @@ impl TileTypeBoard{
 
 // iterators
 impl TileTypeBoard{
-    pub fn iter_filtered(&self) -> impl Iterator<Item = (GridLocation, &Tile)> + '_ {
+    pub fn iter_filtered(&self) -> impl DoubleEndedIterator<Item = (GridLocation, &Tile)> + '_ {
         self.grid.iter().filter(|(_, tile_reference)|{
+            tile_reference.tile_type != TileType::Wall
+        })
+    }
+
+    /// a function for the constructors to use
+    pub fn iter_filtered_static(grid: &Grid<Tile>) -> impl DoubleEndedIterator<Item = (GridLocation, &Tile)> + '_ {
+        grid.iter().filter(|(_, tile_reference)|{
             tile_reference.tile_type != TileType::Wall
         })
     }

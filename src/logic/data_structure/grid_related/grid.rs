@@ -246,7 +246,7 @@ impl<T: Clone> Grid<T> {
 //iterators and filter
 impl<T: Clone> Grid<T> {
     /// returns occupied (initialized) cells' references only
-    pub fn iter(&self) -> impl Iterator<Item = (GridLocation, &T)> + '_ {
+    pub fn iter(&self) -> impl DoubleEndedIterator<Item = (GridLocation, &T)> + '_ {
         self.grid
             .iter()
             .enumerate()
@@ -258,7 +258,7 @@ impl<T: Clone> Grid<T> {
     }
 
     /// returns occupied (initialized) cells' references only
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = (GridLocation, &mut T)> + '_ {
+    pub fn iter_mut(&mut self) -> impl DoubleEndedIterator<Item = (GridLocation, &mut T)> + '_ {
         self.grid
             .iter_mut()
             .enumerate()

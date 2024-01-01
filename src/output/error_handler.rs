@@ -11,7 +11,8 @@ pub enum BoardGenerationError{
     DirectionCouldntBeFlipped,
     ItemNotInMap(ItemNotFoundInMapError),
     TileMoveError,
-    CouldntPlaceAllWalls
+    CouldntPlaceAllWalls,
+    NotEnoughAvailableSpots
 }
 
 #[derive(Debug, Clone, Copy)]
