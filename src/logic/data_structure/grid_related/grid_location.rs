@@ -8,10 +8,21 @@ pub struct GridLocation{
 
 impl GridLocation {
     pub fn new(row: i32, col: i32) -> Self {
-        GridLocation{
+        Self{
             row,
             col
         }
+    }
+
+    pub fn from_index(index: u8, grid_side_length: u8) -> Self{
+        Self{
+            row: (index / grid_side_length) as i32,
+            col: (index % grid_side_length) as i32
+        }
+    }
+
+    pub fn to_index(&self, grid_side_length: u8) -> usize{
+        ( self.row * grid_side_length as i32 + self.col ) as usize
     }
 
     /// grid provided to check that the index is valid for its size

@@ -1,11 +1,9 @@
-use bevy::utils::hashbrown::HashMap;
-
 use crate::prelude::*;
 
 #[derive(Component, Clone, Debug)]
 pub struct Grid<T> {
     grid_side_length: u8,
-    grid: HashMap<GridLocation, Option<T>>
+    grid: Vec<Option<T>>
 }
 
 impl<T> Grid<T>{
@@ -13,7 +11,7 @@ impl<T> Grid<T>{
         if self.grid.is_empty(){
             return true;
         }
-        let mut cells_locations_with_added_mark: HashMap<&GridLocation, bool>=
+        let mut cells_locations_with_added_mark: HashMap<GridLocation, bool>=
             self
             .iter()
             .map(|(location, _)| {
@@ -151,10 +149,15 @@ impl<T> Grid<T>{
 
 //basics
 impl<T> Grid<T> {
+    /// initializes to None
     pub fn new(grid_side_length: u8) -> Self {
+        let mut grid : Vec::<Option<T>> = vec![];
+        for cell in 0..(grid_side_length*grid_side_length){
+            grid.push(None);
+        }
         Self {
             grid_side_length,
-            grid: HashMap::<GridLocation, Option<T>>::new()
+            grid
         }
     }
 
@@ -164,7 +167,7 @@ impl<T> Grid<T> {
 
     pub fn get(&self, location: &GridLocation) -> Option<&T> {
         if self.valid_index(location){
-            self.grid.get(location)?.as_ref()
+            self.grid.get(self.location_to_index(location))?.as_ref()
         }else{
             None
         }
@@ -172,7 +175,7 @@ impl<T> Grid<T> {
 
     pub fn get_mut(&mut self, location: &GridLocation) -> Option<&mut T> {
         if self.valid_index(location){
-            self.grid.get_mut(location)?.as_mut()
+            self.grid.get(self.location_to_index(location))?.as_mut()
         }else{
             None
         }
@@ -181,7 +184,7 @@ impl<T> Grid<T> {
     /// returns whether insertion was successful
     pub fn set(&mut self, location: &GridLocation, value: T) -> bool {
         if self.valid_index(location){
-            self.grid.insert(*location, Some(value));
+            self.grid[location.to_index(self.grid_side_length)] = Some(value);
             return true;
         }
         false
@@ -190,16 +193,9 @@ impl<T> Grid<T> {
     /// returns an option with the previous value
     pub fn set_and_get_former(&mut self, location: &GridLocation, value: T)-> Option<T>{
         if self.valid_index(location){
-            self.grid.insert(*location, Some(value))?
-        }else{
-            None
-        }
-    }
-
-    /// removes and returns former, or None if there was none
-    pub fn remove(&mut self, location: &GridLocation)-> Option<T> {
-        if self.valid_index(location){
-            self.grid.remove(location)?
+            let former = self.grid[location.to_index(self.grid_side_length)];
+            self.set(location, value);
+            former
         }else{
             None
         }
@@ -207,10 +203,7 @@ impl<T> Grid<T> {
 
     /// also returns false if the location is invalid, so remember to check that if relevant
     pub fn occupied(&self, location: &GridLocation) -> bool {
-        if self.valid_index(location){
-            return self.grid.contains_key(location);
-        }
-        false
+        self.get(location).is_some()
     }
 
     /// object function in case we'd want to have grids of different sizes
@@ -220,29 +213,39 @@ impl<T> Grid<T> {
             && location.col < self.grid_side_length as i32
             && location.row < self.grid_side_length as i32
     }
+
+    pub fn location_from_index(&self, index: usize)-> GridLocation {
+        GridLocation::from_index(index as u8, self.grid_side_length)
+    }
+
+    pub fn location_to_index(&self, location: &GridLocation) -> usize{
+        location.to_index(self.grid_side_length)
+    }
 }
 
 //iterators and filter
 impl<T> Grid<T> {
     /// returns without Nones
-    pub fn iter(&self) -> impl Iterator<Item = (&GridLocation, Option<&T>)> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = (GridLocation, Option<&T>)> + '_ {
         self.grid
             .iter()
+            .enumerate()
             .filter(|(_, optional_value)|
                 optional_value.is_some())
-            .map(|(location, optional_value)|{
-                (location, optional_value.as_ref())
+            .map(|(index, optional_value)|{
+                (self.location_from_index(index), optional_value.as_ref())
             })
     }
 
     /// returns without Nones
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = (&GridLocation, Option<&mut T>)> + '_ {
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (GridLocation, Option<&mut T>)> + '_ {
         self.grid
             .iter_mut()
+            .enumerate()
             .filter(|(_, optional_value)|
                 optional_value.is_some())
-            .map(|(location, optional_value)|{
-                (location, optional_value.as_mut())
+            .map(|(index, optional_value)|{
+                (GridLocation::from_index(index as u8, self.grid_side_length), optional_value.as_mut())
             })
     }
 }

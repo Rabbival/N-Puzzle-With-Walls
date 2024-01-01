@@ -71,8 +71,8 @@ pub fn print_tile_move_error(move_error: TileMoveError){
         TileMoveError::NoOccupiedTileInThatDirection(direction)=>{
             warn!("no occupied tile in direction: {:?}", direction);
         },
-        TileMoveError::IndexOutOfGridBounds(message)=>{
-            warn!(message);
+        TileMoveError::IndexOutOfGridBounds(_message)=>{
+            // warn!(message);
         },
         _=>{error!("{:?}", move_error)}
     }
