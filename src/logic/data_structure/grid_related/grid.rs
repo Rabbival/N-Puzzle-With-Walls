@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
 #[derive(Component, Clone, Debug)]
-pub struct Grid<T> {
+pub struct Grid<T: Clone> {
     grid_side_length: u8,
     grid: Vec<Option<T>>
 }
 
-impl<T> Grid<T>{
+impl<T: Clone> Grid<T>{
     pub fn is_connected_graph(&self) -> bool {
         let mut cells_locations_with_added_mark: HashMap<GridLocation, bool>=
             self
@@ -99,7 +99,7 @@ impl<T> Grid<T>{
 }
 
 // get a group of tiles as vector
-impl<T> Grid<T>{
+impl<T: Clone> Grid<T>{
     pub fn corner_locations(&self) -> Vec<GridLocation>{
         let end_of_line = (self.grid_side_length-1) as i32;
         vec![
@@ -145,11 +145,11 @@ impl<T> Grid<T>{
 }
 
 //basics
-impl<T> Grid<T> {
+impl<T: Clone> Grid<T> {
     /// initializes to None
     pub fn new(grid_side_length: u8) -> Self {
         let mut grid : Vec::<Option<T>> = vec![];
-        for cell in 0..(grid_side_length*grid_side_length){
+        for _ in 0..(grid_side_length*grid_side_length){
             grid.push(None);
         }
         Self {
@@ -172,7 +172,8 @@ impl<T> Grid<T> {
 
     pub fn get_mut(&mut self, location: &GridLocation) -> Option<&mut T> {
         if self.valid_index(location){
-            self.grid.get(self.location_to_index(location))?.as_mut()
+            let location_index = self.location_to_index(location);
+            self.grid.get_mut(location_index)?.as_mut()
         }else{
             None
         }
@@ -190,7 +191,7 @@ impl<T> Grid<T> {
     /// returns an option with the previous value
     pub fn set_and_get_former(&mut self, location: &GridLocation, value: T)-> Option<T>{
         if self.valid_index(location){
-            let former = self.grid[location.to_index(self.grid_side_length)];
+            let former = self.grid[location.to_index(self.grid_side_length)].clone();
             self.set(location, value);
             former
         }else{
@@ -201,12 +202,23 @@ impl<T> Grid<T> {
     /// returns an option with the previous value
     pub fn set_none_get_former(&mut self, location: &GridLocation)-> Option<T>{
         if self.valid_index(location){
-            let former = self.grid[location.to_index(self.grid_side_length)];
+            let former = self.grid[location.to_index(self.grid_side_length)].clone();
             self.grid[location.to_index(self.grid_side_length)] = None;
             former
         }else{
             None
         }
+    }
+
+    /// returns true if the operation was successful
+    pub fn swap_by_location(&mut self, first: &GridLocation, second: &GridLocation) -> bool {
+        if self.valid_index(first) && self.valid_index(second){
+            let first_location_index = self.location_to_index(first);
+            let second_location_index = self.location_to_index(second);
+            self.grid.swap(first_location_index, second_location_index);
+            return true;
+        }
+        false
     }
 
     /// also returns false if the location is invalid, so remember to check that if relevant
@@ -232,7 +244,7 @@ impl<T> Grid<T> {
 }
 
 //iterators and filter
-impl<T> Grid<T> {
+impl<T: Clone> Grid<T> {
     /// returns occupied (initialized) cells' references only
     pub fn iter(&self) -> impl Iterator<Item = (GridLocation, &T)> + '_ {
         self.grid
@@ -258,7 +270,7 @@ impl<T> Grid<T> {
     }
 }
 
-impl<T: PartialEq + Eq> PartialEq for Grid<T>{
+impl<T: PartialEq + Eq + Clone> PartialEq for Grid<T>{
     fn eq(&self, other: &Self) -> bool {
         let mut all_cells_are_equal=true;
         let self_iter=self.iter();
@@ -272,4 +284,4 @@ impl<T: PartialEq + Eq> PartialEq for Grid<T>{
         all_cells_are_equal
     }
 }
-impl<T: PartialEq + Eq> Eq for Grid<T>{}
+impl<T: PartialEq + Eq + Clone> Eq for Grid<T>{}

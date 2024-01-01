@@ -11,7 +11,6 @@ pub enum BoardGenerationError{
     DirectionCouldntBeFlipped,
     ItemNotInMap(ItemNotFoundInMapError),
     TileMoveError,
-    GridError(GridError),
     CouldntPlaceAllWalls
 }
 
@@ -38,11 +37,6 @@ pub enum EntityRelatedCustomError{
     NoEntity,
     EntityNotInQuery,
     ItemNotInMap(ItemNotFoundInMapError)
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum GridError{
-    IteratorYieldedNone,
 }
 
 

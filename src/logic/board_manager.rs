@@ -60,7 +60,7 @@ pub fn move_tile_logic_inner(
         first_grid_location: occupied_tile_location,
         second_grid_location: empty_tile_location
     });
-    game_board.switch_tiles_by_location(&empty_tile_location, &occupied_tile_location)?;
+    game_board.swap_tiles_by_location(&empty_tile_location, &occupied_tile_location)?;
 
     check_if_solved(game_board, solved_grid);
 

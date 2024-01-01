@@ -10,13 +10,9 @@ pub fn generate_board_by_vector_permutation(
     let solved_board_iterator = solved_board.iter_filtered();
     let mut sorted_tiles=vec![];
     let mut sorted_grid_locations=vec![];
-    for (sorted_grid_location, optional_tile) in solved_board_iterator{
-        if let Some(tile) = optional_tile{
-            sorted_grid_locations.push(sorted_grid_location);
-            sorted_tiles.push(*tile);
-        }else{
-            return Err(error_handler::BoardGenerationError::GridError(GridError::IteratorYieldedNone));
-        }
+    for (sorted_grid_location, tile_reference) in solved_board_iterator{
+        sorted_grid_locations.push(sorted_grid_location);
+        sorted_tiles.push(*tile_reference);
     }
     let permutation 
         = make_valid_permutation_out_of_vector(&sorted_tiles)?;
@@ -26,7 +22,7 @@ pub fn generate_board_by_vector_permutation(
     for (location, content) in sorted_grid_locations.iter().zip(permutation.iter()){
         grid.set(location, *content);
         if content.tile_type == TileType::Empty {
-            empty_grid_location = *location;
+            empty_grid_location = location;
         }
     }
     let generated_board=

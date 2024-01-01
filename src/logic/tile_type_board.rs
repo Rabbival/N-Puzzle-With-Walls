@@ -57,26 +57,22 @@ impl TileTypeBoard {
 
     /// provides indexes to a type of tile
     fn index_tile_of_type(&mut self, tile_type_to_index: TileType){
-        let only_that_type_iter = self.grid.iter_mut().filter(|(_, optional_tile)|{
-            if let Some(tile_type_in_tile) = optional_tile{
-                return tile_type_in_tile.tile_type == tile_type_to_index;
-            }
-            // shouldn't be, but in case it's a None
-            false
-        }).map(|(_, optional_tile)|{
-                optional_tile
-            }
-        );
+        let only_that_type_iter 
+            = self.grid.iter_mut()
+                .filter(|(_, tile_reference)|{
+                    tile_reference.tile_type == tile_type_to_index
+                })
+                .map(|(_, optional_tile)|{ optional_tile });
 
         for (fixed_index, tile_of_type_to_index) 
             in (0_u32..).zip(only_that_type_iter)
         {
-            tile_of_type_to_index.unwrap().index = fixed_index as usize;
+            tile_of_type_to_index.index = fixed_index as usize;
         }
     }
 
     /// assumes one is empty
-    pub fn switch_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation)
+    pub fn swap_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation)
     -> Result<(), error_handler::TileMoveError>
     {
         self.none_check(first)?;
@@ -87,11 +83,12 @@ impl TileTypeBoard {
             self.empty_tile_location= *first;
         }
 
-        //can't std::swap because that would require two coexisting &mut self
-        let originally_in_first=
-            self.set_and_get_former(first, *self.get(second).unwrap());
-        self.set(second, originally_in_first.unwrap());
-        Ok(())
+        if self.grid.swap_by_location(first, second){
+            Ok(())   
+        }else{
+            Err(error_handler::TileMoveError::IndexOutOfGridBounds
+                    (String::from("index out of grid bounds when tried to swap")))
+        }
     }
 
     pub fn get_direct_neighbors_of_empty(&self) -> HashMap<BasicDirection, GridLocation>{
@@ -164,19 +161,15 @@ impl TileTypeBoard{
     }
 
     /// returns an option with the previous value
-    pub fn set_and_get_former(&mut self, location: &GridLocation, content: Tile)
-    -> Option<Tile>
+    pub fn set_and_get_former(&mut self, location: &GridLocation, content: Tile) -> Option<Tile>
     {
         self.grid.set_and_get_former(location, content)
     }
 
-    /// removes and returns former, or None if there was none
-    pub fn remove(&mut self, location: &GridLocation)-> Option<Tile> {
-        if self.valid_index(location){
-            self.grid.remove(location)
-        }else{
-            None
-        }
+    /// returns an option with the previous value
+    pub fn none(&mut self, location: &GridLocation) -> Option<Tile>
+    {
+        self.grid.set_none_get_former(location)
     }
 
     // returns whether it's not empty
@@ -200,13 +193,9 @@ impl TileTypeBoard{
 
 // iterators
 impl TileTypeBoard{
-    pub fn iter_filtered(&self) -> impl Iterator<Item = (&GridLocation, Option<&Tile>)> + '_ {
-        self.grid.iter().filter(|(_, optional_tile)|{
-            if let Some(tile) = *optional_tile{
-                return tile.tile_type != TileType::Wall;
-            }
-            // shouldn't be, but in case it's a None
-            false
+    pub fn iter_filtered(&self) -> impl Iterator<Item = (GridLocation, &Tile)> + '_ {
+        self.grid.iter().filter(|(_, tile_reference)|{
+            tile_reference.tile_type != TileType::Wall
         })
     }
 }

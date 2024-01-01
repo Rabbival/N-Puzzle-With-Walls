@@ -42,7 +42,7 @@ pub fn brute_force_generate_game_board(
                 (ItemNotFoundInMapError::DirectionNotFoundInMap));
         }
         let chosen_location=chosen_location_option.unwrap();
-        if board.switch_tiles_by_location(&empty_tile_location, chosen_location).is_err(){
+        if board.swap_tiles_by_location(&empty_tile_location, chosen_location).is_err(){
             return Err(error_handler::BoardGenerationError::TileMoveError);
         }
         
