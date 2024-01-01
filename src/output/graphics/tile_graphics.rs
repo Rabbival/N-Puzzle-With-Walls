@@ -57,35 +57,33 @@ fn move_existing_tiles_inner(
     commands: &mut Commands
 )-> Result<(),EntityRelatedCustomError>
 {
-    for (grid_location, cell_reference) in grid.iter(){
+    for (grid_location, tile_type_from_cell) in grid.iter(){
         let spawn_location=grid_location.to_world();
-        if let Some(tile_type_from_cell) =  cell_reference{
-            match tile_dictionary.get(tile_type_from_cell){
-                // the tile doesn't exist yet and thus should be created at that location
-                None=> { 
-                    if *solved_rerolled {
-                        event_writer.send(board_set_event::SpawnTileInLocation{
-                            tile: *tile_type_from_cell,
-                            location: spawn_location
-                        })
-                    }else{
-                        return Err(EntityRelatedCustomError::ItemNotInMap
-                            (ItemNotFoundInMapError::EntityNotFoundInMap));
-                    }
-                    },
-                // the tile exists and should therefore be moved
-                Some(optional_entity)=> { 
-                    match optional_entity{
-                        None=>{return Err(EntityRelatedCustomError::NoEntity);},
-                        Some(entity)=>{
-                            if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
-                                tile_transform.translation= spawn_location;
-                                if *solved_rerolled{
-                                    commands.entity(*entity).insert(StayForNextBoardTag);
-                                }
-                            }else{
-                                return Err(EntityRelatedCustomError::EntityNotInQuery);
+        match tile_dictionary.get(tile_type_from_cell){
+            // the tile doesn't exist yet and thus should be created at that location
+            None=> { 
+                if *solved_rerolled {
+                    event_writer.send(board_set_event::SpawnTileInLocation{
+                        tile: *tile_type_from_cell,
+                        location: spawn_location
+                    })
+                }else{
+                    return Err(EntityRelatedCustomError::ItemNotInMap
+                        (ItemNotFoundInMapError::EntityNotFoundInMap));
+                }
+                },
+            // the tile exists and should therefore be moved
+            Some(optional_entity)=> { 
+                match optional_entity{
+                    None=>{return Err(EntityRelatedCustomError::NoEntity);},
+                    Some(entity)=>{
+                        if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
+                            tile_transform.translation= spawn_location;
+                            if *solved_rerolled{
+                                commands.entity(*entity).insert(StayForNextBoardTag);
                             }
+                        }else{
+                            return Err(EntityRelatedCustomError::EntityNotInQuery);
                         }
                     }
                 }

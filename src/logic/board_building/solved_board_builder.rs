@@ -65,7 +65,8 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
     
             //check if removing that tile keeps the graph connected, 
             //if not - put it back, and reroll
-            let chosen_tile_value = neighbor_count_grid.remove(&chosen_wall_location);
+            let chosen_tile_value 
+                = neighbor_count_grid.set_none_get_former(&chosen_wall_location);
             valid_spawn_location = true;
             if neighbor_count_grid.is_connected_graph(){
                 // check whether choosing that location brings a tile bellow the minimal neighbor counts

@@ -8,9 +8,6 @@ pub struct Grid<T> {
 
 impl<T> Grid<T>{
     pub fn is_connected_graph(&self) -> bool {
-        if self.grid.is_empty(){
-            return true;
-        }
         let mut cells_locations_with_added_mark: HashMap<GridLocation, bool>=
             self
             .iter()
@@ -20,10 +17,10 @@ impl<T> Grid<T>{
             .collect();
         let first_location 
             = cells_locations_with_added_mark.get_key_value_mut(
-                self.grid.keys().next().unwrap()
+                &self.iter().next().unwrap().0
             ).unwrap();
         *first_location.1 = true; //already added
-        let mut locations_to_visit = vec![**first_location.0];
+        let mut locations_to_visit = vec![*first_location.0];
         let mut cells_visited_counter = 0;
         while ! locations_to_visit.is_empty(){
             self.depth_first_count(
@@ -41,7 +38,7 @@ impl<T> Grid<T>{
     fn depth_first_count(
         &self,
         locations_to_visit: &mut Vec<GridLocation>,
-        cells_locations_with_added_mark: &mut HashMap<&GridLocation, bool>
+        cells_locations_with_added_mark: &mut HashMap<GridLocation, bool>
     ){
         let next_tile_to_check = locations_to_visit.pop().unwrap();
         let next_tile_neighbors 
@@ -51,7 +48,7 @@ impl<T> Grid<T>{
                 .values()
                 //only add the ones not yet visited
                 .filter(|next_tile_neighbor_location|{
-                    ! *cells_locations_with_added_mark.get(next_tile_neighbor_location).unwrap()
+                    ! *cells_locations_with_added_mark.get(*next_tile_neighbor_location).unwrap()
                 })
                 .copied()
                 .collect();
@@ -201,6 +198,17 @@ impl<T> Grid<T> {
         }
     }
 
+    /// returns an option with the previous value
+    pub fn set_none_get_former(&mut self, location: &GridLocation)-> Option<T>{
+        if self.valid_index(location){
+            let former = self.grid[location.to_index(self.grid_side_length)];
+            self.grid[location.to_index(self.grid_side_length)] = None;
+            former
+        }else{
+            None
+        }
+    }
+
     /// also returns false if the location is invalid, so remember to check that if relevant
     pub fn occupied(&self, location: &GridLocation) -> bool {
         self.get(location).is_some()
@@ -225,27 +233,27 @@ impl<T> Grid<T> {
 
 //iterators and filter
 impl<T> Grid<T> {
-    /// returns without Nones
-    pub fn iter(&self) -> impl Iterator<Item = (GridLocation, Option<&T>)> + '_ {
+    /// returns occupied (initialized) cells' references only
+    pub fn iter(&self) -> impl Iterator<Item = (GridLocation, &T)> + '_ {
         self.grid
             .iter()
             .enumerate()
             .filter(|(_, optional_value)|
                 optional_value.is_some())
             .map(|(index, optional_value)|{
-                (self.location_from_index(index), optional_value.as_ref())
+                (self.location_from_index(index), optional_value.as_ref().unwrap())
             })
     }
 
-    /// returns without Nones
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = (GridLocation, Option<&mut T>)> + '_ {
+    /// returns occupied (initialized) cells' references only
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (GridLocation, &mut T)> + '_ {
         self.grid
             .iter_mut()
             .enumerate()
             .filter(|(_, optional_value)|
                 optional_value.is_some())
             .map(|(index, optional_value)|{
-                (GridLocation::from_index(index as u8, self.grid_side_length), optional_value.as_mut())
+                (GridLocation::from_index(index as u8, self.grid_side_length), optional_value.as_mut().unwrap())
             })
     }
 }
