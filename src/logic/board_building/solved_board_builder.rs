@@ -18,6 +18,8 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> Result<TileType
         );
     }
 
+    solved_board.insert_empties_in_solved_locations(applied_props.empty_count)?;
+
     let mut empty_tile_counter = applied_props.empty_count;
     'outer_for: for i in (0..grid_side_length_u32).rev(){
         for j in (0..grid_side_length_u32).rev(){
@@ -30,8 +32,6 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> Result<TileType
             }
         }
     }
-    // TODO: update the following when I enable the option for more
-    let empty_tile_location=GridLocation::new((grid_side_length_u32-1) as i32, (grid_side_length_u32-1) as i32);
 
     for i in 0..grid_side_length_u32{
         for j in 0..grid_side_length_u32{
@@ -41,7 +41,6 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> Result<TileType
     }
 
     solved_board.index_all_tile_types();
-    solved_board.empty_tile_location=empty_tile_location;
     solved_board.ignore_player_input=true;
     Ok(solved_board)
 }

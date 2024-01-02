@@ -47,7 +47,7 @@ fn build_a_new_board(
         }
         let solved_grid = &solved_board_entity.grid;
         let mut game_board=game_board_query.single_mut();
-        let optional_newborn_tiletype_board = TileTypeBoard::from_solved_grid(
+        let optional_newborn_tiletype_board = TileTypeBoard::from_grid(
             solved_grid, 
             applied_props.empty_count
         );

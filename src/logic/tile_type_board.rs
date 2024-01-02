@@ -23,25 +23,16 @@ impl TileTypeBoard{
         }
     }
 
-    /// puts empty tile at the last tiles of the grid (that aren't walls)
-    pub fn from_solved_grid(grid: &Grid<Tile>, empty_tiles_count: u8) -> Result<Self, error_handler::BoardGenerationError>{
+    /// puts empty tiles at the last tiles of the grid (that aren't walls)
+    pub fn from_grid(grid: &Grid<Tile>, empty_tiles_count: u8) -> Result<Self, error_handler::BoardGenerationError>{
         let grid_side_length = grid.get_side_length();
-        let mut empty_tile_locations = vec![];
-        let mut reversed_iter = Self::iter_filtered_static(grid).rev();
-        for _empty_tile in 0..empty_tiles_count{
-            let next_from_last_avaliable = reversed_iter.next();
-            match next_from_last_avaliable{
-                Some((tile_location, _tile)) => empty_tile_locations.push(tile_location),
-                None => return Err(error_handler::BoardGenerationError::NotEnoughAvailableSpots)
-            };
-        }
-        Ok(
-            Self { 
+        let mut newborn_self = Self { 
                 grid: grid.clone(), 
-                empty_tile_locations,
+                empty_tile_locations: vec![],
                 ignore_player_input: true
-            }
-        )
+            };
+        newborn_self.insert_empties_in_solved_locations(empty_tiles_count)?;
+        Ok(newborn_self)
     }
 
     /// looks for the empty tiles in the grid
@@ -51,6 +42,23 @@ impl TileTypeBoard{
             empty_tile_locations: vec![],
             ignore_player_input: true
         }
+    }
+
+
+    /// inserts empties without indexing them in the available (meaning not wall) locations from the end
+    pub fn insert_empties_in_solved_locations(&mut self, empty_tiles_count: u8)
+    -> Result<(), error_handler::BoardGenerationError>
+    {
+        let mut empty_tile_locations = self.empty_tile_locations;
+        let mut reversed_iter = self.iter_filtered().rev();
+        for _empty_tile in 0..empty_tiles_count{
+            let next_from_last_avaliable = reversed_iter.next();
+            match next_from_last_avaliable{
+                Some((tile_location, _tile)) => empty_tile_locations.push(tile_location),
+                None => return Err(error_handler::BoardGenerationError::NotEnoughAvailableSpots)
+            };
+        }
+        Ok(())
     }
 }
 
@@ -77,16 +85,16 @@ impl TileTypeBoard {
         }
     }
 
-    /// assumes one is empty
+    /// assumes one is empty, moves the empty tile from the Vec of the index of the provided empty tile
     pub fn swap_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation)
     -> Result<(), error_handler::TileMoveError>
     {
         self.none_check(first)?;
         self.none_check(second)?;
         if self.get(first).unwrap().tile_type == TileType::Empty {
-            self.empty_tile_location= *second;
+            self.empty_tile_locations[self.get(first).unwrap().index] = *second;
         }else{
-            self.empty_tile_location= *first;
+            self.empty_tile_locations[self.get(second).unwrap().index] = *first;
         }
 
         if self.grid.swap_by_location(first, second){
@@ -97,8 +105,13 @@ impl TileTypeBoard {
         }
     }
 
-    pub fn get_direct_neighbors_of_empty(&self) -> HashMap<BasicDirection, GridLocation>{
-        self.grid.get_all_direct_neighbor_locations(&self.empty_tile_location) 
+    /// if it gets an index out of empties bounds, sets the index to the last cell's
+    pub fn get_direct_neighbors_of_empty(&self, mut empty_index: usize) -> HashMap<BasicDirection, GridLocation>{
+        let empty_locations_count  = self.empty_tile_locations.len();
+        if empty_index >= empty_locations_count {
+            empty_index = empty_locations_count - 1 ;
+        }
+        self.grid.get_all_direct_neighbor_locations(&self.empty_tile_locations.get(empty_index).unwrap()) 
     }
 
     pub fn get_empty_neighbor(&self, origin: &GridLocation) 
@@ -204,13 +217,6 @@ impl TileTypeBoard{
 impl TileTypeBoard{
     pub fn iter_filtered(&self) -> impl DoubleEndedIterator<Item = (GridLocation, &Tile)> + '_ {
         self.grid.iter().filter(|(_, tile_reference)|{
-            tile_reference.tile_type != TileType::Wall
-        })
-    }
-
-    /// a function for the constructors to use
-    pub fn iter_filtered_static(grid: &Grid<Tile>) -> impl DoubleEndedIterator<Item = (GridLocation, &Tile)> + '_ {
-        grid.iter().filter(|(_, tile_reference)|{
             tile_reference.tile_type != TileType::Wall
         })
     }
