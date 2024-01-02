@@ -18,15 +18,15 @@ pub fn generate_board_by_vector_permutation(
         = make_valid_permutation_out_of_vector(&sorted_tiles)?;
 
     let mut grid = solved_board.grid.clone();
-    let mut empty_grid_location = &GridLocation::default(); //there should always be an empty tile
+    let mut empty_grid_locations = vec![];
     for (location, content) in sorted_grid_locations.iter().zip(permutation.iter()){
         grid.set(location, *content);
         if content.tile_type == TileType::Empty {
-            empty_grid_location = location;
+            empty_grid_locations.push(*location);
         }
     }
     let generated_board=
-        TileTypeBoard::from_grid_and_empty_loc(&grid, empty_grid_location);
+        TileTypeBoard::from_grid_and_empty_loc(&grid, &empty_grid_locations);
     Ok(generated_board)
 }
 
