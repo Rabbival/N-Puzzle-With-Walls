@@ -1,3 +1,4 @@
+use bevy::input::keyboard::KeyCode;
 use enum_iterator::{all, Sequence};
 
 pub const BASIC_DIRECTION_COUNT:u8=4;
@@ -39,6 +40,16 @@ impl BasicDirection{
 
     pub fn get_directions_as_vec() -> Vec<BasicDirection>{
         all::<BasicDirection>().collect::<Vec<_>>()
+    }
+
+    pub fn from_keycode(keycode: &KeyCode) -> Option<BasicDirection>{
+        match keycode{
+            KeyCode::W | KeyCode::Up => Some(BasicDirection::Up),
+            KeyCode::D | KeyCode::Right => Some(BasicDirection::Right),
+            KeyCode::S | KeyCode::Down => Some(BasicDirection::Down),
+            KeyCode::A | KeyCode::Left => Some(BasicDirection::Left),
+            _ => None
+        }
     }
 }
 

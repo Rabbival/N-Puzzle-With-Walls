@@ -1,4 +1,4 @@
-use crate::{prelude::*, logic::enums::basic_direction, output::{print_to_console, error_handler}, costume_event::{board_set_event, move_tile_event, app_event}};
+use crate::{prelude::*, output::{print_to_console, error_handler}, costume_event::{board_set_event, move_tile_event, app_event}};
 
 pub struct KeyboardInputHandlerPlugin;
 
@@ -19,62 +19,32 @@ impl Plugin for KeyboardInputHandlerPlugin {
     }
 }
 
-fn open_menu(
-    mut menu_toggle_event_writer: EventWriter<app_event::ToggleMenu>,
-    keyboard_input: Res<Input<KeyCode>>,
-){
-    if keyboard_input.just_pressed(KeyCode::Space){
-        menu_toggle_event_writer.send(app_event::ToggleMenu)
-    }
-}
-
-// fn keyboard_events(
-//     mut key_evr: EventReader<KeyboardInput>,
-// ) {
-//     use bevy::input::ButtonState;
-
-//     for ev in key_evr.iter() {
-//         match ev.state {
-//             ButtonState::Pressed => {
-//                 println!("Key press: {:?} ({})", ev.key_code, ev.scan_code);
-//             }
-//             ButtonState::Released => {
-//                 println!("Key release: {:?} ({})", ev.key_code, ev.scan_code);
-//             }
-//         }
-//     }
-// }
-
 fn move_tiles_with_keyboard(
     mut logic_event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
     game_board_query: Query<&TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     keyboard_input: Res<Input<KeyCode>>,
 ){
-    let mut move_request = MoveRequest::default();
-    if keyboard_input.just_pressed(KeyCode::W) ||  keyboard_input.just_pressed(KeyCode::Up){
-        move_request=Some(basic_direction::BasicDirection::Down);
-    }
-    if keyboard_input.just_pressed(KeyCode::D) ||  keyboard_input.just_pressed(KeyCode::Right){
-        move_request=Some(basic_direction::BasicDirection::Left);
-    }
-    if keyboard_input.just_pressed(KeyCode::S) ||  keyboard_input.just_pressed(KeyCode::Down){
-        move_request=Some(basic_direction::BasicDirection::Up);
-    }
-    if keyboard_input.just_pressed(KeyCode::A) ||  keyboard_input.just_pressed(KeyCode::Left){
-        move_request=Some(basic_direction::BasicDirection::Right);
-    }
-    if move_request.move_neighbor_from_direction.is_none()  {
-        return;
-    }
-    if let Err(error) = move_into_empty_from_direction(
-        &mut logic_event_writer,
-        game_board_query.single(),
-        move_request,
-    ){
-        print_to_console::print_tile_move_error(error)
+    let move_requests 
+        = keyboard_input.get_just_pressed()
+        .map(|keycode|{
+            MoveRequest::new(keycode)
+        });
+    for request in move_requests {
+        if request.move_neighbor_from_direction.is_none() || request.empty_tile_index.is_none(){
+            continue;
+        }else{
+            if let Err(error) = move_into_empty_from_direction(
+                &mut logic_event_writer,
+                game_board_query.single(),
+                request,
+            ){
+                print_to_console::print_tile_move_error(error)
+            }
+        }
     }
 }
 
+/// assumes it gets a valid MoveRequest
 fn move_into_empty_from_direction(
     logic_event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>,
     game_board: &TileTypeBoard,
@@ -85,19 +55,28 @@ fn move_into_empty_from_direction(
         return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
     }
     let empty_tile_neighbors
-        = game_board.get_direct_neighbors_of_empty(move_request.empty_tile_index);
+        = game_board.get_direct_neighbors_of_empty(move_request.empty_tile_index.unwrap());
     if let Some(occupied_tile_location) 
         = empty_tile_neighbors.get(&move_request.move_neighbor_from_direction.unwrap())
     {
         logic_event_writer.send(move_tile_event::SwitchTilesLogic{
             occupied_tile_location: *occupied_tile_location, 
             empty_tile_location: game_board
-                                    .get_empty_tile_location_by_index(move_request.empty_tile_index),
+                .get_empty_tile_location_by_index(move_request.empty_tile_index.unwrap()),
         });
         Ok(()) //only here for the sake of testing, there will always be tiles.
     }else{
         Err(error_handler::TileMoveError
                 ::NoOccupiedTileInThatDirection(move_request.move_neighbor_from_direction.unwrap()))
+    }
+}
+
+fn open_menu(
+    mut menu_toggle_event_writer: EventWriter<app_event::ToggleMenu>,
+    keyboard_input: Res<Input<KeyCode>>,
+){
+    if keyboard_input.just_pressed(KeyCode::Space){
+        menu_toggle_event_writer.send(app_event::ToggleMenu)
     }
 }
 
@@ -125,7 +104,7 @@ fn listen_for_app_closing(
 
 #[cfg(test)]
 mod tests {
-    use crate::logic::board_building::solved_board_builder;
+    use crate::logic::{board_building::solved_board_builder, enums::basic_direction};
 
     use super::*;
 
@@ -170,7 +149,7 @@ mod tests {
             move_into_empty_from_direction(
                 event_writer, 
                 &board,
-                from_dir
+                MoveRequest{ move_neighbor_from_direction: Some(from_dir), empty_tile_index: Some(0)}
             );
 
         println!("for {:?}, {:?}", from_dir, direction_check_outcome);

@@ -18,20 +18,20 @@ impl TileTypeBoard{
     {
         Self { 
             grid: grid.clone(), 
-            empty_tile_locations: *empty_tile_locations, 
+            empty_tile_locations: empty_tile_locations.clone(), 
             ignore_player_input: true
         }
     }
 
-    /// puts empty tiles at the last tiles of the grid (that aren't walls)
+    /// declares empty tiles' locations as last avaliable from the end
     pub fn from_grid(grid: &Grid<Tile>, empty_tiles_count: u8) -> Result<Self, error_handler::BoardGenerationError>{
-        let grid_side_length = grid.get_side_length();
         let mut newborn_self = Self { 
                 grid: grid.clone(), 
                 empty_tile_locations: vec![],
                 ignore_player_input: true
             };
-        newborn_self.insert_empties_in_solved_locations(empty_tiles_count)?;
+        newborn_self.empty_tile_locations 
+            = newborn_self.insert_empties_in_solved_locations(empty_tiles_count)?;
         Ok(newborn_self)
     }
 
@@ -47,9 +47,9 @@ impl TileTypeBoard{
 
     /// inserts empties without indexing them in the available (meaning not wall) locations from the end
     pub fn insert_empties_in_solved_locations(&mut self, empty_tiles_count: u8)
-    -> Result<(), error_handler::BoardGenerationError>
+    -> Result<Vec<GridLocation>, error_handler::BoardGenerationError>
     {
-        let mut empty_tile_locations = self.empty_tile_locations;
+        let mut empty_tile_locations = vec![];
         let mut reversed_iter = self.iter_filtered().rev();
         for _empty_tile in 0..empty_tiles_count{
             let next_from_last_avaliable = reversed_iter.next();
@@ -58,11 +58,19 @@ impl TileTypeBoard{
                 None => return Err(error_handler::BoardGenerationError::NotEnoughAvailableSpots)
             };
         }
-        Ok(())
+        Ok(empty_tile_locations)
     }
 }
 
 impl TileTypeBoard {
+    pub fn get_empty_locations_as_references(&self)-> Vec<&GridLocation>{
+        let mut as_references = vec![];
+        for empty_tile_location in &self.empty_tile_locations{
+            as_references.push(empty_tile_location);
+        }
+        as_references
+    }
+
     pub fn index_all_tile_types(&mut self){
         for tile_type in TileType::get_tile_types_as_vec(){
             self.index_tile_of_type(tile_type);
@@ -91,10 +99,13 @@ impl TileTypeBoard {
     {
         self.none_check(first)?;
         self.none_check(second)?;
+        let tile_locations_index ;
         if self.get(first).unwrap().tile_type == TileType::Empty {
-            self.empty_tile_locations[self.get(first).unwrap().index] = *second;
+            tile_locations_index = self.get(first).unwrap().index;
+            self.empty_tile_locations[tile_locations_index] = *second;
         }else{
-            self.empty_tile_locations[self.get(second).unwrap().index] = *first;
+            tile_locations_index = self.get(second).unwrap().index;
+            self.empty_tile_locations[tile_locations_index] = *first;
         }
 
         if self.grid.swap_by_location(first, second){

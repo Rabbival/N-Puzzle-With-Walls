@@ -13,14 +13,14 @@ pub fn brute_force_generate_game_board(
     if location_shift_count%2 == 0 {
         location_shift_count+=1;
     }
-    let mut empty_tile_locations=&mut solved_board.empty_tile_locations;
     let mut board = solved_board.clone();
+    let mut empty_tile_locations= board.empty_tile_locations.clone();
 
     let mut shift_direction_sequence:Vec<BasicDirection> = vec!();
     //we'll never shift with the location below on the first shift since there's none
     let mut previous_shift_direction = BasicDirection::Up; 
     for _shift in 0..location_shift_count{
-        for mut empty_tile_location in empty_tile_locations{
+        for empty_tile_location in &mut empty_tile_locations{
             let mut optional_directions=
                 board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
 
@@ -59,6 +59,7 @@ pub fn brute_force_generate_game_board(
         .rev()
         .copied();
     print_to_console::print_possible_solution(reveresed_shift_order);
+    board.empty_tile_locations = empty_tile_locations;
     Ok(board)
 }
 
