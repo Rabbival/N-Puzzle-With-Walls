@@ -29,6 +29,7 @@ pub mod prelude {
         mouse_input_handler::*,
         keyboard_input_handler::*,
         button_input::*,
+        move_request::*,
     };
     pub use crate::output::{
         graphics::{

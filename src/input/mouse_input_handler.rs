@@ -227,8 +227,13 @@ mod tests {
         let mut board: TileTypeBoard
             =solved_board_builder::generate_solved_board(&BoardProperties::default()).unwrap();
         board.ignore_player_input=false;
-        let empty_tile_location=board.empty_tile_location;
-        board.set(&empty_tile_location, Tile { index: 15, tile_type: TileType::Numbered });
+
+        //fill all empties
+        let empty_tile_locations = board.empty_tile_locations;
+        for empty_tile_location in empty_tile_locations{
+            board.set(&empty_tile_location, Tile { index: 0, tile_type: TileType::Numbered });
+        }
+
         let location_validation_outcome=
             handle_mouse_click(
                 event_writer,

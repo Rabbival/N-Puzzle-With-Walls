@@ -106,6 +106,15 @@ impl TileTypeBoard {
     }
 
     /// if it gets an index out of empties bounds, sets the index to the last cell's
+    pub fn get_empty_tile_location_by_index(&self, mut empty_index: usize) -> GridLocation{
+        let empty_locations_count  = self.empty_tile_locations.len();
+        if empty_index >= empty_locations_count {
+            empty_index = empty_locations_count - 1 ;
+        }
+        *self.empty_tile_locations.get(empty_index).unwrap() 
+    }
+
+    /// if it gets an index out of empties bounds, sets the index to the last cell's
     pub fn get_direct_neighbors_of_empty(&self, mut empty_index: usize) -> HashMap<BasicDirection, GridLocation>{
         let empty_locations_count  = self.empty_tile_locations.len();
         if empty_index >= empty_locations_count {
