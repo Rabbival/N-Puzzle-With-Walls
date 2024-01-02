@@ -229,7 +229,7 @@ mod tests {
         board.ignore_player_input=false;
 
         //fill all empties
-        let empty_tile_locations = board.empty_tile_locations;
+        let empty_tile_locations = board.empty_tile_locations.clone();
         for empty_tile_location in &empty_tile_locations{
             board.set(&empty_tile_location, Tile { index: 0, tile_type: TileType::Numbered });
         }

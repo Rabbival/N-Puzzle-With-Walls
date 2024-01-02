@@ -63,14 +63,6 @@ impl TileTypeBoard{
 }
 
 impl TileTypeBoard {
-    pub fn get_empty_locations_as_references(&self)-> Vec<&GridLocation>{
-        let mut as_references = vec![];
-        for empty_tile_location in &self.empty_tile_locations{
-            as_references.push(empty_tile_location);
-        }
-        as_references
-    }
-
     pub fn index_all_tile_types(&mut self){
         for tile_type in TileType::get_tile_types_as_vec(){
             self.index_tile_of_type(tile_type);
