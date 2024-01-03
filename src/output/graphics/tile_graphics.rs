@@ -160,11 +160,16 @@ fn spawn_tiles(
                 TileType::Empty => Color::DARK_GRAY ,
                 _ => Color::NONE
             };
+            let number_to_display = tile_to_spawn.index;
+            if let TileType::Numbered = tile_to_spawn.tile_type {
+                number_to_display += 1;
+            }
+
             let tile_text_entity_id = commands.spawn(
                 Text2dBundle {
                     text: Text {
                         sections: vec![TextSection::new(
-                            (tile_to_spawn.index+1).to_string(),
+                            number_to_display.to_string(),
                                 TextStyle {
                                     font: font.0.clone(),
                                     font_size: 29.0,
