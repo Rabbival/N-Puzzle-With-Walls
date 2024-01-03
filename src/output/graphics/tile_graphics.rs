@@ -160,7 +160,7 @@ fn spawn_tiles(
                 TileType::Empty => Color::DARK_GRAY ,
                 _ => Color::NONE
             };
-            let number_to_display = tile_to_spawn.index;
+            let mut number_to_display = tile_to_spawn.index;
             if let TileType::Numbered = tile_to_spawn.tile_type {
                 number_to_display += 1;
             }

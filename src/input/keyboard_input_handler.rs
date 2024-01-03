@@ -80,14 +80,15 @@ fn open_menu(
     }
 }
 
+/// resets the solved board if shift is pressed too
 fn listen_for_reset(
     mut input_event_writer: EventWriter<board_set_event::BuildNewBoard>,
     keyboard_input: Res<Input<KeyCode>>
 ){
     if keyboard_input.just_pressed(KeyCode::R){
-
+        let reroll_solved = keyboard_input.pressed(KeyCode::ShiftLeft);
         input_event_writer.send(board_set_event::BuildNewBoard{
-            reroll_solved: false
+            reroll_solved
         });
     }
 }
