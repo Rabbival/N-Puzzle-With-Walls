@@ -151,9 +151,6 @@ mod tests {
                 &board,
                 MoveRequest{ move_neighbor_from_direction: Some(from_dir), empty_tile_index: Some(0)}
             );
-
-        println!("for {:?}, {:?}", from_dir, direction_check_outcome);
-
         match direction_check_outcome{
             Err(error_handler::TileMoveError::NoOccupiedTileInThatDirection(_))=> true,
             _=> false

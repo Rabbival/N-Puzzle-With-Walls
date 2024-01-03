@@ -30,8 +30,7 @@ impl TileTypeBoard{
                 empty_tile_locations: vec![],
                 ignore_player_input: true
             };
-        newborn_self.empty_tile_locations 
-            = newborn_self.insert_empties_in_solved_locations(empty_tiles_count)?;
+        newborn_self.empty_locations_to_solved_default(empty_tiles_count)?;
         Ok(newborn_self)
     }
 
@@ -46,7 +45,15 @@ impl TileTypeBoard{
 
 
     /// inserts empties without indexing them in the available (meaning not wall) locations from the end
-    pub fn insert_empties_in_solved_locations(&mut self, empty_tiles_count: u8)
+    pub fn empty_locations_to_solved_default(&mut self, empty_tiles_count: u8)
+    -> Result<(), error_handler::BoardGenerationError>
+    {
+        self.empty_tile_locations = self.available_locations_from_the_end(empty_tiles_count)?;
+        Ok(())
+    }
+
+    /// returns a vector with available places from the end
+    fn available_locations_from_the_end(&mut self, empty_tiles_count: u8)
     -> Result<Vec<GridLocation>, error_handler::BoardGenerationError>
     {
         let mut empty_tile_locations = vec![];
@@ -70,7 +77,7 @@ impl TileTypeBoard {
     }
 
     /// provides indexes to a type of tile
-    fn index_tile_of_type(&mut self, tile_type_to_index: TileType){
+    pub fn index_tile_of_type(&mut self, tile_type_to_index: TileType){
         let only_that_type_iter 
             = self.grid.iter_mut()
                 .filter(|(_, tile_reference)|{

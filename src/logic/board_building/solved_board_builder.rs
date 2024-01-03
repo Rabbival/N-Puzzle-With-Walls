@@ -18,8 +18,6 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> Result<TileType
         );
     }
 
-    solved_board.insert_empties_in_solved_locations(applied_props.empty_count)?;
-
     let mut empty_tile_counter = applied_props.empty_count;
     'outer_for: for i in (0..grid_side_length_u32).rev(){
         for j in (0..grid_side_length_u32).rev(){
@@ -40,6 +38,7 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> Result<TileType
         }
     }
 
+    solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;
     solved_board.index_all_tile_types();
     solved_board.ignore_player_input=true;
     Ok(solved_board)
