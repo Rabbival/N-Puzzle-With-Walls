@@ -92,39 +92,46 @@ impl TileTypeBoard {
         }
     }
 
-    /// assumes at least one is empty, moves update the empty_tile_locations index
+    /// assumes at least one is empty, updates the empty_tile_locations index
+    /// if both are empty, does nothing
     pub fn swap_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation)
     -> Result<(), error_handler::TileMoveError>
     {
+        let first_tile_type = self.tiletype_in_location(first);
+        let second_tile_type = self.tiletype_in_location(second);
+        if first_tile_type.is_none(){
+            return Err(error_handler::TileMoveError::NoTileInCell(*first));
+        }
+        if second_tile_type.is_none(){
+            return Err(error_handler::TileMoveError::NoTileInCell(*second));
+        }
 
-        info!("first tile is: {:?} , second tile is: {:?}", 
-            self.grid.get(first).unwrap(),
-            self.grid.get(second).unwrap(),
-        );
-        info!("empties before swap: {:?}", self.empty_tile_locations);
-
-
-        self.none_check(first)?;
-        self.none_check(second)?;
         let tile_locations_index ;
-        if self.get(first).unwrap().tile_type == TileType::Empty {
-            tile_locations_index = self.get(first).unwrap().index;
-            self.empty_tile_locations[tile_locations_index] = *second;
+        if let TileType::Empty = first_tile_type.unwrap() {
+            if let TileType::Empty = second_tile_type.unwrap() {
+                return Ok(());
+            }else{
+                tile_locations_index = self.get(first).unwrap().index;
+                self.empty_tile_locations[tile_locations_index] = *second;
+            }
         }else{
             tile_locations_index = self.get(second).unwrap().index;
             self.empty_tile_locations[tile_locations_index] = *first;
         }
-
-
-        info!("empties after swap: {:?}", self.empty_tile_locations);
-
-
 
         if self.grid.swap_by_location(first, second){
             Ok(())   
         }else{
             Err(error_handler::TileMoveError::IndexOutOfGridBounds
                     (String::from("index out of grid bounds when tried to swap")))
+        }
+    }
+
+    pub fn tiletype_in_location(&self, location: &GridLocation) -> Option<TileType> {
+        if self.none_check(location).is_err(){
+            None
+        }else{
+            Some(self.get(location).unwrap().tile_type)
         }
     }
 
