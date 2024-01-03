@@ -92,10 +92,18 @@ impl TileTypeBoard {
         }
     }
 
-    /// assumes one is empty, moves the empty tile from the Vec of the index of the provided empty tile
+    /// assumes at least one is empty, moves update the empty_tile_locations index
     pub fn swap_tiles_by_location(&mut self, first: &GridLocation, second: &GridLocation)
     -> Result<(), error_handler::TileMoveError>
     {
+
+        info!("first tile is: {:?} , second tile is: {:?}", 
+            self.grid.get(first).unwrap(),
+            self.grid.get(second).unwrap(),
+        );
+        info!("empties before swap: {:?}", self.empty_tile_locations);
+
+
         self.none_check(first)?;
         self.none_check(second)?;
         let tile_locations_index ;
@@ -106,6 +114,11 @@ impl TileTypeBoard {
             tile_locations_index = self.get(second).unwrap().index;
             self.empty_tile_locations[tile_locations_index] = *first;
         }
+
+
+        info!("empties after swap: {:?}", self.empty_tile_locations);
+
+
 
         if self.grid.swap_by_location(first, second){
             Ok(())   
