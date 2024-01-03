@@ -154,7 +154,12 @@ fn spawn_tiles(
         )).id();
 
         // create texts for numbered tiles and attach them as their children
-        if tile_to_spawn.tile_type == TileType::Numbered {
+        if tile_to_spawn.tile_type != TileType::Wall {
+            let text_color = match tile_to_spawn.tile_type{
+                TileType::Numbered => Color::INDIGO ,
+                TileType::Empty => Color::DARK_GRAY ,
+                _ => Color::NONE
+            };
             let tile_text_entity_id = commands.spawn(
                 Text2dBundle {
                     text: Text {
@@ -163,7 +168,7 @@ fn spawn_tiles(
                                 TextStyle {
                                     font: font.0.clone(),
                                     font_size: 29.0,
-                                    color: Color::INDIGO
+                                    color: text_color
                                 }
                             )],
                         alignment: TextAlignment::Center,
