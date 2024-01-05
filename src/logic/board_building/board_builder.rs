@@ -30,6 +30,7 @@ fn build_a_new_board(
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<GameState>>,
+    current_game_state: Res<State<GameState>>,
 ){
     for build_request in event_listener.read(){
         let mut solved_board_entity = solved_board_query.single_mut();
@@ -67,7 +68,13 @@ fn build_a_new_board(
                 match attempt_result{
                     Ok(board) =>  {
                         *game_board=board;
-                        game_state.set(GameState::Game);
+                        // if we're resetting when in game screen,
+                        // the board's input ignorance won't be toggled
+                        if let GameState::Game = current_game_state.get(){
+                            game_board.ignore_player_input = false;
+                        }else{
+                            game_state.set(GameState::Game);
+                        }
                         print_to_console::game_log(GameLog::NewBoardGenerated);
                     },
                     Err(error) => {
