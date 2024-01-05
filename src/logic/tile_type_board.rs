@@ -150,7 +150,7 @@ impl TileTypeBoard {
         if empty_index >= empty_locations_count {
             empty_index = empty_locations_count - 1 ;
         }
-        self.grid.get_all_direct_neighbor_locations(&self.empty_tile_locations.get(empty_index).unwrap()) 
+        self.grid.get_all_direct_neighbor_locations(self.empty_tile_locations.get(empty_index).unwrap()) 
     }
 
     pub fn get_empty_neighbor(&self, origin: &GridLocation) 

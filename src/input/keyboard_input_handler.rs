@@ -32,14 +32,12 @@ fn move_tiles_with_keyboard(
     for request in move_requests {
         if request.move_neighbor_from_direction.is_none() || request.empty_tile_index.is_none(){
             continue;
-        }else{
-            if let Err(error) = move_into_empty_from_direction(
-                &mut logic_event_writer,
-                game_board_query.single(),
-                request,
-            ){
-                print_to_console::print_tile_move_error(error)
-            }
+        }else if let Err(error) = move_into_empty_from_direction(
+            &mut logic_event_writer,
+            game_board_query.single(),
+            request,
+        ){
+            print_to_console::print_tile_move_error(error)
         }
     }
 }

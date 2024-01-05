@@ -103,14 +103,12 @@ fn update_wall_count_unapplied_inner(
                         MenuError::CantGoBeyondTileCountBounds(*wall_count_action)
                     );
                 }
+            }else if unapplied_menu_wall_count.0 > 0{
+                unapplied_menu_wall_count.0 -= 1;
             }else{
-                if unapplied_menu_wall_count.0 > 0{
-                    unapplied_menu_wall_count.0 -= 1;
-                }else{
-                    print_to_console::print_menu_error(
-                        MenuError::CantGoBeyondTileCountBounds(*wall_count_action)
-                    );
-                }
+                print_to_console::print_menu_error(
+                    MenuError::CantGoBeyondTileCountBounds(*wall_count_action)
+                );
             }
         }
         _ => {}

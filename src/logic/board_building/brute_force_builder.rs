@@ -22,7 +22,7 @@ pub fn brute_force_generate_game_board(
     for _shift in 0..location_shift_count{
         for empty_tile_location in &mut empty_tile_locations{
             let mut optional_directions=
-                board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
+                board.get_direct_neighbor_locations_walls_excluded(empty_tile_location);
 
             //don't want to shift back and forth, unless it's a dead end in which it has to turn back
             if optional_directions.len() > 1 {
@@ -43,7 +43,7 @@ pub fn brute_force_generate_game_board(
                     (ItemNotFoundInMapError::DirectionNotFoundInMap));
             }
             let chosen_location=chosen_location_option.unwrap();
-            if board.swap_tiles_by_location(&empty_tile_location, chosen_location).is_err(){
+            if board.swap_tiles_by_location(empty_tile_location, chosen_location).is_err(){
                 return Err(error_handler::BoardGenerationError::TileMoveError);
             }
             
