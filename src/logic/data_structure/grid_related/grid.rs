@@ -133,14 +133,18 @@ impl<T: Clone> Grid<T>{
         edge_vector
     }
 
-    pub fn all_locations_as_vec(&self) -> Vec<GridLocation>{
-        let mut all_locations_vector = vec![];
+    /// only returns ones that aren't None
+    pub fn all_initialized_locations_as_vec(&self) -> Vec<GridLocation>{
+        let mut initialized_locations_vector = vec![];
         for col in 0..(self.grid_side_length as i32){
             for row in 0..(self.grid_side_length as i32){
-                all_locations_vector.push(GridLocation { row, col }); 
+                let location = GridLocation { row, col };
+                if self.get(&location).is_some(){
+                    initialized_locations_vector.push(location);
+                }
             }
         }
-        all_locations_vector
+        initialized_locations_vector
     }
 }
 
