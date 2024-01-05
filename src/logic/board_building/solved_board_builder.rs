@@ -61,6 +61,14 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
             let chosen_wall_location_index = rng.gen_range(0..possible_spawn_locations.len());
             chosen_wall_location = possible_spawn_locations[chosen_wall_location_index];
     
+            // whether it's because the chosen location is illegal 
+            // or because we don't want to choose the same location twice
+            // the chosen location has to be removed from the available ones
+            remove_by_value(
+                &chosen_wall_location, 
+                &mut possible_spawn_locations
+            );
+
             //check if removing that tile keeps the graph connected, 
             //if not - put it back, and reroll
             let chosen_tile_value 
@@ -71,14 +79,6 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
                 //if the graph is not connected, we'll not remove this tile and thus it should be put back in place
                 neighbor_count_grid.set(&chosen_wall_location, chosen_tile_value.unwrap());
             }
-
-            // whether it's because the chosen location is illegal 
-            // or because we don't want to choose the same location twice
-            // the chosen location has to be removed from the available ones
-            remove_by_value(
-                &chosen_wall_location, 
-                &mut possible_spawn_locations
-            );
         }
         // if we didn't find an available spot
         if possible_spawn_locations.is_empty() {

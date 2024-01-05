@@ -43,7 +43,6 @@ fn build_a_new_board(
                     return;
                 }
             }
-            
         }
         let solved_grid = &solved_board_entity.grid;
         let mut game_board=game_board_query.single_mut();
