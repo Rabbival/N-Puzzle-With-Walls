@@ -51,13 +51,18 @@ impl GridTree{
 				}else{
 					if let Some(parent) = optional_parent{
 						self.leaves.push(node);
-						self.nodes.insert(node, Some(parent))
+						self.nodes.insert(node, Some(parent));
 						// if the parent was a leaf up to this point,
 						// remove it from the list of leaves
 						util_functions::remove_by_value(
 							&parent, 
 							&mut self.leaves
 						);
+
+						// TODO: make previous function optional-
+						// only call it if the parent was a leaf,
+						// if not simply add one to its children counter
+
 						true
 					}else{
 						false
@@ -68,22 +73,26 @@ impl GridTree{
 	}
 
 	/// returns true if node was removed successfully
-	/// doesn't insert if parent wasn't found or child already exists in the tree
-	pub fn remove_leaf(&mut self, parent: GridLocation, child: GridLocation)-> bool{
-		match self.nodes.get(&child){
-			Some(_) => false,
-			None => {
-				let optional_children = self.nodes.get_mut(&parent);
-				match optional_children{
-					//parent doesn't exist
-					None => false,
-					Some(children) => {
-						children.push(child);
-						self.leaves.push(child);
-						return true;
-					}
-				}
-			}
+	/// doesn't remove if it's not a leaf
+	pub fn remove(&mut self, node_to_remove: GridLocation)-> bool{
+		let index_of_node_to_remove = util_functions::item_to_index(
+			&node_to_remove, 
+			&mut self.leaves
+		);
+		if index_of_node_to_remove.is_none(){
+			return false;
 		}
+		let leaf_to_remove = self.leaves
+			.remove(index_of_node_to_remove.unwrap());
+		let optional_parent_node 
+			= self.nodes.get(&leaf_to_remove).unwrap();
+		// if we didn't remove the root
+		if let Some(parent) = optional_parent_node{
+
+			// TODO: take one off from the node's children counter 
+			// if it turns to zero, add it to the leaves
+
+		}
+
 	}
 }
