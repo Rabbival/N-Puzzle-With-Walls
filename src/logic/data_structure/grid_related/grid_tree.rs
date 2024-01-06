@@ -5,7 +5,7 @@ use crate::{prelude::*, logic::data_structure::util_functions};
 /// inteneded to be used as MST
 pub struct GridTree {
 	/// sorted as <value, parent location>
-	nodes: HashMap<GridLocation, Option<GridLocation>>,
+	nodes: HashMap<GridLocation, Option<GridTreeNode>>,
     leaves: Vec<GridLocation>
 }
 
@@ -35,13 +35,18 @@ impl GridTree{
 
 	/// returns true if leaf was inserted successfully
 	/// doesn't insert if parent wasn't found or node already exists in the tree
-	pub fn insert(&mut self, node: GridLocation, optional_parent: Option<GridLocation>)-> bool{
+	pub fn insert(
+		&mut self, 
+		node: GridLocation, 
+		optional_parent_location: Option<GridLocation>
+	)-> bool
+	{
 		match self.nodes.get(&node){
 			Some(_) => false,
 			None => {
 				// if the tree is empty, the new node must have no parent
 				if self.nodes.is_empty(){
-					if optional_parent.is_none(){
+					if optional_parent_location.is_none(){
 						self.nodes.insert(node, None);
 						self.leaves=vec![node];
 						true
@@ -49,21 +54,34 @@ impl GridTree{
 						false
 					}
 				}else{
-					if let Some(parent) = optional_parent{
-						self.leaves.push(node);
-						self.nodes.insert(node, Some(parent));
-						// if the parent was a leaf up to this point,
-						// remove it from the list of leaves
-						util_functions::remove_by_value(
-							&parent, 
-							&mut self.leaves
-						);
+					if let Some(parent_location) 
+						= optional_parent_location
+					{
+						let optional_parent_node 
+							= self.nodes.get(&parent_location);
+						match optional_parent_node{
+							//if the parent doesn't exist the request is invalid
+							None => false,
+							Some(parent_node) =>{
+								self.leaves.push(node);
+								self.nodes.insert(node, 
+									Some(GridTreeNode::new(parent_location))
+								);
+								// if the parent was a leaf up to this point,
+								// remove it from the list of leaves
+								let mut parent_children_counter = 
+									parent_node.unwrap().children_counter;
+								if parent_children_counter == 0{
+									util_functions::remove_by_value(
+										&parent_location, 
+										&mut self.leaves
+									);
+								}
+								parent_children_counter += 1;
 
-						// TODO: make previous function optional-
-						// only call it if the parent was a leaf,
-						// if not simply add one to its children counter
-
-						true
+								true
+							}
+						}
 					}else{
 						false
 					}
@@ -94,5 +112,22 @@ impl GridTree{
 
 		}
 
+	}
+}
+
+
+
+#[derive(Clone, Debug)]
+struct GridTreeNode {
+	pub value: GridLocation,
+    pub children_counter: u8
+}
+
+impl GridTreeNode{
+	pub fn new(location: GridLocation)-> Self{
+		Self { 
+			value: location, 
+			children_counter: 0 
+		}
 	}
 }
