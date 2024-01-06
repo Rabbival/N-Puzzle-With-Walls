@@ -150,7 +150,7 @@ fn forbid_spawn_in_neighbors_of_location(
     neighbor_count_grid: &Grid<u8>
 ){
     for neighbor_to_forbid in 
-        neighbor_count_grid.get_all_direct_neighbor_locations(&location)
+        neighbor_count_grid.get_all_direct_neighbor_locations(location)
     {
         util_functions::remove_by_value::<GridLocation>(
             &neighbor_to_forbid.1, 

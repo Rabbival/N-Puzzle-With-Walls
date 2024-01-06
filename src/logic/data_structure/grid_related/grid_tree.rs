@@ -53,40 +53,38 @@ impl GridTree{
 					}else{
 						false
 					}
-				}else{
-					if let Some(parent_location) 
-						= optional_parent_location
-					{
-						let optional_parent_node 
-							= self.nodes.get_mut(&parent_location);
-						match optional_parent_node{
-							//if the parent doesn't exist the request is invalid
-							None => false,
-							Some(parent_node) =>{
-								// if the parent was a leaf up to this point,
-								// remove it from the list of leaves
-								let parent_children_counter = 
-									&mut parent_node.as_mut().unwrap().children_counter;
-								if *parent_children_counter == 0{
-									util_functions::remove_by_value(
-										&parent_location, 
-										&mut self.leaves
-									);
-								}
-								*parent_children_counter += 1;
+				}else if let Some(parent_location) 
+    						= optional_parent_location
+    					{
+    						let optional_parent_node 
+    							= self.nodes.get_mut(&parent_location);
+    						match optional_parent_node{
+    							//if the parent doesn't exist the request is invalid
+    							None => false,
+    							Some(parent_node) =>{
+    								// if the parent was a leaf up to this point,
+    								// remove it from the list of leaves
+    								let parent_children_counter = 
+    									&mut parent_node.as_mut().unwrap().children_counter;
+    								if *parent_children_counter == 0{
+    									util_functions::remove_by_value(
+    										&parent_location, 
+    										&mut self.leaves
+    									);
+    								}
+    								*parent_children_counter += 1;
 
-								self.leaves.push(node);
-								self.nodes.insert(node, 
-									Some(GridTreeNode::new(parent_location))
-								);
+    								self.leaves.push(node);
+    								self.nodes.insert(node, 
+    									Some(GridTreeNode::new(parent_location))
+    								);
 
-								true
-							}
-						}
-					}else{
-						false
-					}
-				}
+    								true
+    							}
+    						}
+    					}else{
+    						false
+    					}
 			}
 		}
 	}
@@ -96,7 +94,7 @@ impl GridTree{
 	pub fn remove(&mut self, node_to_remove: GridLocation)-> bool{
 		let index_of_node_to_remove = util_functions::item_to_index(
 			&node_to_remove, 
-			&mut self.leaves
+			&self.leaves
 		);
 		if index_of_node_to_remove.is_none(){
 			return false;
@@ -114,6 +112,12 @@ impl GridTree{
 		}
 		true
 	}
+}
+
+impl Default for GridTree {
+    fn default() -> Self {
+         Self::new()
+     }
 }
 
 

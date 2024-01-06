@@ -12,7 +12,7 @@ pub fn remove_by_value<T: PartialEq>(
     match optional_index_to_remove{
 		Some(index_to_remove) => {
 			list_to_remove_from.swap_remove(index_to_remove);
-			return true;
+			true
 		},
 		None=> false
 	}
