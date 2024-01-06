@@ -1,6 +1,8 @@
 use crate::{prelude::*, output::error_handler, logic::data_structure::util_functions};
 use rand::Rng;
 
+/// mustn't be more than 2 as there will always be a corner
+/// shouldn't be less than 1 or we might get useless spaces
 const MIN_NEIGHBORS: u8 = 2;
 
 pub fn generate_solved_board(applied_props: &BoardProperties) -> Result<TileTypeBoard, BoardGenerationError>{
@@ -122,13 +124,6 @@ fn initialize_neighbor_count_grid(
     for edge_tile_not_corner in neighbor_count_grid.edges_without_corners_locations(){
         neighbor_count_grid.set(&edge_tile_not_corner, 3);
         allowed_wall_spawn_locations.push(edge_tile_not_corner);
-        if MIN_NEIGHBORS == 3 {
-            forbid_spawn_in_neighbors_of_location(
-                &edge_tile_not_corner,
-                allowed_wall_spawn_locations,
-                &neighbor_count_grid
-            );
-        }
     }
     for corner in neighbor_count_grid.corner_locations(){
         neighbor_count_grid.set(&corner, 2);
