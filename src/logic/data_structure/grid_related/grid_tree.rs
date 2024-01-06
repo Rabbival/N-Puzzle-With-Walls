@@ -58,26 +58,27 @@ impl GridTree{
 						= optional_parent_location
 					{
 						let optional_parent_node 
-							= self.nodes.get(&parent_location);
+							= self.nodes.get_mut(&parent_location);
 						match optional_parent_node{
 							//if the parent doesn't exist the request is invalid
 							None => false,
 							Some(parent_node) =>{
-								self.leaves.push(node);
-								self.nodes.insert(node, 
-									Some(GridTreeNode::new(parent_location))
-								);
 								// if the parent was a leaf up to this point,
 								// remove it from the list of leaves
-								let mut parent_children_counter = 
-									parent_node.unwrap().children_counter;
-								if parent_children_counter == 0{
+								let parent_children_counter = 
+									&mut parent_node.as_mut().unwrap().children_counter;
+								if *parent_children_counter == 0{
 									util_functions::remove_by_value(
 										&parent_location, 
 										&mut self.leaves
 									);
 								}
-								parent_children_counter += 1;
+								*parent_children_counter += 1;
+
+								self.leaves.push(node);
+								self.nodes.insert(node, 
+									Some(GridTreeNode::new(parent_location))
+								);
 
 								true
 							}
@@ -103,15 +104,15 @@ impl GridTree{
 		let leaf_to_remove = self.leaves
 			.remove(index_of_node_to_remove.unwrap());
 		let optional_parent_node 
-			= self.nodes.get(&leaf_to_remove).unwrap();
+			= self.nodes.get_mut(&leaf_to_remove).unwrap();
 		// if we didn't remove the root
-		if let Some(parent) = optional_parent_node{
-
-			// TODO: take one off from the node's children counter 
-			// if it turns to zero, add it to the leaves
-
+		if let Some(parent_node) = optional_parent_node{
+			parent_node.children_counter -= 1;
+			if parent_node.children_counter == 0{
+				self.leaves.push(parent_node.value);
+			}
 		}
-
+		true
 	}
 }
 
