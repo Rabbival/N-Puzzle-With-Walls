@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::error_handler};
+use crate::{prelude::*, output::error_handler, logic::data_structure::util_functions};
 use rand::Rng;
 
 const MIN_NEIGHBORS: u8 = 2;
@@ -152,19 +152,10 @@ fn forbid_spawn_in_neighbors_of_location(
     for neighbor_to_forbid in 
         neighbor_count_grid.get_all_direct_neighbor_locations(&location)
     {
-        remove_by_value(
+        util_functions::remove_by_value::<GridLocation>(
             &neighbor_to_forbid.1, 
             possible_spawn_locations
         );
-    }
-}
-
-fn remove_by_value(location_to_forbid: &GridLocation, possible_spawn_locations: &mut Vec<GridLocation>){
-    let optional_index_to_remove = possible_spawn_locations.iter()
-        .position(|x| *x == *location_to_forbid);
-    //could be that it was removed before by a different neighbor
-    if let Some(index_to_remove) =  optional_index_to_remove {
-        possible_spawn_locations.swap_remove(index_to_remove);
     }
 }
 

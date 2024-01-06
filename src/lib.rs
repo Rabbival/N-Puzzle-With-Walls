@@ -63,8 +63,10 @@ pub mod prelude {
             grid_related::{
                 grid::*,
                 grid_location::*,
+                grid_tree::*,
             },
             indexed_value::*,
+            util_functions::*,
         },
         enums::{
             basic_direction::*,
