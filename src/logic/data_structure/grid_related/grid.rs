@@ -14,44 +14,15 @@ impl<T: Clone> Grid<T>{
 
     pub fn is_connected_graph(&self) -> bool {
         let mut travelling_tracker = 
-            GridTravellingTracker::from_grid(self);
+            GridTraveller::from_grid(self);
         while ! travelling_tracker.locations_to_visit.is_empty(){
-            self.depth_first_count(
-                &mut travelling_tracker.locations_to_visit,
-                &mut travelling_tracker.cells_locations_with_added_mark
-            );
+            travelling_tracker.next_cell_location(self);
             travelling_tracker.cells_visited_counter += 1;
         }
 
         //check that we found everything that's defined (and not None)
         travelling_tracker.cells_visited_counter 
             == self.iter().collect::<Vec<_>>().len() as u32
-    }
-
-    /// assumes vec not to be empty and hash-map to have all locations in vec
-    fn depth_first_count(
-        &self,
-        locations_to_visit: &mut Vec<GridLocation>,
-        cells_locations_with_added_mark: &mut Vec<GridTravellingCell>
-    ){
-        let next_tile_to_check = locations_to_visit.pop().unwrap();
-        let next_tile_neighbors 
-            = self.get_all_direct_neighbor_locations(&next_tile_to_check);
-        let mut new_locations_to_visit : Vec<GridLocation>
-            = next_tile_neighbors
-                .values()
-                //only add the ones not yet visited
-                .filter(|next_tile_neighbor_location|{
-                    ! *cells_locations_with_added_mark.get(*next_tile_neighbor_location).unwrap()
-                })
-                .copied()
-                .collect();
-        for new_location in new_locations_to_visit.clone(){
-            let addeded_mark_for_new_location
-                = cells_locations_with_added_mark.get_mut(&new_location).unwrap();
-            *addeded_mark_for_new_location = true;
-        }
-        locations_to_visit.append(&mut new_locations_to_visit);
     }
 }
 

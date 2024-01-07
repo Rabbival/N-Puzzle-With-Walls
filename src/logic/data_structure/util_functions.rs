@@ -20,11 +20,11 @@ pub fn remove_by_value<T: PartialEq>(
 }
 
 pub fn item_to_index<T: PartialEq>(
-	item_to_remove: &T, 
-	list_to_remove_from: &Vec<T>
+	item_to_find: &T, 
+	list_to_find_in: &Vec<T>
 ) -> Option<usize>
 {
-    list_to_remove_from.iter().position(|x| *x == *item_to_remove)
+    list_to_find_in.iter().position(|x| *x == *item_to_find)
 }
 
 pub fn random_value<T:Copy>(list_ref: &Vec<T>) -> T {
