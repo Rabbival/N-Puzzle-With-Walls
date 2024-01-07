@@ -41,53 +41,53 @@ impl GridTree{
 		optional_parent_location: Option<GridLocation>
 	)-> bool
 	{
-		match self.nodes.get(&node){
-			Some(_) => false,
-			None => {
-				// if the tree is empty, the new node must have no parent
-				if self.nodes.is_empty(){
-					if optional_parent_location.is_none(){
-						self.nodes.insert(node, None);
-						self.leaves=vec![node];
+		if self.nodes.get(&node).is_some(){
+			false
+		}else{
+			// if the tree is empty, the new node must have no parent
+			if self.nodes.is_empty(){
+				if optional_parent_location.is_none(){
+					self.nodes.insert(node, None);
+					self.leaves=vec![node];
+					true
+				}else{
+					false
+				}
+			}else if let Some(parent_location) 
+				= optional_parent_location
+			{
+				let optional_parent_node 
+					= self.nodes.get_mut(&parent_location);
+				match optional_parent_node{
+					//if the parent doesn't exist the request is invalid
+					None => false,
+					Some(parent_node) =>{
+						// if the parent was a leaf up to this point,
+						// remove it from the list of leaves
+						let parent_children_counter = 
+							&mut parent_node.as_mut().unwrap().children_counter;
+						if *parent_children_counter == 0{
+							util_functions::remove_by_value(
+								&parent_location, 
+								&mut self.leaves
+							);
+						}
+						*parent_children_counter += 1;
+
+						self.leaves.push(node);
+						self.nodes.insert(node, 
+							Some(GridTreeNode::new(parent_location))
+						);
+
 						true
-					}else{
-						false
 					}
-				}else if let Some(parent_location) 
-    						= optional_parent_location
-    					{
-    						let optional_parent_node 
-    							= self.nodes.get_mut(&parent_location);
-    						match optional_parent_node{
-    							//if the parent doesn't exist the request is invalid
-    							None => false,
-    							Some(parent_node) =>{
-    								// if the parent was a leaf up to this point,
-    								// remove it from the list of leaves
-    								let parent_children_counter = 
-    									&mut parent_node.as_mut().unwrap().children_counter;
-    								if *parent_children_counter == 0{
-    									util_functions::remove_by_value(
-    										&parent_location, 
-    										&mut self.leaves
-    									);
-    								}
-    								*parent_children_counter += 1;
-
-    								self.leaves.push(node);
-    								self.nodes.insert(node, 
-    									Some(GridTreeNode::new(parent_location))
-    								);
-
-    								true
-    							}
-    						}
-    					}else{
-    						false
-    					}
+				}
+			}else{
+				false
 			}
 		}
 	}
+	
 
 	/// returns true if node was removed successfully
 	/// doesn't remove if it's not a leaf

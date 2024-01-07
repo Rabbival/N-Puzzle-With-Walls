@@ -6,7 +6,12 @@ pub struct Grid<T: Clone> {
     grid: Vec<Option<T>>
 }
 
+//graph travelling functions
 impl<T: Clone> Grid<T>{
+    // pub fn get_spanning_tree(&self) -> bool {
+        
+    // }
+
     pub fn is_connected_graph(&self) -> bool {
         let mut cells_locations_with_added_mark: HashMap<GridLocation, bool>=
             self
@@ -59,7 +64,9 @@ impl<T: Clone> Grid<T>{
         }
         locations_to_visit.append(&mut new_locations_to_visit);
     }
+}
 
+impl<T: Clone> Grid<T>{
     /// only returns occupied ones 
     pub fn get_all_direct_neighbor_locations(&self, origin: &GridLocation) 
     -> HashMap<BasicDirection, GridLocation>
