@@ -1,5 +1,4 @@
 use crate::{prelude::*, output::error_handler, logic::data_structure::util_functions};
-use rand::Rng;
 
 /// mustn't be more than 2 as there will always be a corner
 /// shouldn't be less than 1 or we might get useless spaces
@@ -49,7 +48,6 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> Result<TileType
 fn determine_wall_locations(wall_count: u8, grid_side_length: u8) 
 -> Result<Vec<GridLocation>, error_handler::BoardGenerationError>
 {
-    let mut rng = rand::thread_rng();
     let mut wall_spawn_locations = vec![];
     let mut possible_spawn_locations = vec![];
     let mut neighbor_count_grid = initialize_neighbor_count_grid(
@@ -60,8 +58,8 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
     for _ in 0..wall_count{
         let mut chosen_wall_location = GridLocation::default();
         while ! possible_spawn_locations.is_empty(){
-            let chosen_wall_location_index = rng.gen_range(0..possible_spawn_locations.len());
-            chosen_wall_location = possible_spawn_locations[chosen_wall_location_index];
+            chosen_wall_location 
+                = util_functions::random_value(&possible_spawn_locations);
     
             // whether it's because the chosen location is illegal 
             // or because we don't want to choose the same location twice

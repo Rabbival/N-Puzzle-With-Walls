@@ -1,3 +1,4 @@
+use rand::Rng;
 
 /// returns true if the value was found and removed
 pub fn remove_by_value<T: PartialEq>(
@@ -24,4 +25,10 @@ pub fn item_to_index<T: PartialEq>(
 ) -> Option<usize>
 {
     list_to_remove_from.iter().position(|x| *x == *item_to_remove)
+}
+
+pub fn random_value<T:Copy>(list_ref: &Vec<T>) -> T {
+	let mut rng = rand::thread_rng();
+	let random_index = rng.gen_range(0..list_ref.len());
+	list_ref[random_index]
 }

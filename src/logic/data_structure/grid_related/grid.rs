@@ -13,37 +13,26 @@ impl<T: Clone> Grid<T>{
     // }
 
     pub fn is_connected_graph(&self) -> bool {
-        let mut cells_locations_with_added_mark: HashMap<GridLocation, bool>=
-            self
-            .iter()
-            .map(|(location, _)| {
-                (location, false)
-            })
-            .collect();
-        let first_location 
-            = cells_locations_with_added_mark.get_key_value_mut(
-                &self.iter().next().unwrap().0
-            ).unwrap();
-        *first_location.1 = true; //already added
-        let mut locations_to_visit = vec![*first_location.0];
-        let mut cells_visited_counter = 0;
-        while ! locations_to_visit.is_empty(){
+        let mut travelling_tracker = 
+            GridTravellingTracker::from_grid(self);
+        while ! travelling_tracker.locations_to_visit.is_empty(){
             self.depth_first_count(
-                &mut locations_to_visit,
-                &mut cells_locations_with_added_mark
+                &mut travelling_tracker.locations_to_visit,
+                &mut travelling_tracker.cells_locations_with_added_mark
             );
-            cells_visited_counter += 1;
+            travelling_tracker.cells_visited_counter += 1;
         }
 
         //check that we found everything that's defined (and not None)
-        cells_visited_counter == self.iter().collect::<Vec<_>>().len() as u32
+        travelling_tracker.cells_visited_counter 
+            == self.iter().collect::<Vec<_>>().len() as u32
     }
 
     /// assumes vec not to be empty and hash-map to have all locations in vec
     fn depth_first_count(
         &self,
         locations_to_visit: &mut Vec<GridLocation>,
-        cells_locations_with_added_mark: &mut HashMap<GridLocation, bool>
+        cells_locations_with_added_mark: &mut Vec<GridTravellingCell>
     ){
         let next_tile_to_check = locations_to_visit.pop().unwrap();
         let next_tile_neighbors 
