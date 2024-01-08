@@ -64,7 +64,7 @@ pub mod prelude {
                 grid::*,
                 grid_location::*,
                 grid_tree::*,
-                grid_travelling_tracker::*, 
+                grid_traveller::*, 
             },
             indexed_value::*,
             util_functions::*,

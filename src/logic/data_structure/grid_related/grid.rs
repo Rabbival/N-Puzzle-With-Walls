@@ -16,7 +16,7 @@ impl<T: Clone> Grid<T>{
         let mut travelling_tracker = 
             GridTraveller::from_grid(self);
         while ! travelling_tracker.locations_to_visit.is_empty(){
-            travelling_tracker.next_cell_location(self);
+            travelling_tracker.next_cell_location();
             travelling_tracker.cells_visited_counter += 1;
         }
 
