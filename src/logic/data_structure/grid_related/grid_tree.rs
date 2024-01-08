@@ -8,7 +8,7 @@ pub struct GridTree {
 	nodes: HashMap<GridLocation, GridTreeNode>,
     leaves: Vec<GridLocation>,
 	/// a leaf to be drawn out before the others
-	top_prority_leaf: Option<GridLocation>
+	top_priority_leaf: Option<GridLocation>
 }
 
 // constructors
@@ -17,7 +17,7 @@ impl GridTree{
 		Self { 
 			nodes: HashMap::new(), 
 			leaves: vec![] ,
-			top_prority_leaf: None
+			top_priority_leaf: None
 		}
 	}
 
@@ -27,7 +27,7 @@ impl GridTree{
 		Self { 
 			nodes, 
 			leaves: vec![root_location] ,
-			top_prority_leaf: None
+			top_priority_leaf: None
 		}
 	}
 }
@@ -100,17 +100,11 @@ impl GridTree{
 
 	/// will make the parent node a leaf if it has no children left
 	/// doesn't remove if it's not a leaf
-	/// returns true if node was removed successfully
-	fn remove(&mut self, node_to_remove: GridLocation)-> bool{
-		let index_of_node_to_remove = util_functions::item_to_index(
-			&node_to_remove, 
-			&self.leaves
-		);
-		if index_of_node_to_remove.is_none(){
-			return false;
-		}
+	/// returns the removed leaf, or None if there was a problem and the iter should stop
+	fn remove_random(&mut self)-> Option<GridLocation>{
+		let random_index_to_remove = util_functions::random_index(&self.leaves);
 		let removed_leaf = self.leaves
-			.remove(index_of_node_to_remove.unwrap());
+			.remove(random_index_to_remove);
 		let optional_parent_location 
 			= self.nodes.get(&removed_leaf).unwrap().parent_location;
 		// if we didn't remove the root
@@ -118,32 +112,43 @@ impl GridTree{
 			let optional_parent_node =
 				self.nodes.get_mut(&parent_location);
 			match optional_parent_node{
-				None => return false,
+				None => return None,
 				Some(parent_node) => {
 					parent_node.children_counter -= 1;
+					// if the parent is a leaf, could be that it could be removed
 					if parent_node.children_counter == 0{
-						self.leaves.push(parent_location);
-						let new_top_priority_leaf = match parent_node.depth{
-							0 | 1 => None,
-							_ => Some(parent_location)
+						let new_top_priority_leaf;
+						match parent_node.depth {
+							// if the paren't depth is 0 or 1, we don't want to remove it
+							// just to be on the safe side
+							0 | 1 => new_top_priority_leaf = None,
+							_ => {
+								new_top_priority_leaf = Some(parent_location);
+								self.leaves.push(parent_location);
+							}
 						};
-						self.top_prority_leaf = new_top_priority_leaf;
+						self.top_priority_leaf = new_top_priority_leaf;
 					}
 				}
 			}
 		}
-		true
+		Some(removed_leaf)
 	}
 }
 
-// impl Iterator for GridTree{
-//     type Item = GridLocation;
+impl Iterator for GridTree{
+    type Item = GridLocation;
 
-//     fn next(&mut self) -> Option<Self::Item> {
-			// if there's a top priority return it
-			// if there's None return a random leaf
-//     }
-// }
+    fn next(&mut self) -> Option<Self::Item> {
+		match self.top_priority_leaf{
+			Some(top_priority_location) => Some(top_priority_location),
+			// if there's no top priority leaf, return a random leaf
+			None => {
+				Some(self.remove_random()?)
+			}
+		}
+    }
+}
 
 impl Default for GridTree {
     fn default() -> Self {
