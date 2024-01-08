@@ -8,9 +8,21 @@ pub struct Grid<T: Clone> {
 
 //graph travelling functions
 impl<T: Clone> Grid<T>{
-    // pub fn get_spanning_tree(&self) -> bool {
-        
-    // }
+    pub fn get_spanning_tree(&self) -> GridTree {
+        let grid_traveller = GridTraveller::from_grid(self);
+        let mut grid_tree = 
+            GridTree::from_root(grid_traveller.locations_to_visit[0]);
+        let mut bfs_iterator = grid_traveller.into_iter();
+        while let Some(location_and_neighbors) = bfs_iterator.next(){
+            for neighbor in location_and_neighbors.just_added_neighbors{
+                grid_tree.insert(
+                    neighbor,
+                    Some(location_and_neighbors.just_visited_location), 
+                );
+            }
+        }
+        grid_tree
+    }
 
     pub fn is_connected_graph(&self) -> bool {
         let mut bfs_iterator = 

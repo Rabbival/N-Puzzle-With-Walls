@@ -54,7 +54,7 @@ impl<'a, T: Clone> GridTraveller<'a, T>{
 /// BFS iterator, returns None if location wasn't found
 /// or if there are no more locations to iterate over
 impl<'a, T: Clone> Iterator for GridTraveller<'a, T>{
-    type Item = GridLocation;
+    type Item = LocationAndUnaddedNeighbors;
 
     fn next(&mut self) -> Option<Self::Item> {
 		match self.locations_to_visit.pop_front(){
@@ -81,7 +81,10 @@ impl<'a, T: Clone> Iterator for GridTraveller<'a, T>{
 					*self.added_mark(&new_location)? = true;
 				}
 				self.locations_to_visit.append(&mut new_locations_to_visit);
-				Some(next_tile_to_visit) // return tile visited this round
+				Some(LocationAndUnaddedNeighbors{
+					just_visited_location: next_tile_to_visit,
+					just_added_neighbors: Vec::from(new_locations_to_visit)
+				})
 			}
 		}
     }
@@ -89,3 +92,9 @@ impl<'a, T: Clone> Iterator for GridTraveller<'a, T>{
 
 #[derive(Debug, Clone, Copy)]
 pub struct AddedToVisitPlan(bool);
+
+#[derive(Debug, Clone)]
+pub struct LocationAndUnaddedNeighbors{
+	pub just_visited_location: GridLocation,
+	pub just_added_neighbors: Vec<GridLocation>
+}
