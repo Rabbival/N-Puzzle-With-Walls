@@ -13,16 +13,15 @@ impl<T: Clone> Grid<T>{
     // }
 
     pub fn is_connected_graph(&self) -> bool {
-        let mut travelling_tracker = 
-            GridTraveller::from_grid(self);
-        while ! travelling_tracker.locations_to_visit.is_empty(){
-            travelling_tracker.next_cell_location();
-            travelling_tracker.cells_visited_counter += 1;
+        let mut bfs_iterator = 
+            GridTraveller::from_grid(self).into_iter();
+        let mut tile_counter = 0;
+        while bfs_iterator.next().is_some(){
+            tile_counter += 1;
         }
 
         //check that we found everything that's defined (and not None)
-        travelling_tracker.cells_visited_counter 
-            == self.iter().collect::<Vec<_>>().len() as u32
+        tile_counter  == self.iter().collect::<Vec<_>>().len() as u32
     }
 }
 

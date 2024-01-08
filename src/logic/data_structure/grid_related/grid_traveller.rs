@@ -12,8 +12,6 @@ pub struct GridTraveller<'a, T: Clone>{
     pub cells_locations_with_added_mark: HashMap<GridLocation, AddedToVisitPlan>,
     /// locations not yet visited
     pub locations_to_visit: VecDeque<GridLocation>,
-	/// how many cells visited up to that point
-	pub cells_visited_counter: u32
 }
 
 impl<'a, T: Clone> GridTraveller<'a, T>{
@@ -43,37 +41,50 @@ impl<'a, T: Clone> GridTraveller<'a, T>{
 		Self { 
 			grid,
 			cells_locations_with_added_mark, 
-			locations_to_visit, 
-			cells_visited_counter: 0 
+			locations_to_visit
 		}
-	}
-
-	/// travel in BFS
-	pub fn next_cell_location(&mut self)-> GridLocation{
-		let next_tile_to_check 
-			= self.locations_to_visit.pop_front().unwrap();
-		let next_tile_neighbors 
-			= self.grid.get_all_direct_neighbor_locations(&next_tile_to_check);
-		let mut new_locations_to_visit : VecDeque<GridLocation>
-			= next_tile_neighbors
-				.values()
-				//only add the ones not yet visited
-				.filter(|next_tile_neighbor_location|{
-					! *self.added_mark(next_tile_neighbor_location).unwrap()
-				})
-				.copied()
-				.collect();
-		for new_location in new_locations_to_visit.clone(){
-			*self.added_mark(&new_location).unwrap() = true;
-		}
-		self.locations_to_visit.append(&mut new_locations_to_visit);
-		next_tile_to_check
 	}
 
 	/// checks if the location was added to the list of places to search.
 	fn added_mark(&mut self, location: &GridLocation) -> Option<&mut bool>{
 		Some(&mut self.cells_locations_with_added_mark.get_mut(location)?.0)
 	}
+}
+
+/// BFS iterator, returns None if location wasn't found
+/// or if there are no more locations to iterate over
+impl<'a, T: Clone> Iterator for GridTraveller<'a, T>{
+    type Item = GridLocation;
+
+    fn next(&mut self) -> Option<Self::Item> {
+		match self.locations_to_visit.pop_front(){
+			None => None,
+			Some(next_tile_to_visit) =>{
+				let next_tile_neighbors 
+					= self.grid.get_all_direct_neighbor_locations(&next_tile_to_visit);
+				let mut new_locations_to_visit : VecDeque<GridLocation>
+					= next_tile_neighbors
+						.values()
+						//only add the ones not yet visited
+						.filter(|next_tile_neighbor_location|{
+							! match self.added_mark(next_tile_neighbor_location){
+								// could be that the tile wasn't found,
+								// but we can't return None from an iterator's closure
+								// so we'll skip it
+								None => {false},
+								Some(added_mark) => ! *added_mark
+							}
+						})
+						.copied()
+						.collect();
+				for new_location in new_locations_to_visit.clone(){
+					*self.added_mark(&new_location)? = true;
+				}
+				self.locations_to_visit.append(&mut new_locations_to_visit);
+				Some(next_tile_to_visit) // return tile visited this round
+			}
+		}
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
