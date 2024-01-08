@@ -31,7 +31,6 @@ impl<T: Clone> Grid<T>{
         while bfs_iterator.next().is_some(){
             tile_counter += 1;
         }
-
         //check that we found everything that's defined (and not None)
         tile_counter  == self.iter().collect::<Vec<_>>().len() as u32
     }

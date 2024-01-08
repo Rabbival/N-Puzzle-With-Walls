@@ -6,7 +6,7 @@ use crate::{prelude::*, logic::data_structure::util_functions};
 /// travels in BFS
 pub struct GridTraveller<'a, T: Clone>{
 	grid: &'a Grid<T>,
-    /// keeps track of added location,
+    /// keeps track of added locations,
 	/// this is important because it could be that a place was added and visited
 	/// and thus is no longer in locations_to_visit but shouldn't be added
     pub cells_locations_with_added_mark: HashMap<GridLocation, AddedToVisitPlan>,
@@ -67,7 +67,7 @@ impl<'a, T: Clone> Iterator for GridTraveller<'a, T>{
 						.values()
 						//only add the ones not yet visited
 						.filter(|next_tile_neighbor_location|{
-							! match self.added_mark(next_tile_neighbor_location){
+							match self.added_mark(next_tile_neighbor_location){
 								// could be that the tile wasn't found,
 								// but we can't return None from an iterator's closure
 								// so we'll skip it
