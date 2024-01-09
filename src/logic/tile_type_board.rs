@@ -65,6 +65,7 @@ impl TileTypeBoard{
                 None => return Err(error_handler::BoardGenerationError::NotEnoughAvailableSpots)
             };
         }
+        empty_tile_locations.reverse();
         Ok(empty_tile_locations)
     }
 }
@@ -136,27 +137,27 @@ impl TileTypeBoard {
     }
 
     /// if it gets an index out of empties bounds, sets the index to the last cell's
-    pub fn get_empty_tile_by_vec_index(&self, empty_index: usize) -> &Tile{
-        let empty_tile_location = self.get_empty_tile_location_by_vec_index(empty_index);
+    pub fn get_empty_tile(&self, empty_tile_index: usize) -> &Tile{
+        let empty_tile_location = self.get_empty_tile_location(empty_tile_index);
         self.grid.get(empty_tile_location).unwrap()
     }
 
     /// if it gets an index out of empties bounds, sets the index to the last cell's
-    pub fn get_empty_tile_location_by_vec_index(&self, mut empty_index: usize) -> &GridLocation{
+    pub fn get_empty_tile_location(&self, mut empty_tile_index: usize) -> &GridLocation{
         let empty_locations_count  = self.empty_tile_locations.len();
-        if empty_index >= empty_locations_count {
-            empty_index = empty_locations_count - 1 ;
+        if empty_tile_index >= empty_locations_count {
+            empty_tile_index = empty_locations_count - 1 ;
         }
-        self.empty_tile_locations.get(empty_index).unwrap() 
+        self.empty_tile_locations.get(empty_tile_index).unwrap() 
     }
 
     /// if it gets an index out of empties bounds, sets the index to the last cell's
-    pub fn get_direct_neighbors_of_empty(&self, mut empty_index: usize) -> HashMap<BasicDirection, GridLocation>{
+    pub fn get_direct_neighbors_of_empty(&self, mut empty_tile_index: usize) -> HashMap<BasicDirection, GridLocation>{
         let empty_locations_count  = self.empty_tile_locations.len();
-        if empty_index >= empty_locations_count {
-            empty_index = empty_locations_count - 1 ;
+        if empty_tile_index >= empty_locations_count {
+            empty_tile_index = empty_locations_count - 1 ;
         }
-        self.grid.get_all_direct_neighbor_locations(self.empty_tile_locations.get(empty_index).unwrap()) 
+        self.grid.get_all_direct_neighbor_locations(self.empty_tile_locations.get(empty_tile_index).unwrap()) 
     }
 
     /// takes a clicked location and generates the matching move request

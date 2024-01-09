@@ -1,4 +1,4 @@
-use crate::{prelude::*, costume_event::{board_set_event, move_tile_event, app_event}, output::{print_to_console, error_handler}};
+use crate::{prelude::*, costume_event::{board_set_event, move_tile_event, app_event}};
 
 pub struct KeyboardInputHandlerPlugin;
 
@@ -21,14 +21,8 @@ impl Plugin for KeyboardInputHandlerPlugin {
 
 fn move_tiles_with_keyboard(
     mut logic_event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
-    game_board_query: Query<&TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
     keyboard_input: Res<Input<KeyCode>>,
 ){
-    if game_board_query.single().ignore_player_input{
-        print_to_console::print_tile_move_error
-            (error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
-    }
-
     let move_requests 
         = keyboard_input.get_just_pressed()
         .map(|keycode|{
