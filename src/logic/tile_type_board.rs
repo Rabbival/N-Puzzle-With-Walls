@@ -114,16 +114,9 @@ impl TileTypeBoard {
                 empty_tile_index = self.get(first).unwrap().index;
                 self.empty_tile_locations[empty_tile_index] = *second;
             }
-        }else if let TileType::Empty = second_tile_type.unwrap(){
+        }else{
             empty_tile_index = self.get(second).unwrap().index;
             self.empty_tile_locations[empty_tile_index] = *first;
-        }else{
-            self.ignore_player_input = true;
-            return Err(error_handler::TileMoveError
-                ::TriedToSwitchBetweenTwoOccupied(
-                    *self.get(first).unwrap(), 
-                    *self.get(second).unwrap()
-                ))
         }
 
         if self.grid.swap_by_location(first, second){

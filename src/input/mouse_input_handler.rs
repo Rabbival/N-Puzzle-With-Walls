@@ -65,6 +65,10 @@ fn handle_mouse_click(
     game_board: &TileTypeBoard,
 ) -> Result<(), error_handler::TileMoveError>
 {
+    if game_board.ignore_player_input{
+        return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
+    }
+    
     match GridLocation::from_world(&game_board.grid, cursor_position){
         Some(optional_occupied_tile_location) => {
             if !game_board.occupied(&optional_occupied_tile_location)? {
