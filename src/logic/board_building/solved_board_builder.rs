@@ -62,7 +62,11 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
         while ! possible_spawn_locations.is_empty(){
             chosen_wall_location = match grid_tree_iter.next(){
                 Some(tree_leaf) => {
+
+
                     info!("leafed: {:?}", tree_leaf);
+
+                    
                     tree_leaf 
                 },
                 None => {

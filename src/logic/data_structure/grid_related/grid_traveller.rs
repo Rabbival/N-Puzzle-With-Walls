@@ -62,7 +62,7 @@ impl<'a, T: Clone> Iterator for GridTraveller<'a, T>{
 			Some(next_tile_to_visit) =>{
 				let next_tile_neighbors 
 					= self.grid.get_all_direct_neighbor_locations(&next_tile_to_visit);
-				let mut new_locations_to_visit : VecDeque<GridLocation>
+				let new_locations_to_visit : VecDeque<GridLocation>
 					= next_tile_neighbors
 						.values()
 						//only add the ones not yet visited
@@ -80,7 +80,7 @@ impl<'a, T: Clone> Iterator for GridTraveller<'a, T>{
 				for new_location in new_locations_to_visit.clone(){
 					*self.added_mark(&new_location)? = true;
 				}
-				self.locations_to_visit.append(&mut new_locations_to_visit);
+				self.locations_to_visit.append(&mut new_locations_to_visit.clone());
 				Some(LocationAndUnaddedNeighbors{
 					just_visited_location: next_tile_to_visit,
 					just_added_neighbors: Vec::from(new_locations_to_visit)
