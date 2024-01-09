@@ -54,12 +54,18 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
         &mut possible_spawn_locations, 
         grid_side_length
     );
+    let mut grid_tree_iter 
+        = neighbor_count_grid.get_spanning_tree().into_iter();
 
     for _ in 0..wall_count{
         let mut chosen_wall_location = GridLocation::default();
         while ! possible_spawn_locations.is_empty(){
-            chosen_wall_location 
-                = util_functions::random_value(&possible_spawn_locations);
+            chosen_wall_location = match grid_tree_iter.next(){
+                Some(tree_leaf) => tree_leaf ,
+                None => {
+                    util_functions::random_value(&possible_spawn_locations)
+                }
+            };
     
             // whether it's because the chosen location is illegal 
             // or because we don't want to choose the same location twice
