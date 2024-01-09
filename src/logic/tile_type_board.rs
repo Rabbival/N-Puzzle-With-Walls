@@ -106,17 +106,17 @@ impl TileTypeBoard {
             return Err(error_handler::TileMoveError::NoTileInCell(*second));
         }
 
-        let tile_locations_index ;
+        let empty_tile_index ;
         if let TileType::Empty = first_tile_type.unwrap() {
             if let TileType::Empty = second_tile_type.unwrap() {
-                return Ok(());
+                return Err(error_handler::TileMoveError::TriedToSwitchEmptyWithEmpty);
             }else{
-                tile_locations_index = self.get(first).unwrap().index;
-                self.empty_tile_locations[tile_locations_index] = *second;
+                empty_tile_index = self.get(first).unwrap().index;
+                self.empty_tile_locations[empty_tile_index] = *second;
             }
         }else{
-            tile_locations_index = self.get(second).unwrap().index;
-            self.empty_tile_locations[tile_locations_index] = *first;
+            empty_tile_index = self.get(second).unwrap().index;
+            self.empty_tile_locations[empty_tile_index] = *first;
         }
 
         if self.grid.swap_by_location(first, second){

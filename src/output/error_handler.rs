@@ -30,7 +30,8 @@ pub enum TileMoveError{
     PressedEmptySlot (String),
     NoOccupiedTileInThatDirection (BasicDirection),
     EntityRelated(EntityRelatedCustomError),
-    TriedToSwitchWithAWall
+    TriedToSwitchWithAWall,
+    TriedToSwitchEmptyWithEmpty
 }
 
 #[derive(Debug, Clone, Copy)]

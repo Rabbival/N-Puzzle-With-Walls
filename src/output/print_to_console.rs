@@ -74,6 +74,9 @@ pub fn print_tile_move_error(move_error: TileMoveError){
         TileMoveError::IndexOutOfGridBounds(_message)=>{
             // warn!(message);
         },
+        TileMoveError::TriedToSwitchEmptyWithEmpty=>{
+            info!("tried to switch empty with empty, hence no swap was performed");
+        },
         _=>{error!("{:?}", move_error)}
     }
 }
