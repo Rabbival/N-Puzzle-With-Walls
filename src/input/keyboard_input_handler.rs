@@ -21,7 +21,6 @@ impl Plugin for KeyboardInputHandlerPlugin {
 
 fn move_tiles_with_keyboard(
     mut logic_event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
-    game_board_query: Query<&TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     keyboard_input: Res<Input<KeyCode>>,
 ){
     let move_requests 

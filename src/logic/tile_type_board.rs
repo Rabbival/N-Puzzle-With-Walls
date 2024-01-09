@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::error_handler};
+use crate::{prelude::*, output::error_handler, input::move_request};
 
 #[derive(Component, Clone, Debug)]
 pub struct TileTypeBoard {
@@ -160,14 +160,19 @@ impl TileTypeBoard {
         self.grid.get_all_direct_neighbor_locations(self.empty_tile_locations.get(empty_index).unwrap()) 
     }
 
-    pub fn get_empty_neighbor(&self, origin: &GridLocation) 
-    -> Result<Option<GridLocation>, error_handler::TileMoveError>
+    /// takes a clicked location and generates the matching move request
+    /// if it finds an empty neighbor, if it doesn't returns None
+    pub fn clicked_tile_to_move_request(&self, origin: &GridLocation) 
+    -> Result<Option<move_request::MoveRequest>, error_handler::TileMoveError>
     {
         for dir in BasicDirection::get_directions_as_vec(){
             let neighbor_location = self.grid.neighbor_location(origin, &dir);
             if let Some(tile_in_cell) = self.get(&neighbor_location){
                 if tile_in_cell.tile_type == TileType::Empty{
-                    return Ok(Some(neighbor_location));
+                    return Ok(Some(move_request::MoveRequest{
+                        move_neighbor_from_direction: dir.opposite_direction(),
+                        empty_tile_index: Some(tile_in_cell.index)
+                    }));
                 }
             }
         }

@@ -65,28 +65,24 @@ fn handle_mouse_click(
     game_board: &TileTypeBoard,
 ) -> Result<(), error_handler::TileMoveError>
 {
-    if game_board.ignore_player_input{
-        return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
-    }
     match GridLocation::from_world(&game_board.grid, cursor_position){
         Some(optional_occupied_tile_location) => {
             if !game_board.occupied(&optional_occupied_tile_location)? {
                 return Err(error_handler::TileMoveError::PressedEmptySlot(String::from("pressed an empty slot")));
             }
             let occupied_tile_location=optional_occupied_tile_location;
-            let optional_empty_neighbor_location= 
-                game_board.get_empty_neighbor(&occupied_tile_location)?;
-            if optional_empty_neighbor_location.is_none(){
-                return Err(error_handler::TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor")));
+            let optional_move_request= 
+                game_board.clicked_tile_to_move_request(&occupied_tile_location)?;
+            match optional_move_request{
+                None => Err(error_handler::TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor"))),
+                Some(move_request) => {
+                    logic_event_writer.send(move_tile_event::SwitchTilesLogic{
+                        move_neighbor_from_direction: move_request.move_neighbor_from_direction.unwrap(),
+                        empty_tile_index: move_request.empty_tile_index.unwrap()
+                    });
+                    Ok(())
+                }
             }
-            let empty_neighbor_location=optional_empty_neighbor_location.unwrap();
-    
-            logic_event_writer.send(move_tile_event::SwitchTilesLogic{
-                occupied_tile_location,
-                empty_tile_location: empty_neighbor_location
-            });
-    
-            Ok(())
         },
         None => {
             Err(error_handler::TileMoveError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
