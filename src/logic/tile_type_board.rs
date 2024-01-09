@@ -65,6 +65,7 @@ impl TileTypeBoard{
                 None => return Err(error_handler::BoardGenerationError::NotEnoughAvailableSpots)
             };
         }
+        // we want them to appear in the same order they're indexed
         empty_tile_locations.reverse();
         Ok(empty_tile_locations)
     }
