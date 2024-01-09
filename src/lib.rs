@@ -70,15 +70,16 @@ pub mod prelude {
             util_functions::*,
         },
         enums::{
-            basic_direction::*,
-            tile_type::*,
-            eternal_button_action::*,
             board_property_enums::{
                 board_size::*,
                 generation_method::*,
                 wall_tiles_change::*,
                 menu_button_action::*,
             },
+            basic_direction::*,
+            tile_type::*,
+            eternal_button_action::*,
+            grid_traveller_type::*
         },
         states::{
             StatePlugin,

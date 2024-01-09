@@ -12,12 +12,13 @@ pub struct GridTraveller<'a, T: Clone>{
     pub cells_locations_with_added_mark: HashMap<GridLocation, AddedToVisitPlan>,
     /// locations not yet visited
     pub locations_to_visit: VecDeque<GridLocation>,
+	pub traveller_type: GridTravellerType
 }
 
 impl<'a, T: Clone> GridTraveller<'a, T>{
 	/// builds a travelling tracker from a grid 
 	/// that starts at a random initialzed cell
-	pub fn from_grid(grid: &'a Grid<T>) -> Self{
+	pub fn from_grid(grid: &'a Grid<T>, traveller_type: GridTravellerType) -> Self{
 		let mut cells_locations_with_added_mark: HashMap<GridLocation, AddedToVisitPlan>=
 			grid
 			.iter()
@@ -41,7 +42,8 @@ impl<'a, T: Clone> GridTraveller<'a, T>{
 		Self { 
 			grid,
 			cells_locations_with_added_mark, 
-			locations_to_visit
+			locations_to_visit,
+			traveller_type
 		}
 	}
 
