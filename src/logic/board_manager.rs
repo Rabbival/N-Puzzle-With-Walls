@@ -58,7 +58,7 @@ pub fn move_tile_logic_inner(
         if optional_occupied_tile.is_none() {
             return Err(error_handler::TileMoveError::NoTileInCell(occupied_tile_location));
         } 
-        let occupied_tile = optional_occupied_tile.unwrap();
+        let occupied_tile = *optional_occupied_tile.unwrap();
         if occupied_tile.tile_type == TileType::Wall {
             return Err(error_handler::TileMoveError::TriedToSwitchWithAWall);
         }
@@ -70,7 +70,7 @@ pub fn move_tile_logic_inner(
         // reminder that from this point the logic locations are swapped
     
         print_to_console::game_log(GameLog::TilesMoved(
-            occupied_tile,
+            &occupied_tile,
             &empty_tile_location
         ));
     

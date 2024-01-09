@@ -11,7 +11,7 @@ impl Plugin for TileGraphicsPlugin {
         app
             //.add_systems(PostStartup, spawn_tiles)
             .add_systems(Update, (
-                switch_tile_entity_positions
+                update_tile_entity_positions
                     .in_set(InputSystemSets::ChangesBasedOnInput),
                 (
                     move_existing_tiles,
@@ -194,9 +194,8 @@ fn spawn_tiles(
 }
 
 
-fn switch_tile_entity_positions(
+fn update_tile_entity_positions(
     mut graphics_switch_tiles_listener: EventReader<move_tile_event::UpdateTileLocationGraphics>,
-    mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
 ){
@@ -204,9 +203,8 @@ fn switch_tile_entity_positions(
         if let Err(move_error) = switch_tile_entity_positions_inner(
             &mut tile_transforms,
             &tile_dictionary.single().entity_by_tile,
-            &board_query.single_mut().grid,
-            tile_switch_request.move_neighbor_from_direction,
-            tile_switch_request.empty_tile_index,
+            tile_switch_request.tile,
+            tile_switch_request.new_location,
         ){
             print_tile_move_error(move_error);
         }
@@ -216,16 +214,13 @@ fn switch_tile_entity_positions(
 fn switch_tile_entity_positions_inner(
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
     tile_dictionary: &HashMap<Tile,Option<Entity>>,
-    grid: &Grid<Tile>,
-    move_neighbor_from_direction: BasicDirection, 
-    empty_tile_index: usize, 
+    tile_to_reposition: Tile, 
+    new_location_for_tile: GridLocation, 
 ) -> Result<(),TileMoveError>
 {
-    let first_tile_entity=extract_tile_entity(tile_dictionary, grid, first_grid_location)?;
-    let second_tile_entity=extract_tile_entity(tile_dictionary, grid, second_grid_location)?;
-    if let Ok([mut transform_first, mut transform_second]) = 
-        tile_transforms.get_many_mut([first_tile_entity, second_tile_entity]) {
-            std::mem::swap(&mut *transform_first, &mut *transform_second);
+    let tile_entity = extract_tile_entity(tile_dictionary,  &tile_to_reposition)?;
+    if let Ok(mut tile_transform) = tile_transforms.get_mut(tile_entity) {
+            tile_transform.translation = new_location_for_tile.to_world();
     }else{
         return Err(TileMoveError::EntityRelated(EntityRelatedCustomError::EntityNotInQuery));
     }
@@ -234,26 +229,20 @@ fn switch_tile_entity_positions_inner(
 
 fn extract_tile_entity(
     tile_dictionary: &HashMap<Tile,Option<Entity>>,
-    grid: &Grid<Tile>,
-    grid_location: &GridLocation
+    tile: &Tile
 ) -> Result<Entity,TileMoveError>
 {
-    match grid.get(grid_location){
-        None => {Err(TileMoveError::NoTileInCell(*grid_location))},
-        Some(tile_type_from_cell) => {
-            match tile_dictionary.get(tile_type_from_cell){
-                None=> {Err(TileMoveError::EntityRelated
-                    (EntityRelatedCustomError::ItemNotInMap
-                        (ItemNotFoundInMapError::EntityNotFoundInMap)
-                    )
-                )},
-                Some(optional_entity)=> {
-                    match optional_entity{
-                        None=>{Err(TileMoveError::EntityRelated
-                            (EntityRelatedCustomError::NoEntity))},
-                        Some(entity)=>{ Ok(*entity) }
-                    }
-                }
+    match tile_dictionary.get(tile){
+        None=> {Err(TileMoveError::EntityRelated
+            (EntityRelatedCustomError::ItemNotInMap
+                (ItemNotFoundInMapError::EntityNotFoundInMap)
+            )
+        )},
+        Some(optional_entity)=> {
+            match optional_entity{
+                None=>{Err(TileMoveError::EntityRelated
+                    (EntityRelatedCustomError::NoEntity))},
+                Some(entity)=>{ Ok(*entity) }
             }
         }
     }
