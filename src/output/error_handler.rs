@@ -31,7 +31,8 @@ pub enum TileMoveError{
     NoOccupiedTileInThatDirection (BasicDirection),
     EntityRelated(EntityRelatedCustomError),
     TriedToSwitchWithAWall,
-    TriedToSwitchEmptyWithEmpty
+    TriedToSwitchEmptyWithEmpty,
+    TriedToSwitchBetweenTwoOccupied(Tile,Tile)
 }
 
 #[derive(Debug, Clone, Copy)]

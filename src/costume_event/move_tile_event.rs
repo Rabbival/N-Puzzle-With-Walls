@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, logic::enums::basic_direction};
 
 #[derive (Event, Default)]
 pub struct SwitchTilesGraphics{
@@ -6,10 +6,10 @@ pub struct SwitchTilesGraphics{
     pub second_grid_location: GridLocation
 }
 
-#[derive (Event, Default)]
+#[derive (Event)]
 pub struct SwitchTilesLogic{
-    pub occupied_tile_location: GridLocation, 
-    pub empty_tile_location: GridLocation
+    pub move_neighbor_from_direction: basic_direction::BasicDirection,
+    pub empty_tile_index: usize
 }
 
 pub struct MoveTileEventPlugin;
