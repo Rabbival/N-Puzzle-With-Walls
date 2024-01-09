@@ -61,7 +61,10 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
         let mut chosen_wall_location = GridLocation::default();
         while ! possible_spawn_locations.is_empty(){
             chosen_wall_location = match grid_tree_iter.next(){
-                Some(tree_leaf) => tree_leaf ,
+                Some(tree_leaf) => {
+                    info!("leafed: {:?}", tree_leaf);
+                    tree_leaf 
+                },
                 None => {
                     util_functions::random_value(&possible_spawn_locations)
                 }

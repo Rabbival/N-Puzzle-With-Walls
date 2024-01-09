@@ -101,6 +101,9 @@ impl GridTree{
 	/// will make the parent node a leaf if it has no children left
 	/// returns the removed leaf, or None if there was a problem and the iter should stop
 	fn remove_random(&mut self)-> Option<GridLocation>{
+		if self.leaves.is_empty(){
+			return None;
+		}
 		let random_index_to_remove = util_functions::random_index(&self.leaves);
 		let removed_leaf = self.leaves
 			.remove(random_index_to_remove);
