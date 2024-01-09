@@ -45,6 +45,11 @@ pub fn move_tile_logic_inner(
     solved_grid: &Grid<Tile>,
 ) -> Result<(), error_handler::TileMoveError>
 {    
+
+
+    info!("{:?}", game_board);
+
+
     if game_board.ignore_player_input{
         return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
     }
@@ -63,8 +68,8 @@ pub fn move_tile_logic_inner(
             return Err(error_handler::TileMoveError::TriedToSwitchWithAWall);
         }
 
-        let empty_tile_location = game_board
-            .get_empty_tile_location_by_index(empty_tile_index);
+        let empty_tile_location = *game_board
+            .get_empty_tile_location_by_vec_index(empty_tile_index);
         game_board.swap_tiles_by_location(&empty_tile_location, &occupied_tile_location)?;
 
         // reminder that from this point the logic locations are swapped
@@ -81,9 +86,14 @@ pub fn move_tile_logic_inner(
             new_location: empty_tile_location
         });
         graphics_event_writer.send(move_tile_event::UpdateTileLocationGraphics{
-            tile: Tile { index: empty_tile_index, tile_type: TileType::Empty },
+            tile: *game_board
+                .get_empty_tile_by_vec_index(empty_tile_index),
             new_location: occupied_tile_location
         });
+
+
+        info!("{:?}", game_board);
+        
 
         Ok(())
     }else{

@@ -22,7 +22,7 @@ pub fn game_log(log: GameLog){
             info!("new setting set: {:?}", menu_button_action);
         },
         GameLog::TilesMoved(tile, location)=>{
-            info!("{:?} tile moved to {:?}", *tile, *location);
+            info!("{:?} moved to {:?}", *tile, *location);
         },
         GameLog::Victory=>{
             info!("puzzle solved!");
