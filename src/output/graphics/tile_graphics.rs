@@ -195,7 +195,7 @@ fn spawn_tiles(
 
 
 fn switch_tile_entity_positions(
-    mut graphics_switch_tiles_listener: EventReader<move_tile_event::SwitchTilesGraphics>,
+    mut graphics_switch_tiles_listener: EventReader<move_tile_event::UpdateTileLocationGraphics>,
     mut board_query: Query<&mut TileTypeBoard, With<GameBoard>>,
     tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
@@ -205,8 +205,8 @@ fn switch_tile_entity_positions(
             &mut tile_transforms,
             &tile_dictionary.single().entity_by_tile,
             &board_query.single_mut().grid,
-            &tile_switch_request.first_grid_location,
-            &tile_switch_request.second_grid_location,
+            tile_switch_request.move_neighbor_from_direction,
+            tile_switch_request.empty_tile_index,
         ){
             print_tile_move_error(move_error);
         }
@@ -217,8 +217,8 @@ fn switch_tile_entity_positions_inner(
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
     tile_dictionary: &HashMap<Tile,Option<Entity>>,
     grid: &Grid<Tile>,
-    first_grid_location: &GridLocation, 
-    second_grid_location: &GridLocation
+    move_neighbor_from_direction: BasicDirection, 
+    empty_tile_index: usize, 
 ) -> Result<(),TileMoveError>
 {
     let first_tile_entity=extract_tile_entity(tile_dictionary, grid, first_grid_location)?;

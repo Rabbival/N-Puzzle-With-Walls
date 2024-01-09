@@ -18,7 +18,7 @@ impl Plugin for BoardManagerPlugin {
 
 /// graphics switched before logic for the sake of graphics function readability
 pub fn move_tile_logic(
-    mut graphics_event_writer: EventWriter<move_tile_event::SwitchTilesGraphics>,
+    mut graphics_event_writer: EventWriter<move_tile_event::UpdateTileLocationGraphics>,
     mut logic_event_reader: EventReader<move_tile_event::SwitchTilesLogic>,
     mut game_board_query: Query<&mut TileTypeBoard,(With<GameBoard>, Without<SolvedBoard>)>,
     solved_board_query: Query<&TileTypeBoard,(With<SolvedBoard>, Without<GameBoard>)>,
@@ -38,7 +38,7 @@ pub fn move_tile_logic(
 
 /// graphics switched before logic for the sake of graphics function readability
 pub fn move_tile_logic_inner(
-    graphics_event_writer: &mut EventWriter<move_tile_event::SwitchTilesGraphics>,
+    graphics_event_writer: &mut EventWriter<move_tile_event::UpdateTileLocationGraphics>,
     move_neighbor_from_direction: BasicDirection, 
     empty_tile_index: usize, 
     game_board: &mut TileTypeBoard,
@@ -57,27 +57,34 @@ pub fn move_tile_logic_inner(
         let optional_occupied_tile = game_board.get(&occupied_tile_location);
         if optional_occupied_tile.is_none() {
             return Err(error_handler::TileMoveError::NoTileInCell(occupied_tile_location));
-        } else if optional_occupied_tile.unwrap().tile_type == TileType::Wall {
+        } 
+        let occupied_tile = optional_occupied_tile.unwrap();
+        if occupied_tile.tile_type == TileType::Wall {
             return Err(error_handler::TileMoveError::TriedToSwitchWithAWall);
         }
+
         let empty_tile_location = game_board
             .get_empty_tile_location_by_index(empty_tile_index);
-
         game_board.swap_tiles_by_location(&empty_tile_location, &occupied_tile_location)?;
 
         // reminder that from this point the logic locations are swapped
     
-        graphics_event_writer.send(move_tile_event::SwitchTilesGraphics{
-            first_grid_location: occupied_tile_location,
-            second_grid_location: empty_tile_location
-        });
-    
         print_to_console::game_log(GameLog::TilesMoved(
-            game_board.get(&empty_tile_location).unwrap(),
+            occupied_tile,
             &empty_tile_location
         ));
     
         check_if_solved(game_board, solved_grid);
+
+        graphics_event_writer.send(move_tile_event::UpdateTileLocationGraphics{
+            tile: occupied_tile,
+            new_location: empty_tile_location
+        });
+        graphics_event_writer.send(move_tile_event::UpdateTileLocationGraphics{
+            tile: Tile { index: empty_tile_index, tile_type: TileType::Empty },
+            new_location: occupied_tile_location
+        });
+
         Ok(())
     }else{
         Err(error_handler::TileMoveError
@@ -104,13 +111,13 @@ mod tests {
     fn test_valid_request(){
         let mut app = App::new();
         app
-            .add_event::<move_tile_event::SwitchTilesGraphics>()
+            .add_event::<move_tile_event::UpdateTileLocationGraphics>()
             .add_systems(Update, test_valid_request_inner)
         ;
         app.update();
     }
 
-    fn test_valid_request_inner(mut event_writer: EventWriter::<move_tile_event::SwitchTilesGraphics>) {
+    fn test_valid_request_inner(mut event_writer: EventWriter::<move_tile_event::UpdateTileLocationGraphics>) {
         assert!( ! detected_as_invalid_request(
             basic_direction::BasicDirection::Up,
             &mut event_writer
@@ -131,7 +138,7 @@ mod tests {
 
     fn detected_as_invalid_request(
         from_dir: basic_direction::BasicDirection,
-        event_writer: &mut EventWriter::<move_tile_event::SwitchTilesGraphics>
+        event_writer: &mut EventWriter::<move_tile_event::UpdateTileLocationGraphics>
     )-> bool
     {
         let mut board

@@ -1,9 +1,9 @@
 use crate::{prelude::*, logic::enums::basic_direction};
 
-#[derive (Event, Default)]
-pub struct SwitchTilesGraphics{
-    pub first_grid_location: GridLocation, 
-    pub second_grid_location: GridLocation
+#[derive (Event)]
+pub struct UpdateTileLocationGraphics{
+    pub tile: Tile,
+    pub new_location: GridLocation
 }
 
 #[derive (Event)]
@@ -17,7 +17,7 @@ pub struct MoveTileEventPlugin;
 impl Plugin for MoveTileEventPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<SwitchTilesGraphics>()
+            .add_event::<UpdateTileLocationGraphics>()
             .add_event::<SwitchTilesLogic>()
             ;
     }
