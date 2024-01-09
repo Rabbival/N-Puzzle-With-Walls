@@ -101,16 +101,9 @@ impl GridTree{
 	/// will make the parent node a leaf if it has no children left
 	/// returns the removed leaf, or None if there was a problem and the iter should stop
 	fn remove_random(&mut self)-> Option<GridLocation>{
-
-
-		// self.print_leaves_props();
-		info!("{:?}", self.leaves);
-
-
 		if self.leaves.is_empty(){
 			return None;
 		}
-		let mut new_top_priority_leaf= None;
 		let random_index_to_remove = util_functions::random_index(&self.leaves);
 		let removed_leaf = self.leaves
 			.remove(random_index_to_remove);
@@ -131,12 +124,11 @@ impl GridTree{
 							// just to be on the safe side
 							0 | 1 => {},
 							_ => {
-								new_top_priority_leaf = Some(parent_location);
+								self.top_priority_leaf = Some(parent_location);
 								self.leaves.push(parent_location);
 							}
 						};
 					}
-					self.top_priority_leaf = new_top_priority_leaf;
 				}
 			}
 		}
@@ -149,7 +141,10 @@ impl Iterator for GridTree{
 
     fn next(&mut self) -> Option<Self::Item> {
 		match self.top_priority_leaf{
-			Some(top_priority_location) => Some(top_priority_location),
+			Some(top_priority_location) => {
+				self.top_priority_leaf = None;
+				Some(top_priority_location)
+			},
 			// if there's no top priority leaf, return a random leaf
 			None => {
 				Some(self.remove_random()?)

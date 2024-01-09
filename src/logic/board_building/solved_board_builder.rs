@@ -61,26 +61,24 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
         let mut chosen_wall_location = GridLocation::default();
         while ! possible_spawn_locations.is_empty(){
             chosen_wall_location = match grid_tree_iter.next(){
-                Some(tree_leaf) => {
-
-
-                    info!("leafed: {:?}", tree_leaf);
-
-                    
-                    tree_leaf 
-                },
+                Some(tree_leaf) => tree_leaf,
                 None => {
                     util_functions::random_value(&possible_spawn_locations)
                 }
             };
-    
+
             // whether it's because the chosen location is illegal 
             // or because we don't want to choose the same location twice
             // the chosen location has to be removed from the available ones
-            remove_by_value(
+            let found_and_removed = remove_by_value(
                 &chosen_wall_location, 
                 &mut possible_spawn_locations
             );
+
+            // could be that the tree chose an illegal value
+            if !found_and_removed{
+                continue;
+            }
 
             //check if removing that tile keeps the graph connected, 
             //if not - put it back, and reroll

@@ -38,11 +38,11 @@ impl BoardSize{
 
     pub fn wall_count_upper_bound(&self) -> u8 {
         match *self{
-            BoardSize::Tiny=> 2,
-            BoardSize::Small=> 6,
-            BoardSize::Medium=> 9,
-            BoardSize::Large=> 18,
-            BoardSize::Giant=> 42,
+            BoardSize::Tiny=> 1,
+            BoardSize::Small=> 3,
+            BoardSize::Medium=> 5,
+            BoardSize::Large=> 10,
+            BoardSize::Giant=> 30,
         }
     }
 }
