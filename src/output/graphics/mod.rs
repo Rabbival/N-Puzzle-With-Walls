@@ -25,18 +25,35 @@ impl Plugin for GraphicsPlugin {
     }
 }
 
+/// allows optionally visible components to save their original visibility
+#[derive(Component, Default)]
+pub struct OnOwnScreenVisibility(pub Visibility);
 
 /// hides if visible, shows if hidden- all entities with that tag
 fn toggle_visibility_for_entities_with_tag(
     mut event_listener: EventReader<ToggleVisibilityForElementsWithTag>,
-    mut toggle_their_visibility: Query<(&mut Visibility, &OnScreenTag)>, 
+    mut toggle_their_visibility: Query<(
+        &mut Visibility, 
+        Option<&OnOwnScreenVisibility>,
+        &OnScreenTag
+    )>, 
 ) {
     for tag_container in event_listener.read(){
-        for (mut visibility, entity_tag) in toggle_their_visibility.iter_mut() {
+        for (
+            mut visibility, 
+            optional_own_screen_vis, 
+            entity_tag
+        ) in toggle_their_visibility.iter_mut() 
+        {
             if tag_container.0 == *entity_tag{
                 if *visibility == Visibility::Hidden {
-                    *visibility = Visibility::Visible;
-                } else if *visibility == Visibility::Visible{
+                    if let Some(own_screen_vis) = optional_own_screen_vis{
+                        *visibility = own_screen_vis.0;
+                    }else{
+                        *visibility = Visibility::Visible;
+                    }
+                }
+                else if *visibility == Visibility::Visible{
                     *visibility = Visibility::Hidden;
                 }
             }

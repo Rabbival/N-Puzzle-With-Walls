@@ -15,6 +15,7 @@ pub mod prelude {
     pub use crate::app::*;
     pub use crate::screen_setup::*;
     pub use crate::system_sets::*;
+    pub use crate::bundles::tile_bundle::*;
     pub use crate::costume_event::{
         EventPlugins,
         board_set_event::*,
@@ -30,19 +31,6 @@ pub mod prelude {
         keyboard_input_handler::*,
         button_input::*,
         move_request::*,
-    };
-    pub use crate::output::{
-        graphics::{
-            GraphicsPlugin,
-            tile_graphics::*,
-            ui_graphics::*,
-            menu_spawner::*,
-            eternal_buttons_spawner::*,
-        },
-        camera::*,
-        asset_loader::*,
-        error_handler::*,
-        print_to_console::*,
     };
     pub use crate::logic::{
         BoardPlugins,
@@ -95,5 +83,18 @@ pub mod prelude {
         tile_type_board::*,
         tile::*,
     };
-    pub use crate::bundles::tile_bundle::*;
+    pub use crate::output::{
+        graphics::{
+            GraphicsPlugin,
+            OnOwnScreenVisibility,
+            tile_graphics::*,
+            ui_graphics::*,
+            menu_spawner::*,
+            eternal_buttons_spawner::*,
+        },
+        camera::*,
+        asset_loader::*,
+        error_handler::*,
+        print_to_console::*,
+    };
 }

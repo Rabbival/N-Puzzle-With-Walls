@@ -356,17 +356,19 @@ fn spawn_tile_counter(
                 parent
                     // tree generation options
                     .spawn((NodeBundle {
-                        style: Style {
-                            flex_direction: FlexDirection::Column,
-                            align_items: AlignItems::Center,
-                            justify_content: JustifyContent::End,
+                            style: Style {
+                                flex_direction: FlexDirection::Column,
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::End,
+                                ..default()
+                            },
+                            background_color: Color::INDIGO.into(),
+                            visibility: Visibility::Hidden,
                             ..default()
                         },
-                        background_color: Color::INDIGO.into(),
-                        visibility: Visibility::Hidden,
-                        ..default()
-                    },
-                    TreeGenerationOptionsTag
+                        OnScreenTag::Menu,
+                        TreeGenerationOptionsTag,
+                        OnOwnScreenVisibility(Visibility::Hidden),
                     ))                    
                     .with_children(|parent| {
                         //title 

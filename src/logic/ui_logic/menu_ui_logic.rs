@@ -133,15 +133,20 @@ fn apply_wall_count_menu_ui_update(
 fn set_tree_generation_options_visibility(
     unapplied_menu_wall_count: Res<UnappliedMenuWallCount>,
     mut tree_generation_options_query: Query<
-        &mut Visibility, 
+        (&mut Visibility, 
+        &mut OnOwnScreenVisibility),
         With<TreeGenerationOptionsTag>
     >,
 ){
     if unapplied_menu_wall_count.is_changed(){
+        let (mut current_visibility, mut own_screen_vis_for_toggle) 
+            = tree_generation_options_query.single_mut();
         if unapplied_menu_wall_count.0 == 0 {
-            *tree_generation_options_query.single_mut() = Visibility::Hidden;
+            *current_visibility = Visibility::Hidden;
+            own_screen_vis_for_toggle.0 = Visibility::Hidden;
         }else{
-            *tree_generation_options_query.single_mut() = Visibility::Visible;
+            *current_visibility = Visibility::Visible;
+            own_screen_vis_for_toggle.0 = Visibility::Visible;
         }
     }
 }
