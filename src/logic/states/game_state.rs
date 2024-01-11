@@ -12,7 +12,7 @@ pub enum GameState {
 pub enum OnScreenTag{
     #[default]
     Menu,
-    Game
+    Game,
 }
 
 

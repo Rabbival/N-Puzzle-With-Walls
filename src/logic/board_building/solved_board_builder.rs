@@ -57,7 +57,8 @@ fn determine_wall_locations(applied_props: &BoardProperties)
         grid_side_length
     );
     let mut grid_tree_iter 
-        = neighbor_count_grid.get_spanning_tree(GridTravellerType::BFS).into_iter();
+        = neighbor_count_grid
+            .get_spanning_tree(applied_props.tree_traveller_type).into_iter();
 
     for _ in 0..wall_count{
         let mut chosen_wall_location = GridLocation::default();

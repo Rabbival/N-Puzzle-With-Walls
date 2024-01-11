@@ -11,7 +11,8 @@ impl Plugin for MenuUiLogicPlugin {
                     (
                         update_menu_ui_after_press_general,
                         increase_or_decrease_wall_count_menu_ui_update,
-                        set_applied_props
+                        set_applied_props,
+                        set_tree_generation_options_visibility
                     ).in_set(InputSystemSets::InputHandling),
                     apply_wall_count_menu_ui_update.in_set(InputSystemSets::PostMainChanges),
                 )
@@ -74,8 +75,9 @@ fn update_menu_ui_after_press_general(
             MenuButtonAction::ChangeSize(_)
                 | MenuButtonAction::ChangeEmptyTilesCount(_)
                 | MenuButtonAction::ChangeGenerationMethod(_)
+                | MenuButtonAction::ChangeSpanningTreeGeneration(_)
             => {
-                button_action_discriminant=mem::discriminant(&menu_button_action);
+                button_action_discriminant = mem::discriminant(&menu_button_action);
             },
             _=> continue,
         }
@@ -125,6 +127,22 @@ fn apply_wall_count_menu_ui_update(
             commands.entity(apply_button_entity).insert(SelectedOptionTag);
             ui_graphics::set_color_to_pressed(&mut apply_button_color);
         }      
+    }
+}
+
+fn set_tree_generation_options_visibility(
+    unapplied_menu_wall_count: Res<UnappliedMenuWallCount>,
+    mut tree_generation_options_query: Query<
+        &mut Visibility, 
+        With<TreeGenerationOptionsTag>
+    >,
+){
+    if unapplied_menu_wall_count.is_changed(){
+        if unapplied_menu_wall_count.0 == 0 {
+            *tree_generation_options_query.single_mut() = Visibility::Hidden;
+        }else{
+            *tree_generation_options_query.single_mut() = Visibility::Visible;
+        }
     }
 }
 

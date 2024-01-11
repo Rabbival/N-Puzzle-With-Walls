@@ -76,10 +76,6 @@ fn update_wall_count_unapplied(
         (With<PlannedBoardProperties>, Without<AppliedBoardProperties>)
     >,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
-    mut tree_generation_options_query: Query<
-        &mut Visibility, 
-        With<TreeGenerationOptionsTag>
-    >,
 ){
     for button_event in button_event_listener.read(){
         if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action{
@@ -87,7 +83,6 @@ fn update_wall_count_unapplied(
                 &wall_count_action,
                 planned_board_prop_query.single(),
                 &mut unapplied_menu_wall_count,
-            tree_generation_options_query.single_mut().as_mut()
             );
         }      
     }
@@ -97,15 +92,11 @@ fn update_wall_count_unapplied_inner(
     wall_count_action: &WallTilesChange,
     planned_board_prop: &BoardProperties,
     unapplied_menu_wall_count: &mut UnappliedMenuWallCount,
-    tree_generation_options_visibility: &mut Visibility,
 ){
     match wall_count_action{
         WallTilesChange::Increase | WallTilesChange::Decrease=> {
             if let WallTilesChange::Increase = wall_count_action{
                 if unapplied_menu_wall_count.0 < planned_board_prop.size.wall_count_upper_bound(){
-                    if unapplied_menu_wall_count.0 == 0 {
-                        *tree_generation_options_visibility = Visibility::Visible;
-                    }
                     unapplied_menu_wall_count.0 += 1;
                 }else{
                     print_to_console::print_menu_error(
@@ -114,9 +105,6 @@ fn update_wall_count_unapplied_inner(
                 }
             }else if unapplied_menu_wall_count.0 > 0{
                 unapplied_menu_wall_count.0 -= 1;
-                if unapplied_menu_wall_count.0 == 0 {
-                    *tree_generation_options_visibility = Visibility::Hidden;
-                }
             }else{
                 print_to_console::print_menu_error(
                     MenuError::CantGoBeyondTileCountBounds(*wall_count_action)
@@ -184,7 +172,6 @@ mod tests {
 
     const DECREASE_REQUEST: WallTilesChange = WallTilesChange::Decrease;
     const INCREASE_REQUEST: WallTilesChange = WallTilesChange::Increase;
-    const DEMI_VISIBILITY: Visibility = Visibility::Hidden;
 
     #[test]
     fn check_wall_count_cant_go_down_from_zero(){
@@ -206,7 +193,6 @@ mod tests {
             &DECREASE_REQUEST,
             planned_board_prop,
             current_unapplied_wall_count,
-            &mut DEMI_VISIBILITY.clone()
         );
         current_unapplied_wall_count.0 == 0
     }
@@ -219,7 +205,6 @@ mod tests {
             &INCREASE_REQUEST,
             planned_board_prop,
             current_unapplied_wall_count,
-            &mut DEMI_VISIBILITY.clone()
         );
         current_unapplied_wall_count.0 > 0
     }
@@ -249,7 +234,6 @@ mod tests {
             &INCREASE_REQUEST,
             planned_board_prop,
             current_unapplied_wall_count,
-            &mut DEMI_VISIBILITY.clone()
         );
         current_unapplied_wall_count.0 == planned_board_prop.size.wall_count_upper_bound()
     }
@@ -262,7 +246,6 @@ mod tests {
             &DECREASE_REQUEST,
             planned_board_prop,
             current_unapplied_wall_count,
-            &mut DEMI_VISIBILITY.clone()
         );
         current_unapplied_wall_count.0 < planned_board_prop.size.wall_count_upper_bound()
     }
@@ -281,7 +264,6 @@ mod tests {
             &INCREASE_REQUEST,
             &mut planned_board_prop,
             &mut current_unapplied_wall_count,
-            &mut DEMI_VISIBILITY.clone()
         );
         let first_check = current_unapplied_wall_count.0 == smaller_size_wall_count_upper_bound;
 
@@ -290,7 +272,6 @@ mod tests {
             &INCREASE_REQUEST,
             &mut planned_board_prop,
             &mut current_unapplied_wall_count,
-            &mut DEMI_VISIBILITY.clone()
         );
         let second_check = current_unapplied_wall_count.0 > smaller_size_wall_count_upper_bound;
         first_check && second_check
