@@ -11,7 +11,7 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> Result<TileType
 
     if applied_props.wall_count > 0 {
         let wall_locations 
-            = determine_wall_locations(applied_props.wall_count, grid_side_length)?;
+            = determine_wall_locations(applied_props)?;
         spawn_walls_in_locations(
             wall_locations, 
             &mut solved_board
@@ -45,9 +45,11 @@ pub fn generate_solved_board(applied_props: &BoardProperties) -> Result<TileType
 }
 
 
-fn determine_wall_locations(wall_count: u8, grid_side_length: u8) 
+fn determine_wall_locations(applied_props: &BoardProperties) 
 -> Result<Vec<GridLocation>, error_handler::BoardGenerationError>
 {
+    let wall_count = applied_props.wall_count;
+    let grid_side_length = applied_props.size.to_grid_side_length();
     let mut wall_spawn_locations = vec![];
     let mut possible_spawn_locations = vec![];
     let mut neighbor_count_grid = initialize_neighbor_count_grid(
@@ -55,7 +57,7 @@ fn determine_wall_locations(wall_count: u8, grid_side_length: u8)
         grid_side_length
     );
     let mut grid_tree_iter 
-        = neighbor_count_grid.get_spanning_tree().into_iter();
+        = neighbor_count_grid.get_spanning_tree(GridTravellerType::BFS).into_iter();
 
     for _ in 0..wall_count{
         let mut chosen_wall_location = GridLocation::default();

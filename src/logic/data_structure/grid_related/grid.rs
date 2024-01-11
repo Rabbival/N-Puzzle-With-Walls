@@ -8,12 +8,13 @@ pub struct Grid<T: Clone> {
 
 //graph travelling functions
 impl<T: Clone> Grid<T>{
-    pub fn get_spanning_tree(&self) -> GridTree {
-        let grid_traveller = GridTraveller::from_grid(self);
+    pub fn get_spanning_tree(&self, traveller_type: GridTravellerType) -> GridTree {
+        let grid_traveller 
+            = GridTraveller::from_grid(self, traveller_type);
         let mut grid_tree = 
             GridTree::from_root(grid_traveller.locations_to_visit[0]);
-        let mut bfs_iterator = grid_traveller.into_iter();
-        while let Some(location_and_neighbors) = bfs_iterator.next(){
+        let mut traveller_iterator = grid_traveller.into_iter();
+        while let Some(location_and_neighbors) = traveller_iterator.next(){
             for neighbor in location_and_neighbors.just_added_neighbors{
                 grid_tree.insert(
                     neighbor,
@@ -26,7 +27,7 @@ impl<T: Clone> Grid<T>{
 
     pub fn is_connected_graph(&self) -> bool {
         let mut bfs_iterator = 
-            GridTraveller::from_grid(self).into_iter();
+            GridTraveller::from_grid(self, GridTravellerType::BFS).into_iter();
         let mut tile_counter = 0;
         while bfs_iterator.next().is_some(){
             tile_counter += 1;

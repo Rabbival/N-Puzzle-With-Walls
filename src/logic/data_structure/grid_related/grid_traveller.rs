@@ -59,7 +59,11 @@ impl<'a, T: Clone> Iterator for GridTraveller<'a, T>{
     type Item = LocationAndUnaddedNeighbors;
 
     fn next(&mut self) -> Option<Self::Item> {
-		match self.locations_to_visit.pop_front(){
+		let next_location = match self.traveller_type{
+			GridTravellerType::BFS => self.locations_to_visit.pop_front(),
+			GridTravellerType::DFS => self.locations_to_visit.pop_back()
+		};
+		match next_location{
 			None => None,
 			Some(next_tile_to_visit) =>{
 				let next_tile_neighbors 
