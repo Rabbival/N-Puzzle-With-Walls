@@ -16,7 +16,8 @@ pub struct SpawnBigButtons{
 pub struct SpawnTileCountButtons{
     pub regular_button_style: Style,
     pub thin_button_style: Style,
-    pub button_text_style: TextStyle
+    pub button_text_style: TextStyle,
+    pub small_text_style: TextStyle
 }
 
 #[derive (Event, Default)]

@@ -75,11 +75,11 @@ pub mod prelude {
                 generation_method::*,
                 wall_tiles_change::*,
                 menu_button_action::*,
+                grid_traveller_type::*
             },
             basic_direction::*,
             tile_type::*,
             eternal_button_action::*,
-            grid_traveller_type::*
         },
         states::{
             StatePlugin,

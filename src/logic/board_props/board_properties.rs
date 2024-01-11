@@ -14,6 +14,9 @@ pub struct BoardProperties{
     pub wall_count: u8,
     pub empty_count: u8,
     pub generation_method: BoardGenerationMethod,
+    /// determines the graph travelling that will be used to generate
+    /// the MST used for efficient wall spawning
+    pub tree_traveller_type: GridTravellerType,
 }
 
 /// intended to keep track of the numbers not yet applied
@@ -81,6 +84,7 @@ impl Default for BoardProperties{
             wall_count: DEFAULT_WALL_COUNT, 
             empty_count: DEFAULT_EMPTY_COUNT, 
             generation_method: BoardGenerationMethod::default(), 
+            tree_traveller_type: GridTravellerType::default(),
         }
     }
 }

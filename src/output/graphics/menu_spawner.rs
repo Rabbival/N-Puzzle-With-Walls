@@ -21,6 +21,9 @@ pub struct WallCountTextTag;
 pub struct BoardGenerationTextTag;
 
 #[derive(Component)]
+pub struct TreeGenerationOptionsTag;
+
+#[derive(Component)]
 pub struct ButtonText;
 
 
@@ -89,6 +92,12 @@ pub fn menu_setup(
         ..default()
     };
 
+    let small_text_style = TextStyle {
+        font_size: 30.0,
+        //color: Color::DARK_GRAY,
+        ..default()
+    };
+
     eternal_buttons_event_writer.send(ui_spawn_event::SpawnEternalButtons{
         thin_button_style: thin_button_style.clone(),
         button_text_style: eternal_button_text_style.clone()
@@ -104,7 +113,8 @@ pub fn menu_setup(
     tile_count_buttons_event_writer.send(ui_spawn_event::SpawnTileCountButtons{
         regular_button_style: button_style,
         thin_button_style,
-        button_text_style
+        button_text_style,
+        small_text_style
     });
 }
 
@@ -325,6 +335,7 @@ fn spawn_tile_counter(
         let regular_button_style= &button_event.regular_button_style;
         let thin_button_style = &button_event.thin_button_style;
         let button_text_style = &button_event.button_text_style;
+        let small_text_style = &button_event.small_text_style;
 
         commands
             .spawn((
@@ -342,6 +353,53 @@ fn spawn_tile_counter(
                 OnScreenTag::Menu,
             ))
             .with_children(|parent| {
+                parent
+                    // tree generation options
+                    .spawn((NodeBundle {
+                        style: Style {
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::End,
+                            ..default()
+                        },
+                        background_color: Color::INDIGO.into(),
+                        visibility: Visibility::Hidden,
+                        ..default()
+                    },
+                    TreeGenerationOptionsTag
+                    ))                    
+                    .with_children(|parent| {
+                        //title 
+                        parent.spawn(TextBundle::from_section(
+                            " Wall MST Gen ",
+                            small_text_style.clone(),
+                        ));
+                        //buttons
+                        for traveller_type in GridTravellerType::as_list(){
+                            let mut button_entity = parent
+                                .spawn((
+                                    ButtonBundle {
+                                        style: regular_button_style.clone(),
+                                        background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                        ..default()
+                                    },
+                                    MenuButtonAction::ChangeSpanningTreeGeneration(traveller_type)
+                                ));    
+                                button_entity.with_children(|parent| {
+                                    parent.spawn((TextBundle::from_section(
+                                        traveller_type.to_string(),
+                                        small_text_style.clone(),
+                                    ),
+                                    ButtonText));
+                                });
+                                if traveller_type == GridTravellerType::default() {
+                                    button_entity.insert(SelectedOptionTag);
+                                    button_entity.insert(AppliedOptionTag);
+                                }
+                        }
+                    });
+
+                    //actual tile counters
                 parent
                     .spawn(NodeBundle {
                         style: Style {
