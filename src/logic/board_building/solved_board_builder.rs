@@ -60,6 +60,14 @@ fn determine_wall_locations(applied_props: &BoardProperties)
         = neighbor_count_grid
             .get_spanning_tree(applied_props.tree_traveller_type).into_iter();
 
+
+
+    //debug
+    info!("possible spawn locations:");
+    print_to_console::print_display_deriver_vec(&possible_spawn_locations, BevyPrintType::Info);
+
+
+
     for _ in 0..wall_count{
         let mut chosen_wall_location = GridLocation::default();
         let mut is_leaf;
@@ -85,6 +93,12 @@ fn determine_wall_locations(applied_props: &BoardProperties)
                 &chosen_wall_location, 
                 &mut possible_spawn_locations
             );
+
+
+
+            info!("found and removed: {}", found_and_removed);
+
+
 
             // could be that the tree chose an illegal value
             if !found_and_removed{

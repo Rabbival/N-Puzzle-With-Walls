@@ -1,6 +1,8 @@
 use crate::{prelude::*, logic::data_structure::util_functions};
 use super::grid_tree_node::*;
 
+const MINIMAL_DEPTH: u8 = 2;
+
 #[derive(Clone, Debug)]
 /// a tree that tracks locations in the grid,
 /// inteneded to be used as MST
@@ -120,8 +122,12 @@ impl GridTree{
 				self.leaves.remove(index_to_remove)
 			}
 		};
-		let optional_parent_location 
-			= self.nodes.get(&removed_leaf).unwrap().parent_location;
+		let leaf_props = self.nodes.get(&removed_leaf).unwrap();
+		// can't remove a leaf if its too close to the root to keep connectivity
+		if leaf_props.depth < MINIMAL_DEPTH {
+			return None;
+		}
+		let optional_parent_location = leaf_props.parent_location;
 		// if we didn't remove the root
 		if let Some(parent_location) = optional_parent_location{
 			let optional_parent_node =
@@ -132,15 +138,12 @@ impl GridTree{
 					parent_node.children_counter -= 1;
 					// if the parent is a leaf, could be that it could be removed
 					if parent_node.children_counter == 0{
-						match parent_node.depth {
-							// if the paren't depth is 0 or 1, we don't want to remove it
-							// just to be on the safe side
-							0 | 1 => {},
-							_ => {
-								self.top_priority_leaf = Some(parent_location);
-								self.leaves.push(parent_location);
-							}
-						};
+						// if the paren't depth is 0 or 1, we don't want to remove it
+						// just to be on the safe side
+						if parent_node.depth > MINIMAL_DEPTH {
+							self.top_priority_leaf = Some(parent_location);
+							self.leaves.push(parent_location);
+						}
 					}
 				}
 			}
