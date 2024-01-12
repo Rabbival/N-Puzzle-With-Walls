@@ -65,7 +65,7 @@ impl<'a, T: Clone> Iterator for GridTraveller<'a, T>{
 		};
 
 
-		info!("{:?}", next_location);
+		// info!("{:?}", next_location);
 
 
 		match next_location{

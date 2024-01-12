@@ -62,6 +62,9 @@ fn general_update_planned_board_properties_inner(
         MenuButtonAction::ChangeEmptyTilesCount(new_empty_count)=> {
             planned_board_prop.empty_count = *new_empty_count;
         },
+        MenuButtonAction::ChangeSpanningTreeGeneration(traveller_type)=> {
+            planned_board_prop.tree_traveller_type = *traveller_type;
+        },
         MenuButtonAction::ChangeGenerationMethod(generation_method)=> {
             planned_board_prop.generation_method = *generation_method;
         },
