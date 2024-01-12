@@ -58,7 +58,7 @@ fn determine_wall_locations(applied_props: &BoardProperties)
     );
     let mut grid_tree 
         = neighbor_count_grid.get_spanning_tree(applied_props.tree_traveller_type);
-    let mut grid_tree_iter = grid_tree.clone().into_iter();
+    let mut grid_tree_iter = grid_tree.clone();
 
 
 

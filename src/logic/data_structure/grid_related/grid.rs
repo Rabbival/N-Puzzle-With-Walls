@@ -18,8 +18,8 @@ impl<T: Clone> Grid<T>{
 
         let mut grid_tree = 
             GridTree::from_root(grid_traveller.locations_to_visit[0]);
-        let mut traveller_iterator = grid_traveller.into_iter();
-        while let Some(location_and_neighbors) = traveller_iterator.next(){
+        let traveller_iterator = grid_traveller.into_iter();
+        for location_and_neighbors in traveller_iterator{
             for neighbor in location_and_neighbors.just_added_neighbors{
                 grid_tree.insert(
                     neighbor,
@@ -32,7 +32,7 @@ impl<T: Clone> Grid<T>{
 
     pub fn is_connected_graph(&self) -> bool {
         let mut bfs_iterator = 
-            GridTraveller::from_grid(self, GridTravellerType::BFS).into_iter();
+            GridTraveller::from_grid(self, GridTravellerType::BFS);
         let mut tile_counter = 0;
         while bfs_iterator.next().is_some(){
             tile_counter += 1;
