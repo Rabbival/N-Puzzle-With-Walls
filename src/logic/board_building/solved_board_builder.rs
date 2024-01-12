@@ -79,7 +79,6 @@ fn determine_wall_locations(applied_props: &BoardProperties)
                     false)
                 }
             };
-            grid_tree.decrease_parent_child_count(chosen_wall_location);
 
 
             info!("chosen location: {}", chosen_wall_location);
@@ -107,7 +106,7 @@ fn determine_wall_locations(applied_props: &BoardProperties)
                 // if the leaf is valid, we want to remove it from its parents count
                 // to allow the parent to eventually (hopefully) 
                 // become an available leaf
-                //grid_tree.decrease_parent_child_count(chosen_wall_location);
+                grid_tree.decrease_parent_child_count(chosen_wall_location);
             }
 
             let chosen_tile_value 
