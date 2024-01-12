@@ -60,6 +60,11 @@ fn determine_wall_locations(applied_props: &BoardProperties)
         = neighbor_count_grid
             .get_spanning_tree(applied_props.tree_traveller_type).into_iter();
 
+            info!("{:?}", applied_props.tree_traveller_type);
+
+
+
+
     for _ in 0..wall_count{
         let mut chosen_wall_location = GridLocation::default();
         while ! possible_spawn_locations.is_empty(){

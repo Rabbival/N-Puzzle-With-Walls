@@ -63,6 +63,11 @@ impl<'a, T: Clone> Iterator for GridTraveller<'a, T>{
 			GridTravellerType::BFS => self.locations_to_visit.pop_front(),
 			GridTravellerType::DFS => self.locations_to_visit.pop_back()
 		};
+
+
+		info!("{:?}", next_location);
+
+
 		match next_location{
 			None => None,
 			Some(next_tile_to_visit) =>{
