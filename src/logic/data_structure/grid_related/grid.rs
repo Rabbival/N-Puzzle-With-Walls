@@ -11,11 +11,6 @@ impl<T: Clone> Grid<T>{
     pub fn get_spanning_tree(&self, traveller_type: GridTravellerType) -> GridTree {
         let grid_traveller 
             = GridTraveller::from_grid(self, traveller_type);
-
-
-        info!("root: {}", grid_traveller.locations_to_visit[0]);
-
-
         let mut grid_tree = 
             GridTree::from_root(grid_traveller.locations_to_visit[0]);
         let traveller_iterator = grid_traveller.into_iter();

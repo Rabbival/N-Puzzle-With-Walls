@@ -179,11 +179,6 @@ impl Iterator for GridTree{
     type Item = GridLocation;
 
     fn next(&mut self) -> Option<Self::Item> {
-
-
-		//self.print_leaves(true);
-
-
 		match self.top_priority_leaf{
 			Some(top_priority_location) => {
 				self.top_priority_leaf = None;

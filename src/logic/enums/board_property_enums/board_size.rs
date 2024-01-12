@@ -41,7 +41,7 @@ impl BoardSize{
             BoardSize::Tiny=> 1,
             BoardSize::Small=> 3,
             BoardSize::Medium=> 5,
-            BoardSize::Large=> 10,
+            BoardSize::Large=> 8,
             BoardSize::Giant=> 30,
         }
     }

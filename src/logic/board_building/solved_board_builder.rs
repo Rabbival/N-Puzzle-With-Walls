@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::{error_handler, print_to_console}, logic::data_structure::util_functions};
+use crate::{prelude::*, output::error_handler, logic::data_structure::util_functions};
 
 /// mustn't be more than 2 as there will always be a corner
 /// shouldn't be less than 1 or we might get useless spaces
@@ -60,14 +60,6 @@ fn determine_wall_locations(applied_props: &BoardProperties)
         = neighbor_count_grid.get_spanning_tree(applied_props.tree_traveller_type);
     let mut grid_tree_iter = grid_tree.clone();
 
-
-
-    //debug
-    info!("possible spawn locations:");
-    print_to_console::print_display_deriver_vec(&possible_spawn_locations, BevyPrintType::Info);
-
-
-
     for _ in 0..wall_count{
         let mut chosen_wall_location = GridLocation::default();
         let mut is_leaf;
@@ -80,11 +72,6 @@ fn determine_wall_locations(applied_props: &BoardProperties)
                 }
             };
 
-
-            info!("chosen location: {}", chosen_wall_location);
-
-
-
             // whether it's because the chosen location is illegal 
             // or because we don't want to choose the same location twice
             // the chosen location has to be removed from the available ones
@@ -92,12 +79,6 @@ fn determine_wall_locations(applied_props: &BoardProperties)
                 &chosen_wall_location, 
                 &mut possible_spawn_locations
             );
-
-
-
-            info!("found and removed: {}", found_and_removed);
-
-
 
             // could be that the tree chose an illegal value
             if !found_and_removed{
@@ -154,12 +135,6 @@ fn determine_wall_locations(applied_props: &BoardProperties)
                 );
             }
         }
-
-
-        //debug
-        print_to_console::print_display_deriver_vec(&wall_spawn_locations, BevyPrintType::Info);
-
-
     }
     Ok(wall_spawn_locations)
 }
@@ -215,14 +190,13 @@ fn spawn_walls_in_locations(locations: Vec<GridLocation>, board: &mut TileTypeBo
 
 
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_connected_graph(){
-        const ATTEMPT_COUNT: u8 = 10;
+        const ATTEMPT_COUNT: u8 = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
         let board_props: BoardProperties = BoardProperties{
             size: BoardSize::Giant,
