@@ -108,7 +108,7 @@ impl GridTree{
 		if self.leaves.is_empty(){
 			return None;
 		}
-		let removed_leaf = match leaf_to_remove{
+		let mut removed_leaf = match leaf_to_remove{
 			Some(leaf_location) => {
 				util_functions::remove_by_value(
 					&leaf_location, 
@@ -122,11 +122,20 @@ impl GridTree{
 				self.leaves.remove(index_to_remove)
 			}
 		};
-		let leaf_props = self.nodes.get(&removed_leaf).unwrap();
+		let mut leaf_props = self.nodes.get(&removed_leaf).unwrap();
 		// can't remove a leaf if its too close to the root to keep connectivity
-		if leaf_props.depth < MINIMAL_DEPTH {
-			return None;
+		while leaf_props.depth < MINIMAL_DEPTH {
+			if self.leaves.is_empty(){
+				return None;
+			}else{
+				let index_to_remove 
+					= util_functions::random_index(&self.leaves);
+				removed_leaf = self.leaves.remove(index_to_remove);
+				leaf_props = self.nodes.get(&removed_leaf).unwrap();
+			}
 		}
+
+
 		let optional_parent_location = leaf_props.parent_location;
 		// if we didn't remove the root
 		if let Some(parent_location) = optional_parent_location{
