@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::error_handler, logic::data_structure::util_functions};
+use crate::{prelude::*, output::{error_handler, print_to_console}, logic::data_structure::util_functions};
 
 /// mustn't be more than 2 as there will always be a corner
 /// shouldn't be less than 1 or we might get useless spaces
@@ -62,13 +62,21 @@ fn determine_wall_locations(applied_props: &BoardProperties)
 
     for _ in 0..wall_count{
         let mut chosen_wall_location = GridLocation::default();
+        let mut is_leaf;
         while ! possible_spawn_locations.is_empty(){
-            chosen_wall_location = match grid_tree_iter.next(){
-                Some(tree_leaf) => tree_leaf,
+            (chosen_wall_location, is_leaf) = match grid_tree_iter.next(){
+                Some(tree_leaf) => (tree_leaf, true),
                 None => {
-                    util_functions::random_value(&possible_spawn_locations)
+                    (util_functions::random_value(&possible_spawn_locations),
+                    false)
                 }
             };
+
+
+
+            info!("chosen location: {}", chosen_wall_location);
+
+
 
             // whether it's because the chosen location is illegal 
             // or because we don't want to choose the same location twice
@@ -83,15 +91,24 @@ fn determine_wall_locations(applied_props: &BoardProperties)
                 continue;
             }
 
-            //check if removing that tile keeps the graph connected, 
-            //if not - put it back, and reroll
             let chosen_tile_value 
                 = neighbor_count_grid.set_none_get_former(&chosen_wall_location);
-            if neighbor_count_grid.is_connected_graph(){
-                break;
+
+            if is_leaf{
+                //if the tile was determined by the MST, the graph is connected
+                break; 
             }else{
-                //if the graph is not connected, we'll not remove this tile and thus it should be put back in place
-                neighbor_count_grid.set(&chosen_wall_location, chosen_tile_value.unwrap());
+                //if wasn't a leaf, check if removing that tile keeps the graph connected, 
+                //if it doesn't - put the tile back, and reroll
+                if neighbor_count_grid.is_connected_graph(){
+                    break;
+                }else{
+                    //if the graph is not connected, we'll not remove this tile and thus it should be put back in place
+                    neighbor_count_grid.set(
+                        &chosen_wall_location, 
+                        chosen_tile_value.unwrap()
+                    );
+                }
             }
         }
         // if we didn't find an available spot
@@ -119,6 +136,12 @@ fn determine_wall_locations(applied_props: &BoardProperties)
                 );
             }
         }
+
+
+        //debug
+        print_to_console::print_display_deriver_vec(&wall_spawn_locations, BevyPrintType::Info);
+
+
     }
     Ok(wall_spawn_locations)
 }
@@ -169,5 +192,29 @@ fn forbid_spawn_in_neighbors_of_location(
 fn spawn_walls_in_locations(locations: Vec<GridLocation>, board: &mut TileTypeBoard){
     for location in locations{
         board.set(&location, Tile::new(TileType::Wall));
+    }
+}
+
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_connected_graph(){
+        const ATTEMPT_COUNT: u8 = 10;
+        const WALL_COUNT_FOR_TEST: u8 = 2;
+        let board_props: BoardProperties = BoardProperties{
+            size: BoardSize::Giant,
+            wall_count: WALL_COUNT_FOR_TEST,
+            ..Default::default()
+        };
+        for _ in 0..ATTEMPT_COUNT{
+            let solved_board
+                =generate_solved_board(&board_props).unwrap();
+            assert!(solved_board.grid.is_connected_graph());
+        }
     }
 }

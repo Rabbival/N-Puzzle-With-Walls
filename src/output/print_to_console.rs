@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use std::fmt::Display;
 
 use crate::prelude::*;
 
@@ -37,11 +37,16 @@ pub enum BevyPrintType{
     Error
 }
 
-pub fn print_debug_deriver<T: Debug>(to_print: T, print_type: BevyPrintType){
+pub fn print_display_deriver_vec<T: Display>(to_print: &Vec<T>, print_type: BevyPrintType){
+    let mut to_print_str = String::from("[");
+    for item in to_print{
+        to_print_str += &(String::from(" ") + &item.to_string());	
+    }
+    to_print_str += " ]";
     match print_type{
-        BevyPrintType::Info=> {info!("{:?}", to_print)},
-        BevyPrintType::Warn=> {warn!("{:?}", to_print)},
-        BevyPrintType::Error=> {error!("{:?}", to_print)}
+        BevyPrintType::Info=> {info!("{}", to_print_str)},
+        BevyPrintType::Warn=> {warn!("{}", to_print_str)},
+        BevyPrintType::Error=> {error!("{}", to_print_str)}
     }
 }
 

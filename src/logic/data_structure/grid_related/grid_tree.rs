@@ -1,4 +1,5 @@
 use crate::{prelude::*, logic::data_structure::util_functions};
+use super::grid_tree_node::*;
 
 #[derive(Clone, Debug)]
 /// a tree that tracks locations in the grid,
@@ -98,15 +99,27 @@ impl GridTree{
 	}
 	
 
+	/// if leaf_to_remove is None, picks one randomly
 	/// will make the parent node a leaf if it has no children left
 	/// returns the removed leaf, or None if there was a problem and the iter should stop
-	fn remove_random(&mut self)-> Option<GridLocation>{
+	fn remove_leaf(&mut self, leaf_to_remove: Option<GridLocation>)-> Option<GridLocation>{
 		if self.leaves.is_empty(){
 			return None;
 		}
-		let random_index_to_remove = util_functions::random_index(&self.leaves);
-		let removed_leaf = self.leaves
-			.remove(random_index_to_remove);
+		let removed_leaf = match leaf_to_remove{
+			Some(leaf_location) => {
+				util_functions::remove_by_value(
+					&leaf_location, 
+					&mut self.leaves
+				);
+				leaf_location
+			},
+			None => {
+				let index_to_remove 
+					= util_functions::random_index(&self.leaves);
+				self.leaves.remove(index_to_remove)
+			}
+		};
 		let optional_parent_location 
 			= self.nodes.get(&removed_leaf).unwrap().parent_location;
 		// if we didn't remove the root
@@ -140,14 +153,19 @@ impl Iterator for GridTree{
     type Item = GridLocation;
 
     fn next(&mut self) -> Option<Self::Item> {
+
+
+		self.print_leaves(true);
+
+
 		match self.top_priority_leaf{
 			Some(top_priority_location) => {
 				self.top_priority_leaf = None;
-				Some(top_priority_location)
+				Some(self.remove_leaf(Some(top_priority_location))?)
 			},
 			// if there's no top priority leaf, return a random leaf
 			None => {
-				Some(self.remove_random()?)
+				Some(self.remove_leaf(None)?)
 			}
 		}
     }
@@ -159,30 +177,20 @@ impl Default for GridTree {
      }
 }
 
-// //debug
-// impl GridTree{
-// 	fn print_leaves_props(&self){
-// 		for leaf in self.leaves.clone(){
-// 			info!("{:?}", self.nodes.get(&leaf));
-// 		}
-// 	}
-// }
-
-
-
-#[derive(Clone, Debug)]
-struct GridTreeNode {
-	pub parent_location: Option<GridLocation>,
-	pub depth: u8,
-    pub children_counter: u8
-}
-
-impl GridTreeNode{
-	pub fn new(parent_location: Option<GridLocation>, depth: u8)-> Self{
-		Self { 
-			parent_location, 
-			depth,
-			children_counter: 0 
+//debug
+impl GridTree{
+	fn print_leaves(&self, props_included: bool){
+		let mut leaves_string = String::from("");
+		for leaf in self.leaves.clone(){
+			leaves_string += "\n";
+			leaves_string += &leaf.to_string();	
+			if props_included{
+				let leaf_prop = self.nodes.get(&leaf);
+				if let Some(props) = leaf_prop{
+					leaves_string += &(String::from(" ") + &props.to_string());	
+				}
+			}		
 		}
+		info!("{}", leaves_string);
 	}
 }

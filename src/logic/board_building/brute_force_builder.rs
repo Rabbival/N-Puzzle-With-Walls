@@ -64,7 +64,6 @@ pub fn brute_force_generate_game_board(
 }
 
 
-//board building tests
 #[cfg(test)]
 mod tests {
     use super::*;

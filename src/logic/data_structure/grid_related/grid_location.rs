@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::fmt;
 
 #[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug)]
 pub struct GridLocation{
@@ -53,5 +54,16 @@ impl From<IVec2> for GridLocation {
             row: value.y,
             col: value.x
         }
+    }
+}
+
+impl fmt::Display for GridLocation {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.write_str("[ ")?;
+        fmt.write_str(&self.row.to_string())?;
+        fmt.write_str(" , ")?;
+        fmt.write_str(&self.col.to_string())?;
+        fmt.write_str(" ]")?;
+        Ok(())
     }
 }
