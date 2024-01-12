@@ -102,7 +102,6 @@ impl GridTree{
 	
 
 	/// if leaf_to_remove is None, picks one randomly
-	/// will make the parent node a leaf if it has no children left
 	/// returns the removed leaf, or None if there was a problem and the iter should stop
 	fn remove_leaf(&mut self, leaf_to_remove: Option<GridLocation>)-> Option<GridLocation>{
 		if self.leaves.is_empty(){
@@ -122,42 +121,57 @@ impl GridTree{
 				self.leaves.remove(index_to_remove)
 			}
 		};
-		let mut leaf_props = self.nodes.get(&removed_leaf).unwrap();
+		let mut leaf_depth = self.nodes.get(&removed_leaf).unwrap().depth;
 		// can't remove a leaf if its too close to the root to keep connectivity
-		while leaf_props.depth < MINIMAL_DEPTH {
+		while leaf_depth < MINIMAL_DEPTH {
 			if self.leaves.is_empty(){
 				return None;
 			}else{
 				let index_to_remove 
 					= util_functions::random_index(&self.leaves);
 				removed_leaf = self.leaves.remove(index_to_remove);
-				leaf_props = self.nodes.get(&removed_leaf).unwrap();
+				leaf_depth = self.nodes.get(&removed_leaf).unwrap().depth;
 			}
 		}
 
+		Some(removed_leaf)
+	}
 
-		let optional_parent_location = leaf_props.parent_location;
-		// if we didn't remove the root
-		if let Some(parent_location) = optional_parent_location{
-			let optional_parent_node =
-				self.nodes.get_mut(&parent_location);
-			match optional_parent_node{
-				None => return None,
-				Some(parent_node) => {
-					parent_node.children_counter -= 1;
-					// if the parent is a leaf, could be that it could be removed
-					if parent_node.children_counter == 0{
-						// if the paren't depth is 0 or 1, we don't want to remove it
-						// just to be on the safe side
-						if parent_node.depth > MINIMAL_DEPTH {
-							self.top_priority_leaf = Some(parent_location);
-							self.leaves.push(parent_location);
+	
+	/// intended to be used on leaves that were deemed valid
+	/// to ensure their parents would become leaves too eventually
+	/// returns true if the parent was found
+	pub fn decrease_parent_child_count(&mut self, location: GridLocation) -> bool{
+		let optional_node_props = self.nodes.get(&location);
+		match optional_node_props{
+			None => false,
+			Some(node_props) => {
+				let optional_parent_location = node_props.parent_location;
+				if let Some(parent_location) = optional_parent_location{
+					let optional_parent_node =
+						self.nodes.get_mut(&parent_location);
+					match optional_parent_node{
+						None => false,
+						Some(parent_node) => {
+							parent_node.children_counter -= 1;
+							// if the parent is a leaf
+							if parent_node.children_counter == 0{
+								// if the paren't depth is minimal, 
+								// we don't want to eventually remove it
+								if parent_node.depth > MINIMAL_DEPTH {
+									self.top_priority_leaf = Some(parent_location);
+									self.leaves.push(parent_location);
+								}
+							}
+							true
 						}
 					}
+				}else{
+					//could be that we, in some case, remove the root
+					false
 				}
 			}
 		}
-		Some(removed_leaf)
 	}
 }
 
@@ -167,7 +181,7 @@ impl Iterator for GridTree{
     fn next(&mut self) -> Option<Self::Item> {
 
 
-		self.print_leaves(true);
+		//self.print_leaves(true);
 
 
 		match self.top_priority_leaf{
@@ -189,20 +203,20 @@ impl Default for GridTree {
      }
 }
 
-//debug
-impl GridTree{
-	fn print_leaves(&self, props_included: bool){
-		let mut leaves_string = String::from("");
-		for leaf in self.leaves.clone(){
-			leaves_string += "\n";
-			leaves_string += &leaf.to_string();	
-			if props_included{
-				let leaf_prop = self.nodes.get(&leaf);
-				if let Some(props) = leaf_prop{
-					leaves_string += &(String::from(" ") + &props.to_string());	
-				}
-			}		
-		}
-		info!("{}", leaves_string);
-	}
-}
+// //debug
+// impl GridTree{
+// 	fn print_leaves(&self, props_included: bool){
+// 		let mut leaves_string = String::from("");
+// 		for leaf in self.leaves.clone(){
+// 			leaves_string += "\n";
+// 			leaves_string += &leaf.to_string();	
+// 			if props_included{
+// 				let leaf_prop = self.nodes.get(&leaf);
+// 				if let Some(props) = leaf_prop{
+// 					leaves_string += &(String::from(" ") + &props.to_string());	
+// 				}
+// 			}		
+// 		}
+// 		info!("{}", leaves_string);
+// 	}
+// }

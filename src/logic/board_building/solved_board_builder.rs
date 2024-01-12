@@ -56,9 +56,9 @@ fn determine_wall_locations(applied_props: &BoardProperties)
         &mut possible_spawn_locations, 
         grid_side_length
     );
-    let mut grid_tree_iter 
-        = neighbor_count_grid
-            .get_spanning_tree(applied_props.tree_traveller_type).into_iter();
+    let mut grid_tree 
+        = neighbor_count_grid.get_spanning_tree(applied_props.tree_traveller_type);
+    let mut grid_tree_iter = grid_tree.clone().into_iter();
 
 
 
@@ -79,7 +79,7 @@ fn determine_wall_locations(applied_props: &BoardProperties)
                     false)
                 }
             };
-
+            grid_tree.decrease_parent_child_count(chosen_wall_location);
 
 
             info!("chosen location: {}", chosen_wall_location);
@@ -103,6 +103,11 @@ fn determine_wall_locations(applied_props: &BoardProperties)
             // could be that the tree chose an illegal value
             if !found_and_removed{
                 continue;
+            }else{
+                // if the leaf is valid, we want to remove it from its parents count
+                // to allow the parent to eventually (hopefully) 
+                // become an available leaf
+                //grid_tree.decrease_parent_child_count(chosen_wall_location);
             }
 
             let chosen_tile_value 
