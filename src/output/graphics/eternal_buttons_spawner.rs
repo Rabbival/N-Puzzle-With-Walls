@@ -114,7 +114,6 @@ fn spawn_menu_toggling_button(
                                 },
                                 EternalButton,
                                 EternalButtonAction::ToggleMenu,
-                                SelectedOptionTag,
                                 MenuToggleButton,
                             ))
                             .with_children(|parent| {

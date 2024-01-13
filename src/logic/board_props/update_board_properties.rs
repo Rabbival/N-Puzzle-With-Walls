@@ -167,7 +167,6 @@ fn set_applied_props_and_begin_generation(
             Without<AppliedBoardProperties>,
         ),
     >,
-    mut set_game_state_to_regular: ResMut<NextState<GameState>>,
 ) {
     for button_event in button_event_listener.read() {
         if let MenuButtonAction::GenerateBoard = button_event.action {
@@ -181,7 +180,6 @@ fn set_applied_props_and_begin_generation(
             camera_adjustmant_event_writer.send(board_set_event::SetCameraAccordingToNewSettings {
                 new_grid_side_length: planned_board_prop.size.to_grid_side_length(),
             });
-            set_game_state_to_regular.set(GameState::Regular);
         }
     }
 }

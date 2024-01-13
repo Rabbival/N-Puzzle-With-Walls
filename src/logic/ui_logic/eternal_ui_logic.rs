@@ -1,7 +1,7 @@
 use bevy::app::AppExit;
 
 use crate::{
-    costume_event::{app_event, ui_event},
+    costume_event::app_event,
     prelude::*,
 };
 
@@ -19,15 +19,10 @@ impl Plugin for EternalUiLogicPlugin {
 
 fn toggle_menu(
     mut event_listener: EventReader<app_event::ToggleMenu>,
-    mut button_toggle_event_writer: EventWriter<ui_event::ToggleButton>,
-    menu_toggle_button_entity: Query<Entity, With<MenuToggleButton>>,
     game_state: Res<State<AppState>>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
     for _ in event_listener.read() {
-        button_toggle_event_writer.send(ui_event::ToggleButton {
-            entity: menu_toggle_button_entity.single(),
-        });
         match game_state.get() {
             AppState::Game => {
                 next_state.set(AppState::Menu);

@@ -16,7 +16,6 @@ impl Plugin for VictoryUiLogicPlugin {
 fn listen_for_victory_button_press(
 	mut button_event_listener: EventReader<ui_event::VictoryButtonPressed>,
 	mut spawn_board_event_writer: EventWriter<board_set_event::BuildNewBoard>,
-	mut set_game_state_to_regular: ResMut<NextState<GameState>>,
 ){
 	for button_event in button_event_listener.read(){
 		match button_event.action{
@@ -24,7 +23,6 @@ fn listen_for_victory_button_press(
 				spawn_board_event_writer.send(board_set_event::BuildNewBoard {
 					reroll_solved: false,
 				});
-				set_game_state_to_regular.set(GameState::Regular);
 			}
 		}
 	}

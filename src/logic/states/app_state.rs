@@ -1,4 +1,4 @@
-use crate::{costume_event::screen_changing_event, prelude::*};
+use crate::{costume_event::{screen_changing_event, ui_event}, prelude::*};
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum AppState {
@@ -38,13 +38,17 @@ impl Plugin for AppStatePlugin {
             )
             .add_systems(
                 OnExit(AppState::Menu),
-                (toggle_visibility_for_menu_screen_elements,)
+                (
+                    toggle_visibility_for_menu_screen_elements,
+                    toggle_menu_button
+                )
                     .in_set(StateChangeSystemSets::StateChangeListening),
             )
             .add_systems(
                 OnEnter(AppState::Menu),
                 (
                     toggle_visibility_for_menu_screen_elements,
+                    toggle_menu_button,
                     set_menu_indicators_to_fit_current,
                 )
                     .in_set(StateChangeSystemSets::StateChangeListening),
@@ -77,4 +81,13 @@ fn set_menu_indicators_to_fit_current(
     mut event_writer: EventWriter<screen_changing_event::SetPlannedPropertiesToFitCurrent>,
 ) {
     event_writer.send(SetPlannedPropertiesToFitCurrent);
+}
+
+fn toggle_menu_button(
+    mut button_toggle_event_writer: EventWriter<ui_event::ToggleButton>,
+    menu_toggle_button_entity: Query<Entity, With<MenuToggleButton>>,
+){
+    button_toggle_event_writer.send(ui_event::ToggleButton {
+        entity: menu_toggle_button_entity.single(),
+    });
 }
