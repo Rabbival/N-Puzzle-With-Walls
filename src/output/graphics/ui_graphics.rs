@@ -1,4 +1,4 @@
-use crate::{prelude::*, costume_event::ui_event};
+use crate::{costume_event::ui_event, prelude::*};
 
 pub const NORMAL_BUTTON: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const HOVERED_BUTTON: Color = Color::rgb(0.2, 0.2, 0.2);
@@ -8,29 +8,30 @@ pub const PRESSED_BUTTON: Color = Color::rgb(0.3, 0.3, 0.3);
 pub const NORMAL_TEXT_COLOR: Color = Color::WHITE;
 pub const RED_TEXT_COLOR: Color = Color::ORANGE_RED;
 
-
 pub struct MenuGraphicsPlugin;
 
 impl Plugin for MenuGraphicsPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_systems(
-                Update,(
-                    (
-                        flash_generation_text_red,
-                        reset_color_for_button_text
-                    ).run_if(in_state(GameState::Menu)),
-                    update_button_color,
-                    (update_wall_tiles_count_visuals).run_if(resource_changed::<UnappliedMenuWallCount>())
-                ))
-            ;
+        app.add_systems(
+            Update,
+            (
+                (flash_generation_text_red, reset_color_for_button_text)
+                    .run_if(in_state(GameState::Menu)),
+                update_button_color,
+                (update_wall_tiles_count_visuals)
+                    .run_if(resource_changed::<UnappliedMenuWallCount>()),
+            ),
+        );
     }
 }
 
-
 fn update_button_color(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, Option<&SelectedOptionTag>),
+        (
+            &Interaction,
+            &mut BackgroundColor,
+            Option<&SelectedOptionTag>,
+        ),
         (Changed<Interaction>, With<Button>),
     >,
 ) {
@@ -46,19 +47,18 @@ fn update_button_color(
 
 fn update_wall_tiles_count_visuals(
     unapplied_menu_wall_count: Res<UnappliedMenuWallCount>,
-    mut wall_count_text_query: Query<&mut Text , With<WallCountTextTag>>
-){
+    mut wall_count_text_query: Query<&mut Text, With<WallCountTextTag>>,
+) {
     let mut text = wall_count_text_query.single_mut();
     text.sections[0].value = unapplied_menu_wall_count.0.to_string();
 }
 
-
 fn reset_color_for_button_text(
     mut event_listener: EventReader<ui_event::ResetButtonTextColor>,
-    mut generation_text_query: Query<&mut Text, With<ButtonText>>
-){
-    for _ in event_listener.read(){
-        for mut button_text in generation_text_query.iter_mut(){
+    mut generation_text_query: Query<&mut Text, With<ButtonText>>,
+) {
+    for _ in event_listener.read() {
+        for mut button_text in generation_text_query.iter_mut() {
             let button_text_color = &mut button_text.sections[0].style.color;
             if *button_text_color == RED_TEXT_COLOR {
                 *button_text_color = NORMAL_TEXT_COLOR;
@@ -69,18 +69,18 @@ fn reset_color_for_button_text(
 
 fn flash_generation_text_red(
     mut event_listener: EventReader<ui_event::ShowGenerationError>,
-    mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>
-){
+    mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>,
+) {
     let generation_text_color = &mut generation_text_query.single_mut().sections[0].style.color;
-    for _ in event_listener.read(){
+    for _ in event_listener.read() {
         *generation_text_color = RED_TEXT_COLOR;
     }
 }
 
-pub fn set_color_to_normal(background_color: &mut BackgroundColor){
+pub fn set_color_to_normal(background_color: &mut BackgroundColor) {
     *background_color = NORMAL_BUTTON.into();
 }
 
-pub fn set_color_to_pressed(background_color: &mut BackgroundColor){
+pub fn set_color_to_pressed(background_color: &mut BackgroundColor) {
     *background_color = PRESSED_BUTTON.into();
 }

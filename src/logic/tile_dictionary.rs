@@ -4,8 +4,8 @@ use crate::prelude::*;
 pub struct TileDictionaryTag;
 
 #[derive(Component)]
-pub struct TileDictionary{
-    pub entity_by_tile: HashMap<Tile,Option<Entity>>
+pub struct TileDictionary {
+    pub entity_by_tile: HashMap<Tile, Option<Entity>>,
 }
 
 pub struct TileDictionaryPlugin;
@@ -16,12 +16,11 @@ impl Plugin for TileDictionaryPlugin {
     }
 }
 
-fn spawn_tile_dictionary(mut commands: Commands){
+fn spawn_tile_dictionary(mut commands: Commands) {
     commands.spawn((
-        TileDictionary{
-            entity_by_tile: HashMap::<Tile,Option::<Entity>>::new()
+        TileDictionary {
+            entity_by_tile: HashMap::<Tile, Option<Entity>>::new(),
         },
-        TileDictionaryTag
+        TileDictionaryTag,
     ));
 }
-

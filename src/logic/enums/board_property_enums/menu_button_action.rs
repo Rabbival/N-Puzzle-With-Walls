@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
 #[derive(Component, Debug, Clone, Copy)]
-pub enum MenuButtonAction{
+pub enum MenuButtonAction {
     ChangeSize(BoardSize),
     ChangeWallTilesCount(WallTilesChange),
     ChangeEmptyTilesCount(u8),
     ChangeGenerationMethod(BoardGenerationMethod),
     ChangeSpanningTreeGeneration(GridTravellerType),
-    GenerateBoard
+    GenerateBoard,
 }

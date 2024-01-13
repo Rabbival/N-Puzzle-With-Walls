@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Component, Debug, Clone, Copy)]
-pub enum EternalButtonAction{
+pub enum EternalButtonAction {
     EndGame,
-    ToggleMenu
+    ToggleMenu,
 }

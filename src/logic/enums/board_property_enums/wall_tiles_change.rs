@@ -1,6 +1,6 @@
 #[derive(Debug, Clone, Copy)]
-pub enum WallTilesChange{
+pub enum WallTilesChange {
     Increase,
     Decrease,
-    Apply
+    Apply,
 }

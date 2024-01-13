@@ -13,7 +13,7 @@ pub fn main() {
             SystemSetsPlugin,
             EventPlugins,
             GameStatePlugin,
-            ErrorHandlerPlugin
+            ErrorHandlerPlugin,
         ))
         //costume
         .add_plugins((
@@ -22,9 +22,8 @@ pub fn main() {
             AssetLoaderPlugin,
             BoardPlugins,
             GraphicsPlugin,
-            TileDictionaryPlugin
-        ))
-        ;
+            TileDictionaryPlugin,
+        ));
 
     app.run();
 }

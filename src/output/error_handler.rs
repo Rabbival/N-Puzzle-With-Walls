@@ -1,63 +1,59 @@
-use crate::{prelude::*, costume_event::ui_event};
+use crate::{costume_event::ui_event, prelude::*};
 
 #[derive(Debug)]
-pub enum MenuError{
-    CantGoBeyondTileCountBounds(WallTilesChange)
+pub enum MenuError {
+    CantGoBeyondTileCountBounds(WallTilesChange),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum BoardGenerationError{
+pub enum BoardGenerationError {
     VectorPermutationGenerationFailed,
     DirectionCouldntBeFlipped,
     ItemNotInMap(ItemNotFoundInMapError),
     TileMoveError(TileMoveError),
     CouldntPlaceAllWalls,
-    NotEnoughAvailableSpots
+    NotEnoughAvailableSpots,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum ItemNotFoundInMapError{
+pub enum ItemNotFoundInMapError {
     DirectionNotFoundInMap,
-    EntityNotFoundInMap 
+    EntityNotFoundInMap,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum TileMoveError{
+pub enum TileMoveError {
     NoTileInCell(GridLocation),
     BoardFrozenToPlayer,
     IndexOutOfGridBounds,
     NoEmptyNeighbor,
     PressedEmptySlot,
-    NoOccupiedTileInThatDirection (BasicDirection),
+    NoOccupiedTileInThatDirection(BasicDirection),
     EntityRelated(EntityRelatedCustomError),
     TriedToSwitchWithAWall,
     TriedToSwitchEmptyWithEmpty,
-    TriedToSwitchBetweenTwoOccupied(Tile,Tile)
+    TriedToSwitchBetweenTwoOccupied(Tile, Tile),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum EntityRelatedCustomError{
+pub enum EntityRelatedCustomError {
     NoEntity,
     EntityNotInQuery,
-    ItemNotInMap(ItemNotFoundInMapError)
+    ItemNotInMap(ItemNotFoundInMapError),
 }
-
 
 pub struct ErrorHandlerPlugin;
 
 impl Plugin for ErrorHandlerPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_systems(Update, board_generation_error_handler)
-        ;
+        app.add_systems(Update, board_generation_error_handler);
     }
 }
 
-
 pub fn board_generation_error_handler(
     mut event_listener: EventReader<ui_event::ShowGenerationError>,
-){
-    for generation_error in event_listener.read(){
+) {
+    for generation_error in event_listener.read() {
         print_board_generation_error(generation_error.0);
     }
 }

@@ -2,15 +2,15 @@ use enum_iterator::{all, Sequence};
 use std::fmt;
 
 #[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub enum BoardGenerationMethod{
+pub enum BoardGenerationMethod {
     #[default]
     Auto,
     Manual,
-    Load
+    Load,
 }
 
-impl BoardGenerationMethod{
-    pub fn as_list() -> Vec<BoardGenerationMethod>{
+impl BoardGenerationMethod {
+    pub fn as_list() -> Vec<BoardGenerationMethod> {
         all::<BoardGenerationMethod>().collect::<Vec<BoardGenerationMethod>>()
     }
 }

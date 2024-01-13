@@ -1,100 +1,65 @@
 #![allow(clippy::type_complexity)]
 mod app;
-mod screen_setup;
-mod system_sets;
+mod bundles;
 mod costume_event;
-mod output;
 mod input;
 mod logic;
-mod bundles;
+mod output;
+mod screen_setup;
+mod system_sets;
 
 pub mod prelude {
     pub use bevy::reflect::TypeUuid;
     pub use bevy::{prelude::*, utils::HashMap};
 
     pub use crate::app::*;
-    pub use crate::screen_setup::*;
-    pub use crate::system_sets::*;
     pub use crate::bundles::tile_bundle::*;
     pub use crate::costume_event::{
-        EventPlugins,
-        board_set_event::*,
-        move_tile_event::*,
-        screen_changing_event::*,
-        ui_event::*,
-        ui_spawn_event::*,
-        app_event::*,
+        app_event::*, board_set_event::*, move_tile_event::*, screen_changing_event::*,
+        ui_event::*, ui_spawn_event::*, EventPlugins,
     };
     pub use crate::input::{
+        button_input::*, keyboard_input_handler::*, mouse_input_handler::*, move_request::*,
         InputPlugin,
-        mouse_input_handler::*,
-        keyboard_input_handler::*,
-        button_input::*,
-        move_request::*,
     };
     pub use crate::logic::{
-        BoardPlugins,
         board_building::{
-            BoardBuildingPlugins,
-            solved_board_builder::*,
-            board_builder::*,
-            permutation_builder::*,
-            brute_force_builder::*,
-            board_entities_spawner::*,
+            board_builder::*, board_entities_spawner::*, brute_force_builder::*,
+            permutation_builder::*, solved_board_builder::*, BoardBuildingPlugins,
         },
-        board_props::{
-            BoardPropsPlugins,
-            board_properties::*,
-            update_board_properties::*,
-        },
+        board_manager::*,
+        board_props::{board_properties::*, update_board_properties::*, BoardPropsPlugins},
         data_structure::{
-            grid_related::{
-                grid::*,
-                grid_location::*,
-                grid_tree::*,
-                grid_traveller::*, 
-            },
+            grid_related::{grid::*, grid_location::*, grid_traveller::*, grid_tree::*},
             indexed_value::*,
             util_functions::*,
         },
         enums::{
-            board_property_enums::{
-                board_size::*,
-                generation_method::*,
-                wall_tiles_change::*,
-                menu_button_action::*,
-                grid_traveller_type::*
-            },
             basic_direction::*,
-            tile_type::*,
+            board_property_enums::{
+                board_size::*, generation_method::*, grid_traveller_type::*, menu_button_action::*,
+                wall_tiles_change::*,
+            },
             eternal_button_action::*,
+            tile_type::*,
         },
-        states::{
-            StatePlugin,
-            game_state::*,
-        },
-        ui_logic::{
-            UiLogicPlugin,
-            menu_ui_logic::*,
-            eternal_ui_logic::*
-        },
-        board_manager::*,
+        states::{game_state::*, StatePlugin},
+        tile::*,
         tile_dictionary::*,
         tile_type_board::*,
-        tile::*,
+        ui_logic::{eternal_ui_logic::*, menu_ui_logic::*, UiLogicPlugin},
+        BoardPlugins,
     };
     pub use crate::output::{
-        graphics::{
-            GraphicsPlugin,
-            OnOwnScreenVisibility,
-            tile_graphics::*,
-            ui_graphics::*,
-            menu_spawner::*,
-            eternal_buttons_spawner::*,
-        },
-        camera::*,
         asset_loader::*,
+        camera::*,
         error_handler::*,
+        graphics::{
+            eternal_buttons_spawner::*, menu_spawner::*, tile_graphics::*, ui_graphics::*,
+            GraphicsPlugin, OnOwnScreenVisibility,
+        },
         print_to_console::*,
     };
+    pub use crate::screen_setup::*;
+    pub use crate::system_sets::*;
 }

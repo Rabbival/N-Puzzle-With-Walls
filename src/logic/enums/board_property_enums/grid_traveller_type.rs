@@ -2,14 +2,14 @@ use enum_iterator::{all, Sequence};
 use std::fmt;
 
 #[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub enum GridTravellerType{
-	#[default]
-	BFS,
-	DFS
+pub enum GridTravellerType {
+    #[default]
+    BFS,
+    DFS,
 }
 
-impl GridTravellerType{
-    pub fn as_list() -> Vec<GridTravellerType>{
+impl GridTravellerType {
+    pub fn as_list() -> Vec<GridTravellerType> {
         all::<GridTravellerType>().collect::<Vec<GridTravellerType>>()
     }
 }

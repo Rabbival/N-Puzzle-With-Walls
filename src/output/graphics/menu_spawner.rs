@@ -1,4 +1,4 @@
-use crate::{prelude::*, costume_event::ui_spawn_event, logic::board_props::board_properties};
+use crate::{costume_event::ui_spawn_event, logic::board_props::board_properties, prelude::*};
 
 use super::ui_graphics;
 
@@ -26,13 +26,13 @@ pub struct TreeGenerationOptionsTag;
 #[derive(Component)]
 pub struct ButtonText;
 
-
 pub struct MenuSpanwerPlugin;
 
 impl Plugin for MenuSpanwerPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_systems(Startup, (
+        app.add_systems(
+            Startup,
+            (
                 menu_setup,
                 (
                     spawn_generate_button,
@@ -40,8 +40,9 @@ impl Plugin for MenuSpanwerPlugin {
                     spawn_generation_options,
                     spawn_tile_counter,
                 )
-                .after(menu_setup)
-            ));
+                    .after(menu_setup),
+            ),
+        );
     }
 }
 
@@ -50,7 +51,7 @@ pub fn menu_setup(
     mut button_event_writer: EventWriter<ui_spawn_event::SpawnButtons>,
     mut big_button_event_writer: EventWriter<ui_spawn_event::SpawnBigButtons>,
     mut tile_count_buttons_event_writer: EventWriter<ui_spawn_event::SpawnTileCountButtons>,
-    mut eternal_buttons_event_writer: EventWriter<ui_spawn_event::SpawnEternalButtons>
+    mut eternal_buttons_event_writer: EventWriter<ui_spawn_event::SpawnEternalButtons>,
 ) {
     let button_style = Style {
         width: Val::Px(150.0),
@@ -61,7 +62,7 @@ pub fn menu_setup(
         ..default()
     };
     let button_text_style = TextStyle {
-        font_size: 40.0 ,
+        font_size: 40.0,
         ..default()
     };
 
@@ -74,7 +75,7 @@ pub fn menu_setup(
         ..default()
     };
     let big_button_text_style = TextStyle {
-        font_size: 60.0 ,
+        font_size: 60.0,
         ..default()
     };
 
@@ -88,7 +89,7 @@ pub fn menu_setup(
     };
 
     let eternal_button_text_style = TextStyle {
-        font_size: 50.0 ,
+        font_size: 50.0,
         ..default()
     };
 
@@ -98,91 +99,89 @@ pub fn menu_setup(
         ..default()
     };
 
-    eternal_buttons_event_writer.send(ui_spawn_event::SpawnEternalButtons{
+    eternal_buttons_event_writer.send(ui_spawn_event::SpawnEternalButtons {
         thin_button_style: thin_button_style.clone(),
-        button_text_style: eternal_button_text_style.clone()
+        button_text_style: eternal_button_text_style.clone(),
     });
-    button_event_writer.send(ui_spawn_event::SpawnButtons{
+    button_event_writer.send(ui_spawn_event::SpawnButtons {
         button_style: button_style.clone(),
-        button_text_style: button_text_style.clone()
+        button_text_style: button_text_style.clone(),
     });
-    big_button_event_writer.send(ui_spawn_event::SpawnBigButtons{
+    big_button_event_writer.send(ui_spawn_event::SpawnBigButtons {
         big_button_style,
-        big_button_text_style
+        big_button_text_style,
     });
-    tile_count_buttons_event_writer.send(ui_spawn_event::SpawnTileCountButtons{
+    tile_count_buttons_event_writer.send(ui_spawn_event::SpawnTileCountButtons {
         regular_button_style: button_style,
         thin_button_style,
         button_text_style,
-        small_text_style
+        small_text_style,
     });
 }
 
-
 fn spawn_generate_button(
     mut big_button_event_reader: EventReader<ui_spawn_event::SpawnBigButtons>,
-    mut commands: Commands
-){
-    for big_button_event in big_button_event_reader.read(){
-        let button_style=&big_button_event.big_button_style;
-        let button_text_style=&big_button_event.big_button_text_style;
+    mut commands: Commands,
+) {
+    for big_button_event in big_button_event_reader.read() {
+        let button_style = &big_button_event.big_button_style;
+        let button_text_style = &big_button_event.big_button_text_style;
 
         commands
-        .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::End,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                visibility: Visibility::Hidden,
-                ..default()
-            },
-            OnScreenTag::Menu,
-        ))
-        .with_children(|parent| {
-            parent
-            .spawn(NodeBundle {
-                style: Style {
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                background_color: Color::PURPLE.into(),
-                ..default()
-            }).with_children(|parent| {
-                parent
-                .spawn((
-                    ButtonBundle {
-                        style: button_style.clone(),
-                        background_color: ui_graphics::NORMAL_BUTTON.into(),
+            .spawn((
+                NodeBundle {
+                    style: Style {
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
+                        align_items: AlignItems::End,
+                        justify_content: JustifyContent::Center,
                         ..default()
                     },
-                    MenuButtonAction::GenerateBoard
-                ))
-                .with_children(|parent| {
-                    parent.spawn((TextBundle::from_section(
-                            "Generate",
-                            button_text_style.clone(),
-                        ),
-                        BoardGenerationTextTag,
-                        ButtonText,
-                    ));
-                });
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                OnScreenTag::Menu,
+            ))
+            .with_children(|parent| {
+                parent
+                    .spawn(NodeBundle {
+                        style: Style {
+                            flex_direction: FlexDirection::Column,
+                            align_items: AlignItems::Center,
+                            ..default()
+                        },
+                        background_color: Color::PURPLE.into(),
+                        ..default()
+                    })
+                    .with_children(|parent| {
+                        parent
+                            .spawn((
+                                ButtonBundle {
+                                    style: button_style.clone(),
+                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                    ..default()
+                                },
+                                MenuButtonAction::GenerateBoard,
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn((
+                                    TextBundle::from_section("Generate", button_text_style.clone()),
+                                    BoardGenerationTextTag,
+                                    ButtonText,
+                                ));
+                            });
+                    });
             });
-        });
     }
 }
 
 fn spawn_generation_options(
     mut button_event_reader: EventReader<ui_spawn_event::SpawnButtons>,
-    mut commands: Commands
-){
-    for button_event in button_event_reader.read(){
-        let button_style=&button_event.button_style;
-        let button_text_style=&button_event.button_text_style;
+    mut commands: Commands,
+) {
+    for button_event in button_event_reader.read() {
+        let button_style = &button_event.button_style;
+        let button_text_style = &button_event.button_text_style;
 
         commands
             .spawn((
@@ -202,70 +201,72 @@ fn spawn_generation_options(
             ))
             .with_children(|parent| {
                 //title
-                parent.spawn((
-                    NodeBundle {
-                        style: Style {
-                            flex_direction: FlexDirection::Column,
-                            align_items: AlignItems::Center,
-                            justify_content: JustifyContent::Start,
-                            ..default()
-                        },
-                        background_color: Color::INDIGO.into(),
-                        ..default()
-                    },
-                    OnScreenTag::Menu,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        String::from("Generation Method"),
-                        button_text_style.clone(),
-                    ));
-                    parent
-                        .spawn(NodeBundle {
+                parent
+                    .spawn((
+                        NodeBundle {
                             style: Style {
-                                flex_direction: FlexDirection::Row,
+                                flex_direction: FlexDirection::Column,
                                 align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Start,
                                 ..default()
                             },
+                            background_color: Color::INDIGO.into(),
                             ..default()
-                        })
-                        .with_children(|parent| {
-                            //buttons
-                            for generation_method in BoardGenerationMethod::as_list(){
-                                let mut button_entity = parent
-                                    .spawn((
+                        },
+                        OnScreenTag::Menu,
+                    ))
+                    .with_children(|parent| {
+                        parent.spawn(TextBundle::from_section(
+                            String::from("Generation Method"),
+                            button_text_style.clone(),
+                        ));
+                        parent
+                            .spawn(NodeBundle {
+                                style: Style {
+                                    flex_direction: FlexDirection::Row,
+                                    align_items: AlignItems::Center,
+                                    ..default()
+                                },
+                                ..default()
+                            })
+                            .with_children(|parent| {
+                                //buttons
+                                for generation_method in BoardGenerationMethod::as_list() {
+                                    let mut button_entity = parent.spawn((
                                         ButtonBundle {
                                             style: button_style.clone(),
                                             background_color: ui_graphics::NORMAL_BUTTON.into(),
                                             ..default()
                                         },
-                                        MenuButtonAction::ChangeGenerationMethod(generation_method)
-                                    ));    
+                                        MenuButtonAction::ChangeGenerationMethod(generation_method),
+                                    ));
                                     button_entity.with_children(|parent| {
-                                        parent.spawn((TextBundle::from_section(
-                                            generation_method.to_string(),
-                                            button_text_style.clone(),
-                                        ),
-                                        ButtonText));
+                                        parent.spawn((
+                                            TextBundle::from_section(
+                                                generation_method.to_string(),
+                                                button_text_style.clone(),
+                                            ),
+                                            ButtonText,
+                                        ));
                                     });
                                     if generation_method == BoardGenerationMethod::default() {
                                         button_entity.insert(SelectedOptionTag);
                                         button_entity.insert(AppliedOptionTag);
                                     }
-                            }
-                        });
-                });
+                                }
+                            });
+                    });
             });
     }
 }
 
 fn spawn_size_options(
     mut button_event_reader: EventReader<ui_spawn_event::SpawnButtons>,
-    mut commands: Commands
-){
-    for button_event in button_event_reader.read(){
-        let button_style=&button_event.button_style;
-        let button_text_style=&button_event.button_text_style;
+    mut commands: Commands,
+) {
+    for button_event in button_event_reader.read() {
+        let button_style = &button_event.button_style;
+        let button_text_style = &button_event.button_text_style;
 
         commands
             .spawn((
@@ -300,39 +301,40 @@ fn spawn_size_options(
                             button_text_style.clone(),
                         ));
                         //buttons
-                        for board_size in BoardSize::as_list(){
-                            let mut button_entity = parent
-                                .spawn((
-                                    ButtonBundle {
-                                        style: button_style.clone(),
-                                        background_color: ui_graphics::NORMAL_BUTTON.into(),
-                                        ..default()
-                                    },
-                                    MenuButtonAction::ChangeSize(board_size)
-                                ));    
-                                button_entity.with_children(|parent| {
-                                    parent.spawn((TextBundle::from_section(
+                        for board_size in BoardSize::as_list() {
+                            let mut button_entity = parent.spawn((
+                                ButtonBundle {
+                                    style: button_style.clone(),
+                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                    ..default()
+                                },
+                                MenuButtonAction::ChangeSize(board_size),
+                            ));
+                            button_entity.with_children(|parent| {
+                                parent.spawn((
+                                    TextBundle::from_section(
                                         board_size.to_string(),
                                         button_text_style.clone(),
                                     ),
-                                    ButtonText));
-                                });
-                                if board_size == BoardSize::default() {
-                                    button_entity.insert(SelectedOptionTag);
-                                    button_entity.insert(AppliedOptionTag);
-                                }
+                                    ButtonText,
+                                ));
+                            });
+                            if board_size == BoardSize::default() {
+                                button_entity.insert(SelectedOptionTag);
+                                button_entity.insert(AppliedOptionTag);
+                            }
                         }
-                });
+                    });
             });
     }
 }
 
 fn spawn_tile_counter(
     mut button_event_reader: EventReader<ui_spawn_event::SpawnTileCountButtons>,
-    mut commands: Commands
-){
-    for button_event in button_event_reader.read(){
-        let regular_button_style= &button_event.regular_button_style;
+    mut commands: Commands,
+) {
+    for button_event in button_event_reader.read() {
+        let regular_button_style = &button_event.regular_button_style;
         let thin_button_style = &button_event.thin_button_style;
         let button_text_style = &button_event.button_text_style;
         let small_text_style = &button_event.small_text_style;
@@ -355,7 +357,8 @@ fn spawn_tile_counter(
             .with_children(|parent| {
                 parent
                     // tree generation options
-                    .spawn((NodeBundle {
+                    .spawn((
+                        NodeBundle {
                             style: Style {
                                 flex_direction: FlexDirection::Column,
                                 align_items: AlignItems::Center,
@@ -369,39 +372,40 @@ fn spawn_tile_counter(
                         OnScreenTag::Menu,
                         TreeGenerationOptionsTag,
                         OnOwnScreenVisibility(Visibility::Hidden),
-                    ))                    
+                    ))
                     .with_children(|parent| {
-                        //title 
+                        //title
                         parent.spawn(TextBundle::from_section(
                             " Wall MST Gen ",
                             small_text_style.clone(),
                         ));
                         //buttons
-                        for traveller_type in GridTravellerType::as_list(){
-                            let mut button_entity = parent
-                                .spawn((
-                                    ButtonBundle {
-                                        style: regular_button_style.clone(),
-                                        background_color: ui_graphics::NORMAL_BUTTON.into(),
-                                        ..default()
-                                    },
-                                    MenuButtonAction::ChangeSpanningTreeGeneration(traveller_type)
-                                ));    
-                                button_entity.with_children(|parent| {
-                                    parent.spawn((TextBundle::from_section(
+                        for traveller_type in GridTravellerType::as_list() {
+                            let mut button_entity = parent.spawn((
+                                ButtonBundle {
+                                    style: regular_button_style.clone(),
+                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                    ..default()
+                                },
+                                MenuButtonAction::ChangeSpanningTreeGeneration(traveller_type),
+                            ));
+                            button_entity.with_children(|parent| {
+                                parent.spawn((
+                                    TextBundle::from_section(
                                         traveller_type.to_string(),
                                         small_text_style.clone(),
                                     ),
-                                    ButtonText));
-                                });
-                                if traveller_type == GridTravellerType::default() {
-                                    button_entity.insert(SelectedOptionTag);
-                                    button_entity.insert(AppliedOptionTag);
-                                }
+                                    ButtonText,
+                                ));
+                            });
+                            if traveller_type == GridTravellerType::default() {
+                                button_entity.insert(SelectedOptionTag);
+                                button_entity.insert(AppliedOptionTag);
+                            }
                         }
                     });
 
-                    //actual tile counters
+                //actual tile counters
                 parent
                     .spawn(NodeBundle {
                         style: Style {
@@ -422,31 +426,29 @@ fn spawn_tile_counter(
                         for (action, text) in [
                             (MenuButtonAction::ChangeEmptyTilesCount(1), "1"),
                             (MenuButtonAction::ChangeEmptyTilesCount(2), "2"),
-                        ]{
-                            let mut empty_tiles_count=0;
+                        ] {
+                            let mut empty_tiles_count = 0;
                             if let MenuButtonAction::ChangeEmptyTilesCount(number) = action {
-                                empty_tiles_count=number;
+                                empty_tiles_count = number;
                             }
-                            let mut button_entity = parent
-                                .spawn((
-                                    ButtonBundle {
-                                        style: thin_button_style.clone(),
-                                        background_color: ui_graphics::NORMAL_BUTTON.into(),
-                                        ..default()
-                                    },
-                                    action
-                                ));    
-                                button_entity.with_children(|parent| {
-                                    parent.spawn((TextBundle::from_section(
-                                        text,
-                                        button_text_style.clone(),
-                                    ),
-                                    ButtonText));
-                                });
-                                if empty_tiles_count == board_properties::DEFAULT_EMPTY_COUNT {
-                                    button_entity.insert(SelectedOptionTag);
-                                    button_entity.insert(AppliedOptionTag);
-                                }
+                            let mut button_entity = parent.spawn((
+                                ButtonBundle {
+                                    style: thin_button_style.clone(),
+                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                    ..default()
+                                },
+                                action,
+                            ));
+                            button_entity.with_children(|parent| {
+                                parent.spawn((
+                                    TextBundle::from_section(text, button_text_style.clone()),
+                                    ButtonText,
+                                ));
+                            });
+                            if empty_tiles_count == board_properties::DEFAULT_EMPTY_COUNT {
+                                button_entity.insert(SelectedOptionTag);
+                                button_entity.insert(AppliedOptionTag);
+                            }
                         }
 
                         //title - walls
@@ -455,67 +457,78 @@ fn spawn_tile_counter(
                             button_text_style.clone(),
                         ));
                         //buttons - walls
-                        parent.spawn(NodeBundle {
-                            style: Style {
-                                flex_direction: FlexDirection::Row,
-                                align_items: AlignItems::Center,
-                                ..default()
-                            },
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            for (action, text) in [
-                                (Some(MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Decrease)), "<"),
-                                (None, " _ "),
-                                (Some(MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Increase)), ">"),
-                            ]{
-                                if action.is_none() {
-                                    parent.spawn((TextBundle::from_section(
-                                            text,
-                                            button_text_style.clone(),
-                                        ),
-                                        WallCountTextTag
-                                    ));  
-                                }else{
-                                    let mut arrow_button_entity = parent
-                                    .spawn((
-                                        ButtonBundle {
-                                            style: thin_button_style.clone(),
-                                            background_color: ui_graphics::NORMAL_BUTTON.into(),
-                                            ..default()
-                                        },
-                                        action.unwrap()
-                                    ));    
-                                    arrow_button_entity.with_children(|parent| {
-                                        parent.spawn((TextBundle::from_section(
-                                            text,
-                                            button_text_style.clone(),
-                                        )
-                                        , ButtonText));
-                                    });
-                                }
-                            }
-                        });
-                        //apply button
-                        let mut apply_button_entity = 
-                            parent.spawn((
-                                ButtonBundle {
-                                    style: regular_button_style.clone(),
-                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                        parent
+                            .spawn(NodeBundle {
+                                style: Style {
+                                    flex_direction: FlexDirection::Row,
+                                    align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),                                
-                                SelectedOptionTag,
-                                ApplyButtonTag
-                            ));    
+                                ..default()
+                            })
+                            .with_children(|parent| {
+                                for (action, text) in [
+                                    (
+                                        Some(MenuButtonAction::ChangeWallTilesCount(
+                                            WallTilesChange::Decrease,
+                                        )),
+                                        "<",
+                                    ),
+                                    (None, " _ "),
+                                    (
+                                        Some(MenuButtonAction::ChangeWallTilesCount(
+                                            WallTilesChange::Increase,
+                                        )),
+                                        ">",
+                                    ),
+                                ] {
+                                    if action.is_none() {
+                                        parent.spawn((
+                                            TextBundle::from_section(
+                                                text,
+                                                button_text_style.clone(),
+                                            ),
+                                            WallCountTextTag,
+                                        ));
+                                    } else {
+                                        let mut arrow_button_entity = parent.spawn((
+                                            ButtonBundle {
+                                                style: thin_button_style.clone(),
+                                                background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                                ..default()
+                                            },
+                                            action.unwrap(),
+                                        ));
+                                        arrow_button_entity.with_children(|parent| {
+                                            parent.spawn((
+                                                TextBundle::from_section(
+                                                    text,
+                                                    button_text_style.clone(),
+                                                ),
+                                                ButtonText,
+                                            ));
+                                        });
+                                    }
+                                }
+                            });
+                        //apply button
+                        let mut apply_button_entity = parent.spawn((
+                            ButtonBundle {
+                                style: regular_button_style.clone(),
+                                background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                ..default()
+                            },
+                            MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),
+                            SelectedOptionTag,
+                            ApplyButtonTag,
+                        ));
                         apply_button_entity.with_children(|parent| {
-                            parent.spawn((TextBundle::from_section(
-                                "Apply",
-                                button_text_style.clone(),
-                            ),
-                            ButtonText));
+                            parent.spawn((
+                                TextBundle::from_section("Apply", button_text_style.clone()),
+                                ButtonText,
+                            ));
                         });
-                });
+                    });
             });
     }
 }

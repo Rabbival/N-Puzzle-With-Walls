@@ -1,27 +1,25 @@
 use crate::prelude::*;
 
+pub mod eternal_buttons_spawner;
+pub mod menu_spawner;
 pub mod tile_graphics;
 pub mod ui_graphics;
-pub mod menu_spawner;
-pub mod eternal_buttons_spawner;
-
 
 pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_plugins((
-                TileGraphicsPlugin,
-                MenuGraphicsPlugin,
-                MenuSpanwerPlugin,
-                EternalButtonsSpanwerPlugin
-            ))
-            .add_systems(Update, 
-                toggle_visibility_for_entities_with_tag
-                    .in_set(StateChangeSystemSets::HandleStateChange)
-            )
-            ;
+        app.add_plugins((
+            TileGraphicsPlugin,
+            MenuGraphicsPlugin,
+            MenuSpanwerPlugin,
+            EternalButtonsSpanwerPlugin,
+        ))
+        .add_systems(
+            Update,
+            toggle_visibility_for_entities_with_tag
+                .in_set(StateChangeSystemSets::HandleStateChange),
+        );
     }
 }
 
@@ -33,27 +31,23 @@ pub struct OnOwnScreenVisibility(pub Visibility);
 fn toggle_visibility_for_entities_with_tag(
     mut event_listener: EventReader<ToggleVisibilityForElementsWithTag>,
     mut toggle_their_visibility: Query<(
-        &mut Visibility, 
+        &mut Visibility,
         Option<&OnOwnScreenVisibility>,
-        &OnScreenTag
-    )>, 
+        &OnScreenTag,
+    )>,
 ) {
-    for tag_container in event_listener.read(){
-        for (
-            mut visibility, 
-            optional_own_screen_vis, 
-            entity_tag
-        ) in toggle_their_visibility.iter_mut() 
+    for tag_container in event_listener.read() {
+        for (mut visibility, optional_own_screen_vis, entity_tag) in
+            toggle_their_visibility.iter_mut()
         {
-            if tag_container.0 == *entity_tag{
+            if tag_container.0 == *entity_tag {
                 if *visibility == Visibility::Hidden {
-                    if let Some(own_screen_vis) = optional_own_screen_vis{
+                    if let Some(own_screen_vis) = optional_own_screen_vis {
                         *visibility = own_screen_vis.0;
-                    }else{
+                    } else {
                         *visibility = Visibility::Visible;
                     }
-                }
-                else if *visibility == Visibility::Visible{
+                } else if *visibility == Visibility::Visible {
                     *visibility = Visibility::Hidden;
                 }
             }

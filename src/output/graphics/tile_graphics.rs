@@ -1,4 +1,8 @@
-use crate::{prelude::*, logic::tile_dictionary, costume_event::{move_tile_event, board_set_event}};
+use crate::{
+    costume_event::{board_set_event, move_tile_event},
+    logic::tile_dictionary,
+    prelude::*,
+};
 use bevy::{prelude::*, utils::HashMap};
 
 #[derive(Component)]
@@ -10,39 +14,42 @@ impl Plugin for TileGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
             //.add_systems(PostStartup, spawn_tiles)
-            .add_systems(Update, (
-                update_tile_entity_positions
-                    .in_set(InputSystemSets::ChangesBasedOnInput),
+            .add_systems(
+                Update,
                 (
-                    move_existing_tiles,
-                    despawn_unused_tiles_and_clear_tag,
-                    spawn_tiles,   
-                )
-                .chain()
-                .in_set(InputSystemSets::PostMainChanges)
-            ))
-            ;
+                    update_tile_entity_positions.in_set(InputSystemSets::ChangesBasedOnInput),
+                    (
+                        move_existing_tiles,
+                        despawn_unused_tiles_and_clear_tag,
+                        spawn_tiles,
+                    )
+                        .chain()
+                        .in_set(InputSystemSets::PostMainChanges),
+                ),
+            );
     }
 }
-
 
 fn move_existing_tiles(
     mut event_writer: EventWriter<board_set_event::SpawnTileInLocation>,
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     board_query: Query<&TileTypeBoard, With<GameBoard>>,
-    tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
+    tile_dictionary: Query<
+        &tile_dictionary::TileDictionary,
+        With<tile_dictionary::TileDictionaryTag>,
+    >,
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
-    mut commands: Commands
-){
-    for event in event_listener.read(){
+    mut commands: Commands,
+) {
+    for event in event_listener.read() {
         if let Err(error) = move_existing_tiles_inner(
             &mut event_writer,
             &event.reroll_solved,
             &board_query.single().grid,
             &tile_dictionary.single().entity_by_tile,
             &mut tile_transforms,
-            &mut commands
-        ){
+            &mut commands,
+        ) {
             print_entity_related_error(error);
         }
     }
@@ -52,42 +59,42 @@ fn move_existing_tiles_inner(
     event_writer: &mut EventWriter<board_set_event::SpawnTileInLocation>,
     solved_rerolled: &bool,
     grid: &Grid<Tile>,
-    tile_dictionary: &HashMap<Tile,Option<Entity>>,
+    tile_dictionary: &HashMap<Tile, Option<Entity>>,
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
-    commands: &mut Commands
-)-> Result<(),EntityRelatedCustomError>
-{
-    for (grid_location, tile_type_from_cell) in grid.iter(){
-        let spawn_location=grid_location.to_world();
-        match tile_dictionary.get(tile_type_from_cell){
+    commands: &mut Commands,
+) -> Result<(), EntityRelatedCustomError> {
+    for (grid_location, tile_type_from_cell) in grid.iter() {
+        let spawn_location = grid_location.to_world();
+        match tile_dictionary.get(tile_type_from_cell) {
             // the tile doesn't exist yet and thus should be created at that location
-            None=> { 
+            None => {
                 if *solved_rerolled {
-                    event_writer.send(board_set_event::SpawnTileInLocation{
+                    event_writer.send(board_set_event::SpawnTileInLocation {
                         tile: *tile_type_from_cell,
-                        location: spawn_location
+                        location: spawn_location,
                     })
-                }else{
-                    return Err(EntityRelatedCustomError::ItemNotInMap
-                        (ItemNotFoundInMapError::EntityNotFoundInMap));
-                }
-                },
-            // the tile exists and should therefore be moved
-            Some(optional_entity)=> { 
-                match optional_entity{
-                    None=>{return Err(EntityRelatedCustomError::NoEntity);},
-                    Some(entity)=>{
-                        if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
-                            tile_transform.translation= spawn_location;
-                            if *solved_rerolled{
-                                commands.entity(*entity).insert(StayForNextBoardTag);
-                            }
-                        }else{
-                            return Err(EntityRelatedCustomError::EntityNotInQuery);
-                        }
-                    }
+                } else {
+                    return Err(EntityRelatedCustomError::ItemNotInMap(
+                        ItemNotFoundInMapError::EntityNotFoundInMap,
+                    ));
                 }
             }
+            // the tile exists and should therefore be moved
+            Some(optional_entity) => match optional_entity {
+                None => {
+                    return Err(EntityRelatedCustomError::NoEntity);
+                }
+                Some(entity) => {
+                    if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
+                        tile_transform.translation = spawn_location;
+                        if *solved_rerolled {
+                            commands.entity(*entity).insert(StayForNextBoardTag);
+                        }
+                    } else {
+                        return Err(EntityRelatedCustomError::EntityNotInQuery);
+                    }
+                }
+            },
         }
     }
     Ok(())
@@ -97,23 +104,26 @@ fn despawn_unused_tiles_and_clear_tag(
     tagged_tiles: Query<Entity, (With<Tile>, With<StayForNextBoardTag>)>,
     untagged_tiles: Query<(Entity, &Tile), Without<StayForNextBoardTag>>,
     mut tile_dictionary_query: Query<
-        &mut tile_dictionary::TileDictionary, 
-        With<tile_dictionary::TileDictionaryTag>
+        &mut tile_dictionary::TileDictionary,
+        With<tile_dictionary::TileDictionaryTag>,
     >,
-    mut commands: Commands
-){
+    mut commands: Commands,
+) {
     // the only time the function should be used is when a solved board of a smaller size was generated
-    if tagged_tiles.is_empty(){
+    if tagged_tiles.is_empty() {
         return;
     }
 
     // delete all unused
-    for (tile_entity, tile_type) in untagged_tiles.iter(){
-        tile_dictionary_query.single_mut().entity_by_tile.remove(tile_type);
+    for (tile_entity, tile_type) in untagged_tiles.iter() {
+        tile_dictionary_query
+            .single_mut()
+            .entity_by_tile
+            .remove(tile_type);
         commands.entity(tile_entity).despawn_recursive();
     }
     // delete tags from the ones left
-    for tile_entity in tagged_tiles.iter(){
+    for tile_entity in tagged_tiles.iter() {
         commands.entity(tile_entity).remove::<StayForNextBoardTag>();
     }
 }
@@ -123,89 +133,93 @@ fn spawn_tiles(
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
     font: Res<TileTextFont>,
-    mut tile_dictionary: Query<&mut tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>
-){
-    if event_listener.is_empty(){
+    mut tile_dictionary: Query<
+        &mut tile_dictionary::TileDictionary,
+        With<tile_dictionary::TileDictionaryTag>,
+    >,
+) {
+    if event_listener.is_empty() {
         return;
     }
-    let mut tile_dictionary_instance=tile_dictionary.single_mut();
-    for spawn_request in event_listener.read(){
+    let mut tile_dictionary_instance = tile_dictionary.single_mut();
+    for spawn_request in event_listener.read() {
         let tile_to_spawn = spawn_request.tile;
-        let spawn_location = Vec3::new(
-            spawn_request.location.x,
-            spawn_request.location.y,
-            0.0
-        );
-        let text_spawn_loc_relative=Vec3::Z;        
+        let spawn_location = Vec3::new(spawn_request.location.x, spawn_request.location.y, 0.0);
+        let text_spawn_loc_relative = Vec3::Z;
 
-        let tile_entity_id=commands.spawn((
-            SpriteSheetBundle {
-                texture_atlas: sprite_atlas.0.clone(),
-                sprite: TextureAtlasSprite::new(tile_to_spawn.tile_type.to_atlas_index()),
-                transform: Transform::from_translation(spawn_location),
-                visibility: Visibility::Hidden, 
-                ..default()
-            },
-            TileBundle{
-                tile: tile_to_spawn,
-                tag: OnScreenTag::Game
-            },
-            StayForNextBoardTag,
-        )).id();
+        let tile_entity_id = commands
+            .spawn((
+                SpriteSheetBundle {
+                    texture_atlas: sprite_atlas.0.clone(),
+                    sprite: TextureAtlasSprite::new(tile_to_spawn.tile_type.to_atlas_index()),
+                    transform: Transform::from_translation(spawn_location),
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                TileBundle {
+                    tile: tile_to_spawn,
+                    tag: OnScreenTag::Game,
+                },
+                StayForNextBoardTag,
+            ))
+            .id();
 
         // create texts for numbered tiles and attach them as their children
         if tile_to_spawn.tile_type != TileType::Wall {
-            let text_color = match tile_to_spawn.tile_type{
-                TileType::Numbered => Color::INDIGO ,
-                TileType::Empty => Color::DARK_GRAY ,
-                _ => Color::NONE
+            let text_color = match tile_to_spawn.tile_type {
+                TileType::Numbered => Color::INDIGO,
+                TileType::Empty => Color::DARK_GRAY,
+                _ => Color::NONE,
             };
             let mut number_to_display = tile_to_spawn.index;
             if let TileType::Numbered = tile_to_spawn.tile_type {
                 number_to_display += 1;
             }
 
-            let tile_text_entity_id = commands.spawn(
-                Text2dBundle {
+            let tile_text_entity_id = commands
+                .spawn(Text2dBundle {
                     text: Text {
                         sections: vec![TextSection::new(
                             number_to_display.to_string(),
-                                TextStyle {
-                                    font: font.0.clone(),
-                                    font_size: 29.0,
-                                    color: text_color
-                                }
-                            )],
+                            TextStyle {
+                                font: font.0.clone(),
+                                font_size: 29.0,
+                                color: text_color,
+                            },
+                        )],
                         alignment: TextAlignment::Center,
                         linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
                     },
                     transform: Transform::from_translation(text_spawn_loc_relative),
                     ..default()
-                }
-            ).id();
-            commands.entity(tile_entity_id).add_child(tile_text_entity_id);
+                })
+                .id();
+            commands
+                .entity(tile_entity_id)
+                .add_child(tile_text_entity_id);
         }
 
-        tile_dictionary_instance.entity_by_tile.insert(
-            tile_to_spawn, 
-            Some(tile_entity_id)
-        );
+        tile_dictionary_instance
+            .entity_by_tile
+            .insert(tile_to_spawn, Some(tile_entity_id));
     }
 }
 
-
 fn update_tile_entity_positions(
     mut graphics_switch_tiles_listener: EventReader<move_tile_event::UpdateTileLocationGraphics>,
-    tile_dictionary: Query<&tile_dictionary::TileDictionary, With<tile_dictionary::TileDictionaryTag>>,
+    tile_dictionary: Query<
+        &tile_dictionary::TileDictionary,
+        With<tile_dictionary::TileDictionaryTag>,
+    >,
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
-){
-    for tile_switch_request in graphics_switch_tiles_listener.read(){
+) {
+    for tile_switch_request in graphics_switch_tiles_listener.read() {
         if let Err(move_error) = switch_tile_entity_positions_inner(
             &mut tile_transforms,
             &tile_dictionary.single().entity_by_tile,
             tile_switch_request.tile,
             tile_switch_request.new_location,
-        ){
+        ) {
             print_tile_move_error(move_error);
         }
     }
@@ -213,37 +227,34 @@ fn update_tile_entity_positions(
 
 fn switch_tile_entity_positions_inner(
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
-    tile_dictionary: &HashMap<Tile,Option<Entity>>,
-    tile_to_reposition: Tile, 
-    new_location_for_tile: GridLocation, 
-) -> Result<(),TileMoveError>
-{
-    let tile_entity = extract_tile_entity(tile_dictionary,  &tile_to_reposition)?;
+    tile_dictionary: &HashMap<Tile, Option<Entity>>,
+    tile_to_reposition: Tile,
+    new_location_for_tile: GridLocation,
+) -> Result<(), TileMoveError> {
+    let tile_entity = extract_tile_entity(tile_dictionary, &tile_to_reposition)?;
     if let Ok(mut tile_transform) = tile_transforms.get_mut(tile_entity) {
-            tile_transform.translation = new_location_for_tile.to_world();
-    }else{
-        return Err(TileMoveError::EntityRelated(EntityRelatedCustomError::EntityNotInQuery));
+        tile_transform.translation = new_location_for_tile.to_world();
+    } else {
+        return Err(TileMoveError::EntityRelated(
+            EntityRelatedCustomError::EntityNotInQuery,
+        ));
     }
     Ok(())
 }
 
 fn extract_tile_entity(
-    tile_dictionary: &HashMap<Tile,Option<Entity>>,
-    tile: &Tile
-) -> Result<Entity,TileMoveError>
-{
-    match tile_dictionary.get(tile){
-        None=> {Err(TileMoveError::EntityRelated
-            (EntityRelatedCustomError::ItemNotInMap
-                (ItemNotFoundInMapError::EntityNotFoundInMap)
-            )
-        )},
-        Some(optional_entity)=> {
-            match optional_entity{
-                None=>{Err(TileMoveError::EntityRelated
-                    (EntityRelatedCustomError::NoEntity))},
-                Some(entity)=>{ Ok(*entity) }
-            }
-        }
+    tile_dictionary: &HashMap<Tile, Option<Entity>>,
+    tile: &Tile,
+) -> Result<Entity, TileMoveError> {
+    match tile_dictionary.get(tile) {
+        None => Err(TileMoveError::EntityRelated(
+            EntityRelatedCustomError::ItemNotInMap(ItemNotFoundInMapError::EntityNotFoundInMap),
+        )),
+        Some(optional_entity) => match optional_entity {
+            None => Err(TileMoveError::EntityRelated(
+                EntityRelatedCustomError::NoEntity,
+            )),
+            Some(entity) => Ok(*entity),
+        },
     }
 }
