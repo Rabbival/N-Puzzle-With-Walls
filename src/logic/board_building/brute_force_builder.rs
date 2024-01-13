@@ -14,22 +14,31 @@ pub fn brute_force_generate_game_board(
         location_shift_count+=1;
     }
     let mut board = solved_board.clone();
+    let empty_tile_locations = board.empty_tile_locations.clone();
+    let mut location_shift_trackers 
+        = empty_tile_locations.iter()
+                                    .enumerate()
+                                    .map(|(empty_index, empty_tile_location)|{
+                                        LocationShiftTracker{
+                                            empty_index,
+                                            empty_location: *empty_tile_location,
+                                            // we'll never shift with the location below 
+                                            // on the first shift since there's none
+                                            previous_shift: BasicDirection::Up,
+                                            shift_direction_sequence: vec!()
+                                        }
+                                    });
 
-    let mut shift_direction_sequence:Vec<BasicDirection> = vec!();
-    // we'll never shift with the location below on the first shift since there's none
-    let mut previous_shift_direction = BasicDirection::Up; 
     for _shift in 0..location_shift_count{
-        // got to get a new one every time because they change after each iteration
-        // and we can't have two mutable board references at a time
-        let empty_tile_locations= board.empty_tile_locations.clone();
-        for empty_tile_location in &empty_tile_locations{
+        for mut shift_tracker in &mut location_shift_trackers{
+            let empty_tile_location = shift_tracker.empty_location;
             let mut optional_directions=
-                board.get_direct_neighbor_locations_walls_excluded(empty_tile_location);
+                board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
 
             // don't want to shift back and forth, 
             // unless it's a dead end in which it has to turn back
             if optional_directions.len() > 1 {
-                let opposite_of_previous_shift=previous_shift_direction.opposite_direction();
+                let opposite_of_previous_shift=shift_tracker.previous_shift.opposite_direction();
                 if opposite_of_previous_shift.is_none(){
                     return Err(error_handler::BoardGenerationError::DirectionCouldntBeFlipped);
                 }
@@ -46,24 +55,41 @@ pub fn brute_force_generate_game_board(
                     (ItemNotFoundInMapError::DirectionNotFoundInMap));
             }
             let chosen_location=chosen_location_option.unwrap();
-            if board.swap_tiles_by_location(empty_tile_location, chosen_location).is_err(){
+            if board.swap_tiles_by_location(&empty_tile_location, chosen_location).is_err(){
                 return Err(error_handler::BoardGenerationError::TileMoveError);
+            }else{
+                //get ready for next iteration
+                shift_tracker.empty_location = *chosen_location;
+                shift_tracker.shift_direction_sequence.push(*chosen_direction);
+                shift_tracker.previous_shift= *chosen_direction;
             }
-            
-            //get ready for next choice
-            shift_direction_sequence.push(*chosen_direction);
-            previous_shift_direction= *chosen_direction;
         }
     }
 
     //generation was successful
-    let reveresed_shift_order=shift_direction_sequence
-        .iter()
-        .rev()
-        .copied();
-    print_to_console::print_possible_solution(reveresed_shift_order);
+    for shift_tracker in location_shift_trackers{
+        let reveresed_shift_order=shift_tracker.shift_direction_sequence
+            .iter()
+            .rev()
+            .copied();
+        print_to_console::print_possible_solution(
+            shift_tracker.empty_index,
+            reveresed_shift_order
+        );
+    }
+    
     Ok(board)
 }
+
+
+/// allows to keep track of multiple empty tiles
+struct LocationShiftTracker{
+    pub empty_index: usize,
+    pub empty_location: GridLocation,
+    pub previous_shift: BasicDirection,
+    pub shift_direction_sequence: Vec<BasicDirection>
+}
+
 
 
 #[cfg(test)]
