@@ -9,22 +9,25 @@ pub fn brute_force_generate_game_board(
 {
     let mut rng = rand::thread_rng();
     let mut location_shift_count=rng.gen_range(generation_range.0..generation_range.1);
-    //prevents the generation of another solved board
+    // prevents the generation of another solved board
     if location_shift_count%2 == 0 {
         location_shift_count+=1;
     }
     let mut board = solved_board.clone();
-    let mut empty_tile_locations= board.empty_tile_locations.clone();
 
     let mut shift_direction_sequence:Vec<BasicDirection> = vec!();
-    //we'll never shift with the location below on the first shift since there's none
+    // we'll never shift with the location below on the first shift since there's none
     let mut previous_shift_direction = BasicDirection::Up; 
     for _shift in 0..location_shift_count{
-        for empty_tile_location in &mut empty_tile_locations{
+        // got to get a new one every time because they change after each iteration
+        // and we can't have two mutable board references at a time
+        let empty_tile_locations= board.empty_tile_locations.clone();
+        for empty_tile_location in &empty_tile_locations{
             let mut optional_directions=
                 board.get_direct_neighbor_locations_walls_excluded(empty_tile_location);
 
-            //don't want to shift back and forth, unless it's a dead end in which it has to turn back
+            // don't want to shift back and forth, 
+            // unless it's a dead end in which it has to turn back
             if optional_directions.len() > 1 {
                 let opposite_of_previous_shift=previous_shift_direction.opposite_direction();
                 if opposite_of_previous_shift.is_none(){
@@ -33,7 +36,7 @@ pub fn brute_force_generate_game_board(
                 optional_directions.remove(&opposite_of_previous_shift.unwrap());
             }
 
-            //choose, register, update board
+            // choose, register, update board
             let valid_directions:Vec<&BasicDirection>=optional_directions.keys().clone().collect(); 
             let chosen_shift_index=rng.gen_range(0..valid_directions.len());
             let chosen_direction=valid_directions[chosen_shift_index];
@@ -59,7 +62,6 @@ pub fn brute_force_generate_game_board(
         .rev()
         .copied();
     print_to_console::print_possible_solution(reveresed_shift_order);
-    board.empty_tile_locations = empty_tile_locations;
     Ok(board)
 }
 

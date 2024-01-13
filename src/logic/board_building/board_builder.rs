@@ -92,14 +92,14 @@ pub fn generate_game_board(
     generation_range: (u8, u8)
 ) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
 {
-    for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
-        let attempt_result
-            =permutation_builder::generate_board_by_vector_permutation(&solved_board);
-         //generation successful
-        if let Ok(board) = attempt_result { 
-            return Ok(board); 
-        }
-    }
+    // for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
+    //     let attempt_result
+    //         =permutation_builder::generate_board_by_vector_permutation(&solved_board);
+    //      //generation successful
+    //     if let Ok(board) = attempt_result { 
+    //         return Ok(board); 
+    //     }
+    // }
 
     brute_force_builder::brute_force_generate_game_board(&solved_board, generation_range)
 }
