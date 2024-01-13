@@ -94,6 +94,5 @@ pub fn generate_game_board(
     //     }
     // }
 
-    let generation_range = (1,2); // TODO: remove after debug
     brute_force_builder::brute_force_generate_game_board(&solved_board, generation_range)
 }
