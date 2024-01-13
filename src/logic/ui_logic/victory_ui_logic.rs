@@ -7,19 +7,20 @@ impl Plugin for VictoryUiLogicPlugin {
         app.add_systems(
             Update,
             (listen_for_victory_button_press)
+				.run_if(in_state(GameState::Victory))
                 .in_set(InputSystemSets::ChangesBasedOnInput),
         );
     }
 }
 
 fn listen_for_victory_button_press(
-	mut button_event_listener: EventReader<ui_event::GameButtonPressed>,
+	mut button_event_listener: EventReader<ui_event::VictoryButtonPressed>,
 	mut spawn_board_event_writer: EventWriter<board_set_event::BuildNewBoard>,
 	mut set_game_state_to_regular: ResMut<NextState<GameState>>,
 ){
 	for button_event in button_event_listener.read(){
 		match button_event.action{
-			GameButtonAction::ResetBoard => {
+			VictoryButtonAction::ResetBoard => {
 				spawn_board_event_writer.send(board_set_event::BuildNewBoard {
 					reroll_solved: false,
 				});

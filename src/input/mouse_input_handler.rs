@@ -17,6 +17,7 @@ impl Plugin for MouseInputHandlerPlugin {
             Update,
             (update_cursor_in_game_world, listen_for_mouse_click_in_game)
                 .run_if(in_state(AppState::Game))
+                .run_if(in_state(GameState::Regular))
                 .chain()
                 .in_set(InputSystemSets::InputListening),
         );

@@ -12,8 +12,8 @@ pub struct ApplyButtonPressed {
 }
 
 #[derive(Event)]
-pub struct GameButtonPressed {
-    pub action: GameButtonAction,
+pub struct VictoryButtonPressed {
+    pub action: VictoryButtonAction,
 }
 
 #[derive(Event)]
@@ -33,7 +33,7 @@ impl Plugin for UiEventPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<MenuButtonPressed>()
             .add_event::<ApplyButtonPressed>()
-            .add_event::<GameButtonPressed>()
+            .add_event::<VictoryButtonPressed>()
             .add_event::<ShowGenerationError>()
             .add_event::<ResetButtonTextColor>()
             .add_event::<ToggleButton>();

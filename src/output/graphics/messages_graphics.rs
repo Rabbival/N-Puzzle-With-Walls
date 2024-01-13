@@ -27,7 +27,6 @@ fn spawn_victory_message(
 	let button_style = Style {
         width: Val::Px(600.0),
         height: Val::Px(80.0),
-        margin: UiRect::all(Val::Px(15.0)),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         ..default()
@@ -72,7 +71,7 @@ fn spawn_victory_message(
 								background_color: ui_graphics::NORMAL_BUTTON.into(),
 								..default()
 							},
-							GameButtonAction::ResetBoard,
+							VictoryButtonAction::ResetBoard,
 						))
 						.with_children(|parent| {
 							parent.spawn((

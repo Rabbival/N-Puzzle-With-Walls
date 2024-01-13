@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
 #[derive(Component, Debug, Clone, Copy)]
-pub enum GameButtonAction {
+pub enum VictoryButtonAction {
     ResetBoard
 }

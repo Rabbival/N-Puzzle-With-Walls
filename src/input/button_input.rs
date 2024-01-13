@@ -12,7 +12,7 @@ impl Plugin for ButtonInputPlugin {
             Update,
             (
                 handle_menu_buttons.run_if(in_state(AppState::Menu)),
-                handle_game_buttons.run_if(in_state(AppState::Game)),
+                handle_victory_buttons.run_if(in_state(GameState::Victory)),
                 handle_eternal_buttons,
             )
                 .in_set(InputSystemSets::InputListening),
@@ -82,13 +82,13 @@ fn handle_menu_buttons(
     }
 }
 
-fn handle_game_buttons(
-    mut button_event_writer: EventWriter<ui_event::GameButtonPressed>,
+fn handle_victory_buttons(
+    mut button_event_writer: EventWriter<ui_event::VictoryButtonPressed>,
     mut reset_button_text_color_event_writer: EventWriter<ui_event::ResetButtonTextColor>,
     interaction_query: Query<
         (
             &Interaction,
-            &GameButtonAction,
+            &VictoryButtonAction,
         ),
         (Changed<Interaction>, With<Button>),
     >,
@@ -97,7 +97,7 @@ fn handle_game_buttons(
         interaction_query.iter()
     {
         if *interaction == Interaction::Pressed {
-            button_event_writer.send(ui_event::GameButtonPressed {
+            button_event_writer.send(ui_event::VictoryButtonPressed {
                 action: *game_button_action
             });
 

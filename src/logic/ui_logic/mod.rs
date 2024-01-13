@@ -8,7 +8,7 @@ pub struct UiLogicPlugin;
 
 impl Plugin for UiLogicPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((MenuUiLogicPlugin, EternalUiLogicPlugin))
+        app.add_plugins((MenuUiLogicPlugin, EternalUiLogicPlugin, VictoryUiLogicPlugin))
             .add_systems(
                 Update,
                 toggle_button.in_set(InputSystemSets::PostMainChanges),

@@ -48,7 +48,7 @@ pub mod prelude {
         tile::*,
         tile_dictionary::*,
         tile_type_board::*,
-        ui_logic::{eternal_ui_logic::*, menu_ui_logic::*, UiLogicPlugin},
+        ui_logic::{eternal_ui_logic::*, menu_ui_logic::*, victory_ui_logic::*, UiLogicPlugin},
         BoardPlugins,
     };
     pub use crate::output::{
