@@ -214,4 +214,14 @@ impl Default for GridTree {
 // 		}
 // 		info!("{}", leaves_string);
 // 	}
+
+// 	fn print_nodes(&self){
+// 		let mut nodes_string = String::from("");
+// 		for node in self.nodes.clone(){
+// 			nodes_string += "\n";
+// 			nodes_string += &node.0.to_string();	
+// 			nodes_string += &(String::from(" ") + &node.1.to_string());		
+// 		}
+// 		info!("{}", nodes_string);
+// 	}
 // }

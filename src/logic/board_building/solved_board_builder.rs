@@ -195,12 +195,30 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_connected_graph(){
+    fn test_connectivity_bfs_tree(){
         const ATTEMPT_COUNT: u8 = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
         let board_props: BoardProperties = BoardProperties{
             size: BoardSize::Giant,
             wall_count: WALL_COUNT_FOR_TEST,
+            tree_traveller_type: GridTravellerType::BFS,
+            ..Default::default()
+        };
+        for _ in 0..ATTEMPT_COUNT{
+            let solved_board
+                =generate_solved_board(&board_props).unwrap();
+            assert!(solved_board.grid.is_connected_graph());
+        }
+    }
+
+    #[test]
+    fn test_connectivity_dfs_tree(){
+        const ATTEMPT_COUNT: u8 = 42;
+        const WALL_COUNT_FOR_TEST: u8 = 2;
+        let board_props: BoardProperties = BoardProperties{
+            size: BoardSize::Giant,
+            wall_count: WALL_COUNT_FOR_TEST,
+            tree_traveller_type: GridTravellerType::DFS,
             ..Default::default()
         };
         for _ in 0..ATTEMPT_COUNT{
