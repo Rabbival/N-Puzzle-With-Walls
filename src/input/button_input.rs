@@ -12,6 +12,7 @@ impl Plugin for ButtonInputPlugin {
             Update,
             (
                 handle_menu_buttons.run_if(in_state(AppState::Menu)),
+                handle_game_buttons.run_if(in_state(AppState::Game)),
                 handle_eternal_buttons,
             )
                 .in_set(InputSystemSets::InputListening),
@@ -40,7 +41,7 @@ fn handle_eternal_buttons(
 }
 
 fn handle_menu_buttons(
-    mut button_event_writer: EventWriter<ui_event::ButtonPressed>,
+    mut button_event_writer: EventWriter<ui_event::MenuButtonPressed>,
     mut apply_button_event_writer: EventWriter<ui_event::ApplyButtonPressed>,
     mut reset_button_text_color_event_writer: EventWriter<ui_event::ResetButtonTextColor>,
     interaction_query: Query<
@@ -62,7 +63,7 @@ fn handle_menu_buttons(
                     action: *menu_button_action,
                 });
             } else {
-                button_event_writer.send(ui_event::ButtonPressed {
+                button_event_writer.send(ui_event::MenuButtonPressed {
                     entity,
                     action: *menu_button_action,
                 });
@@ -77,6 +78,31 @@ fn handle_menu_buttons(
                     print_to_console::game_log(GameLog::BoardSettingsChanged(menu_button_action));
                 }
             }
+        }
+    }
+}
+
+fn handle_game_buttons(
+    mut button_event_writer: EventWriter<ui_event::GameButtonPressed>,
+    mut reset_button_text_color_event_writer: EventWriter<ui_event::ResetButtonTextColor>,
+    interaction_query: Query<
+        (
+            &Interaction,
+            &GameButtonAction,
+        ),
+        (Changed<Interaction>, With<Button>),
+    >,
+) {
+    for (interaction, game_button_action) in
+        interaction_query.iter()
+    {
+        if *interaction == Interaction::Pressed {
+            button_event_writer.send(ui_event::GameButtonPressed {
+                action: *game_button_action
+            });
+
+            // if any button was pressed, turn back all the ui text that was turned red
+            reset_button_text_color_event_writer.send(ui_event::ResetButtonTextColor);
         }
     }
 }

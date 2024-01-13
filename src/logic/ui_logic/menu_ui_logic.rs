@@ -63,7 +63,7 @@ fn set_chosen_options_to_fit_current_props(
 
 /// for the planned board properties updates that don't require special treatment
 fn update_menu_ui_after_press_general(
-    mut button_event_listener: EventReader<ui_event::ButtonPressed>,
+    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction),
         (With<SelectedOptionTag>, Without<ApplyButtonTag>),
@@ -101,7 +101,7 @@ fn update_menu_ui_after_press_general(
 }
 
 fn increase_or_decrease_wall_count_menu_ui_update(
-    mut button_event_listener: EventReader<ui_event::ButtonPressed>,
+    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
     mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
     mut commands: Commands,
 ) {
@@ -157,7 +157,7 @@ fn set_tree_generation_options_visibility(
 }
 
 fn set_applied_props(
-    mut button_event_listener: EventReader<ui_event::ButtonPressed>,
+    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction),
         (With<SelectedOptionTag>, Without<ApplyButtonTag>),

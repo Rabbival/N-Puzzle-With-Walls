@@ -41,6 +41,7 @@ pub mod prelude {
                 wall_tiles_change::*,
             },
             eternal_button_action::*,
+            game_button_action::*,
             tile_type::*,
         },
         states::{app_state::*, game_state::*, StatePlugin},

@@ -7,7 +7,6 @@ pub enum GameState {
     Victory,
 }
 
-
 pub struct GameStatePlugin;
 
 impl Plugin for GameStatePlugin {

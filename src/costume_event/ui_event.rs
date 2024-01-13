@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Event)]
-pub struct ButtonPressed {
+pub struct MenuButtonPressed {
     pub entity: Entity,
     pub action: MenuButtonAction,
 }
@@ -9,6 +9,11 @@ pub struct ButtonPressed {
 #[derive(Event)]
 pub struct ApplyButtonPressed {
     pub action: MenuButtonAction,
+}
+
+#[derive(Event)]
+pub struct GameButtonPressed {
+    pub action: GameButtonAction,
 }
 
 #[derive(Event)]
@@ -26,8 +31,9 @@ pub struct UiEventPlugin;
 
 impl Plugin for UiEventPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<ButtonPressed>()
+        app.add_event::<MenuButtonPressed>()
             .add_event::<ApplyButtonPressed>()
+            .add_event::<GameButtonPressed>()
             .add_event::<ShowGenerationError>()
             .add_event::<ResetButtonTextColor>()
             .add_event::<ToggleButton>();

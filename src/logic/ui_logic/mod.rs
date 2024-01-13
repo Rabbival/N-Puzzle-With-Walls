@@ -2,6 +2,7 @@ use crate::{costume_event::ui_event, output::graphics::ui_graphics, prelude::*};
 
 pub mod eternal_ui_logic;
 pub mod menu_ui_logic;
+pub mod victory_ui_logic;
 
 pub struct UiLogicPlugin;
 

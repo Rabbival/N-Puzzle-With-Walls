@@ -12,7 +12,7 @@ pub fn main() {
         .add_plugins((
             SystemSetsPlugin,
             EventPlugins,
-            AppStatePlugin,
+            StatePlugin,
             ErrorHandlerPlugin,
         ))
         //costume

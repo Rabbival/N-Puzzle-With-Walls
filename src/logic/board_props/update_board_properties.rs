@@ -27,7 +27,7 @@ impl Plugin for UpdateBoardPropertiesPlugin {
 
 /// for the planned board properties updates that don't require special treatment
 fn general_update_planned_board_properties(
-    mut button_event_listener: EventReader<ui_event::ButtonPressed>,
+    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
     mut button_event_writer_for_apply: EventWriter<ui_event::ApplyButtonPressed>,
     mut planned_board_prop_query: Query<
         &mut BoardProperties,
@@ -79,7 +79,7 @@ fn general_update_planned_board_properties_inner(
 }
 
 fn update_wall_count_unapplied(
-    mut button_event_listener: EventReader<ui_event::ButtonPressed>,
+    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
     planned_board_prop_query: Query<
         &BoardProperties,
         (
@@ -150,7 +150,7 @@ fn apply_wall_count_to_planned_props(
 }
 
 fn set_applied_props_and_begin_generation(
-    mut button_event_listener: EventReader<ui_event::ButtonPressed>,
+    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
     mut spawn_board_event_writer: EventWriter<board_set_event::BuildNewBoard>,
     mut camera_adjustmant_event_writer: EventWriter<SetCameraAccordingToNewSettings>,
     mut applied_board_prop_query: Query<

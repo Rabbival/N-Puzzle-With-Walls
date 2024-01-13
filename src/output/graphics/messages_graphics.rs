@@ -25,15 +25,15 @@ fn spawn_victory_message(
 	mut commands: Commands
 ){
 	let button_style = Style {
-        width: Val::Px(300.0),
-        height: Val::Px(50.0),
+        width: Val::Px(600.0),
+        height: Val::Px(80.0),
         margin: UiRect::all(Val::Px(15.0)),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         ..default()
     };
     let button_text_style = TextStyle {
-        font_size: 40.0,
+        font_size: 50.0,
         ..default()
     };
 
@@ -72,12 +72,12 @@ fn spawn_victory_message(
 								background_color: ui_graphics::NORMAL_BUTTON.into(),
 								..default()
 							},
-							MenuButtonAction::GenerateBoard,
+							GameButtonAction::ResetBoard,
 						))
 						.with_children(|parent| {
 							parent.spawn((
 								TextBundle::from_section(
-									"Puzzle Solved! (reset)", 
+									"Puzzle Solved!  (Reset)", 
 									button_text_style.clone()
 								),
 								ButtonText,
@@ -92,7 +92,7 @@ fn toggle_victory_message_visibilities(
 	mut victory_listener: EventReader<game_event::ToggleVictoryMessage>,
 	mut victory_message_query: Query<
 		(&mut Visibility, &mut OnOwnScreenVisibility),
-		With<TreeGenerationOptionsTag>,
+		With<VictoryAnnouncementTag>,
 	>,
 ){
 	for _victory_announcment in victory_listener.read(){
