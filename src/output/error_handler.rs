@@ -10,7 +10,7 @@ pub enum BoardGenerationError{
     VectorPermutationGenerationFailed,
     DirectionCouldntBeFlipped,
     ItemNotInMap(ItemNotFoundInMapError),
-    TileMoveError,
+    TileMoveError(TileMoveError),
     CouldntPlaceAllWalls,
     NotEnoughAvailableSpots
 }
@@ -21,13 +21,13 @@ pub enum ItemNotFoundInMapError{
     EntityNotFoundInMap 
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum TileMoveError{
     NoTileInCell(GridLocation),
-    BoardFrozenToPlayer (String),
-    IndexOutOfGridBounds (String),
-    NoEmptyNeighbor (String),
-    PressedEmptySlot (String),
+    BoardFrozenToPlayer,
+    IndexOutOfGridBounds,
+    NoEmptyNeighbor,
+    PressedEmptySlot,
     NoOccupiedTileInThatDirection (BasicDirection),
     EntityRelated(EntityRelatedCustomError),
     TriedToSwitchWithAWall,

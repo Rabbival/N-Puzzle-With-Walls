@@ -124,8 +124,7 @@ impl TileTypeBoard {
         if self.grid.swap_by_location(first, second){
             Ok(())   
         }else{
-            Err(error_handler::TileMoveError::IndexOutOfGridBounds
-                    (String::from("index out of grid bounds when tried to swap")))
+            Err(error_handler::TileMoveError::IndexOutOfGridBounds)
         }
     }
 

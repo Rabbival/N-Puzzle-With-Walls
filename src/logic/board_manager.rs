@@ -46,7 +46,7 @@ pub fn move_tile_logic_inner(
 ) -> Result<(), error_handler::TileMoveError>
 {    
     if game_board.ignore_player_input{
-        return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
+        return Err(error_handler::TileMoveError::BoardFrozenToPlayer);
     }
 
     let empty_tile_neighbors

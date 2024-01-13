@@ -66,19 +66,19 @@ fn handle_mouse_click(
 ) -> Result<(), error_handler::TileMoveError>
 {
     if game_board.ignore_player_input{
-        return Err(error_handler::TileMoveError::BoardFrozenToPlayer(String::from("board locked")));
+        return Err(error_handler::TileMoveError::BoardFrozenToPlayer);
     }
     
     match GridLocation::from_world(&game_board.grid, cursor_position){
         Some(optional_occupied_tile_location) => {
             if !game_board.occupied(&optional_occupied_tile_location)? {
-                return Err(error_handler::TileMoveError::PressedEmptySlot(String::from("pressed an empty slot")));
+                return Err(error_handler::TileMoveError::PressedEmptySlot);
             }
             let occupied_tile_location=optional_occupied_tile_location;
             let optional_move_request= 
                 game_board.clicked_tile_to_move_request(&occupied_tile_location)?;
             match optional_move_request{
-                None => Err(error_handler::TileMoveError::NoEmptyNeighbor(String::from("no empty neighbor"))),
+                None => Err(error_handler::TileMoveError::NoEmptyNeighbor),
                 Some(move_request) => {
                     logic_event_writer.send(move_tile_event::SwitchTilesLogic{
                         move_neighbor_from_direction: move_request.move_neighbor_from_direction.unwrap(),
@@ -89,7 +89,7 @@ fn handle_mouse_click(
             }
         },
         None => {
-            Err(error_handler::TileMoveError::IndexOutOfGridBounds(String::from("index out of grid bounds!")))
+            Err(error_handler::TileMoveError::IndexOutOfGridBounds)
         }
     }
 }
@@ -139,7 +139,7 @@ mod tests {
                 &board,
             );
         match location_search_outcome{
-            Err(error_handler::TileMoveError::IndexOutOfGridBounds(_))=> true,
+            Err(error_handler::TileMoveError::IndexOutOfGridBounds)=> true,
             _ => false
         }
     }
@@ -167,7 +167,7 @@ mod tests {
                 &TileTypeBoard::default(), //locked by default
             );
         match location_validation_outcome{
-            Err(TileMoveError::BoardFrozenToPlayer(_))=> true,
+            Err(TileMoveError::BoardFrozenToPlayer)=> true,
             _ => false
         }
     }
@@ -218,7 +218,7 @@ mod tests {
                 &board,
             );
         match location_validation_outcome{
-            Err(TileMoveError::PressedEmptySlot(_))=> true,
+            Err(TileMoveError::PressedEmptySlot)=> true,
             _ => false
         }
     }
@@ -241,7 +241,7 @@ mod tests {
                 &board,
             );
         match location_validation_outcome{
-            Err(TileMoveError::NoEmptyNeighbor(_))=> true,
+            Err(TileMoveError::NoEmptyNeighbor)=> true,
             _ => false
         }
     }

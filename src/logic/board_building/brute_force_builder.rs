@@ -15,7 +15,7 @@ pub fn brute_force_generate_game_board(
     }
     let mut board = solved_board.clone();
     let empty_tile_locations = board.empty_tile_locations.clone();
-    let mut location_shift_trackers 
+    let mut location_shift_trackers : Vec<LocationShiftTracker>
         = empty_tile_locations.iter()
                                     .enumerate()
                                     .map(|(empty_index, empty_tile_location)|{
@@ -27,10 +27,11 @@ pub fn brute_force_generate_game_board(
                                             previous_shift: BasicDirection::Up,
                                             shift_direction_sequence: vec!()
                                         }
-                                    });
+                                    })
+                                    .collect();
 
     for _shift in 0..location_shift_count{
-        for mut shift_tracker in &mut location_shift_trackers{
+        for shift_tracker in &mut location_shift_trackers{
             let empty_tile_location = shift_tracker.empty_location;
             let mut optional_directions=
                 board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
@@ -55,8 +56,15 @@ pub fn brute_force_generate_game_board(
                     (ItemNotFoundInMapError::DirectionNotFoundInMap));
             }
             let chosen_location=chosen_location_option.unwrap();
-            if board.swap_tiles_by_location(&empty_tile_location, chosen_location).is_err(){
-                return Err(error_handler::BoardGenerationError::TileMoveError);
+            if let Err(error) 
+                = board.swap_tiles_by_location(&empty_tile_location, chosen_location)
+            {
+                // if it tried to switch between two empty tiles
+                // we'll ignore and not register the move
+                match error{
+                    TileMoveError::TriedToSwitchEmptyWithEmpty => continue,
+                    _ => return Err(error_handler::BoardGenerationError::TileMoveError(error))
+                };
             }else{
                 //get ready for next iteration
                 shift_tracker.empty_location = *chosen_location;

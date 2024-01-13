@@ -2,6 +2,11 @@ use std::fmt::Display;
 
 use crate::prelude::*;
 
+
+pub fn print_board_generation_error(error: BoardGenerationError){
+    error!("board generation failed! error: {:?}", error);
+}
+
 pub enum GameLog<'a>{
     NewBoardGenerated,
     WallCountSet(u8),
@@ -58,31 +63,27 @@ pub fn print_menu_error(menu_error: MenuError){
     }
 }
 
-pub fn print_board_generation_error(error: BoardGenerationError){
-    error!("board generation failed! error: {:?}", error);
-}
-
 pub fn print_tile_move_error(move_error: TileMoveError){
     match move_error{
-        TileMoveError::BoardFrozenToPlayer(message)=>{
-            warn!(message);
+        TileMoveError::BoardFrozenToPlayer => {
+            warn!("board locked");
         },
-        TileMoveError::NoEmptyNeighbor(message)=>{
-            warn!(message);
+        TileMoveError::NoEmptyNeighbor => {
+            warn!("no empty neighbor");
         },
-        TileMoveError::PressedEmptySlot(message)=>{
-            warn!(message);
+        TileMoveError::PressedEmptySlot => {
+            warn!("pressed an empty slot");
         },
-        TileMoveError::NoOccupiedTileInThatDirection(direction)=>{
+        TileMoveError::NoOccupiedTileInThatDirection(direction) => {
             warn!("no occupied tile in direction: {:?}", direction);
         },
-        TileMoveError::IndexOutOfGridBounds(_message)=>{
-            // warn!(message);
+        TileMoveError::IndexOutOfGridBounds => {
+            // warn!("index out of grid bounds");
         },
-        TileMoveError::TriedToSwitchEmptyWithEmpty=>{
+        TileMoveError::TriedToSwitchEmptyWithEmpty => {
             info!("tried to switch empty with empty, hence no swap was performed");
         },
-        _=>{error!("{:?}", move_error)}
+        _ => {error!("{:?}", move_error)}
     }
 }
 
