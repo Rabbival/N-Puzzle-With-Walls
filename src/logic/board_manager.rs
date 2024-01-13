@@ -10,7 +10,10 @@ impl Plugin for BoardManagerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (move_tile_logic,)
+            (
+                    move_tile_logic,
+                    check_if_solved
+                )
                 .chain()
                 .in_set(InputSystemSets::InputHandling),
         );
@@ -18,19 +21,19 @@ impl Plugin for BoardManagerPlugin {
 }
 
 /// graphics switched before logic for the sake of graphics function readability
-pub fn move_tile_logic(
+fn move_tile_logic(
     mut graphics_event_writer: EventWriter<move_tile_event::UpdateTileLocationGraphics>,
+    mut check_if_board_is_solved_writer: EventWriter<move_tile_event::CheckIfBoardIsSolved>,
     mut logic_event_reader: EventReader<move_tile_event::SwitchTilesLogic>,
     mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
-    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
 ) {
     for switch_tile_request in logic_event_reader.read() {
         if let Err(move_error) = move_tile_logic_inner(
             &mut graphics_event_writer,
+            &mut check_if_board_is_solved_writer,
             switch_tile_request.move_neighbor_from_direction,
             switch_tile_request.empty_tile_index,
             &mut game_board_query.single_mut(),
-            &solved_board_query.single().grid,
         ) {
             print_to_console::print_tile_move_error(move_error);
         }
@@ -38,12 +41,12 @@ pub fn move_tile_logic(
 }
 
 /// graphics switched before logic for the sake of graphics function readability
-pub fn move_tile_logic_inner(
+fn move_tile_logic_inner(
     graphics_event_writer: &mut EventWriter<move_tile_event::UpdateTileLocationGraphics>,
+    check_if_board_is_solved_writer: &mut EventWriter<move_tile_event::CheckIfBoardIsSolved>,
     move_neighbor_from_direction: BasicDirection,
     empty_tile_index: usize,
     game_board: &mut TileTypeBoard,
-    solved_grid: &Grid<Tile>,
 ) -> Result<(), error_handler::TileMoveError> {
     if game_board.ignore_player_input {
         return Err(error_handler::TileMoveError::BoardFrozenToPlayer);
@@ -69,8 +72,6 @@ pub fn move_tile_logic_inner(
 
         print_to_console::game_log(GameLog::TilesMoved(&occupied_tile, &empty_tile_location));
 
-        check_if_solved(game_board, solved_grid);
-
         graphics_event_writer.send(move_tile_event::UpdateTileLocationGraphics {
             tile: occupied_tile,
             new_location: empty_tile_location,
@@ -79,6 +80,9 @@ pub fn move_tile_logic_inner(
             tile: *game_board.get_empty_tile(empty_tile_index),
             new_location: occupied_tile_location,
         });
+
+        check_if_board_is_solved_writer.send(move_tile_event::CheckIfBoardIsSolved);
+
         Ok(())
     } else {
         Err(error_handler::TileMoveError::NoOccupiedTileInThatDirection(
@@ -88,10 +92,18 @@ pub fn move_tile_logic_inner(
 }
 
 /// also freezes the board if it is solved
-fn check_if_solved(game_board: &mut TileTypeBoard, solved_grid: &Grid<Tile>) {
-    if game_board.grid == *solved_grid {
-        print_to_console::game_log(GameLog::Victory);
-        game_board.ignore_player_input = true;
+fn check_if_solved(
+    mut check_if_board_is_solved_listener: EventReader<move_tile_event::CheckIfBoardIsSolved>,
+    mut set_game_state_to_victory: ResMut<NextState<GameState>>,
+    mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
+) {
+    for _check_request in check_if_board_is_solved_listener.read(){
+        if game_board_query.single().grid == solved_board_query.single().grid {
+            set_game_state_to_victory.set(GameState::Victory);
+            print_to_console::game_log(GameLog::Victory);
+            game_board_query.single_mut().ignore_player_input = true;
+        }
     }
 }
 
@@ -105,40 +117,47 @@ mod tests {
     fn test_valid_request() {
         let mut app = App::new();
         app.add_event::<move_tile_event::UpdateTileLocationGraphics>()
+            .add_event::<move_tile_event::CheckIfBoardIsSolved>()
             .add_systems(Update, test_valid_request_inner);
         app.update();
     }
 
     fn test_valid_request_inner(
-        mut event_writer: EventWriter<move_tile_event::UpdateTileLocationGraphics>,
+        mut graphics_writer: EventWriter<move_tile_event::UpdateTileLocationGraphics>,
+        mut check_writer: EventWriter<move_tile_event::CheckIfBoardIsSolved>,
     ) {
         assert!(!detected_as_invalid_request(
             basic_direction::BasicDirection::Up,
-            &mut event_writer
+            &mut graphics_writer,
+            &mut check_writer
         ));
         assert!(detected_as_invalid_request(
             basic_direction::BasicDirection::Right,
-            &mut event_writer
+            &mut graphics_writer,
+            &mut check_writer
         ));
         assert!(detected_as_invalid_request(
             basic_direction::BasicDirection::Down,
-            &mut event_writer
+            &mut graphics_writer,
+            &mut check_writer
         ));
         assert!(!detected_as_invalid_request(
             basic_direction::BasicDirection::Left,
-            &mut event_writer
+            &mut graphics_writer,
+            &mut check_writer
         ));
     }
 
     fn detected_as_invalid_request(
         from_dir: basic_direction::BasicDirection,
-        event_writer: &mut EventWriter<move_tile_event::UpdateTileLocationGraphics>,
+        graphics_writer: &mut EventWriter<move_tile_event::UpdateTileLocationGraphics>,
+        check_writer: &mut EventWriter<move_tile_event::CheckIfBoardIsSolved>,
     ) -> bool {
         let mut board =
             solved_board_builder::generate_solved_board(&BoardProperties::default()).unwrap();
         board.ignore_player_input = false;
         let direction_check_outcome =
-            move_tile_logic_inner(event_writer, from_dir, 0, &mut board.clone(), &board.grid);
+            move_tile_logic_inner(graphics_writer, check_writer, from_dir, 0, &mut board.clone());
         match direction_check_outcome {
             Err(error_handler::TileMoveError::NoOccupiedTileInThatDirection(_)) => true,
             _ => false,

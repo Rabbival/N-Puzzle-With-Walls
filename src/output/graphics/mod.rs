@@ -4,6 +4,7 @@ pub mod eternal_buttons_spawner;
 pub mod menu_spawner;
 pub mod tile_graphics;
 pub mod ui_graphics;
+pub mod messages_graphics;
 
 pub struct GraphicsPlugin;
 
@@ -14,6 +15,7 @@ impl Plugin for GraphicsPlugin {
             MenuGraphicsPlugin,
             MenuSpanwerPlugin,
             EternalButtonsSpanwerPlugin,
+            MessagesGraphicsPlugin,
         ))
         .add_systems(
             Update,

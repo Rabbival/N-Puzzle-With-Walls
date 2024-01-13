@@ -20,7 +20,7 @@ impl Plugin for UpdateBoardPropertiesPlugin {
                     .in_set(InputSystemSets::InputHandling),
                 apply_wall_count_to_planned_props.in_set(InputSystemSets::PostMainChanges),
             )
-                .run_if(in_state(GameState::Menu)),
+                .run_if(in_state(AppState::Menu)),
         );
     }
 }
@@ -167,11 +167,13 @@ fn set_applied_props_and_begin_generation(
             Without<AppliedBoardProperties>,
         ),
     >,
+    mut set_game_state_to_regular: ResMut<NextState<GameState>>,
 ) {
     for button_event in button_event_listener.read() {
         if let MenuButtonAction::GenerateBoard = button_event.action {
             let planned_board_prop = planned_board_prop_query.single_mut();
             let mut applied_props = applied_board_prop_query.single_mut();
+            *applied_props = *planned_board_prop;
 
             spawn_board_event_writer.send(board_set_event::BuildNewBoard {
                 reroll_solved: true,
@@ -179,7 +181,7 @@ fn set_applied_props_and_begin_generation(
             camera_adjustmant_event_writer.send(board_set_event::SetCameraAccordingToNewSettings {
                 new_grid_side_length: planned_board_prop.size.to_grid_side_length(),
             });
-            *applied_props = *planned_board_prop;
+            set_game_state_to_regular.set(GameState::Regular);
         }
     }
 }

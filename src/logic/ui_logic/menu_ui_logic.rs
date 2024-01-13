@@ -23,7 +23,7 @@ impl Plugin for MenuUiLogicPlugin {
                     .in_set(InputSystemSets::InputHandling),
                 apply_wall_count_menu_ui_update.in_set(InputSystemSets::PostMainChanges),
             )
-                .run_if(in_state(GameState::Menu)),
+                .run_if(in_state(AppState::Menu)),
         );
     }
 }

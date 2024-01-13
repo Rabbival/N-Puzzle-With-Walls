@@ -16,7 +16,7 @@ pub mod prelude {
     pub use crate::bundles::tile_bundle::*;
     pub use crate::costume_event::{
         app_event::*, board_set_event::*, move_tile_event::*, screen_changing_event::*,
-        ui_event::*, ui_spawn_event::*, EventPlugins,
+        ui_event::*, ui_spawn_event::*, game_event::*, EventPlugins,
     };
     pub use crate::input::{
         button_input::*, keyboard_input_handler::*, mouse_input_handler::*, move_request::*,
@@ -43,7 +43,7 @@ pub mod prelude {
             eternal_button_action::*,
             tile_type::*,
         },
-        states::{game_state::*, StatePlugin},
+        states::{app_state::*, game_state::*, StatePlugin},
         tile::*,
         tile_dictionary::*,
         tile_type_board::*,
@@ -55,7 +55,7 @@ pub mod prelude {
         camera::*,
         error_handler::*,
         graphics::{
-            eternal_buttons_spawner::*, menu_spawner::*, tile_graphics::*, ui_graphics::*,
+            eternal_buttons_spawner::*, menu_spawner::*, tile_graphics::*, ui_graphics::*, messages_graphics::*,
             GraphicsPlugin, OnOwnScreenVisibility,
         },
         print_to_console::*,

@@ -12,11 +12,15 @@ pub struct SwitchTilesLogic {
     pub empty_tile_index: usize,
 }
 
+#[derive(Event)]
+pub struct CheckIfBoardIsSolved;
+
 pub struct MoveTileEventPlugin;
 
 impl Plugin for MoveTileEventPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<UpdateTileLocationGraphics>()
-            .add_event::<SwitchTilesLogic>();
+            .add_event::<SwitchTilesLogic>()
+            .add_event::<CheckIfBoardIsSolved>();
     }
 }

@@ -11,7 +11,7 @@ impl Plugin for KeyboardInputHandlerPlugin {
             Update,
             (
                 (
-                    move_tiles_with_keyboard.run_if(in_state(GameState::Game)),
+                    move_tiles_with_keyboard.run_if(in_state(AppState::Game)),
                     listen_for_reset,
                     open_menu,
                 )

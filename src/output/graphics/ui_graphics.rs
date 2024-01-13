@@ -16,7 +16,7 @@ impl Plugin for MenuGraphicsPlugin {
             Update,
             (
                 (flash_generation_text_red, reset_color_for_button_text)
-                    .run_if(in_state(GameState::Menu)),
+                    .run_if(in_state(AppState::Menu)),
                 update_button_color,
                 (update_wall_tiles_count_visuals)
                     .run_if(resource_changed::<UnappliedMenuWallCount>()),

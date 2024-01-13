@@ -11,7 +11,7 @@ impl Plugin for ButtonInputPlugin {
         app.add_systems(
             Update,
             (
-                handle_menu_buttons.run_if(in_state(GameState::Menu)),
+                handle_menu_buttons.run_if(in_state(AppState::Menu)),
                 handle_eternal_buttons,
             )
                 .in_set(InputSystemSets::InputListening),

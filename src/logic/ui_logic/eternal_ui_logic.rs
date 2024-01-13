@@ -21,19 +21,19 @@ fn toggle_menu(
     mut event_listener: EventReader<app_event::ToggleMenu>,
     mut button_toggle_event_writer: EventWriter<ui_event::ToggleButton>,
     menu_toggle_button_entity: Query<Entity, With<MenuToggleButton>>,
-    game_state: Res<State<GameState>>,
-    mut next_state: ResMut<NextState<GameState>>,
+    game_state: Res<State<AppState>>,
+    mut next_state: ResMut<NextState<AppState>>,
 ) {
     for _ in event_listener.read() {
         button_toggle_event_writer.send(ui_event::ToggleButton {
             entity: menu_toggle_button_entity.single(),
         });
         match game_state.get() {
-            GameState::Game => {
-                next_state.set(GameState::Menu);
+            AppState::Game => {
+                next_state.set(AppState::Menu);
             }
-            GameState::Menu => {
-                next_state.set(GameState::Game);
+            AppState::Menu => {
+                next_state.set(AppState::Game);
             }
         }
     }

@@ -16,7 +16,7 @@ impl Plugin for MouseInputHandlerPlugin {
         app.init_resource::<CursorPosition>().add_systems(
             Update,
             (update_cursor_in_game_world, listen_for_mouse_click_in_game)
-                .run_if(in_state(GameState::Game))
+                .run_if(in_state(AppState::Game))
                 .chain()
                 .in_set(InputSystemSets::InputListening),
         );
