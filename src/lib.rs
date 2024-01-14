@@ -7,6 +7,7 @@ mod logic;
 mod output;
 mod screen_setup;
 mod system_sets;
+mod data_base;
 
 pub mod prelude {
     pub use bevy::reflect::TypeUuid;
@@ -17,6 +18,11 @@ pub mod prelude {
     pub use crate::costume_event::{
         app_event::*, board_set_event::*, move_tile_event::*, screen_changing_event::*,
         ui_event::*, ui_spawn_event::*, game_event::*, EventPlugins,
+    };
+    pub use crate::data_base::{
+        DataBasePlugins,
+        saved_layout::*,
+        data_base_manager::*,
     };
     pub use crate::input::{
         button_input::*, keyboard_input_handler::*, mouse_input_handler::*, move_request::*,

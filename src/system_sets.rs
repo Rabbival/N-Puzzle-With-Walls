@@ -4,7 +4,9 @@ use bevy::prelude::*;
 pub enum InputSystemSets {
     InputListening,
     InputHandling,
-    ChangesBasedOnInput,
+    InitialChanges,
+    PostInitialChanges,
+    MainChanges,
     PostMainChanges,
 }
 
@@ -24,7 +26,9 @@ impl Plugin for SystemSetsPlugin {
             (
                 InputSystemSets::InputListening,
                 InputSystemSets::InputHandling,
-                InputSystemSets::ChangesBasedOnInput,
+                InputSystemSets::InitialChanges,
+                InputSystemSets::PostInitialChanges,
+                InputSystemSets::MainChanges,
                 InputSystemSets::PostMainChanges,
             )
                 .chain(),

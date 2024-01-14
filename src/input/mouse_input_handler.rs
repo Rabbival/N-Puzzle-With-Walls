@@ -209,7 +209,10 @@ mod tests {
         event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>,
     ) -> bool {
         let mut board: TileTypeBoard =
-            solved_board_builder::generate_solved_board(&BoardProperties::default()).unwrap();
+            solved_board_builder::generate_solved_board_inner(
+                &BoardProperties::default(),
+                &mut DataBaseManager::default()
+            ).unwrap();
         board.ignore_player_input = false;
 
         //fill all empties

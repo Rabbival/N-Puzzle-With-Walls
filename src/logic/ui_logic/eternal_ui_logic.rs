@@ -12,7 +12,7 @@ impl Plugin for EternalUiLogicPlugin {
         app.add_systems(
             Update,
             (toggle_menu, listen_for_app_close_request)
-                .in_set(InputSystemSets::ChangesBasedOnInput),
+                .in_set(InputSystemSets::InitialChanges),
         );
     }
 }

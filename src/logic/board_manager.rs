@@ -154,7 +154,10 @@ mod tests {
         check_writer: &mut EventWriter<move_tile_event::CheckIfBoardIsSolved>,
     ) -> bool {
         let mut board =
-            solved_board_builder::generate_solved_board(&BoardProperties::default()).unwrap();
+            solved_board_builder::generate_solved_board_inner(
+                &BoardProperties::default(),
+                &mut DataBaseManager::default()
+            ).unwrap();
         board.ignore_player_input = false;
         let direction_check_outcome =
             move_tile_logic_inner(graphics_writer, check_writer, from_dir, 0, &mut board.clone());

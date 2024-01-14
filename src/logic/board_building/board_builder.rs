@@ -21,7 +21,7 @@ impl Plugin for BoardBuilderPlugin {
             //important to run before we draw it in graphics.rs
             .add_systems(
                 Update,
-                build_a_new_board.in_set(InputSystemSets::ChangesBasedOnInput),
+                build_a_new_board.in_set(InputSystemSets::PostInitialChanges),
             );
     }
 }
@@ -29,25 +29,15 @@ impl Plugin for BoardBuilderPlugin {
 fn build_a_new_board(
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
-    mut solved_board_query: Query<&mut TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
+    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<AppState>>,
     current_game_state: Res<State<AppState>>,
 ) {
-    for build_request in event_listener.read() {
-        let mut solved_board_entity = solved_board_query.single_mut();
+    for _build_request in event_listener.read() {
         let applied_props = applied_board_props_query.single();
-        if build_request.reroll_solved {
-            match generate_solved_board(applied_props) {
-                Ok(board) => *solved_board_entity = board,
-                Err(error) => {
-                    generation_error_event_writer.send(ui_event::ShowGenerationError(error));
-                    return;
-                }
-            }
-        }
-        let solved_grid = &solved_board_entity.grid;
+        let solved_grid = &solved_board_query.single().grid;
         let mut game_board = game_board_query.single_mut();
         let optional_newborn_tiletype_board =
             TileTypeBoard::from_grid(solved_grid, applied_props.empty_count);
@@ -85,14 +75,14 @@ pub fn generate_game_board(
     solved_board: TileTypeBoard,
     generation_range: (u8, u8),
 ) -> Result<TileTypeBoard, error_handler::BoardGenerationError> {
-    // for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
-    //     let attempt_result
-    //         =permutation_builder::generate_board_by_vector_permutation(&solved_board);
-    //      //generation successful
-    //     if let Ok(board) = attempt_result {
-    //         return Ok(board);
-    //     }
-    // }
+    for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
+        let attempt_result
+            =permutation_builder::generate_board_by_vector_permutation(&solved_board);
+         //generation successful
+        if let Ok(board) = attempt_result {
+            return Ok(board);
+        }
+    }
 
     brute_force_builder::brute_force_generate_game_board(&solved_board, generation_range)
 }

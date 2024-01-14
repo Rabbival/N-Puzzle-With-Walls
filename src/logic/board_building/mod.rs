@@ -10,6 +10,6 @@ pub struct BoardBuildingPlugins;
 
 impl Plugin for BoardBuildingPlugins {
     fn build(&self, app: &mut App) {
-        app.add_plugins((BoardEntitiesSpawnerPlugin, BoardBuilderPlugin));
+        app.add_plugins((BoardEntitiesSpawnerPlugin, BoardBuilderPlugin, SolvedBoardPlugin));
     }
 }

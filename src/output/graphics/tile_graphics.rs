@@ -17,7 +17,7 @@ impl Plugin for TileGraphicsPlugin {
             .add_systems(
                 Update,
                 (
-                    update_tile_entity_positions.in_set(InputSystemSets::ChangesBasedOnInput),
+                    update_tile_entity_positions.in_set(InputSystemSets::InitialChanges),
                     (
                         move_existing_tiles,
                         despawn_unused_tiles_and_clear_tag,

@@ -8,7 +8,7 @@ impl Plugin for VictoryUiLogicPlugin {
             Update,
             (listen_for_victory_button_press)
 				.run_if(in_state(GameState::Victory))
-                .in_set(InputSystemSets::ChangesBasedOnInput),
+                .in_set(InputSystemSets::InitialChanges),
         );
     }
 }

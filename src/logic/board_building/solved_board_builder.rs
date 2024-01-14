@@ -1,20 +1,63 @@
-use crate::{logic::data_structure::util_functions, output::error_handler, prelude::*};
+use crate::{logic::data_structure::util_functions, output::error_handler, prelude::*, costume_event::{board_set_event, ui_event}};
 
 /// mustn't be more than 2 as there will always be a corner
 /// shouldn't be less than 1 or we might get useless spaces
 const MIN_NEIGHBORS: u8 = 2;
 
-pub fn generate_solved_board(
+pub struct SolvedBoardPlugin;
+
+impl Plugin for SolvedBoardPlugin{
+    fn build(&self, app: &mut App) {
+        app
+            //important to run before we base a new board on it in board_builder.rs
+            .add_systems(
+                Update,
+                generate_solved_board.in_set(InputSystemSets::InitialChanges),
+            );
+    }
+}
+
+fn generate_solved_board(
+    mut event_listener: EventReader<board_set_event::BuildNewBoard>,
+    mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
+    mut solved_board_query: Query<&mut TileTypeBoard, With<SolvedBoard>>,
+    applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
+    mut db_manager: ResMut<DataBaseManager>
+){
+    for build_request in event_listener.read(){
+        if build_request.reroll_solved {
+            match generate_solved_board_inner(
+                applied_board_props_query.single(),
+                db_manager.as_mut()
+            ) {
+                Ok(board) => *solved_board_query.single_mut() = board,
+                Err(error) => {
+                    generation_error_event_writer.send(ui_event::ShowGenerationError(error));
+                    return;
+                }
+            }
+        }
+    }
+}
+
+pub fn generate_solved_board_inner(
     applied_props: &BoardProperties,
+    db_manager: &mut DataBaseManager
 ) -> Result<TileTypeBoard, BoardGenerationError> {
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut solved_board = TileTypeBoard::new(grid_side_length);
     let grid_side_length_u32 = grid_side_length as u32;
+    let mut wall_locations = vec![];
 
     if applied_props.wall_count > 0 {
-        let wall_locations = determine_wall_locations(applied_props)?;
-        spawn_walls_in_locations(wall_locations, &mut solved_board);
+        wall_locations = determine_wall_locations(applied_props)?;
+        spawn_walls_in_locations(&wall_locations, &mut solved_board);
     }
+
+    db_manager.insert_layout(SavedLayout{
+        board_propes: *applied_props,
+        wall_locations: wall_locations
+    });
 
     let mut empty_tile_counter = applied_props.empty_count;
     'outer_for: for i in (0..grid_side_length_u32).rev() {
@@ -166,9 +209,9 @@ fn forbid_spawn_in_neighbors_of_location(
     }
 }
 
-fn spawn_walls_in_locations(locations: Vec<GridLocation>, board: &mut TileTypeBoard) {
+fn spawn_walls_in_locations(locations: &Vec<GridLocation>, board: &mut TileTypeBoard) {
     for location in locations {
-        board.set(&location, Tile::new(TileType::Wall));
+        board.set(location, Tile::new(TileType::Wall));
     }
 }
 
@@ -178,7 +221,7 @@ mod tests {
 
     #[test]
     fn test_connectivity_bfs_tree() {
-        const ATTEMPT_COUNT: u8 = 42;
+        const ATTEMPT_COUNT: usize = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
         let board_props: BoardProperties = BoardProperties {
             size: BoardSize::Giant,
@@ -186,15 +229,21 @@ mod tests {
             tree_traveller_type: GridTravellerType::BFS,
             ..Default::default()
         };
+        let mut dummy_db_manager = DataBaseManager::default();
         for _ in 0..ATTEMPT_COUNT {
-            let solved_board = generate_solved_board(&board_props).unwrap();
+            let solved_board = 
+                generate_solved_board_inner(
+                    &board_props,
+                    &mut dummy_db_manager
+                ).unwrap();
             assert!(solved_board.grid.is_connected_graph());
         }
+        assert!(dummy_db_manager.get_saved_layouts_ref().len() == ATTEMPT_COUNT);
     }
 
     #[test]
     fn test_connectivity_dfs_tree() {
-        const ATTEMPT_COUNT: u8 = 42;
+        const ATTEMPT_COUNT: usize = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
         let board_props: BoardProperties = BoardProperties {
             size: BoardSize::Giant,
@@ -202,9 +251,15 @@ mod tests {
             tree_traveller_type: GridTravellerType::DFS,
             ..Default::default()
         };
+        let mut dummy_db_manager = DataBaseManager::default();
         for _ in 0..ATTEMPT_COUNT {
-            let solved_board = generate_solved_board(&board_props).unwrap();
+            let solved_board = 
+                generate_solved_board_inner(
+                    &board_props,
+                    &mut dummy_db_manager
+                ).unwrap();
             assert!(solved_board.grid.is_connected_graph());
         }
+        assert!(dummy_db_manager.get_saved_layouts_ref().len() == ATTEMPT_COUNT);
     }
 }
