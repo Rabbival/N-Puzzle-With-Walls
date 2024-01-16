@@ -94,8 +94,18 @@ fn determine_wall_locations(
     let mut possible_spawn_locations = vec![];
     let mut neighbor_count_grid =
         initialize_neighbor_count_grid(&mut possible_spawn_locations, grid_side_length);
-    let mut grid_tree = neighbor_count_grid.get_spanning_tree(applied_props.tree_traveller_type);
-    let mut grid_tree_iter = grid_tree.clone();
+    let mut grid_tree_result = 
+        neighbor_count_grid.get_spanning_tree(applied_props.tree_traveller_type);
+    let mut grid_tree ;
+    let mut grid_tree_iter ;
+    match grid_tree_result{
+        Ok(valid_grid_tree) => {
+            grid_tree = valid_grid_tree;
+            grid_tree_iter = grid_tree.clone();
+        },
+        Err(tree_error) => return Err(error_handler::BoardGenerationError::GridTreeError(tree_error))
+    }
+    
 
     for _ in 0..wall_count {
         let mut chosen_wall_location = GridLocation::default();
@@ -149,7 +159,7 @@ fn determine_wall_locations(
         // if the location was chosen
         wall_spawn_locations.push(chosen_wall_location);
         let neighbors_of_chosen_wall_location =
-            neighbor_count_grid.get_all_direct_neighbor_locations(&chosen_wall_location);
+            neighbor_count_grid.get_all_occupied_neighbor_locations(&chosen_wall_location);
         for neighbor in neighbors_of_chosen_wall_location {
             let neighbor_location = neighbor.1;
             let neighbor_value = neighbor_count_grid.get_mut(&neighbor_location).unwrap();
@@ -201,7 +211,7 @@ fn forbid_spawn_in_neighbors_of_location(
     possible_spawn_locations: &mut Vec<GridLocation>,
     neighbor_count_grid: &Grid<u8>,
 ) {
-    for neighbor_to_forbid in neighbor_count_grid.get_all_direct_neighbor_locations(location) {
+    for neighbor_to_forbid in neighbor_count_grid.get_all_occupied_neighbor_locations(location) {
         util_functions::remove_by_value::<GridLocation>(
             &neighbor_to_forbid.1,
             possible_spawn_locations,

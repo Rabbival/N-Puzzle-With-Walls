@@ -45,8 +45,6 @@ impl<'a, T: Clone> GridTraveller<'a, T> {
     }
 }
 
-/// BFS iterator, returns None if location wasn't found
-/// or if there are no more locations to iterate over
 impl<'a, T: Clone> Iterator for GridTraveller<'a, T> {
     type Item = LocationAndUnaddedNeighbors;
 
@@ -56,21 +54,19 @@ impl<'a, T: Clone> Iterator for GridTraveller<'a, T> {
             GridTravellerType::DFS => self.locations_to_visit.pop_back(),
         };
 
-        // info!("{:?}", next_location);
-
         match next_location {
             None => None,
             Some(next_tile_to_visit) => {
                 let next_tile_neighbors = self
                     .grid
-                    .get_all_direct_neighbor_locations(&next_tile_to_visit);
+                    .get_all_occupied_neighbor_locations(&next_tile_to_visit);
                 let new_locations_to_visit: VecDeque<GridLocation> = next_tile_neighbors
                     .values()
                     //only add the ones not yet visited
                     .filter(|next_tile_neighbor_location| {
                         match self.added_mark(next_tile_neighbor_location) {
                             // could be that the tile wasn't found,
-                            // but we can't return None from an iterator's closure
+                            // but we can't return None from an filter's closure
                             // so we'll skip it
                             None => false,
                             Some(added_mark) => !*added_mark,

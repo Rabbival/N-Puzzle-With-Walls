@@ -1,5 +1,5 @@
 use super::grid_tree_node::*;
-use crate::{logic::data_structure::util_functions, prelude::*};
+use crate::{logic::data_structure::util_functions, prelude::*, output::error_handler};
 
 const MINIMAL_DEPTH: u8 = 2;
 
@@ -40,30 +40,27 @@ impl GridTree {
         self.nodes.is_empty()
     }
 
-    /// returns true if leaf was inserted successfully
-    /// doesn't insert if parent wasn't found or node already exists in the tree
-    pub fn insert(
+    pub fn insert_leaf(
         &mut self,
         node: GridLocation,
         optional_parent_location: Option<GridLocation>,
-    ) -> bool {
+    ) -> Result<(), error_handler::GridTreeError> {
         if self.nodes.get(&node).is_some() {
-            false
+            Err(error_handler::GridTreeError::NodeAlreadyExists)
         } else {
             // if the tree is empty, the new node must have no parent
             if self.nodes.is_empty() {
                 if optional_parent_location.is_none() {
                     self.nodes.insert(node, GridTreeNode::new(None, 0));
                     self.leaves = vec![node];
-                    true
+                    Ok(())
                 } else {
-                    false
+                    Err(error_handler::GridTreeError::ParentNotFound)
                 }
             } else if let Some(parent_location) = optional_parent_location {
                 let optional_parent_node = self.nodes.get_mut(&parent_location);
                 match optional_parent_node {
-                    //if the parent doesn't exist the request is invalid
-                    None => false,
+                    None => Err(error_handler::GridTreeError::ParentNotFound),
                     Some(parent_node) => {
                         // if the parent was a leaf up to this point,
                         // remove it from the list of leaves
@@ -80,11 +77,11 @@ impl GridTree {
                             GridTreeNode::new(Some(parent_location), parent_depth + 1),
                         );
 
-                        true
+                        Ok(())
                     }
                 }
             } else {
-                false
+                Err(error_handler::GridTreeError::NodeNotConnectedToTree)
             }
         }
     }
@@ -123,16 +120,18 @@ impl GridTree {
     /// intended to be used on leaves that were deemed valid
     /// to ensure their parents would become leaves too eventually
     /// returns true if the parent was found
-    pub fn decrease_parent_child_count(&mut self, location: GridLocation) -> bool {
+    pub fn decrease_parent_child_count(&mut self, location: GridLocation) 
+    -> Result<(), error_handler::GridTreeError> 
+    {
         let optional_node_props = self.nodes.get(&location);
         match optional_node_props {
-            None => false,
+            None => Err(error_handler::GridTreeError::NodeNotFound),
             Some(node_props) => {
                 let optional_parent_location = node_props.parent_location;
                 if let Some(parent_location) = optional_parent_location {
                     let optional_parent_node = self.nodes.get_mut(&parent_location);
                     match optional_parent_node {
-                        None => false,
+                        None => Err(error_handler::GridTreeError::ParentNotFound),
                         Some(parent_node) => {
                             parent_node.children_counter -= 1;
                             // if the parent is a leaf
@@ -144,12 +143,12 @@ impl GridTree {
                                     self.leaves.push(parent_location);
                                 }
                             }
-                            true
+                            Ok(())
                         }
                     }
                 } else {
                     //could be that we, in some case, remove the root
-                    false
+                    Ok(())
                 }
             }
         }

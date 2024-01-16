@@ -1,5 +1,18 @@
 use crate::{costume_event::ui_event, prelude::*};
 
+#[derive(Debug, Clone, Copy)]
+pub enum GridError {
+    InvalidIndex(GridLocation)
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum GridTreeError {
+    ParentNotFound,
+    NodeAlreadyExists,
+    NodeNotConnectedToTree,
+    NodeNotFound
+}
+
 #[derive(Debug)]
 pub enum MenuError {
     CantGoBeyondTileCountBounds(WallTilesChange),
@@ -13,6 +26,7 @@ pub enum BoardGenerationError {
     TileMoveError(TileMoveError),
     CouldntPlaceAllWalls,
     NotEnoughAvailableSpots,
+    GridTreeError(GridTreeError)
 }
 
 #[derive(Debug, Clone, Copy)]

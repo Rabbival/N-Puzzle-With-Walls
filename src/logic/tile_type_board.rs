@@ -123,7 +123,7 @@ impl TileTypeBoard {
             self.empty_tile_locations[empty_tile_index] = *first;
         }
 
-        if self.grid.swap_by_location(first, second) {
+        if self.grid.swap_by_location(first, second).is_ok() {
             Ok(())
         } else {
             Err(error_handler::TileMoveError::IndexOutOfGridBounds)
@@ -162,7 +162,7 @@ impl TileTypeBoard {
         if empty_tile_index >= empty_locations_count {
             empty_tile_index = empty_locations_count - 1;
         }
-        self.grid.get_all_direct_neighbor_locations(
+        self.grid.get_all_occupied_neighbor_locations(
             self.empty_tile_locations.get(empty_tile_index).unwrap(),
         )
     }
@@ -192,8 +192,8 @@ impl TileTypeBoard {
         &self,
         origin: &GridLocation,
     ) -> HashMap<BasicDirection, GridLocation> {
-        let mut direct_neighbor_locations = self.grid.get_all_direct_neighbor_locations(origin);
-        for (dir, loc) in self.grid.get_all_direct_neighbor_locations(origin) {
+        let mut direct_neighbor_locations = self.grid.get_all_occupied_neighbor_locations(origin);
+        for (dir, loc) in self.grid.get_all_occupied_neighbor_locations(origin) {
             if let Some(value_in_cell) = self.grid.get(&loc) {
                 if TileType::Wall == value_in_cell.tile_type {
                     direct_neighbor_locations.remove(&dir);
@@ -237,7 +237,7 @@ impl TileTypeBoard {
     }
 
     /// returns whether insertion was successful
-    pub fn set(&mut self, location: &GridLocation, content: Tile) -> bool {
+    pub fn set(&mut self, location: &GridLocation, content: Tile) -> Result<(), error_handler::GridError> {
         self.grid.set(location, content)
     }
 

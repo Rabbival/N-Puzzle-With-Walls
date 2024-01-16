@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, output::error_handler};
 
 #[derive(Component, Clone, Debug)]
 pub struct Grid<T: Clone> {
@@ -6,34 +6,35 @@ pub struct Grid<T: Clone> {
     grid: Vec<Option<T>>,
 }
 
-//graph travelling functions
+//grid travelling functions
 impl<T: Clone> Grid<T> {
-    pub fn get_spanning_tree(&self, traveller_type: GridTravellerType) -> GridTree {
+    pub fn get_spanning_tree(&self, traveller_type: GridTravellerType) -> Result<GridTree, GridTreeError> {
         let grid_traveller = GridTraveller::from_grid(self, traveller_type);
         let mut grid_tree = GridTree::from_root(grid_traveller.locations_to_visit[0]);
         let traveller_iterator = grid_traveller.into_iter();
         for location_and_neighbors in traveller_iterator {
             for neighbor in location_and_neighbors.just_added_neighbors {
-                grid_tree.insert(neighbor, Some(location_and_neighbors.just_visited_location));
+                grid_tree.insert_leaf
+                    (neighbor, Some(location_and_neighbors.just_visited_location))?;
             }
         }
-        grid_tree
+        Ok(grid_tree)
     }
 
     pub fn is_connected_graph(&self) -> bool {
-        let mut bfs_iterator = GridTraveller::from_grid(self, GridTravellerType::BFS);
+        let mut traveller = 
+            GridTraveller::from_grid(self, GridTravellerType::default());
         let mut tile_counter = 0;
-        while bfs_iterator.next().is_some() {
+        while traveller.next().is_some() {
             tile_counter += 1;
         }
         //check that we found everything that's defined (and not None)
-        tile_counter == self.iter().collect::<Vec<_>>().len() as u32
+        tile_counter == self.iter().count() as u32
     }
 }
 
 impl<T: Clone> Grid<T> {
-    /// only returns occupied ones
-    pub fn get_all_direct_neighbor_locations(
+    pub fn get_all_occupied_neighbor_locations(
         &self,
         origin: &GridLocation,
     ) -> HashMap<BasicDirection, GridLocation> {
@@ -52,14 +53,14 @@ impl<T: Clone> Grid<T> {
         dir: &BasicDirection,
     ) -> Option<GridLocation> {
         let neighbor_location = self.neighbor_location(origin, dir);
-        if self.occupied(&neighbor_location) {
+        if self.get(&neighbor_location).is_some() {
             Some(neighbor_location)
         } else {
             None
         }
     }
 
-    //returns a location without checking if it's valid
+    /// returns a location without checking if it's valid
     pub fn neighbor_location(&self, origin: &GridLocation, dir: &BasicDirection) -> GridLocation {
         match dir {
             BasicDirection::Up => GridLocation::new(origin.row - 1, origin.col),
@@ -110,20 +111,6 @@ impl<T: Clone> Grid<T> {
         }
         edge_vector
     }
-
-    /// only returns ones that aren't None
-    pub fn all_initialized_locations_as_vec(&self) -> Vec<GridLocation> {
-        let mut initialized_locations_vector = vec![];
-        for col in 0..(self.grid_side_length as i32) {
-            for row in 0..(self.grid_side_length as i32) {
-                let location = GridLocation { row, col };
-                if self.get(&location).is_some() {
-                    initialized_locations_vector.push(location);
-                }
-            }
-        }
-        initialized_locations_vector
-    }
 }
 
 //basics
@@ -161,13 +148,13 @@ impl<T: Clone> Grid<T> {
         }
     }
 
-    /// returns whether insertion was successful
-    pub fn set(&mut self, location: &GridLocation, value: T) -> bool {
+    pub fn set(&mut self, location: &GridLocation, value: T) -> Result<(), error_handler::GridError> {
         if self.valid_index(location) {
             self.grid[location.to_index(self.grid_side_length)] = Some(value);
-            return true;
+            Ok(())
+        }else{
+            Err(error_handler::GridError::InvalidIndex(*location))
         }
-        false
     }
 
     /// returns an option with the previous value
@@ -192,23 +179,21 @@ impl<T: Clone> Grid<T> {
         }
     }
 
-    /// returns true if the operation was successful
-    pub fn swap_by_location(&mut self, first: &GridLocation, second: &GridLocation) -> bool {
-        if self.valid_index(first) && self.valid_index(second) {
+    pub fn swap_by_location(&mut self, first: &GridLocation, second: &GridLocation) 
+    -> Result<(), error_handler::GridError> 
+    {
+        if !self.valid_index(first){
+            Err(error_handler::GridError::InvalidIndex(*first)) 
+        }else if !self.valid_index(second){
+            Err(error_handler::GridError::InvalidIndex(*second)) 
+        }else{
             let first_location_index = self.location_to_index(first);
             let second_location_index = self.location_to_index(second);
             self.grid.swap(first_location_index, second_location_index);
-            return true;
+            Ok(())
         }
-        false
     }
 
-    /// also returns false if the location is invalid, so remember to check that if relevant
-    pub fn occupied(&self, location: &GridLocation) -> bool {
-        self.get(location).is_some()
-    }
-
-    /// object function in case we'd want to have grids of different sizes
     pub fn valid_index(&self, location: &GridLocation) -> bool {
         location.col >= 0
             && location.row >= 0
@@ -225,7 +210,7 @@ impl<T: Clone> Grid<T> {
     }
 }
 
-//iterators and filter
+//iterators
 impl<T: Clone> Grid<T> {
     /// returns occupied (initialized) cells' references only
     pub fn iter(&self) -> impl DoubleEndedIterator<Item = (GridLocation, &T)> + '_ {
