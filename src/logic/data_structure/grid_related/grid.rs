@@ -148,6 +148,7 @@ impl<T: Clone> Grid<T> {
         }
     }
 
+    /// throws an error if the index is invalid
     pub fn set(&mut self, location: &GridLocation, value: T) -> Result<(), error_handler::GridError> {
         if self.valid_index(location) {
             self.grid[location.to_index(self.grid_side_length)] = Some(value);
@@ -158,24 +159,28 @@ impl<T: Clone> Grid<T> {
     }
 
     /// returns an option with the previous value
-    pub fn set_and_get_former(&mut self, location: &GridLocation, value: T) -> Option<T> {
+    pub fn set_and_get_former(&mut self, location: &GridLocation, value: T) 
+    -> Result<Option<T>,  error_handler::GridError>
+    {
         if self.valid_index(location) {
             let former = self.grid[location.to_index(self.grid_side_length)].clone();
-            self.set(location, value);
-            former
+            self.set(location, value)?;
+            Ok(former)
         } else {
-            None
+            Ok(None)
         }
     }
 
     /// returns an option with the previous value
-    pub fn set_none_get_former(&mut self, location: &GridLocation) -> Option<T> {
+    pub fn set_none_get_former(&mut self, location: &GridLocation) 
+    -> Result<Option<T>, error_handler::GridError> 
+    {
         if self.valid_index(location) {
             let former = self.grid[location.to_index(self.grid_side_length)].clone();
             self.grid[location.to_index(self.grid_side_length)] = None;
-            former
+            Ok(former)
         } else {
-            None
+            Err(error_handler::GridError::InvalidIndex(*location))
         }
     }
 

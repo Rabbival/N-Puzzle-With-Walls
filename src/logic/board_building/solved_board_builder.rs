@@ -51,7 +51,8 @@ pub fn generate_solved_board_inner(
 
     if applied_props.wall_count > 0 {
         wall_locations = determine_wall_locations(applied_props)?;
-        spawn_walls_in_locations(&wall_locations, &mut solved_board);
+        wrap_if_error
+            (spawn_walls_in_locations(&wall_locations, &mut solved_board))?;
     }
 
     db_manager.insert_layout(SavedLayout{
@@ -63,7 +64,9 @@ pub fn generate_solved_board_inner(
     'outer_for: for i in (0..grid_side_length_u32).rev() {
         for j in (0..grid_side_length_u32).rev() {
             let location = GridLocation::new(i as i32, j as i32);
-            if solved_board.set_if_none(&location, Tile::new(TileType::Empty)) {
+            if solved_board.tiletype_in_location(&location) == None {
+                wrap_if_error
+                    (solved_board.set(&location, Tile::new(TileType::Empty)))?;
                 empty_tile_counter -= 1;
                 if empty_tile_counter == 0 {
                     break 'outer_for;
@@ -75,7 +78,10 @@ pub fn generate_solved_board_inner(
     for i in 0..grid_side_length_u32 {
         for j in 0..grid_side_length_u32 {
             let location = GridLocation::new(i as i32, j as i32);
-            solved_board.set_if_none(&location, Tile::new(TileType::Numbered));
+            if solved_board.tiletype_in_location(&location) == None {
+                wrap_if_error
+                    (solved_board.set(&location, Tile::new(TileType::Numbered)))?
+            }
         }
     }
 
@@ -92,12 +98,17 @@ fn determine_wall_locations(
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut wall_spawn_locations = vec![];
     let mut possible_spawn_locations = vec![];
-    let mut neighbor_count_grid =
+    let neighbor_count_grid_result =
         initialize_neighbor_count_grid(&mut possible_spawn_locations, grid_side_length);
-    let mut grid_tree_result = 
+    let mut neighbor_count_grid;
+    match neighbor_count_grid_result{
+        Err(grid_error) => return Err(error_handler::BoardGenerationError::GridError(grid_error)),
+        Ok(valid_grid) => neighbor_count_grid = valid_grid
+    }
+    let grid_tree_result = 
         neighbor_count_grid.get_spanning_tree(applied_props.tree_traveller_type);
-    let mut grid_tree ;
-    let mut grid_tree_iter ;
+    let mut grid_tree;
+    let mut grid_tree_iter;
     match grid_tree_result{
         Ok(valid_grid_tree) => {
             grid_tree = valid_grid_tree;
@@ -132,10 +143,13 @@ fn determine_wall_locations(
                 // if the leaf is valid, we want to remove it from its parents count
                 // to allow the parent to eventually (hopefully)
                 // become an available leaf
-                grid_tree.decrease_parent_child_count(chosen_wall_location);
+                if let Err(grid_tree_error) = grid_tree.decrease_parent_child_count(chosen_wall_location){
+                    return Err(error_handler::BoardGenerationError::GridTreeError(grid_tree_error));
+                }
             }
 
-            let chosen_tile_value = neighbor_count_grid.set_none_get_former(&chosen_wall_location);
+            let chosen_tile_value_result = 
+                neighbor_count_grid.set_none_get_former(&chosen_wall_location);
 
             if is_leaf {
                 //if the tile was determined by the MST, the graph is connected
@@ -146,8 +160,16 @@ fn determine_wall_locations(
                 if neighbor_count_grid.is_connected_graph() {
                     break;
                 } else {
+                    let chosen_tile_value;
+                    match chosen_tile_value_result{
+                        Err(grid_error) => {
+                            return Err(error_handler::BoardGenerationError::GridError(grid_error))
+                        },
+                        Ok(tile_value) => chosen_tile_value = tile_value
+                    }
                     //if the graph is not connected, we'll not remove this tile and thus it should be put back in place
-                    neighbor_count_grid.set(&chosen_wall_location, chosen_tile_value.unwrap());
+                    wrap_if_error
+                        (neighbor_count_grid.set(&chosen_wall_location, chosen_tile_value.unwrap()))?
                 }
             }
         }
@@ -182,18 +204,18 @@ fn determine_wall_locations(
 fn initialize_neighbor_count_grid(
     allowed_wall_spawn_locations: &mut Vec<GridLocation>,
     grid_side_length: u8,
-) -> Grid<u8> {
+) -> Result<Grid<u8>, error_handler::GridError> {
     let mut neighbor_count_grid = Grid::new(grid_side_length);
     for inner_cell in neighbor_count_grid.all_locations_no_edges() {
-        neighbor_count_grid.set(&inner_cell, 4);
+        neighbor_count_grid.set(&inner_cell, 4)?;
         allowed_wall_spawn_locations.push(inner_cell);
     }
     for edge_tile_not_corner in neighbor_count_grid.edges_without_corners_locations() {
-        neighbor_count_grid.set(&edge_tile_not_corner, 3);
+        neighbor_count_grid.set(&edge_tile_not_corner, 3)?;
         allowed_wall_spawn_locations.push(edge_tile_not_corner);
     }
     for corner in neighbor_count_grid.corner_locations() {
-        neighbor_count_grid.set(&corner, 2);
+        neighbor_count_grid.set(&corner, 2)?;
         allowed_wall_spawn_locations.push(corner);
         if MIN_NEIGHBORS >= 2 {
             forbid_spawn_in_neighbors_of_location(
@@ -203,7 +225,7 @@ fn initialize_neighbor_count_grid(
             );
         }
     }
-    neighbor_count_grid
+    Ok(neighbor_count_grid)
 }
 
 fn forbid_spawn_in_neighbors_of_location(
@@ -219,11 +241,24 @@ fn forbid_spawn_in_neighbors_of_location(
     }
 }
 
-fn spawn_walls_in_locations(locations: &Vec<GridLocation>, board: &mut TileTypeBoard) {
+fn spawn_walls_in_locations(locations: &Vec<GridLocation>, board: &mut TileTypeBoard)
+-> Result<(), error_handler::GridError>
+{
     for location in locations {
-        board.set(location, Tile::new(TileType::Wall));
+        board.set(location, Tile::new(TileType::Wall))?;
+    }
+    Ok(())
+}
+
+fn wrap_if_error(result: Result<(), error_handler::GridError>) 
+-> Result<(), error_handler::BoardGenerationError>{
+    if let Err(grid_error) = result {
+        Err(error_handler::BoardGenerationError::GridError(grid_error))
+    }else{
+        Ok(())
     }
 }
+
 
 #[cfg(test)]
 mod tests {

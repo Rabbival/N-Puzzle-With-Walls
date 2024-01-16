@@ -197,7 +197,7 @@ mod tests {
                 index: 0,
                 tile_type: TileType::Empty,
             },
-        );
+        ).unwrap();
         let location_validation_outcome = handle_mouse_click(event_writer, Vec2::default(), &board);
         match location_validation_outcome {
             Err(TileMoveError::PressedEmptySlot) => true,
@@ -224,7 +224,7 @@ mod tests {
                     index: 0,
                     tile_type: TileType::Numbered,
                 },
-            );
+            ).unwrap();
         }
 
         let location_validation_outcome = handle_mouse_click(event_writer, Vec2::default(), &board);

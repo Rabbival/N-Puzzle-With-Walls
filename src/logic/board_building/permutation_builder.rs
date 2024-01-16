@@ -18,7 +18,9 @@ pub fn generate_board_by_vector_permutation(
     let mut grid = solved_board.grid.clone();
     let mut empty_grid_locations = vec![];
     for (location, content) in sorted_grid_locations.iter().zip(permutation.iter()) {
-        grid.set(location, *content);
+        if let Err(grid_error) = grid.set(location, *content){
+            return Err(error_handler::BoardGenerationError::GridError(grid_error));        
+        }
         if content.tile_type == TileType::Empty {
             empty_grid_locations.push(*location);
         }

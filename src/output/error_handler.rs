@@ -26,7 +26,8 @@ pub enum BoardGenerationError {
     TileMoveError(TileMoveError),
     CouldntPlaceAllWalls,
     NotEnoughAvailableSpots,
-    GridTreeError(GridTreeError)
+    GridTreeError(GridTreeError),
+    GridError(GridError)
 }
 
 #[derive(Debug, Clone, Copy)]
