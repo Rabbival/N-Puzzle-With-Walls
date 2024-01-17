@@ -37,26 +37,27 @@ impl<T: Clone> Grid<T> {
     pub fn get_all_occupied_neighbor_locations(
         &self,
         origin: &GridLocation,
-    ) -> Result<HashMap<BasicDirection, GridLocation>, error_handler::GridError> {
+    ) -> HashMap<BasicDirection, GridLocation> 
+    {
         let mut valid_neighbors: HashMap<BasicDirection, GridLocation> = HashMap::new();
         for dir in BasicDirection::get_directions_as_vec() {
-            if let Some(neighbor_location) = self.occupied_neighbor_location(origin, &dir)? {
+            if let Some(neighbor_location) = self.occupied_neighbor_location(origin, &dir) {
                 valid_neighbors.insert(dir, neighbor_location);
             }
         }
-        Ok(valid_neighbors)
+        valid_neighbors
     }
 
     fn occupied_neighbor_location(
         &self,
         origin: &GridLocation,
         dir: &BasicDirection,
-    ) -> Result<Option<GridLocation>, error_handler::GridError> {
+    ) -> Option<GridLocation> {
         let neighbor_location = self.neighbor_location(origin, dir);
-        if self.get(&neighbor_location)?.is_some() {
-            Ok(Some(neighbor_location))
+        if self.get(&neighbor_location).is_ok() {
+            Some(neighbor_location)
         } else {
-            Ok(None)
+            None
         }
     }
 

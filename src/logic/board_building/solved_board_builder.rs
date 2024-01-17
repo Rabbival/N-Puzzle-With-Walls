@@ -184,7 +184,7 @@ fn determine_wall_locations(
             neighbor_count_grid.get_all_occupied_neighbor_locations(&chosen_wall_location);
         for neighbor in neighbors_of_chosen_wall_location {
             let neighbor_location = neighbor.1;
-            let neighbor_value = neighbor_count_grid.get_mut(&neighbor_location).unwrap();
+            let neighbor_value = neighbor_count_grid.get_mut(&neighbor_location).unwrap().unwrap();
             *neighbor_value -= 1;
 
             // if a neigbor of the chosen location got to the threshold
