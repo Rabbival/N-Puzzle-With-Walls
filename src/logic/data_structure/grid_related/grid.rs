@@ -54,7 +54,7 @@ impl<T: Clone> Grid<T> {
         dir: &BasicDirection,
     ) -> Option<GridLocation> {
         let neighbor_location = self.neighbor_location(origin, dir);
-        if self.get(&neighbor_location).is_ok() {
+        if self.valid_index(&neighbor_location) {
             Some(neighbor_location)
         } else {
             None
