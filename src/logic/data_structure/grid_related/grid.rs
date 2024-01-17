@@ -37,26 +37,26 @@ impl<T: Clone> Grid<T> {
     pub fn get_all_occupied_neighbor_locations(
         &self,
         origin: &GridLocation,
-    ) -> HashMap<BasicDirection, GridLocation> {
+    ) -> Result<HashMap<BasicDirection, GridLocation>, error_handler::GridError> {
         let mut valid_neighbors: HashMap<BasicDirection, GridLocation> = HashMap::new();
         for dir in BasicDirection::get_directions_as_vec() {
-            if let Some(neighbor_location) = self.occupied_neighbor_location(origin, &dir) {
+            if let Some(neighbor_location) = self.occupied_neighbor_location(origin, &dir)? {
                 valid_neighbors.insert(dir, neighbor_location);
             }
         }
-        valid_neighbors
+        Ok(valid_neighbors)
     }
 
     fn occupied_neighbor_location(
         &self,
         origin: &GridLocation,
         dir: &BasicDirection,
-    ) -> Option<GridLocation> {
+    ) -> Result<Option<GridLocation>, error_handler::GridError> {
         let neighbor_location = self.neighbor_location(origin, dir);
-        if self.get(&neighbor_location).is_some() {
-            Some(neighbor_location)
+        if self.get(&neighbor_location)?.is_some() {
+            Ok(Some(neighbor_location))
         } else {
-            None
+            Ok(None)
         }
     }
 
@@ -131,20 +131,31 @@ impl<T: Clone> Grid<T> {
         &self.grid_side_length
     }
 
-    pub fn get(&self, location: &GridLocation) -> Option<&T> {
+    pub fn get(&self, location: &GridLocation) 
+    -> Result<Option<&T>, error_handler::GridError> 
+    {
         if self.valid_index(location) {
-            self.grid.get(self.location_to_index(location))?.as_ref()
+            let location_index = self.location_to_index(location);
+            match self.grid.get(location_index){
+                None => Ok(None),
+                Some(cell_value) => Ok(cell_value.as_ref())
+            }
         } else {
-            None
+            Err(error_handler::GridError::InvalidIndex(*location))
         }
     }
 
-    pub fn get_mut(&mut self, location: &GridLocation) -> Option<&mut T> {
+    pub fn get_mut(&mut self, location: &GridLocation)
+    -> Result<Option<&mut T>, error_handler::GridError> 
+    {
         if self.valid_index(location) {
             let location_index = self.location_to_index(location);
-            self.grid.get_mut(location_index)?.as_mut()
+            match self.grid.get(location_index){
+                None => Ok(None),
+                Some(cell_value) => Ok(cell_value.as_mut())
+            }
         } else {
-            None
+            Err(error_handler::GridError::InvalidIndex(*location))
         }
     }
 
