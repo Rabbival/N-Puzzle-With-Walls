@@ -40,7 +40,6 @@ pub enum ItemNotFoundInMapError {
 pub enum TileMoveError {
     NoTileInCell(GridLocation),
     BoardFrozenToPlayer,
-    IndexOutOfGridBounds,
     NoEmptyNeighbor,
     PressedEmptySlot,
     NoOccupiedTileInThatDirection(BasicDirection),
@@ -71,5 +70,18 @@ pub fn board_generation_error_handler(
 ) {
     for generation_error in event_listener.read() {
         print_board_generation_error(generation_error.0);
+    }
+}
+
+
+/// I don't use it automatically inside the get set etc functions
+/// since it they might have nothing to do with moving tiles
+pub fn wrap_if_error<T>(result: Result<T, error_handler::GridError>) 
+-> Result<T, error_handler::TileMoveError>{
+    match result {
+        Err(grid_error) => {
+            Err(error_handler::TileMoveError::GridError(grid_error))
+        },
+        Ok(value) => Ok(value)
     }
 }

@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, output::error_handler};
 use std::fmt;
 
 #[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug)]
@@ -24,15 +24,17 @@ impl GridLocation {
     }
 
     /// grid provided to check that the index is valid for its size
-    pub fn from_world<T: Clone>(grid: &Grid<T>, position: Vec2) -> Option<Self> {
+    pub fn from_world<T: Clone>(grid: &Grid<T>, position: Vec2) 
+    -> Result<Self, error_handler::GridError>
+    {
         let location = GridLocation {
             row: (-1.0 * position.y / (ATLAS_CELL_SQUARE_SIZE) + 0.5) as i32,
             col: (position.x / (ATLAS_CELL_SQUARE_SIZE) + 0.5) as i32,
         };
         if grid.valid_index(&location) {
-            Some(location)
+            Ok(location)
         } else {
-            None
+            Err(error_handler::GridError::InvalidIndex(location))
         }
     }
 

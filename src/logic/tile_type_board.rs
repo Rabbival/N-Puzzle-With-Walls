@@ -126,15 +126,16 @@ impl TileTypeBoard {
         if self.grid.swap_by_location(first, second).is_ok() {
             Ok(())
         } else {
-            Err(error_handler::TileMoveError::IndexOutOfGridBounds)
+            Err(error_handler::TileMoveError::GridError(GridError::InvalidIndex(()))))
         }
     }
 
-    pub fn tiletype_in_location(&self, location: &GridLocation) -> Option<TileType> {
-        if self.none_check(location).is_err() {
-            None
-        } else {
-            Some(self.get(location).unwrap().tile_type)
+    pub fn tiletype_in_location(&self, location: &GridLocation) 
+    -> Result<Option<TileType>, error_handler::GridError> 
+    {
+        match self.get(location)?{
+            Some(tile_ref) => Ok(Some(tile_ref.tile_type)),
+            None => Ok(None)
         }
     }
 
@@ -245,7 +246,9 @@ impl TileTypeBoard {
         self.grid.set_and_get_former(location, content)
     }
 
-    pub fn empty_tile(&self, location: &GridLocation) -> Result<bool, error_handler::TileMoveError> {
+    pub fn empty_tile(&self, location: &GridLocation) 
+    -> Result<bool, error_handler::TileMoveError> 
+    {
         let tile_ref = self.none_check_get(location)?;
         match tile_ref.tile_type {
             TileType::Empty => {
@@ -260,7 +263,7 @@ impl TileTypeBoard {
     fn none_check_get(&self, location: &GridLocation) 
     -> Result<&Tile, error_handler::TileMoveError> 
     {
-        match wrap_if_error(self.get(location))? {
+        match error_handler::wrap_if_error(self.get(location))? {
             None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
             Some(tile_ref) => Ok(tile_ref),
         }
@@ -269,7 +272,7 @@ impl TileTypeBoard {
     fn none_check_get_mut(&self, location: &GridLocation) 
     -> Result<&Tile, error_handler::TileMoveError> 
     {
-        match wrap_if_error(self.get_mut(location))? {
+        match error_handler::wrap_if_error(self.get_mut(location))? {
             None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
             Some(mut_tile_ref) => Ok(mut_tile_ref),
         }
@@ -279,17 +282,5 @@ impl TileTypeBoard {
 impl Default for TileTypeBoard {
     fn default() -> Self {
         Self::new(BoardSize::default().to_grid_side_length())
-    }
-}
-
-/// I don't use it automatically inside the get set etc functions
-/// since it they might have nothing to do with moving tiles
-fn wrap_if_error<T>(result: Result<T, error_handler::GridError>) 
--> Result<T, error_handler::TileMoveError>{
-    match result {
-        Err(grid_error) => {
-            Err(error_handler::TileMoveError::GridError(grid_error))
-        },
-        Ok(value) => Ok(value)
     }
 }

@@ -68,28 +68,28 @@ fn handle_mouse_click(
         return Err(error_handler::TileMoveError::BoardFrozenToPlayer);
     }
 
-    match GridLocation::from_world(&game_board.grid, cursor_position) {
-        Some(optional_occupied_tile_location) => {
-            if game_board.empty_tile(&optional_occupied_tile_location)? {
-                return Err(error_handler::TileMoveError::PressedEmptySlot);
-            }
-            let occupied_tile_location = optional_occupied_tile_location;
-            let optional_move_request =
-                game_board.move_request_from_clicked_tile(&occupied_tile_location)?;
-            match optional_move_request {
-                None => Err(error_handler::TileMoveError::NoEmptyNeighbor),
-                Some(move_request) => {
-                    logic_event_writer.send(move_tile_event::SwitchTilesLogic {
-                        move_neighbor_from_direction: move_request
-                            .move_neighbor_from_direction
-                            .unwrap(),
-                        empty_tile_index: move_request.empty_tile_index.unwrap(),
-                    });
-                    Ok(())
-                }
-            }
+    let optional_occupied_tile_location = 
+        error_handler::wrap_if_error(
+            GridLocation::from_world(&game_board.grid, cursor_position)
+        )?;
+    
+    if game_board.empty_tile(&optional_occupied_tile_location)? {
+        return Err(error_handler::TileMoveError::PressedEmptySlot);
+    }
+    let occupied_tile_location = optional_occupied_tile_location;
+    let optional_move_request =
+        game_board.move_request_from_clicked_tile(&occupied_tile_location)?;
+    match optional_move_request {
+        None => Err(error_handler::TileMoveError::NoEmptyNeighbor),
+        Some(move_request) => {
+            logic_event_writer.send(move_tile_event::SwitchTilesLogic {
+                move_neighbor_from_direction: move_request
+                    .move_neighbor_from_direction
+                    .unwrap(),
+                empty_tile_index: move_request.empty_tile_index.unwrap(),
+            });
+            Ok(())
         }
-        None => Err(error_handler::TileMoveError::IndexOutOfGridBounds),
     }
 }
 
