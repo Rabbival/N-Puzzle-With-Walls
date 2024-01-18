@@ -101,32 +101,34 @@ impl TileBoard {
         first: &GridLocation,
         second: &GridLocation,
     ) -> Result<(), error_handler::TileMoveError> {
-        let first_tile_type = self.tiletype_in_location(first);
-        let second_tile_type = self.tiletype_in_location(second);
-        if first_tile_type.is_none() {
-            return Err(error_handler::TileMoveError::NoTileInCell(*first));
-        }
-        if second_tile_type.is_none() {
-            return Err(error_handler::TileMoveError::NoTileInCell(*second));
-        }
+        let first_tile_type = wrap_to_tile_move_error
+            (self.tiletype_in_location_if_none(first))?;
+        let second_tile_type = wrap_to_tile_move_error
+            (self.tiletype_in_location_if_none(second))?;
 
         let empty_tile_index;
-        if let TileType::Empty = first_tile_type.unwrap() {
-            if let TileType::Empty = second_tile_type.unwrap() {
+        if let TileType::Empty = first_tile_type {
+            if let TileType::Empty = second_tile_type {
                 return Err(error_handler::TileMoveError::TriedToSwitchEmptyWithEmpty);
             } else {
-                empty_tile_index = self.get(first).unwrap().index;
+                empty_tile_index = self.get(first).unwrap().unwrap().index;
                 self.empty_tile_locations[empty_tile_index] = *second;
             }
         } else {
-            empty_tile_index = self.get(second).unwrap().index;
+            empty_tile_index = self.get(second).unwrap().unwrap().index;
             self.empty_tile_locations[empty_tile_index] = *first;
         }
 
-        if self.grid.swap_by_location(first, second).is_ok() {
-            Ok(())
-        } else {
-            Err(error_handler::TileMoveError::GridError(GridError::InvalidIndex(())))
+        let swap_result = self.grid.swap_by_location(first, second);
+        Ok(wrap_to_tile_move_error(wrap_to_tile_board_error(swap_result))?)
+    }
+
+    pub fn tiletype_in_location_if_none(&self, location: &GridLocation) 
+    -> Result<TileType, error_handler::TileBoardError> 
+    {
+        match wrap_to_tile_board_error(self.get(location))?{
+            Some(tile_ref) => Ok(tile_ref.tile_type),
+            None => Err(error_handler::TileBoardError::NoTileInCell(*location))
         }
     }
 
@@ -246,8 +248,8 @@ impl TileBoard {
         self.grid.set_and_get_former(location, content)
     }
 
-    pub fn empty_tile(&self, location: &GridLocation) 
-    -> Result<bool, error_handler::TileMoveError> 
+    pub fn is_tile_empty(&self, location: &GridLocation) 
+    -> Result<bool, error_handler::TileBoardError> 
     {
         let tile_ref = self.none_check_get(location)?;
         match tile_ref.tile_type {
@@ -261,22 +263,22 @@ impl TileBoard {
     }
 
     fn none_check_get(&self, location: &GridLocation) 
-    -> Result<&Tile, error_handler::TileMoveError> 
+    -> Result<&Tile, error_handler::TileBoardError> 
     {
-        match wrap_if_error(self.get(location))? {
-            None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
+        match wrap_to_tile_board_error(self.get(location))? {
+            None => Err(error_handler::TileBoardError::NoTileInCell(*location)),
             Some(tile_ref) => Ok(tile_ref),
         }
     }
 
-    fn none_check_get_mut(&self, location: &GridLocation) 
-    -> Result<&Tile, error_handler::TileMoveError> 
-    {
-        match wrap_if_error(self.get_mut(location))? {
-            None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
-            Some(mut_tile_ref) => Ok(mut_tile_ref),
-        }
-    }
+    // fn none_check_get_mut(&mut self, location: &GridLocation) 
+    // -> Result<&Tile, error_handler::TileBoardError> 
+    // {
+    //     match wrap_to_tile_board_error(self.get_mut(location))? {
+    //         None => Err(error_handler::TileBoardError::NoTileInCell(*location)),
+    //         Some(mut_tile_ref) => Ok(mut_tile_ref),
+    //     }
+    // }
 }
 
 impl Default for TileBoard {
@@ -285,13 +287,22 @@ impl Default for TileBoard {
     }
 }
 
-/// I don't use it automatically inside the get set etc functions
-/// since it they might have nothing to do with moving tiles
-fn wrap_if_error<T>(result: Result<T, error_handler::GridError>) 
+
+fn wrap_to_tile_board_error<T>(result: Result<T, error_handler::GridError>) 
 -> Result<T, error_handler::TileBoardError>{
     match result {
         Err(grid_error) => {
             Err(error_handler::TileBoardError::GridError(grid_error))
+        },
+        Ok(value) => Ok(value)
+    }
+}
+
+fn wrap_to_tile_move_error<T>(result: Result<T, error_handler::TileBoardError>) 
+-> Result<T, error_handler::TileMoveError>{
+    match result {
+        Err(board_error) => {
+            Err(error_handler::TileMoveError::TileBoardError(board_error))
         },
         Ok(value) => Ok(value)
     }

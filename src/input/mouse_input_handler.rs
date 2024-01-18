@@ -79,8 +79,14 @@ fn handle_mouse_click(
         }
     }
     
-    if game_board.empty_tile(&optional_occupied_tile_location)? {
-        return Err(error_handler::TileMoveError::PressedEmptySlot);
+    match game_board.is_tile_empty(&optional_occupied_tile_location) {
+        Err(tile_board_error) =>
+            return Err(error_handler::TileMoveError::TileBoardError(tile_board_error)),
+        Ok(empty_tile) => {
+            if empty_tile{
+                return Err(error_handler::TileMoveError::PressedEmptySlot);
+            }
+        }
     }
     let occupied_tile_location = optional_occupied_tile_location;
     let optional_move_request =

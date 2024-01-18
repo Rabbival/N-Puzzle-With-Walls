@@ -152,7 +152,7 @@ impl<T: Clone> Grid<T> {
     {
         if self.valid_index(location) {
             let location_index = self.location_to_index(location);
-            match self.grid.get(location_index){
+            match self.grid.get_mut(location_index){
                 None => Ok(None),
                 Some(cell_value) => Ok(cell_value.as_mut())
             }
