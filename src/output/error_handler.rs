@@ -48,6 +48,7 @@ pub enum TileMoveError {
     TriedToSwitchWithAWall,
     TriedToSwitchEmptyWithEmpty,
     TriedToSwitchBetweenTwoOccupied(Tile, Tile),
+    GridError(GridError)
 }
 
 #[derive(Debug, Clone, Copy)]

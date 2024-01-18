@@ -202,30 +202,34 @@ impl TileTypeBoard {
                 }
             }
         }
-
         direct_neighbor_locations
-    }
-
-    /// throws an error if the location is either invalid or not initialized
-    fn none_check(&self, location: &GridLocation) -> Result<(), error_handler::TileMoveError> {
-        match self.get(location) {
-            None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
-            Some(_) => Ok(()),
-        }
     }
 }
 
-//manipulation (or short access) to the grid's functions
+// iterators
+impl TileTypeBoard {
+    pub fn iter_filtered(&self) -> impl DoubleEndedIterator<Item = (GridLocation, &Tile)> + '_ {
+        self.grid
+            .iter()
+            .filter(|(_, tile_reference)| tile_reference.tile_type != TileType::Wall)
+    }
+}
+
+//from grid functions
 impl TileTypeBoard {
     pub fn get_side_length(&self) -> &u8 {
         self.grid.get_side_length()
     }
 
-    pub fn get(&self, location: &GridLocation) -> Option<&Tile> {
+    pub fn get(&self, location: &GridLocation) 
+    -> Result<Option<&Tile>, error_handler::GridError> 
+    {
         self.grid.get(location)
     }
 
-    pub fn get_mut(&mut self, location: &GridLocation) -> Option<&mut Tile> {
+    pub fn get_mut(&mut self, location: &GridLocation) 
+    -> Result<Option<&mut Tile>, error_handler::GridError> 
+    {
         self.grid.get_mut(location)
     }
 
@@ -244,35 +248,41 @@ impl TileTypeBoard {
     // returns whether it's not empty
     pub fn occupied(&self, location: &GridLocation) -> Result<bool, error_handler::TileMoveError> {
         self.none_check(location)?;
-        if self.valid_index(location) {
-            match self.get(location).unwrap().tile_type {
-                TileType::Empty => {
-                    return Ok(false);
-                }
-                TileType::Numbered | TileType::Wall => {
-                    return Ok(true);
-                }
+        match self.get(location).unwrap().tile_type {
+            TileType::Empty => {
+                return Ok(false);
+            }
+            TileType::Numbered | TileType::Wall => {
+                return Ok(true);
             }
         }
         Ok(false)
     }
 
-    pub fn valid_index(&self, location: &GridLocation) -> bool {
-        self.grid.valid_index(location)
-    }
-}
-
-// iterators
-impl TileTypeBoard {
-    pub fn iter_filtered(&self) -> impl DoubleEndedIterator<Item = (GridLocation, &Tile)> + '_ {
-        self.grid
-            .iter()
-            .filter(|(_, tile_reference)| tile_reference.tile_type != TileType::Wall)
+    fn none_check(&self, location: &GridLocation) 
+    -> Result<(), error_handler::TileMoveError> 
+    {
+        match wrap_if_error(self.get(location))? {
+            None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
+            Some(_) => Ok(()),
+        }
     }
 }
 
 impl Default for TileTypeBoard {
     fn default() -> Self {
         Self::new(BoardSize::default().to_grid_side_length())
+    }
+}
+
+/// I don't use it automatically inside the get set etc functions
+/// since it they might have nothing to do with moving tiles
+fn wrap_if_error<T>(result: Result<T, error_handler::GridError>) 
+-> Result<T, error_handler::TileMoveError>{
+    match result {
+        Err(grid_error) => {
+            Err(error_handler::TileMoveError::GridError(grid_error))
+        },
+        Ok(value) => Ok(value)
     }
 }

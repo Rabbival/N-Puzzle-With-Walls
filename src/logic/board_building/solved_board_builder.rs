@@ -100,11 +100,8 @@ fn determine_wall_locations(
     let mut possible_spawn_locations = vec![];
     let neighbor_count_grid_result =
         initialize_neighbor_count_grid(&mut possible_spawn_locations, grid_side_length);
-    let mut neighbor_count_grid;
-    match neighbor_count_grid_result{
-        Err(grid_error) => return Err(error_handler::BoardGenerationError::GridError(grid_error)),
-        Ok(valid_grid) => neighbor_count_grid = valid_grid
-    }
+    let mut neighbor_count_grid = 
+        wrap_if_error(neighbor_count_grid_result)?;
     let grid_tree_result = 
         neighbor_count_grid.get_spanning_tree(applied_props.tree_traveller_type);
     let mut grid_tree;
@@ -160,13 +157,8 @@ fn determine_wall_locations(
                 if neighbor_count_grid.is_connected_graph() {
                     break;
                 } else {
-                    let chosen_tile_value;
-                    match chosen_tile_value_result{
-                        Err(grid_error) => {
-                            return Err(error_handler::BoardGenerationError::GridError(grid_error))
-                        },
-                        Ok(tile_value) => chosen_tile_value = tile_value
-                    }
+                    let chosen_tile_value= 
+                        wrap_if_error(chosen_tile_value_result)?;
                     //if the graph is not connected, we'll not remove this tile and thus it should be put back in place
                     wrap_if_error
                         (neighbor_count_grid.set(&chosen_wall_location, chosen_tile_value.unwrap()))?
@@ -250,12 +242,13 @@ fn spawn_walls_in_locations(locations: &Vec<GridLocation>, board: &mut TileTypeB
     Ok(())
 }
 
-fn wrap_if_error(result: Result<(), error_handler::GridError>) 
--> Result<(), error_handler::BoardGenerationError>{
-    if let Err(grid_error) = result {
-        Err(error_handler::BoardGenerationError::GridError(grid_error))
-    }else{
-        Ok(())
+fn wrap_if_error<T>(result: Result<T, error_handler::GridError>) 
+-> Result<T, error_handler::BoardGenerationError>{
+    match result {
+        Err(grid_error) => {
+            Err(error_handler::BoardGenerationError::GridError(grid_error))
+        },
+        Ok(value) => Ok(value)
     }
 }
 
