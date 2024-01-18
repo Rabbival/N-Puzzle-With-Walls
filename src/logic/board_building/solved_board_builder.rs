@@ -20,7 +20,7 @@ impl Plugin for SolvedBoardPlugin{
 fn generate_solved_board(
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
-    mut solved_board_query: Query<&mut TileTypeBoard, With<SolvedBoard>>,
+    mut solved_board_query: Query<&mut TileBoard, With<SolvedBoard>>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut db_manager: ResMut<DataBaseManager>
 ){
@@ -43,9 +43,9 @@ fn generate_solved_board(
 pub fn generate_solved_board_inner(
     applied_props: &BoardProperties,
     db_manager: &mut DataBaseManager
-) -> Result<TileTypeBoard, BoardGenerationError> {
+) -> Result<TileBoard, BoardGenerationError> {
     let grid_side_length = applied_props.size.to_grid_side_length();
-    let mut solved_board = TileTypeBoard::new(grid_side_length);
+    let mut solved_board = TileBoard::new(grid_side_length);
     let grid_side_length_u32 = grid_side_length as u32;
     let mut wall_locations = vec![];
 
@@ -64,7 +64,7 @@ pub fn generate_solved_board_inner(
     'outer_for: for i in (0..grid_side_length_u32).rev() {
         for j in (0..grid_side_length_u32).rev() {
             let location = GridLocation::new(i as i32, j as i32);
-            if solved_board.tiletype_in_location(&location) == None {
+            if wrap_if_error(solved_board.tiletype_in_location(&location))? == None {
                 wrap_if_error
                     (solved_board.set(&location, Tile::new(TileType::Empty)))?;
                 empty_tile_counter -= 1;
@@ -78,7 +78,7 @@ pub fn generate_solved_board_inner(
     for i in 0..grid_side_length_u32 {
         for j in 0..grid_side_length_u32 {
             let location = GridLocation::new(i as i32, j as i32);
-            if solved_board.tiletype_in_location(&location) == None {
+            if wrap_if_error(solved_board.tiletype_in_location(&location))? == None {
                 wrap_if_error
                     (solved_board.set(&location, Tile::new(TileType::Numbered)))?
             }
@@ -233,7 +233,7 @@ fn forbid_spawn_in_neighbors_of_location(
     }
 }
 
-fn spawn_walls_in_locations(locations: &Vec<GridLocation>, board: &mut TileTypeBoard)
+fn spawn_walls_in_locations(locations: &Vec<GridLocation>, board: &mut TileBoard)
 -> Result<(), error_handler::GridError>
 {
     for location in locations {

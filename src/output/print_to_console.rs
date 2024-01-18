@@ -85,9 +85,6 @@ pub fn print_tile_move_error(move_error: TileMoveError) {
         TileMoveError::NoOccupiedTileInThatDirection(direction) => {
             warn!("no occupied tile in direction: {:?}", direction);
         }
-        TileMoveError::IndexOutOfGridBounds => {
-            // warn!("index out of grid bounds");
-        }
         TileMoveError::TriedToSwitchEmptyWithEmpty => {
             info!("tried to switch empty with empty, hence no swap was performed");
         }

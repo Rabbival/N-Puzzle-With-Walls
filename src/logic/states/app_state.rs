@@ -64,7 +64,7 @@ fn toggle_visibility_for_game_screen_elements(
     visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(OnScreenTag::Game));
 }
 
-fn toggle_board_lock(mut game_board_query: Query<&mut TileTypeBoard, With<GameBoard>>) {
+fn toggle_board_lock(mut game_board_query: Query<&mut TileBoard, With<GameBoard>>) {
     let current_lock_state = &mut game_board_query.single_mut().ignore_player_input;
     *current_lock_state = !*current_lock_state;
 }

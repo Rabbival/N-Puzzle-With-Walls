@@ -3,9 +3,9 @@ use crate::{prelude::*, output::{print_to_console, error_handler}};
 use rand::Rng;
 
 pub fn brute_force_generate_game_board(
-    solved_board: &TileTypeBoard,
+    solved_board: &TileBoard,
     generation_range: (u8, u8)
-) -> Result<TileTypeBoard, error_handler::BoardGenerationError>
+) -> Result<TileBoard, error_handler::BoardGenerationError>
 {
     let mut rng = rand::thread_rng();
     let mut location_shift_count=rng.gen_range(generation_range.0..generation_range.1);

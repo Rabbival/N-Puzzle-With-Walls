@@ -53,7 +53,7 @@ pub mod prelude {
         states::{app_state::*, game_state::*, StatePlugin},
         tile::*,
         tile_dictionary::*,
-        tile_type_board::*,
+        tile_board::*,
         ui_logic::{eternal_ui_logic::*, menu_ui_logic::*, victory_ui_logic::*, UiLogicPlugin},
         BoardPlugins,
     };

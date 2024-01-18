@@ -4,8 +4,8 @@ use rand::Rng;
 
 /// builds a new board based on the one it gets
 pub fn generate_board_by_vector_permutation(
-    solved_board: &TileTypeBoard,
-) -> Result<TileTypeBoard, error_handler::BoardGenerationError> {
+    solved_board: &TileBoard,
+) -> Result<TileBoard, error_handler::BoardGenerationError> {
     let solved_board_iterator = solved_board.iter_filtered();
     let mut sorted_tiles = vec![];
     let mut sorted_grid_locations = vec![];
@@ -25,7 +25,7 @@ pub fn generate_board_by_vector_permutation(
             empty_grid_locations.push(*location);
         }
     }
-    let generated_board = TileTypeBoard::from_grid_and_empty_loc(&grid, &empty_grid_locations);
+    let generated_board = TileBoard::from_grid_and_empty_loc(&grid, &empty_grid_locations);
     Ok(generated_board)
 }
 

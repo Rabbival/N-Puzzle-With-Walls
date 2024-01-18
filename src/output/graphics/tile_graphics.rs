@@ -33,7 +33,7 @@ impl Plugin for TileGraphicsPlugin {
 fn move_existing_tiles(
     mut event_writer: EventWriter<board_set_event::SpawnTileInLocation>,
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
-    board_query: Query<&TileTypeBoard, With<GameBoard>>,
+    board_query: Query<&TileBoard, With<GameBoard>>,
     tile_dictionary: Query<
         &tile_dictionary::TileDictionary,
         With<tile_dictionary::TileDictionaryTag>,

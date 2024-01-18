@@ -25,7 +25,7 @@ fn move_tile_logic(
     mut graphics_event_writer: EventWriter<move_tile_event::UpdateTileLocationGraphics>,
     mut check_if_board_is_solved_writer: EventWriter<move_tile_event::CheckIfBoardIsSolved>,
     mut logic_event_reader: EventReader<move_tile_event::SwitchTilesLogic>,
-    mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
 ) {
     for switch_tile_request in logic_event_reader.read() {
         if let Err(move_error) = move_tile_logic_inner(
@@ -46,7 +46,7 @@ fn move_tile_logic_inner(
     check_if_board_is_solved_writer: &mut EventWriter<move_tile_event::CheckIfBoardIsSolved>,
     move_neighbor_from_direction: BasicDirection,
     empty_tile_index: usize,
-    game_board: &mut TileTypeBoard,
+    game_board: &mut TileBoard,
 ) -> Result<(), error_handler::TileMoveError> {
     if game_board.ignore_player_input {
         return Err(error_handler::TileMoveError::BoardFrozenToPlayer);
@@ -54,11 +54,11 @@ fn move_tile_logic_inner(
 
     let empty_tile_neighbors = game_board.get_direct_neighbors_of_empty(empty_tile_index);
     if let Some(&occupied_tile_location) = empty_tile_neighbors.get(&move_neighbor_from_direction) {
-        let optional_occupied_tile = game_board.get(&occupied_tile_location);
+        let optional_occupied_tile = 
+            wrap_if_error(game_board.get(&occupied_tile_location))?;
         if optional_occupied_tile.is_none() {
-            return Err(error_handler::TileMoveError::NoTileInCell(
-                occupied_tile_location,
-            ));
+            return Err(error_handler::TileMoveError::TileBoardError
+                (TileBoardError::NoTileInCell(occupied_tile_location)));
         }
         let occupied_tile = *optional_occupied_tile.unwrap();
         if occupied_tile.tile_type == TileType::Wall {
@@ -77,7 +77,7 @@ fn move_tile_logic_inner(
             new_location: empty_tile_location,
         });
         graphics_event_writer.send(move_tile_event::UpdateTileLocationGraphics {
-            tile: *game_board.get_empty_tile(empty_tile_index),
+            tile: *wrap_if_error(game_board.get_empty_tile(empty_tile_index))?.unwrap(),
             new_location: occupied_tile_location,
         });
 
@@ -95,8 +95,8 @@ fn move_tile_logic_inner(
 fn check_if_solved(
     mut check_if_board_is_solved_listener: EventReader<move_tile_event::CheckIfBoardIsSolved>,
     mut set_game_state_to_victory: ResMut<NextState<GameState>>,
-    mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
-    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
+    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
 ) {
     for _check_request in check_if_board_is_solved_listener.read(){
         if game_board_query.single().grid == solved_board_query.single().grid {
@@ -106,6 +106,19 @@ fn check_if_solved(
         }
     }
 }
+
+/// I don't use it automatically inside the get set etc functions
+/// since it they might have nothing to do with moving tiles
+fn wrap_if_error<T>(result: Result<T, error_handler::GridError>) 
+-> Result<T, error_handler::TileMoveError>{
+    match result {
+        Err(grid_error) => {
+            Err(error_handler::TileMoveError::GridError(grid_error))
+        },
+        Ok(value) => Ok(value)
+    }
+}
+
 
 #[cfg(test)]
 mod tests {

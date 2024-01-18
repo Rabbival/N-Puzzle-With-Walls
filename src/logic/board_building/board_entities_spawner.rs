@@ -9,6 +9,6 @@ impl Plugin for BoardEntitiesSpawnerPlugin {
 }
 
 fn spawn_deafult_boards(mut commands: Commands) {
-    commands.spawn((TileTypeBoard::default(), SolvedBoard));
-    commands.spawn((TileTypeBoard::default(), GameBoard));
+    commands.spawn((TileBoard::default(), SolvedBoard));
+    commands.spawn((TileBoard::default(), GameBoard));
 }

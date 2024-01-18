@@ -8,7 +8,7 @@ pub mod enums;
 pub mod states;
 pub mod tile;
 pub mod tile_dictionary;
-pub mod tile_type_board;
+pub mod tile_board;
 pub mod ui_logic;
 
 pub struct BoardPlugins;

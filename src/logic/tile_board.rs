@@ -1,8 +1,8 @@
 use crate::{input::move_request, output::error_handler, prelude::*};
 
 #[derive(Component, Clone, Debug)]
-pub struct TileTypeBoard {
-    /// even if the location is empty, TileTypeBoard's location should have an empty tile (and NOT a None)
+pub struct TileBoard {
+    /// even if the location is empty, TileBoard's location should have an empty tile (and NOT a None)
     pub grid: Grid<Tile>,
     pub empty_tile_locations: Vec<GridLocation>,
     ///appear as frozen to player
@@ -10,7 +10,7 @@ pub struct TileTypeBoard {
 }
 
 //constructors
-impl TileTypeBoard {
+impl TileBoard {
     pub fn from_grid_and_empty_loc(
         grid: &Grid<Tile>,
         empty_tile_locations: &Vec<GridLocation>,
@@ -74,7 +74,7 @@ impl TileTypeBoard {
     }
 }
 
-impl TileTypeBoard {
+impl TileBoard {
     pub fn index_all_tile_types(&mut self) {
         for tile_type in TileType::get_tile_types_as_vec() {
             self.index_tile_of_type(tile_type);
@@ -126,7 +126,7 @@ impl TileTypeBoard {
         if self.grid.swap_by_location(first, second).is_ok() {
             Ok(())
         } else {
-            Err(error_handler::TileMoveError::GridError(GridError::InvalidIndex(()))))
+            Err(error_handler::TileMoveError::GridError(GridError::InvalidIndex(())))
         }
     }
 
@@ -208,7 +208,7 @@ impl TileTypeBoard {
 }
 
 // iterators
-impl TileTypeBoard {
+impl TileBoard {
     pub fn iter_filtered(&self) -> impl DoubleEndedIterator<Item = (GridLocation, &Tile)> + '_ {
         self.grid
             .iter()
@@ -217,7 +217,7 @@ impl TileTypeBoard {
 }
 
 //from grid functions
-impl TileTypeBoard {
+impl TileBoard {
     pub fn get_side_length(&self) -> &u8 {
         self.grid.get_side_length()
     }
@@ -263,7 +263,7 @@ impl TileTypeBoard {
     fn none_check_get(&self, location: &GridLocation) 
     -> Result<&Tile, error_handler::TileMoveError> 
     {
-        match error_handler::wrap_if_error(self.get(location))? {
+        match wrap_if_error(self.get(location))? {
             None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
             Some(tile_ref) => Ok(tile_ref),
         }
@@ -272,15 +272,27 @@ impl TileTypeBoard {
     fn none_check_get_mut(&self, location: &GridLocation) 
     -> Result<&Tile, error_handler::TileMoveError> 
     {
-        match error_handler::wrap_if_error(self.get_mut(location))? {
+        match wrap_if_error(self.get_mut(location))? {
             None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
             Some(mut_tile_ref) => Ok(mut_tile_ref),
         }
     }
 }
 
-impl Default for TileTypeBoard {
+impl Default for TileBoard {
     fn default() -> Self {
         Self::new(BoardSize::default().to_grid_side_length())
+    }
+}
+
+/// I don't use it automatically inside the get set etc functions
+/// since it they might have nothing to do with moving tiles
+fn wrap_if_error<T>(result: Result<T, error_handler::GridError>) 
+-> Result<T, error_handler::TileBoardError>{
+    match result {
+        Err(grid_error) => {
+            Err(error_handler::TileBoardError::GridError(grid_error))
+        },
+        Ok(value) => Ok(value)
     }
 }

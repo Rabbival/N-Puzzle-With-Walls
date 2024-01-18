@@ -29,8 +29,8 @@ impl Plugin for BoardBuilderPlugin {
 fn build_a_new_board(
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
-    solved_board_query: Query<&TileTypeBoard, (With<SolvedBoard>, Without<GameBoard>)>,
-    mut game_board_query: Query<&mut TileTypeBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
+    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<AppState>>,
     current_game_state: Res<State<AppState>>,
@@ -40,7 +40,7 @@ fn build_a_new_board(
         let solved_grid = &solved_board_query.single().grid;
         let mut game_board = game_board_query.single_mut();
         let optional_newborn_tiletype_board =
-            TileTypeBoard::from_grid(solved_grid, applied_props.empty_count);
+            TileBoard::from_grid(solved_grid, applied_props.empty_count);
         match optional_newborn_tiletype_board {
             Err(error) => {
                 generation_error_event_writer.send(ui_event::ShowGenerationError(error));
@@ -72,9 +72,9 @@ fn build_a_new_board(
 }
 
 pub fn generate_game_board(
-    solved_board: TileTypeBoard,
+    solved_board: TileBoard,
     generation_range: (u8, u8),
-) -> Result<TileTypeBoard, error_handler::BoardGenerationError> {
+) -> Result<TileBoard, error_handler::BoardGenerationError> {
     for _attempt in 0..BOARD_GENERATION_ATTEMPTS{
         let attempt_result
             =permutation_builder::generate_board_by_vector_permutation(&solved_board);
