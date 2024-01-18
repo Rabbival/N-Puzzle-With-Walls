@@ -57,14 +57,14 @@ pub fn generate_solved_board_inner(
 
     db_manager.insert_layout(SavedLayout{
         board_propes: *applied_props,
-        wall_locations: wall_locations
+        wall_locations
     });
 
     let mut empty_tile_counter = applied_props.empty_count;
     'outer_for: for i in (0..grid_side_length_u32).rev() {
         for j in (0..grid_side_length_u32).rev() {
             let location = GridLocation::new(i as i32, j as i32);
-            if wrap_if_error(solved_board.tiletype_in_location(&location))? == None {
+            if wrap_if_error(solved_board.tiletype_in_location(&location))?.is_none() {
                 wrap_if_error
                     (solved_board.set(&location, Tile::new(TileType::Empty)))?;
                 empty_tile_counter -= 1;
@@ -78,7 +78,7 @@ pub fn generate_solved_board_inner(
     for i in 0..grid_side_length_u32 {
         for j in 0..grid_side_length_u32 {
             let location = GridLocation::new(i as i32, j as i32);
-            if wrap_if_error(solved_board.tiletype_in_location(&location))? == None {
+            if wrap_if_error(solved_board.tiletype_in_location(&location))?.is_none() {
                 wrap_if_error
                     (solved_board.set(&location, Tile::new(TileType::Numbered)))?
             }

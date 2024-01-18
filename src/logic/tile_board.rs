@@ -120,7 +120,7 @@ impl TileBoard {
         }
 
         let swap_result = self.grid.swap_by_location(first, second);
-        Ok(wrap_to_tile_move_error(wrap_to_tile_board_error(swap_result))?)
+        wrap_to_tile_move_error(wrap_to_tile_board_error(swap_result))
     }
 
     pub fn tiletype_in_location_if_none(&self, location: &GridLocation) 
@@ -254,10 +254,10 @@ impl TileBoard {
         let tile_ref = self.none_check_get(location)?;
         match tile_ref.tile_type {
             TileType::Empty => {
-                return Ok(true);
+                Ok(true)
             }
             TileType::Numbered | TileType::Wall => {
-                return Ok(false);
+                Ok(false)
             }
         }
     }
