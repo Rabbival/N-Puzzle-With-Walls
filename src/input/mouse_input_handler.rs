@@ -70,12 +70,12 @@ fn handle_mouse_click(
 
     match GridLocation::from_world(&game_board.grid, cursor_position) {
         Some(optional_occupied_tile_location) => {
-            if !game_board.occupied(&optional_occupied_tile_location)? {
+            if game_board.empty_tile(&optional_occupied_tile_location)? {
                 return Err(error_handler::TileMoveError::PressedEmptySlot);
             }
             let occupied_tile_location = optional_occupied_tile_location;
             let optional_move_request =
-                game_board.clicked_tile_to_move_request(&occupied_tile_location)?;
+                game_board.move_request_from_clicked_tile(&occupied_tile_location)?;
             match optional_move_request {
                 None => Err(error_handler::TileMoveError::NoEmptyNeighbor),
                 Some(move_request) => {

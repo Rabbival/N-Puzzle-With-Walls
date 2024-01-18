@@ -169,18 +169,19 @@ impl TileTypeBoard {
         )
     }
 
-    /// takes a clicked location and generates the matching move request
-    /// if it finds an empty neighbor, if it doesn't returns None
-    pub fn clicked_tile_to_move_request(
+    pub fn move_request_from_clicked_tile(
         &self,
         origin: &GridLocation,
     ) -> Result<Option<move_request::MoveRequest>, error_handler::TileMoveError> {
-        for dir in BasicDirection::get_directions_as_vec() {
-            let neighbor_location = self.grid.neighbor_location(origin, &dir);
-            if let Some(tile_in_cell) = self.get(&neighbor_location) {
+        let direct_neighbor_locations_walls_excluded = 
+            self.get_direct_neighbor_locations_walls_excluded(origin);
+        for (neighbor_direction, neighbor_location)
+            in direct_neighbor_locations_walls_excluded
+        {
+            if let Some(tile_in_cell) = self.get(&neighbor_location).unwrap() {
                 if tile_in_cell.tile_type == TileType::Empty {
                     return Ok(Some(move_request::MoveRequest {
-                        move_neighbor_from_direction: dir.opposite_direction(),
+                        move_neighbor_from_direction: neighbor_direction.opposite_direction(),
                         empty_tile_index: Some(tile_in_cell.index),
                     }));
                 }
@@ -189,14 +190,13 @@ impl TileTypeBoard {
         Ok(None)
     }
 
-    /// only returns occupied ones that aren't walls
     pub fn get_direct_neighbor_locations_walls_excluded(
         &self,
         origin: &GridLocation,
     ) -> HashMap<BasicDirection, GridLocation> {
         let mut direct_neighbor_locations = self.grid.get_all_occupied_neighbor_locations(origin);
         for (dir, loc) in self.grid.get_all_occupied_neighbor_locations(origin) {
-            if let Some(value_in_cell) = self.grid.get(&loc) {
+            if let Some(value_in_cell) = self.get(&loc).unwrap() {
                 if TileType::Wall == value_in_cell.tile_type {
                     direct_neighbor_locations.remove(&dir);
                 }
@@ -245,26 +245,33 @@ impl TileTypeBoard {
         self.grid.set_and_get_former(location, content)
     }
 
-    // returns whether it's not empty
-    pub fn occupied(&self, location: &GridLocation) -> Result<bool, error_handler::TileMoveError> {
-        self.none_check(location)?;
-        match self.get(location).unwrap().tile_type {
+    pub fn empty_tile(&self, location: &GridLocation) -> Result<bool, error_handler::TileMoveError> {
+        let tile_ref = self.none_check_get(location)?;
+        match tile_ref.tile_type {
             TileType::Empty => {
-                return Ok(false);
-            }
-            TileType::Numbered | TileType::Wall => {
                 return Ok(true);
             }
+            TileType::Numbered | TileType::Wall => {
+                return Ok(false);
+            }
         }
-        Ok(false)
     }
 
-    fn none_check(&self, location: &GridLocation) 
-    -> Result<(), error_handler::TileMoveError> 
+    fn none_check_get(&self, location: &GridLocation) 
+    -> Result<&Tile, error_handler::TileMoveError> 
     {
         match wrap_if_error(self.get(location))? {
             None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
-            Some(_) => Ok(()),
+            Some(tile_ref) => Ok(tile_ref),
+        }
+    }
+
+    fn none_check_get_mut(&self, location: &GridLocation) 
+    -> Result<&Tile, error_handler::TileMoveError> 
+    {
+        match wrap_if_error(self.get_mut(location))? {
+            None => Err(error_handler::TileMoveError::NoTileInCell(*location)),
+            Some(mut_tile_ref) => Ok(mut_tile_ref),
         }
     }
 }
