@@ -39,6 +39,7 @@ pub mod prelude {
             grid_related::{grid::*, grid_location::*, grid_traveller::*, grid_tree::*},
             indexed_value::*,
             util_functions::*,
+            linked_list::*,
         },
         enums::{
             basic_direction::*,

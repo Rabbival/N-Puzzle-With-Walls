@@ -8,11 +8,31 @@ pub struct Grid<T: Clone> {
 
 //grid travelling functions
 impl<T: Clone> Grid<T> {
+    pub fn all_nodes_in_cycles(&self) -> bool{
+        let grid_traveller = GridTraveller::from_grid(self, GridTravellerType::DFS);
+        
+        // initialize a one directional linked list
+        
+        for location_and_neighbors in grid_traveller {
+            let all_neighbors_of_last_visited_location = self.get_all_occupied_neighbor_locations
+                (&location_and_neighbors.just_visited_location);
+            for neighbor in location_and_neighbors.just_added_neighbors {
+                
+                // if there's one that doesn't appear in the just added list then
+                // it was already added, so we can remove it from the linked list
+                // making all of its decendants be declared as a part of a circle
+
+            }
+        }
+
+        //temp
+        true
+    }
+
     pub fn get_spanning_tree(&self, traveller_type: GridTravellerType) -> Result<GridTree, GridTreeError> {
         let grid_traveller = GridTraveller::from_grid(self, traveller_type);
         let mut grid_tree = GridTree::from_root(grid_traveller.locations_to_visit[0]);
-        let traveller_iterator = grid_traveller.into_iter();
-        for location_and_neighbors in traveller_iterator {
+        for location_and_neighbors in grid_traveller {
             for neighbor in location_and_neighbors.just_added_neighbors {
                 grid_tree.insert_leaf
                     (neighbor, Some(location_and_neighbors.just_visited_location))?;
