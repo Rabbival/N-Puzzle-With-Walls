@@ -17,7 +17,7 @@ pub enum MenuError {
 pub enum BoardGenerationError {
     VectorPermutationGenerationFailed,
     DirectionCouldntBeFlipped,
-    ItemNotInMap(ItemNotFoundInMapError),
+    DataStructError(DataStructError<BasicDirection>),
     TileMoveError(TileMoveError),
     CouldntPlaceAllWalls,
     NotEnoughAvailableSpots,
@@ -26,9 +26,9 @@ pub enum BoardGenerationError {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum ItemNotFoundInMapError {
-    DirectionNotFoundInMap,
-    EntityNotFoundInMap,
+pub enum DataStructError<T> {
+    ItemNotFoundInMap(T),
+    KeyAlreadyExists,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -60,7 +60,7 @@ pub enum GridError {
 pub enum EntityRelatedCustomError {
     NoEntity,
     EntityNotInQuery,
-    ItemNotInMap(ItemNotFoundInMapError),
+    DataStructError(DataStructError<Tile>),
 }
 
 pub struct ErrorHandlerPlugin;

@@ -63,19 +63,19 @@ fn move_existing_tiles_inner(
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
     commands: &mut Commands,
 ) -> Result<(), EntityRelatedCustomError> {
-    for (grid_location, tile_type_from_cell) in grid.iter() {
+    for (grid_location, tile_from_cell) in grid.iter() {
         let spawn_location = grid_location.to_world();
-        match tile_dictionary.get(tile_type_from_cell) {
+        match tile_dictionary.get(tile_from_cell) {
             // the tile doesn't exist yet and thus should be created at that location
             None => {
                 if *solved_rerolled {
                     event_writer.send(board_set_event::SpawnTileInLocation {
-                        tile: *tile_type_from_cell,
+                        tile: *tile_from_cell,
                         location: spawn_location,
                     })
                 } else {
-                    return Err(EntityRelatedCustomError::ItemNotInMap(
-                        ItemNotFoundInMapError::EntityNotFoundInMap,
+                    return Err(EntityRelatedCustomError::DataStructError(
+                        DataStructError::ItemNotFoundInMap(*tile_from_cell),
                     ));
                 }
             }
@@ -115,11 +115,11 @@ fn despawn_unused_tiles_and_clear_tag(
     }
 
     // delete all unused
-    for (tile_entity, tile_type) in untagged_tiles.iter() {
+    for (tile_entity, tile) in untagged_tiles.iter() {
         tile_dictionary_query
             .single_mut()
             .entity_by_tile
-            .remove(tile_type);
+            .remove(tile);
         commands.entity(tile_entity).despawn_recursive();
     }
     // delete tags from the ones left
@@ -248,7 +248,7 @@ fn extract_tile_entity(
 ) -> Result<Entity, TileMoveError> {
     match tile_dictionary.get(tile) {
         None => Err(TileMoveError::EntityRelated(
-            EntityRelatedCustomError::ItemNotInMap(ItemNotFoundInMapError::EntityNotFoundInMap),
+            EntityRelatedCustomError::DataStructError(DataStructError::ItemNotFoundInMap(*tile)),
         )),
         Some(optional_entity) => match optional_entity {
             None => Err(TileMoveError::EntityRelated(

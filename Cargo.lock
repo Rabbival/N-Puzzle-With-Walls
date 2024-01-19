@@ -1619,7 +1619,6 @@ dependencies = [
  "bevy",
  "enum-iterator",
  "rand",
- "sorted-vec",
 ]
 
 [[package]]
@@ -3040,12 +3039,6 @@ checksum = "74212e6bbe9a4352329b2f68ba3130c15a3f26fe88ff22dbdc6cdd58fa85e99c"
 dependencies = [
  "serde",
 ]
-
-[[package]]
-name = "sorted-vec"
-version = "0.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6734caf0b6f51addd5eeacca12fb39b2c6c14e8d4f3ac42f3a78955c0467458"
 
 [[package]]
 name = "spirv"
