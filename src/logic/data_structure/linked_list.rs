@@ -3,6 +3,8 @@ use crate::prelude::*;
 use crate::output::error_handler;
 use std::hash::Hash;
 
+/// a data structure for which if a node is removed
+/// all next ones follow
 pub struct LinkedList<T: Hash + Ord + Copy>{
 	list: Vec<T>,
 	index_by_value: HashMap<T, usize>,
