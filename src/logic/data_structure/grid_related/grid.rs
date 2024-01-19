@@ -43,7 +43,7 @@ impl<T: Clone> Grid<T> {
 
     pub fn is_connected_graph(&self) -> bool {
         let mut traveller = 
-            GridTraveller::from_grid(self, GridTravellerType::default());
+            GridTraveller::from_grid(self, GridTra+++vellerType::default());
         let mut tile_counter = 0;
         while traveller.next().is_some() {
             tile_counter += 1;
