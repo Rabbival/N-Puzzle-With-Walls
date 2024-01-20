@@ -13,7 +13,7 @@ impl<T: Clone> Grid<T> {
         let grid_traveller = GridTraveller::from_grid(self, GridTravellerType::DFS);
         let mut locations_not_in_circle = LinkedList::<GridLocation>::new();
         for mut location_and_neighbors in grid_traveller {
-            locations_not_in_circle.push(location_and_neighbors.just_visited_location)?;
+            locations_not_in_circle.push(location_and_neighbors.just_visited_location);
             let occupied_neighbors_of_just_visited_location =
                 self.get_all_occupied_neighbor_locations
                 (&location_and_neighbors.just_visited_location);

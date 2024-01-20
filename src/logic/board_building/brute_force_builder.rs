@@ -53,7 +53,7 @@ pub fn brute_force_generate_game_board(
             let chosen_location_option=optional_directions.get(chosen_direction);
             if chosen_location_option.is_none(){
                 return Err(error_handler::BoardGenerationError::DirectionNotInMap
-                    (DataStructError::ItemNotFoundInMap(*chosen_direction)));
+                    (DataStructError::ItemNotFound(*chosen_direction)));
             }
             let chosen_location = chosen_location_option.unwrap();
             if let Err(error) = 

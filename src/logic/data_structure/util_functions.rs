@@ -1,6 +1,5 @@
 use rand::Rng;
 
-/// returns true if the value was found and removed
 pub fn remove_by_value<T: PartialEq>(item_to_remove: &T, list_to_remove_from: &mut Vec<T>) -> Option<T> {
     let optional_index_to_remove = item_to_index(item_to_remove, list_to_remove_from);
     match optional_index_to_remove {

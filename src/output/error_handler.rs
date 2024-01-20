@@ -28,7 +28,7 @@ pub enum BoardGenerationError {
 
 #[derive(Debug, Clone, Copy)]
 pub enum DataStructError<T> {
-    ItemNotFoundInMap(T),
+    ItemNotFound(T),
     KeyAlreadyExists,
 }
 

@@ -75,7 +75,7 @@ fn move_existing_tiles_inner(
                     })
                 } else {
                     return Err(EntityRelatedCustomError::DataStructError(
-                        DataStructError::ItemNotFoundInMap(*tile_from_cell),
+                        DataStructError::ItemNotFound(*tile_from_cell),
                     ));
                 }
             }
@@ -248,7 +248,7 @@ fn extract_tile_entity(
 ) -> Result<Entity, TileMoveError> {
     match tile_dictionary.get(tile) {
         None => Err(TileMoveError::EntityRelated(
-            EntityRelatedCustomError::DataStructError(DataStructError::ItemNotFoundInMap(*tile)),
+            EntityRelatedCustomError::DataStructError(DataStructError::ItemNotFound(*tile)),
         )),
         Some(optional_entity) => match optional_entity {
             None => Err(TileMoveError::EntityRelated(
