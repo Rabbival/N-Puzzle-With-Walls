@@ -37,14 +37,14 @@ impl<T: Hash + Ord + Copy> LinkedList<T>{
 		}
 	}
 
-	pub fn remove_by_value(&mut self, value_to_remove: T) 
+	pub fn remove_by_value(&mut self, ref_to_value_to_remove: &T)
 	-> Result<(), error_handler::DataStructError<T>>
 	{
 		let optional_value_index = 
-			self.index_by_value.remove(&value_to_remove);
+			self.index_by_value.remove(ref_to_value_to_remove);
 		match optional_value_index{
 			None => {
-				Err(error_handler::DataStructError::ItemNotFoundInMap(value_to_remove))
+				Err(error_handler::DataStructError::ItemNotFoundInMap(*ref_to_value_to_remove))
 			},
 			Some(index_to_remove) => {
 				self.next_index = index_to_remove;

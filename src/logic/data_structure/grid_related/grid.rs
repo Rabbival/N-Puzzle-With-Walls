@@ -8,25 +8,23 @@ pub struct Grid<T: Clone> {
 
 //grid travelling functions
 impl<T: Clone> Grid<T> {
-    pub fn all_nodes_in_cycles(&self) -> bool{
+    pub fn all_nodes_in_cycles(&self) -> Result<bool, error_handler::DataStructError<GridError>>{
         let grid_traveller = GridTraveller::from_grid(self, GridTravellerType::DFS);
-        
-        // initialize a one directional linked list
-        
+        let mut locations_not_in_circle = LinkedList::<GridLocation>::new();
         for location_and_neighbors in grid_traveller {
-            let all_neighbors_of_last_visited_location = self.get_all_occupied_neighbor_locations
-                (&location_and_neighbors.just_visited_location);
-            for neighbor in location_and_neighbors.just_added_neighbors {
-                
+            locations_not_in_circle.push(location_and_neighbors.just_visited_location)?;
+            let all_neighbors_of_last_visited_location =
+                Vec::from_iter(self.get_all_occupied_neighbor_locations
+                (&location_and_neighbors.just_visited_location).values());
+            for neighbor_location_ref in all_neighbors_of_last_visited_location{
                 // if there's one that doesn't appear in the just added list then
-                // it was already added, so we can remove it from the linked list
-                // making all of its decendants be declared as a part of a circle
-
+                // it was already added, which means we can declare a circle with it closed
+                if location_and_neighbors.just_added_neighbors.get(neighbor_location_ref).is_none(){
+                    locations_not_in_circle.remove_by_value(neighbor_location_ref)?;
+                }
             }
         }
-
-        //temp
-        true
+        Ok(locations_not_in_circle.is_empty())
     }
 
     pub fn get_spanning_tree(&self, traveller_type: GridTravellerType) -> Result<GridTree, GridTreeError> {
@@ -43,7 +41,7 @@ impl<T: Clone> Grid<T> {
 
     pub fn is_connected_graph(&self) -> bool {
         let mut traveller = 
-            GridTraveller::from_grid(self, GridTra+++vellerType::default());
+            GridTraveller::from_grid(self, GridTravellerType::default());
         let mut tile_counter = 0;
         while traveller.next().is_some() {
             tile_counter += 1;
@@ -113,7 +111,7 @@ impl<T: Clone> Grid<T> {
             edge_vector.push(GridLocation {
                 row: end_of_line,
                 col: i,
-            }); //buttom line
+            }); //bottom line
             edge_vector.push(GridLocation { row: i, col: 0 }); //left line
             edge_vector.push(GridLocation {
                 row: i,
