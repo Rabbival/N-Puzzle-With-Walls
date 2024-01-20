@@ -52,7 +52,7 @@ pub fn generate_solved_board_inner(
     if applied_props.wall_count > 0 {
         wall_locations = determine_wall_locations(applied_props)?;
         wrap_if_error
-            (spawn_walls_in_locations(&wall_locations, &mut solved_board))?;
+            (&spawn_walls_in_locations(&wall_locations, &mut solved_board))?;
     }
 
     db_manager.insert_layout(SavedLayout{
@@ -64,9 +64,9 @@ pub fn generate_solved_board_inner(
     'outer_for: for i in (0..grid_side_length_u32).rev() {
         for j in (0..grid_side_length_u32).rev() {
             let location = GridLocation::new(i as i32, j as i32);
-            if wrap_if_error(solved_board.tiletype_in_location(&location))?.is_none() {
+            if wrap_if_error(&solved_board.tiletype_in_location(&location))?.is_none() {
                 wrap_if_error
-                    (solved_board.set(&location, Tile::new(TileType::Empty)))?;
+                    (&solved_board.set(&location, Tile::new(TileType::Empty)))?;
                 empty_tile_counter -= 1;
                 if empty_tile_counter == 0 {
                     break 'outer_for;
@@ -78,9 +78,9 @@ pub fn generate_solved_board_inner(
     for i in 0..grid_side_length_u32 {
         for j in 0..grid_side_length_u32 {
             let location = GridLocation::new(i as i32, j as i32);
-            if wrap_if_error(solved_board.tiletype_in_location(&location))?.is_none() {
+            if wrap_if_error(&solved_board.tiletype_in_location(&location))?.is_none() {
                 wrap_if_error
-                    (solved_board.set(&location, Tile::new(TileType::Numbered)))?
+                    (&solved_board.set(&location, Tile::new(TileType::Numbered)))?
             }
         }
     }
@@ -145,11 +145,23 @@ fn determine_wall_locations(
                 }
             }
 
-            let chosen_tile_value_result = 
+            let chosen_tile_value_result: Result<Option<u8>, GridError> = 
                 neighbor_count_grid.set_none_get_former(&chosen_wall_location);
 
-            if let Err(data_struct_error) = neighbor_count_grid.all_nodes_in_cycles(){
-                return Err(error_handler::BoardGenerationError::CircleCheckError(data_struct_error));
+            match neighbor_count_grid.all_nodes_in_cycles() {
+                Err(data_struct_error) => {
+                    return Err(error_handler::BoardGenerationError::CircleCheckError(data_struct_error));
+                },
+                Ok(all_in_cycles) => {
+                    if !all_in_cycles{
+                        put_cell_back_in_place(
+                            &chosen_wall_location,
+                            &chosen_tile_value_result,
+                            &mut neighbor_count_grid
+                        )?;
+                        continue;
+                    }
+                }
             }
 
             //check (or don't) connectivity
@@ -162,11 +174,12 @@ fn determine_wall_locations(
                 if neighbor_count_grid.is_connected_graph() {
                     break;
                 } else {
-                    let chosen_tile_value= 
-                        wrap_if_error(chosen_tile_value_result)?;
-                    //if the graph is not connected, we'll not remove this tile and thus it should be put back in place
-                    wrap_if_error
-                        (neighbor_count_grid.set(&chosen_wall_location, chosen_tile_value.unwrap()))?
+                    put_cell_back_in_place(
+                        &chosen_wall_location,
+                        &chosen_tile_value_result,
+                        &mut neighbor_count_grid
+                    )?;
+                    continue;
                 }
             }
         }
@@ -196,6 +209,22 @@ fn determine_wall_locations(
         }
     }
     Ok(wall_spawn_locations)
+}
+
+fn put_cell_back_in_place(
+    chosen_wall_location_ref: &GridLocation,
+    chosen_tile_value_result_ref: &Result<Option<u8>, GridError>,
+    neighbor_count_grid_ref_mut: &mut Grid<u8>
+) 
+-> Result<(), error_handler::BoardGenerationError>
+{
+    let chosen_tile_value= 
+        wrap_if_error(chosen_tile_value_result_ref)?;
+    Ok(
+        wrap_if_error
+            (&neighbor_count_grid_ref_mut.set
+                (chosen_wall_location_ref, chosen_tile_value.unwrap()))?
+    )
 }
 
 fn initialize_neighbor_count_grid(
@@ -247,13 +276,13 @@ fn spawn_walls_in_locations(locations: &Vec<GridLocation>, board: &mut TileBoard
     Ok(())
 }
 
-fn wrap_if_error<T>(result: Result<T, error_handler::GridError>) 
+fn wrap_if_error<T: Copy>(result: &Result<T, error_handler::GridError>) 
 -> Result<T, error_handler::BoardGenerationError>{
     match result {
         Err(grid_error) => {
-            Err(error_handler::BoardGenerationError::GridError(grid_error))
+            Err(error_handler::BoardGenerationError::GridError(*grid_error))
         },
-        Ok(value) => Ok(value)
+        Ok(value) => Ok(*value)
     }
 }
 
