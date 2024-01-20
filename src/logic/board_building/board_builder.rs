@@ -29,6 +29,7 @@ impl Plugin for BoardBuilderPlugin {
 fn build_a_new_board(
     mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
+    mut camera_adjustmant_event_writer: EventWriter<SetCameraAccordingToNewSettings>,
     solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
@@ -61,6 +62,9 @@ fn build_a_new_board(
                             game_state.set(AppState::Game);
                         }
                         print_to_console::game_log(GameLog::NewBoardGenerated);
+                        camera_adjustmant_event_writer.send(board_set_event::SetCameraAccordingToNewSettings {
+                            new_grid_side_length: applied_props.size.to_grid_side_length(),
+                        });
                     }
                     Err(error) => {
                         generation_error_event_writer.send(ui_event::ShowGenerationError(error))

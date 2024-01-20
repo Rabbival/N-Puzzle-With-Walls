@@ -17,7 +17,8 @@ pub enum MenuError {
 pub enum BoardGenerationError {
     VectorPermutationGenerationFailed,
     DirectionCouldntBeFlipped,
-    DataStructError(DataStructError<BasicDirection>),
+    DirectionNotInMap(DataStructError<BasicDirection>),
+    CircleCheckError(DataStructError<GridLocation>),
     TileMoveError(TileMoveError),
     CouldntPlaceAllWalls,
     NotEnoughAvailableSpots,

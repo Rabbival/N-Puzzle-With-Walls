@@ -130,11 +130,11 @@ fn determine_wall_locations(
             // whether it's because the chosen location is illegal
             // or because we don't want to choose the same location twice
             // the chosen location has to be removed from the available ones
-            let found_and_removed =
+            let removed_item =
                 remove_by_value(&chosen_wall_location, &mut possible_spawn_locations);
 
             // could be that the tree chose an illegal value
-            if !found_and_removed {
+            if removed_item.is_none() {
                 continue;
             } else {
                 // if the leaf is valid, we want to remove it from its parents count
@@ -148,6 +148,11 @@ fn determine_wall_locations(
             let chosen_tile_value_result = 
                 neighbor_count_grid.set_none_get_former(&chosen_wall_location);
 
+            if let Err(data_struct_error) = neighbor_count_grid.all_nodes_in_cycles(){
+                return Err(error_handler::BoardGenerationError::CircleCheckError(data_struct_error));
+            }
+
+            //check (or don't) connectivity
             if is_leaf {
                 //if the tile was determined by the MST, the graph is connected
                 break;
@@ -179,7 +184,7 @@ fn determine_wall_locations(
             let neighbor_value = neighbor_count_grid.get_mut(&neighbor_location).unwrap().unwrap();
             *neighbor_value -= 1;
 
-            // if a neigbor of the chosen location got to the threshold
+            // if a neighbor of the chosen location got to the threshold
             // we can't put a wall in its neighbor or it'll go below threshold
             if *neighbor_value == MIN_NEIGHBORS {
                 forbid_spawn_in_neighbors_of_location(
@@ -276,7 +281,7 @@ mod tests {
                 ).unwrap();
             assert!(solved_board.grid.is_connected_graph());
         }
-        assert!(dummy_db_manager.get_saved_layouts_ref().len() == ATTEMPT_COUNT);
+        assert_eq!(dummy_db_manager.get_saved_layouts_ref().len(), ATTEMPT_COUNT);
     }
 
     #[test]
@@ -298,6 +303,6 @@ mod tests {
                 ).unwrap();
             assert!(solved_board.grid.is_connected_graph());
         }
-        assert!(dummy_db_manager.get_saved_layouts_ref().len() == ATTEMPT_COUNT);
+        assert_eq!(dummy_db_manager.get_saved_layouts_ref().len(), ATTEMPT_COUNT);
     }
 }

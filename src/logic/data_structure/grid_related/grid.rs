@@ -1,4 +1,5 @@
 use crate::{prelude::*, output::error_handler};
+use crate::logic::data_structure::util_functions;
 
 #[derive(Component, Clone, Debug)]
 pub struct Grid<T: Clone> {
@@ -8,18 +9,24 @@ pub struct Grid<T: Clone> {
 
 //grid travelling functions
 impl<T: Clone> Grid<T> {
-    pub fn all_nodes_in_cycles(&self) -> Result<bool, error_handler::DataStructError<GridError>>{
+    pub fn all_nodes_in_cycles(&self) -> Result<bool, error_handler::DataStructError<GridLocation>>{
         let grid_traveller = GridTraveller::from_grid(self, GridTravellerType::DFS);
         let mut locations_not_in_circle = LinkedList::<GridLocation>::new();
-        for location_and_neighbors in grid_traveller {
+        for mut location_and_neighbors in grid_traveller {
             locations_not_in_circle.push(location_and_neighbors.just_visited_location)?;
+            let occupied_neighbors_of_just_visited_location =
+                self.get_all_occupied_neighbor_locations
+                (&location_and_neighbors.just_visited_location);
             let all_neighbors_of_last_visited_location =
-                Vec::from_iter(self.get_all_occupied_neighbor_locations
-                (&location_and_neighbors.just_visited_location).values());
+                Vec::from_iter(occupied_neighbors_of_just_visited_location.values());
             for neighbor_location_ref in all_neighbors_of_last_visited_location{
                 // if there's one that doesn't appear in the just added list then
                 // it was already added, which means we can declare a circle with it closed
-                if location_and_neighbors.just_added_neighbors.get(neighbor_location_ref).is_none(){
+                let optional_just_added_location = util_functions::remove_by_value(
+                    neighbor_location_ref,
+                    &mut location_and_neighbors.just_added_neighbors
+                );
+                if optional_just_added_location.is_none(){
                     locations_not_in_circle.remove_by_value(neighbor_location_ref)?;
                 }
             }

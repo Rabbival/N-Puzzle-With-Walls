@@ -1,7 +1,7 @@
 use crate::{prelude::*, output::error_handler};
 use std::fmt;
 
-#[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug)]
+#[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug, Ord, PartialOrd)]
 pub struct GridLocation {
     pub row: i32,
     pub col: i32,
