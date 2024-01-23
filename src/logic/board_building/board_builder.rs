@@ -3,6 +3,7 @@ use crate::{
     output::{error_handler, print_to_console},
     prelude::*,
 };
+use crate::logic::states::game_state;
 
 use super::{brute_force_builder, permutation_builder};
 
@@ -20,55 +21,48 @@ impl Plugin for BoardBuilderPlugin {
         app
             //important to run before we draw it in graphics.rs
             .add_systems(
-                Update,
-                build_a_new_board.in_set(InputSystemSets::PostInitialChanges),
+                Update,(
+                    build_a_new_board
+                        .in_set(InputSystemSets::PostInitialChanges)
+                        .run_if(in_state(GameState::SolvedBoardGenerated))
+                    ,
+                    declare_board_generation_done
+                        .in_set(InputSystemSets::MainChanges)
+                        .run_if(in_state(GameState::GameBoardGenerated))
+                )
             );
     }
 }
 
 fn build_a_new_board(
-    mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
-    mut camera_adjustmant_event_writer: EventWriter<SetCameraAccordingToNewSettings>,
     solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
-    mut game_state: ResMut<NextState<AppState>>,
-    current_game_state: Res<State<AppState>>,
+    mut game_state: ResMut<NextState<GameState>>,
 ) {
-    for _build_request in event_listener.read() {
-        let applied_props = applied_board_props_query.single();
-        let solved_grid = &solved_board_query.single().grid;
-        let mut game_board = game_board_query.single_mut();
-        let optional_newborn_tiletype_board =
-            TileBoard::from_grid(solved_grid, applied_props.empty_count);
-        match optional_newborn_tiletype_board {
-            Err(error) => {
-                generation_error_event_writer.send(ui_event::ShowGenerationError(error));
-                return;
-            }
-            Ok(newborn_board) => {
-                let attempt_result =
-                    generate_game_board(newborn_board, applied_props.size.to_random_turns_range());
-                //generation successful
-                match attempt_result {
-                    Ok(board) => {
-                        *game_board = board;
-                        // if we're resetting when in game screen,
-                        // the board's input ignorance won't be toggled
-                        if let AppState::Game = current_game_state.get() {
-                            game_board.ignore_player_input = false;
-                        } else {
-                            game_state.set(AppState::Game);
-                        }
-                        print_to_console::game_log(GameLog::NewBoardGenerated);
-                        camera_adjustmant_event_writer.send(board_set_event::SetCameraAccordingToNewSettings {
-                            new_grid_side_length: applied_props.size.to_grid_side_length(),
-                        });
-                    }
-                    Err(error) => {
-                        generation_error_event_writer.send(ui_event::ShowGenerationError(error))
-                    }
+    let applied_props = applied_board_props_query.single();
+    let solved_grid = &solved_board_query.single().grid;
+
+    let optional_newborn_tiletype_board =
+        TileBoard::from_grid(solved_grid, applied_props.empty_count);
+    match optional_newborn_tiletype_board {
+        Err(error) => {
+            generation_error_event_writer.send(ui_event::ShowGenerationError(error));
+            return;
+        }
+        Ok(newborn_board) => {
+            let attempt_result =
+                generate_game_board(newborn_board, applied_props.size.to_random_turns_range());
+            //generation successful
+            match attempt_result {
+                Ok(board) => {
+                    game_state.set(GameState::GameBoardGenerated);
+                    let mut game_board = game_board_query.single_mut();
+                    *game_board = board;
+                }
+                Err(error) => {
+                    generation_error_event_writer.send(ui_event::ShowGenerationError(error))
                 }
             }
         }
@@ -89,4 +83,23 @@ pub fn generate_game_board(
     }
 
     brute_force_builder::brute_force_generate_game_board(&solved_board, generation_range)
+}
+
+fn declare_board_generation_done(
+    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    mut app_state: ResMut<NextState<AppState>>,
+    current_app_state: Res<State<AppState>>,
+    mut game_state: ResMut<NextState<GameState>>,
+){
+    let mut game_board = game_board_query.single_mut();
+
+    // if we're resetting when in game screen,
+    // the board's input ignorance won't be toggled
+    if let AppState::Game = current_app_state.get() {
+        game_board.ignore_player_input = false;
+    } else {
+        app_state.set(AppState::Game);
+    }
+    print_to_console::game_log(GameLog::NewBoardGenerated);
+    game_state.set(GameState::Regular);
 }

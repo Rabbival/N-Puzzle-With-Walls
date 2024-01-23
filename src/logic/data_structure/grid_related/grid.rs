@@ -27,7 +27,7 @@ impl<T: Clone> Grid<T> {
                     &mut location_and_neighbors.just_added_neighbors
                 );
                 if optional_just_added_location.is_none(){
-                    locations_not_in_circle.remove_by_value(neighbor_location_ref)?;
+                    locations_not_in_circle.remove_by_value(neighbor_location_ref);
                 }
             }
         }

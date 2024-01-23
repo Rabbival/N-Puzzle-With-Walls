@@ -4,6 +4,7 @@ use crate::{
     prelude::*,
 };
 use bevy::{prelude::*, utils::HashMap};
+use crate::output::print_to_console;
 
 #[derive(Component)]
 pub struct StayForNextBoardTag;
@@ -13,11 +14,10 @@ pub struct TileGraphicsPlugin;
 impl Plugin for TileGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
-            //.add_systems(PostStartup, spawn_tiles)
             .add_systems(
                 Update,
                 (
-                    update_tile_entity_positions.in_set(InputSystemSets::InitialChanges),
+                    update_tile_entity_positions.in_set(InputSystemSets::PostInitialChanges),
                     (
                         move_existing_tiles,
                         despawn_unused_tiles_and_clear_tag,
@@ -42,6 +42,11 @@ fn move_existing_tiles(
     mut commands: Commands,
 ) {
     for event in event_listener.read() {
+
+
+        info!("board generation request got by graphics");
+
+
         if let Err(error) = move_existing_tiles_inner(
             &mut event_writer,
             &event.reroll_solved,
@@ -50,7 +55,7 @@ fn move_existing_tiles(
             &mut tile_transforms,
             &mut commands,
         ) {
-            print_entity_related_error(error);
+            print_to_console::print_entity_related_error(error);
         }
     }
 }
@@ -141,6 +146,11 @@ fn spawn_tiles(
     if event_listener.is_empty() {
         return;
     }
+
+
+    info!("got tiles spawn request");
+
+
     let mut tile_dictionary_instance = tile_dictionary.single_mut();
     for spawn_request in event_listener.read() {
         let tile_to_spawn = spawn_request.tile;

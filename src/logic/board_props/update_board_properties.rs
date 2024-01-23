@@ -149,7 +149,7 @@ fn apply_wall_count_to_planned_props(
     }
 }
 
-fn set_applied_props_and_begin_generation(
+pub fn set_applied_props_and_begin_generation(
     mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
     mut spawn_board_event_writer: EventWriter<board_set_event::BuildNewBoard>,
     mut applied_board_prop_query: Query<

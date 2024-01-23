@@ -1,4 +1,5 @@
 use crate::{logic::data_structure::util_functions, output::error_handler, prelude::*, costume_event::{board_set_event, ui_event}};
+use crate::logic::states::game_state;
 
 /// mustn't be more than 2 as there will always be a corner
 /// shouldn't be less than 1 or we might get useless spaces
@@ -12,7 +13,9 @@ impl Plugin for SolvedBoardPlugin{
             //important to run before we base a new board on it in board_builder.rs
             .add_systems(
                 Update,
-                generate_solved_board.in_set(InputSystemSets::InitialChanges),
+                generate_solved_board
+                    .in_set(InputSystemSets::InitialChanges)
+                    .run_if(in_state(GameState::PendingSolvedBoardGen))
             );
     }
 }
@@ -22,7 +25,8 @@ fn generate_solved_board(
     mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
     mut solved_board_query: Query<&mut TileBoard, With<SolvedBoard>>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
-    mut db_manager: ResMut<DataBaseManager>
+    mut db_manager: ResMut<DataBaseManager>,
+    mut game_state: ResMut<NextState<GameState>>,
 ){
     for build_request in event_listener.read(){
         if build_request.reroll_solved {
@@ -30,7 +34,10 @@ fn generate_solved_board(
                 applied_board_props_query.single(),
                 db_manager.as_mut()
             ) {
-                Ok(board) => *solved_board_query.single_mut() = board,
+                Ok(board) => {
+                    *solved_board_query.single_mut() = board;
+                    game_state.set(GameState::SolvedBoardGenerated);
+                },
                 Err(error) => {
                     generation_error_event_writer.send(ui_event::ShowGenerationError(error));
                     return;
@@ -100,8 +107,8 @@ fn determine_wall_locations(
     let mut possible_spawn_locations = vec![];
     let neighbor_count_grid_result =
         initialize_neighbor_count_grid(&mut possible_spawn_locations, grid_side_length);
-    let mut neighbor_count_grid = 
-        wrap_if_error(neighbor_count_grid_result)?;
+    let mut neighbor_count_grid =
+        wrap_if_error_owned(neighbor_count_grid_result)?;
     let grid_tree_result = 
         neighbor_count_grid.get_spanning_tree(applied_props.tree_traveller_type);
     let mut grid_tree;
@@ -283,6 +290,16 @@ fn wrap_if_error<T: Copy>(result: &Result<T, error_handler::GridError>)
             Err(error_handler::BoardGenerationError::GridError(*grid_error))
         },
         Ok(value) => Ok(*value)
+    }
+}
+
+fn wrap_if_error_owned<T>(result: Result<T, GridError>)
+    -> Result<T, error_handler::BoardGenerationError>{
+    match result {
+        Err(grid_error) => {
+            Err(error_handler::BoardGenerationError::GridError(grid_error))
+        },
+        Ok(value) => Ok(value)
     }
 }
 

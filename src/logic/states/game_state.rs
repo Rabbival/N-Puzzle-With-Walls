@@ -1,7 +1,11 @@
 use crate::{prelude::*, costume_event::{game_event, board_set_event}};
+use crate::logic::board_props::update_board_properties;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum GameState {
+	PendingSolvedBoardGen,
+	SolvedBoardGenerated,
+	GameBoardGenerated,
     #[default]
     Regular,
     Victory,
@@ -21,8 +25,12 @@ impl Plugin for GameStatePlugin {
 					toggle_victory,
             )
 			.add_systems(
-				Update,
-				cancel_victory_state_when_board_rerolls
+				Update,(
+					cancel_victory_state_when_board_rerolls,
+					set_game_state_according_to_board_gen_request
+						.in_set(InputSystemSets::InputHandling)
+						.after(update_board_properties::set_applied_props_and_begin_generation)
+				)
 			)
 			;
 	}
@@ -40,5 +48,18 @@ fn cancel_victory_state_when_board_rerolls(
 ){
 	for _new_board_request in spawn_board_event_listener.read(){
 		set_game_state_to_regular.set(GameState::Regular);	
+	}
+}
+
+fn set_game_state_according_to_board_gen_request(
+	mut event_listener: EventReader<board_set_event::BuildNewBoard>,
+	mut game_state: ResMut<NextState<GameState>>,
+){
+	for board_gen_request in event_listener.read(){
+		if board_gen_request.reroll_solved{
+			game_state.set(GameState::PendingSolvedBoardGen);
+		}else{
+			game_state.set(GameState::SolvedBoardGenerated);
+		}
 	}
 }
