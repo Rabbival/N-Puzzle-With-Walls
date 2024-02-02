@@ -13,7 +13,6 @@ impl Plugin for SolvedBoardPlugin{
             .add_systems(
                 OnEnter(GameState::PendingSolvedBoardGen),
                 generate_solved_board
-                    //.in_set(InputSystemSets::InitialChanges)
             );
     }
 }

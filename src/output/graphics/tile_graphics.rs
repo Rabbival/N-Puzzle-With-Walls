@@ -26,9 +26,10 @@ impl Plugin for TileGraphicsPlugin {
                     move_existing_tiles,
                     despawn_unused_tiles_and_clear_tag,
                     spawn_tiles,
+                    declare_post_game_board_gen_changes_done
                 )
                     .chain()
-                    .in_set(InputSystemSets::PostMainChanges),
+                    .in_set(InputSystemSets::MainChanges),
             );
     }
 }
@@ -96,6 +97,9 @@ fn move_existing_tiles_inner(
                     if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
                         tile_transform.translation = spawn_location;
                         if *solved_rerolled {
+
+                            info!("marked as forbidden to despawn by mover: {:?}", tile_from_cell);
+
                             commands.entity(*entity).insert(StayForNextBoardTag);
                         }
                     } else {
@@ -117,6 +121,11 @@ fn despawn_unused_tiles_and_clear_tag(
     >,
     mut commands: Commands,
 ) {
+
+    info!("found {:?} that should despawn, {:?} that should stay",
+        untagged_tiles.iter().len(), tagged_tiles.iter().len());
+
+
     // should only execute if a solved board rerolled
     if tagged_tiles.is_empty() {
         return;
@@ -124,6 +133,9 @@ fn despawn_unused_tiles_and_clear_tag(
 
     // delete all unused
     for (tile_entity, tile) in untagged_tiles.iter() {
+
+        info!("should have despawned: {:?}", tile);
+
         tile_dictionary_query
             .single_mut()
             .entity_by_tile
@@ -150,10 +162,6 @@ fn spawn_tiles(
         return;
     }
 
-
-    info!("got tiles spawn request");
-
-
     let mut tile_dictionary_instance = tile_dictionary.single_mut();
     for spawn_request in event_listener.read() {
         let tile_to_spawn = spawn_request.tile;
@@ -173,11 +181,9 @@ fn spawn_tiles(
                     tile: tile_to_spawn,
                     tag: OnScreenTag::Game,
                 },
-                StayForNextBoardTag,
             ))
             .id();
 
-        // create texts for numbered tiles and attach them as their children
         if tile_to_spawn.tile_type != TileType::Wall {
             let text_color = match tile_to_spawn.tile_type {
                 TileType::Numbered => Color::INDIGO,
@@ -218,6 +224,12 @@ fn spawn_tiles(
     }
 }
 
+fn declare_post_game_board_gen_changes_done(
+    mut game_state: ResMut<NextState<GameState>>
+){
+    game_state.set(GameState::PostGameBoardGenerationChangesDone);
+}
+
 fn update_tile_entity_positions(
     mut graphics_switch_tiles_listener: EventReader<move_tile_event::UpdateTileLocationGraphics>,
     tile_dictionary: Query<
@@ -227,7 +239,7 @@ fn update_tile_entity_positions(
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
 ) {
     for tile_switch_request in graphics_switch_tiles_listener.read() {
-        if let Err(move_error) = switch_tile_entity_positions_inner(
+        if let Err(move_error) = update_tile_entity_positions_inner(
             &mut tile_transforms,
             &tile_dictionary.single().entity_by_tile,
             tile_switch_request.tile,
@@ -238,7 +250,7 @@ fn update_tile_entity_positions(
     }
 }
 
-fn switch_tile_entity_positions_inner(
+fn update_tile_entity_positions_inner(
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
     tile_dictionary: &HashMap<Tile, Option<Entity>>,
     tile_to_reposition: Tile,

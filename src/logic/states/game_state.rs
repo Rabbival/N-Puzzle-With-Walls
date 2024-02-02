@@ -6,6 +6,7 @@ pub enum GameState {
 	PendingSolvedBoardGen,
 	SolvedBoardGenerated,
 	GameBoardGenerated,
+	PostGameBoardGenerationChangesDone,
     #[default]
     Regular,
     Victory,

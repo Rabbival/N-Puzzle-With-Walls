@@ -21,12 +21,11 @@ impl Plugin for BoardBuilderPlugin {
             .add_systems(
                 OnEnter(GameState::SolvedBoardGenerated),
                     build_a_new_board
-                        .in_set(InputSystemSets::PostInitialChanges)
             )
             .add_systems(
-                OnEnter(GameState::GameBoardGenerated),
+                OnEnter(GameState::PostGameBoardGenerationChangesDone),
                     declare_board_generation_done
-                        .in_set(InputSystemSets::PostInitialChanges)
+                        .in_set(InputSystemSets::PostMainChanges)
             );
     }
 }
@@ -38,9 +37,6 @@ fn build_a_new_board(
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<GameState>>,
 ) {
-
-    info!("board builder ran");
-
     let applied_props = applied_board_props_query.single();
     let solved_grid = &solved_board_query.single().grid;
 
