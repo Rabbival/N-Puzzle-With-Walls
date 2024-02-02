@@ -18,14 +18,17 @@ impl Plugin for TileGraphicsPlugin {
                 Update,
                 (
                     update_tile_entity_positions.in_set(InputSystemSets::PostInitialChanges),
-                    (
-                        move_existing_tiles,
-                        despawn_unused_tiles_and_clear_tag,
-                        spawn_tiles,
-                    )
-                        .chain()
-                        .in_set(InputSystemSets::PostMainChanges),
                 ),
+            )
+            .add_systems(
+                OnEnter(GameState::GameBoardGenerated),
+                (
+                    move_existing_tiles,
+                    despawn_unused_tiles_and_clear_tag,
+                    spawn_tiles,
+                )
+                    .chain()
+                    .in_set(InputSystemSets::PostMainChanges),
             );
     }
 }
@@ -44,7 +47,7 @@ fn move_existing_tiles(
     for event in event_listener.read() {
 
 
-        info!("board generation request got by graphics");
+        info!("board generation request got by graphics, reroll solved: {:?}", &event.reroll_solved);
 
 
         if let Err(error) = move_existing_tiles_inner(
@@ -114,7 +117,7 @@ fn despawn_unused_tiles_and_clear_tag(
     >,
     mut commands: Commands,
 ) {
-    // the only time the function should be used is when a solved board of a smaller size was generated
+    // should only execute if a solved board rerolled
     if tagged_tiles.is_empty() {
         return;
     }

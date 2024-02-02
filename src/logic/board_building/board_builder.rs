@@ -3,7 +3,6 @@ use crate::{
     output::{error_handler, print_to_console},
     prelude::*,
 };
-use crate::logic::states::game_state;
 
 use super::{brute_force_builder, permutation_builder};
 
@@ -19,17 +18,15 @@ pub struct BoardBuilderPlugin;
 impl Plugin for BoardBuilderPlugin {
     fn build(&self, app: &mut App) {
         app
-            //important to run before we draw it in graphics.rs
             .add_systems(
-                Update,(
+                OnEnter(GameState::SolvedBoardGenerated),
                     build_a_new_board
                         .in_set(InputSystemSets::PostInitialChanges)
-                        .run_if(in_state(GameState::SolvedBoardGenerated))
-                    ,
+            )
+            .add_systems(
+                OnEnter(GameState::GameBoardGenerated),
                     declare_board_generation_done
-                        .in_set(InputSystemSets::MainChanges)
-                        .run_if(in_state(GameState::GameBoardGenerated))
-                )
+                        .in_set(InputSystemSets::PostInitialChanges)
             );
     }
 }
@@ -41,6 +38,9 @@ fn build_a_new_board(
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<GameState>>,
 ) {
+
+    info!("board builder ran");
+
     let applied_props = applied_board_props_query.single();
     let solved_grid = &solved_board_query.single().grid;
 

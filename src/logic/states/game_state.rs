@@ -25,12 +25,10 @@ impl Plugin for GameStatePlugin {
 					toggle_victory,
             )
 			.add_systems(
-				Update,(
-					cancel_victory_state_when_board_rerolls,
+				Update,
 					set_game_state_according_to_board_gen_request
 						.in_set(InputSystemSets::InputHandling)
 						.after(update_board_properties::set_applied_props_and_begin_generation)
-				)
 			)
 			;
 	}
@@ -40,15 +38,6 @@ fn toggle_victory(
 	mut victory_message_toggle_writer: EventWriter<game_event::ToggleVictoryMessage>
 ){
 	victory_message_toggle_writer.send(game_event::ToggleVictoryMessage);
-}
-
-fn cancel_victory_state_when_board_rerolls(
-	mut spawn_board_event_listener: EventReader<board_set_event::BuildNewBoard>,
-	mut set_game_state_to_regular: ResMut<NextState<GameState>>,
-){
-	for _new_board_request in spawn_board_event_listener.read(){
-		set_game_state_to_regular.set(GameState::Regular);	
-	}
 }
 
 fn set_game_state_according_to_board_gen_request(

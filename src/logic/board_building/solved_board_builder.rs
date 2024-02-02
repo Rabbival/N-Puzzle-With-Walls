@@ -10,39 +10,32 @@ pub struct SolvedBoardPlugin;
 impl Plugin for SolvedBoardPlugin{
     fn build(&self, app: &mut App) {
         app
-            //important to run before we base a new board on it in board_builder.rs
             .add_systems(
-                Update,
+                OnEnter(GameState::PendingSolvedBoardGen),
                 generate_solved_board
-                    .in_set(InputSystemSets::InitialChanges)
-                    .run_if(in_state(GameState::PendingSolvedBoardGen))
+                    //.in_set(InputSystemSets::InitialChanges)
             );
     }
 }
 
 fn generate_solved_board(
-    mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
     mut solved_board_query: Query<&mut TileBoard, With<SolvedBoard>>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut db_manager: ResMut<DataBaseManager>,
     mut game_state: ResMut<NextState<GameState>>,
 ){
-    for build_request in event_listener.read(){
-        if build_request.reroll_solved {
-            match generate_solved_board_inner(
-                applied_board_props_query.single(),
-                db_manager.as_mut()
-            ) {
-                Ok(board) => {
-                    *solved_board_query.single_mut() = board;
-                    game_state.set(GameState::SolvedBoardGenerated);
-                },
-                Err(error) => {
-                    generation_error_event_writer.send(ui_event::ShowGenerationError(error));
-                    return;
-                }
-            }
+    match generate_solved_board_inner(
+        applied_board_props_query.single(),
+        db_manager.as_mut()
+    ) {
+        Ok(board) => {
+            *solved_board_query.single_mut() = board;
+            game_state.set(GameState::SolvedBoardGenerated);
+        },
+        Err(error) => {
+            generation_error_event_writer.send(ui_event::ShowGenerationError(error));
+            return;
         }
     }
 }
