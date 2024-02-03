@@ -47,6 +47,12 @@ fn move_existing_tiles(
     mut commands: Commands,
 ) {
     for event in event_listener.read() {
+
+
+        info!("graphics received reroll request");
+
+
+
         if let Err(error) = move_existing_tiles_inner(
             &mut event_writer,
             &event.reroll_solved,

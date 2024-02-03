@@ -34,6 +34,7 @@ fn generate_solved_board(
         },
         Err(error) => {
             generation_error_event_writer.send(ui_event::ShowGenerationError(error));
+            game_state.set(GameState::Regular);
             return;
         }
     }
