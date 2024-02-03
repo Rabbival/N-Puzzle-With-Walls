@@ -5,7 +5,6 @@ pub struct BuildNewBoard {
     pub reroll_solved: bool,
 }
 
-/// contains the current and previous values
 #[derive(Event, Default)]
 pub struct SpawnTileInLocation {
     pub tile: Tile,

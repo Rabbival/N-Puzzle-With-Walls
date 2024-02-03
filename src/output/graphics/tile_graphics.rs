@@ -24,6 +24,7 @@ impl Plugin for TileGraphicsPlugin {
                 OnEnter(GameState::GameBoardGenerated),
                 (
                     move_existing_tiles,
+                    apply_deferred,
                     despawn_unused_tiles_and_clear_tag,
                     spawn_tiles,
                     declare_post_game_board_gen_changes_done
@@ -46,11 +47,6 @@ fn move_existing_tiles(
     mut commands: Commands,
 ) {
     for event in event_listener.read() {
-
-
-        info!("board generation request got by graphics, reroll solved: {:?}", &event.reroll_solved);
-
-
         if let Err(error) = move_existing_tiles_inner(
             &mut event_writer,
             &event.reroll_solved,
@@ -97,9 +93,6 @@ fn move_existing_tiles_inner(
                     if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
                         tile_transform.translation = spawn_location;
                         if *solved_rerolled {
-
-                            info!("marked as forbidden to despawn by mover: {:?}", tile_from_cell);
-
                             commands.entity(*entity).insert(StayForNextBoardTag);
                         }
                     } else {
@@ -121,28 +114,18 @@ fn despawn_unused_tiles_and_clear_tag(
     >,
     mut commands: Commands,
 ) {
-
-    info!("found {:?} that should despawn, {:?} that should stay",
-        untagged_tiles.iter().len(), tagged_tiles.iter().len());
-
-
     // should only execute if a solved board rerolled
     if tagged_tiles.is_empty() {
         return;
     }
 
-    // delete all unused
     for (tile_entity, tile) in untagged_tiles.iter() {
-
-        info!("should have despawned: {:?}", tile);
-
         tile_dictionary_query
             .single_mut()
             .entity_by_tile
             .remove(tile);
         commands.entity(tile_entity).despawn_recursive();
     }
-    // delete tags from the ones left
     for tile_entity in tagged_tiles.iter() {
         commands.entity(tile_entity).remove::<StayForNextBoardTag>();
     }
