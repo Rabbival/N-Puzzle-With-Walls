@@ -45,6 +45,7 @@ fn build_a_new_board(
     match optional_newborn_tiletype_board {
         Err(error) => {
             generation_error_event_writer.send(ui_event::ShowGenerationError(error));
+            game_state.set(GameState::Regular);
             return;
         }
         Ok(newborn_board) => {
@@ -58,6 +59,7 @@ fn build_a_new_board(
                     *game_board = board;
                 }
                 Err(error) => {
+                    game_state.set(GameState::Regular);
                     generation_error_event_writer.send(ui_event::ShowGenerationError(error))
                 }
             }

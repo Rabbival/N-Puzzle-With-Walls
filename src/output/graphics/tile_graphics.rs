@@ -37,7 +37,6 @@ impl Plugin for TileGraphicsPlugin {
 
 fn move_existing_tiles(
     mut event_writer: EventWriter<board_set_event::SpawnTileInLocation>,
-    mut event_listener: EventReader<board_set_event::BuildNewBoard>,
     board_query: Query<&TileBoard, With<GameBoard>>,
     tile_dictionary: Query<
         &tile_dictionary::TileDictionary,
@@ -46,29 +45,19 @@ fn move_existing_tiles(
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
     mut commands: Commands,
 ) {
-    for event in event_listener.read() {
-
-
-        info!("graphics received reroll request");
-
-
-
-        if let Err(error) = move_existing_tiles_inner(
-            &mut event_writer,
-            &event.reroll_solved,
-            &board_query.single().grid,
-            &tile_dictionary.single().entity_by_tile,
-            &mut tile_transforms,
-            &mut commands,
-        ) {
-            print_to_console::print_entity_related_error(error);
-        }
+    if let Err(error) = move_existing_tiles_inner(
+        &mut event_writer,
+        &board_query.single().grid,
+        &tile_dictionary.single().entity_by_tile,
+        &mut tile_transforms,
+        &mut commands,
+    ) {
+        print_to_console::print_entity_related_error(error);
     }
 }
 
 fn move_existing_tiles_inner(
     event_writer: &mut EventWriter<board_set_event::SpawnTileInLocation>,
-    solved_rerolled: &bool,
     grid: &Grid<Tile>,
     tile_dictionary: &HashMap<Tile, Option<Entity>>,
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
@@ -77,20 +66,12 @@ fn move_existing_tiles_inner(
     for (grid_location, tile_from_cell) in grid.iter() {
         let spawn_location = grid_location.to_world();
         match tile_dictionary.get(tile_from_cell) {
-            // the tile doesn't exist yet and thus should be created at that location
             None => {
-                if *solved_rerolled {
-                    event_writer.send(board_set_event::SpawnTileInLocation {
-                        tile: *tile_from_cell,
-                        location: spawn_location,
-                    })
-                } else {
-                    return Err(EntityRelatedCustomError::DataStructError(
-                        DataStructError::ItemNotFound(*tile_from_cell),
-                    ));
-                }
+                event_writer.send(board_set_event::SpawnTileInLocation {
+                    tile: *tile_from_cell,
+                    location: spawn_location,
+                })
             }
-            // the tile exists and should therefore be moved
             Some(optional_entity) => match optional_entity {
                 None => {
                     return Err(EntityRelatedCustomError::NoEntity);
@@ -98,9 +79,7 @@ fn move_existing_tiles_inner(
                 Some(entity) => {
                     if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
                         tile_transform.translation = spawn_location;
-                        if *solved_rerolled {
-                            commands.entity(*entity).insert(StayForNextBoardTag);
-                        }
+                        commands.entity(*entity).insert(StayForNextBoardTag);
                     } else {
                         return Err(EntityRelatedCustomError::EntityNotInQuery);
                     }

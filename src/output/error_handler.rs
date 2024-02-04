@@ -54,7 +54,8 @@ pub enum TileBoardError {
 
 #[derive(Debug, Clone, Copy)]
 pub enum GridError {
-    InvalidIndex(GridLocation)
+    InvalidIndex(GridLocation),
+    InvalidPositionVector(Vec2)
 }
 
 #[derive(Debug, Clone, Copy)]
