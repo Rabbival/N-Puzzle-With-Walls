@@ -1,6 +1,9 @@
+use rand::prelude::ThreadRng;
 use crate::{prelude::*, output::{print_to_console, error_handler}};
 
 use rand::Rng;
+
+struct MoveDecidedAndRegistered(pub bool);
 
 pub fn brute_force_generate_game_board(
     solved_board: &TileBoard,
@@ -32,45 +35,11 @@ pub fn brute_force_generate_game_board(
 
     for _shift in 0..location_shift_count{
         for shift_tracker in &mut location_shift_trackers{
-            let empty_tile_location = shift_tracker.empty_location;
-            let mut optional_directions=
-                board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
-
-            // don't want to shift back and forth, 
-            // unless it's a dead end in which it has to turn back
-            if optional_directions.len() > 1 {
-                let opposite_of_previous_shift=shift_tracker.previous_shift.opposite_direction();
-                if opposite_of_previous_shift.is_none(){
-                    return Err(error_handler::BoardGenerationError::DirectionCouldntBeFlipped);
-                }
-                optional_directions.remove(&opposite_of_previous_shift.unwrap());
-            }
-
-            // choose, register, update board
-            let valid_directions:Vec<&BasicDirection>=optional_directions.keys().clone().collect(); 
-            let chosen_shift_index=rng.gen_range(0..valid_directions.len());
-            let chosen_direction=valid_directions[chosen_shift_index];
-            let chosen_location_option=optional_directions.get(chosen_direction);
-            if chosen_location_option.is_none(){
-                return Err(error_handler::BoardGenerationError::DirectionNotInMap
-                    (DataStructError::ItemNotFound(*chosen_direction)));
-            }
-            let chosen_location = chosen_location_option.unwrap();
-            if let Err(error) = 
-                board.swap_tiles_by_location(&empty_tile_location, chosen_location)
-            {
-                // if it tried to switch between two empty tiles
-                // we'll ignore and not register the move
-                match error{
-                    TileMoveError::TriedToSwitchEmptyWithEmpty => continue,
-                    _ => return Err(error_handler::BoardGenerationError::TileMoveError(error))
-                };
-            }else{
-                //get ready for next iteration
-                shift_tracker.empty_location = *chosen_location;
-                shift_tracker.shift_direction_sequence.push(*chosen_direction);
-                shift_tracker.previous_shift= *chosen_direction;
-            }
+            determine_next_shift_direction(
+                &mut board,
+                shift_tracker,
+                &mut rng
+            )?;
         }
     }
 
@@ -87,6 +56,106 @@ pub fn brute_force_generate_game_board(
     }
     
     Ok(board)
+}
+
+fn determine_next_shift_direction(
+    board: &mut TileBoard,
+    shift_tracker: &mut LocationShiftTracker,
+    rng: &mut ThreadRng
+) -> Result<MoveDecidedAndRegistered, error_handler::BoardGenerationError>
+{
+    let empty_tile_location = shift_tracker.empty_location;
+    let mut optional_directions=
+        board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
+
+    // don't want to shift back and forth,
+    // unless it's a dead end in which it has to turn back
+    if optional_directions.len() > 1 {
+        remove_opposite_of_previous_shift_direction_from_possible_shift_locations(
+            &shift_tracker,
+            &mut optional_directions
+        )?;
+    }
+
+    let chosen_shift_direction = choose_next_shift_direction(
+        &optional_directions,
+        rng
+    );
+    let chosen_new_empty_tile_location = get_next_location_for_empty(
+        &mut optional_directions,
+        &chosen_shift_direction
+    )?;
+
+    let tile_swap_result =
+        board.swap_tiles_by_location(&empty_tile_location, &chosen_new_empty_tile_location);
+    match tile_swap_result {
+        Err(error) => {
+            match error{
+                TileMoveError::TriedToSwitchEmptyWithEmpty => Ok(MoveDecidedAndRegistered(false)),
+                _ => return Err(error_handler::BoardGenerationError::TileMoveError(error))
+            }
+        },
+        Ok(_) => {
+            prepare_shift_tracker_for_next_iteration(
+                shift_tracker,
+                chosen_new_empty_tile_location,
+                chosen_shift_direction
+            );
+            Ok(MoveDecidedAndRegistered(true))
+        }
+    }
+}
+
+fn remove_opposite_of_previous_shift_direction_from_possible_shift_locations(
+    shift_tracker: &LocationShiftTracker,
+    optional_directions: &mut HashMap<BasicDirection, GridLocation>
+) -> Result<(), error_handler::BoardGenerationError>
+{
+    let opposite_of_previous_shift=shift_tracker.previous_shift.opposite_direction();
+    match opposite_of_previous_shift {
+        Some(opposite_of_prev) => {
+            optional_directions.remove(&opposite_of_prev);
+            Ok(())
+        },
+        None => {
+            Err(error_handler::BoardGenerationError::DirectionCouldntBeFlipped)
+        }
+    }
+}
+
+fn choose_next_shift_direction(
+    optional_directions: &HashMap<BasicDirection, GridLocation>,
+    rng: &mut ThreadRng
+) -> BasicDirection
+{
+    let valid_directions:Vec<&BasicDirection>=optional_directions.keys().clone().collect();
+    let chosen_shift_index=rng.gen_range(0..valid_directions.len());
+    *valid_directions[chosen_shift_index]
+}
+
+fn get_next_location_for_empty(
+    optional_directions: &mut HashMap<BasicDirection, GridLocation>,
+    chosen_direction: &BasicDirection
+) -> Result<GridLocation, error_handler::BoardGenerationError>
+{
+    let chosen_location_option=optional_directions.get(chosen_direction);
+    match chosen_location_option{
+        Some(chosen_location) => Ok(*chosen_location),
+        None => {
+            Err(error_handler::BoardGenerationError::DirectionNotInMap
+                (DataStructError::ItemNotFound(*chosen_direction)))
+        }
+    }
+}
+
+fn prepare_shift_tracker_for_next_iteration(
+    shift_tracker: &mut LocationShiftTracker,
+    updated_empty_tile_location: GridLocation,
+    chosen_direction: BasicDirection
+){
+    shift_tracker.empty_location = updated_empty_tile_location;
+    shift_tracker.shift_direction_sequence.push(chosen_direction);
+    shift_tracker.previous_shift= chosen_direction;
 }
 
 
