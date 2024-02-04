@@ -67,9 +67,6 @@ fn handle_mouse_click(
     if game_board.ignore_player_input {
         return Err(error_handler::TileMoveError::BoardFrozenToPlayer);
     }
-
-    info!("cursor position: {:?}", cursor_position);
-
     let grid_location_from_click = 
         GridLocation::from_world(&game_board.grid, cursor_position);
     let optional_occupied_tile_location ;

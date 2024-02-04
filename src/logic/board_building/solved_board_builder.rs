@@ -1,9 +1,13 @@
-use crate::{logic::data_structure::util_functions, output::error_handler, prelude::*, costume_event::{board_set_event, ui_event}};
-use crate::logic::states::game_state;
+use crate::{logic::data_structure::util_functions, output::error_handler, prelude::*, costume_event::ui_event};
 
 /// mustn't be more than 2 as there will always be a corner
 /// shouldn't be less than 1 or we might get useless spaces
 const MIN_NEIGHBORS: u8 = 2;
+
+struct WallLocationChosen(pub bool);
+struct LocationFoundInPossibleLocations(pub bool);
+struct AllTilesStillInCycles(pub bool);
+struct GraphIsStillConnected(pub bool);
 
 pub struct SolvedBoardPlugin;
 
@@ -113,82 +117,41 @@ fn determine_wall_locations(
         },
         Err(tree_error) => return Err(error_handler::BoardGenerationError::GridTreeError(tree_error))
     }
-    
 
     for _ in 0..wall_count {
-        let mut chosen_wall_location = GridLocation::default();
-        let mut is_leaf;
-        while !possible_spawn_locations.is_empty() {
-            (chosen_wall_location, is_leaf) = match grid_tree_iter.next() {
-                Some(tree_leaf) => (tree_leaf, true),
-                None => (
-                    util_functions::random_value(&possible_spawn_locations),
-                    false,
-                ),
-            };
+        determine_wall_location(
+            &mut wall_spawn_locations,
+            &mut possible_spawn_locations,
+            &mut neighbor_count_grid,
+            &mut grid_tree,
+            &mut grid_tree_iter
+        )?;
+    }
 
-            // whether it's because the chosen location is illegal
-            // or because we don't want to choose the same location twice
-            // the chosen location has to be removed from the available ones
-            let removed_item =
-                remove_by_value(&chosen_wall_location, &mut possible_spawn_locations);
+    Ok(wall_spawn_locations)
+}
 
-            // could be that the tree chose an illegal value
-            if removed_item.is_none() {
-                continue;
-            } else {
-                // if the leaf is valid, we want to remove it from its parents count
-                // to allow the parent to eventually (hopefully)
-                // become an available leaf
-                if let Err(grid_tree_error) = grid_tree.decrease_parent_child_count(chosen_wall_location){
-                    return Err(error_handler::BoardGenerationError::GridTreeError(grid_tree_error));
-                }
-            }
+fn determine_wall_location(
+    wall_spawn_locations: &mut Vec<GridLocation>,
+    possible_spawn_locations: &mut Vec<GridLocation>,
+    neighbor_count_grid: &mut Grid<u8>,
+    grid_tree: &mut GridTree,
+    grid_tree_iter: &mut GridTree,
+) -> Result<(), BoardGenerationError>
+{
+    let mut chosen_wall_location = GridLocation::default();
+    let mut wall_location_found = false;
+    while !wall_location_found && !possible_spawn_locations.is_empty() {
+        wall_location_found = roll_and_validate_wall_location(
+            &mut chosen_wall_location,
+            possible_spawn_locations,
+            neighbor_count_grid,
+            grid_tree,
+            grid_tree_iter,
+        )?.0;
+    }
 
-            let chosen_tile_value_result: Result<Option<u8>, GridError> = 
-                neighbor_count_grid.set_none_get_former(&chosen_wall_location);
-
-            match neighbor_count_grid.all_nodes_in_cycles() {
-                Err(data_struct_error) => {
-                    return Err(error_handler::BoardGenerationError::CircleCheckError(data_struct_error));
-                },
-                Ok(all_in_cycles) => {
-                    if !all_in_cycles{
-                        put_cell_back_in_place(
-                            &chosen_wall_location,
-                            &chosen_tile_value_result,
-                            &mut neighbor_count_grid
-                        )?;
-                        continue;
-                    }
-                }
-            }
-
-            //check (or don't) connectivity
-            if is_leaf {
-                //if the tile was determined by the MST, the graph is connected
-                break;
-            } else {
-                //if wasn't a leaf, check if removing that tile keeps the graph connected,
-                //if it doesn't - put the tile back, and reroll
-                if neighbor_count_grid.is_connected_graph() {
-                    break;
-                } else {
-                    put_cell_back_in_place(
-                        &chosen_wall_location,
-                        &chosen_tile_value_result,
-                        &mut neighbor_count_grid
-                    )?;
-                    continue;
-                }
-            }
-        }
-        // if we didn't find an available spot
-        if possible_spawn_locations.is_empty() {
-            return Err(error_handler::BoardGenerationError::CouldntPlaceAllWalls);
-        }
-
-        // if the location was chosen
+    if wall_location_found {
         wall_spawn_locations.push(chosen_wall_location);
         let neighbors_of_chosen_wall_location =
             neighbor_count_grid.get_all_occupied_neighbor_locations(&chosen_wall_location);
@@ -198,17 +161,151 @@ fn determine_wall_locations(
             *neighbor_value -= 1;
 
             // if a neighbor of the chosen location got to the threshold
-            // we can't put a wall in its neighbor or it'll go below threshold
+            // we can't put walls near it or it'll go below threshold
             if *neighbor_value == MIN_NEIGHBORS {
                 forbid_spawn_in_neighbors_of_location(
                     &neighbor_location,
-                    &mut possible_spawn_locations,
+                    possible_spawn_locations,
                     &neighbor_count_grid,
                 );
             }
         }
+        Ok(())
+    }else{
+        Err(error_handler::BoardGenerationError::CouldntPlaceAllWalls)
     }
-    Ok(wall_spawn_locations)
+}
+
+fn roll_and_validate_wall_location(
+    chosen_wall_location: &mut GridLocation,
+    possible_spawn_locations: &mut Vec<GridLocation>,
+    neighbor_count_grid: &mut Grid<u8>,
+    grid_tree: &mut GridTree,
+    grid_tree_iter: &mut GridTree,
+) -> Result<WallLocationChosen, BoardGenerationError>
+{
+    let is_leaf;
+    (*chosen_wall_location, is_leaf) = match grid_tree_iter.next() {
+        Some(tree_leaf) => (tree_leaf, true),
+        None => (
+            util_functions::random_value(possible_spawn_locations),
+            false,
+        )
+    };
+
+    match remove_wall_location_from_possible_locations(
+        chosen_wall_location,
+        possible_spawn_locations,
+        grid_tree
+    )?
+    {
+        LocationFoundInPossibleLocations(false) => {
+            Ok(WallLocationChosen(false))
+        },
+        LocationFoundInPossibleLocations(true) => {
+            let chosen_tile_value_result: Result<Option<u8>, GridError> =
+                neighbor_count_grid.set_none_get_former(&chosen_wall_location);
+
+            match ensure_all_walls_in_cycle(
+                chosen_wall_location,
+                &chosen_tile_value_result,
+                neighbor_count_grid
+            )?
+            {
+                AllTilesStillInCycles(false) => {
+                    Ok(WallLocationChosen(false))
+                },
+                AllTilesStillInCycles(true) => {
+                    match ensure_connectivity(
+                        is_leaf,
+                        chosen_wall_location,
+                        &chosen_tile_value_result,
+                        neighbor_count_grid
+                    )?
+                    {
+                        GraphIsStillConnected(is_graph_still_connected) => {
+                            Ok(WallLocationChosen(is_graph_still_connected))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// whether because it's illegal or because we don't want to chose the same place twice
+fn remove_wall_location_from_possible_locations(
+    chosen_wall_location: &mut GridLocation,
+    possible_spawn_locations: &mut Vec<GridLocation>,
+    grid_tree: &mut GridTree,
+) -> Result<LocationFoundInPossibleLocations, BoardGenerationError>
+{
+    let location_removed_from_possible_wall_locations =
+        remove_by_value(chosen_wall_location, possible_spawn_locations);
+
+    // could that the place chosen by the tree wasn't a valid location (say, too few neighbors)
+    if location_removed_from_possible_wall_locations.is_none() {
+        Ok(LocationFoundInPossibleLocations(false))
+    } else {
+        // if the leaf is valid, we want to remove it from its parent's count
+        // to allow the parent to eventually (hopefully) become an available leaf
+        if let Err(grid_tree_error) = grid_tree.decrease_parent_child_count(*chosen_wall_location){
+            Err(error_handler::BoardGenerationError::GridTreeError(grid_tree_error))
+        }else{
+            Ok(LocationFoundInPossibleLocations(true))
+        }
+    }
+}
+
+fn ensure_all_walls_in_cycle(
+    chosen_wall_location: &GridLocation,
+    chosen_tile_value_result: &Result<Option<u8>, GridError>,
+    neighbor_count_grid: &mut Grid<u8>,
+) -> Result<AllTilesStillInCycles, BoardGenerationError>
+{
+    match neighbor_count_grid.all_nodes_in_cycles() {
+        Err(data_struct_error) => {
+            Err(error_handler::BoardGenerationError::CircleCheckError(data_struct_error))
+        },
+        Ok(all_in_cycles) => {
+            if all_in_cycles{
+                Ok(AllTilesStillInCycles(true))
+            }else{
+                put_cell_back_in_place(
+                    chosen_wall_location,
+                    &chosen_tile_value_result,
+                    neighbor_count_grid
+                )?;
+                Ok(AllTilesStillInCycles(false))
+            }
+        }
+    }
+}
+
+fn ensure_connectivity(
+    is_leaf: bool,
+    chosen_wall_location: &GridLocation,
+    chosen_tile_value_result: &Result<Option<u8>, GridError>,
+    neighbor_count_grid: &mut Grid<u8>,
+) -> Result<GraphIsStillConnected, BoardGenerationError>
+{
+    if is_leaf {
+        //if the tile was determined by the MST, the graph is connected
+        Ok(GraphIsStillConnected(true))
+    } else {
+        //if wasn't a leaf, check if removing that tile keeps the graph connected,
+        //if it doesn't - put the tile back, and reroll
+        if neighbor_count_grid.is_connected_graph() {
+            Ok(GraphIsStillConnected(true))
+        } else {
+            put_cell_back_in_place(
+                &chosen_wall_location,
+                &chosen_tile_value_result,
+                neighbor_count_grid
+            )?;
+            Ok(GraphIsStillConnected(false))
+        }
+    }
 }
 
 fn put_cell_back_in_place(
