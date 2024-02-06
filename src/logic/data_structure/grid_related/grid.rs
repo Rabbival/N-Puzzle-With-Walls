@@ -9,29 +9,54 @@ pub struct Grid<T: Clone> {
 
 //grid travelling functions
 impl<T: Clone> Grid<T> {
+    /// when we travel the graph and get back to a node we've already visited
+    /// we'll mark it and all the nodes after it as a part of a cycle
     pub fn all_nodes_in_cycles(&self) -> Result<bool, error_handler::DataStructError<GridLocation>>{
         let grid_traveller = GridTraveller::from_grid(self, GridTravellerType::DFS);
-        let mut locations_not_in_circle = LinkedList::<GridLocation>::new();
-        for mut location_and_neighbors in grid_traveller {
-            locations_not_in_circle.push(location_and_neighbors.just_visited_location);
-            let occupied_neighbors_of_just_visited_location =
-                self.get_all_occupied_neighbor_locations
-                (&location_and_neighbors.just_visited_location);
-            let all_neighbors_of_last_visited_location =
-                Vec::from_iter(occupied_neighbors_of_just_visited_location.values());
-            for neighbor_location_ref in all_neighbors_of_last_visited_location{
-                // if there's one that doesn't appear in the just added list then
-                // it was already added, which means we can declare a circle with it closed
-                let optional_just_added_location = util_functions::remove_by_value(
-                    neighbor_location_ref,
-                    &mut location_and_neighbors.just_added_neighbors
-                );
-                if optional_just_added_location.is_none(){
-                    locations_not_in_circle.remove_by_value(neighbor_location_ref);
-                }
+        let mut locations_not_in_cycle = LinkedList::<GridLocation>::new();
+        for location_and_unadded_neighbors in grid_traveller {
+            locations_not_in_cycle.push(location_and_unadded_neighbors.just_visited_location);
+
+
+            info!("locations not in cycle: {:?}", locations_not_in_cycle);
+
+
+            let already_visited_neighbors =
+                self.find_already_visited_neighbors(&location_and_unadded_neighbors)?;
+            // if we got to a place already visited, it closes a cycle
+            for already_visited_neighbor in already_visited_neighbors{
+
+                
+                info!("ordered to remove: {:?}", already_visited_neighbor);
+
+
+                locations_not_in_cycle.remove_by_value(&already_visited_neighbor);
             }
         }
-        Ok(locations_not_in_circle.is_empty())
+        Ok(locations_not_in_cycle.is_empty())
+    }
+
+    fn find_already_visited_neighbors(
+        &self,
+        location_and_unadded_neighbors: &LocationAndUnaddedNeighbors
+    ) -> Result<Vec<GridLocation>,error_handler::DataStructError<GridLocation>> {
+        let occupied_neighbors_and_directions_of_last_visited_location =
+            self.get_all_occupied_neighbor_locations(&location_and_unadded_neighbors.just_visited_location);
+        let mut unvisited_neighbors_of_just_visited : Vec<GridLocation> =
+            occupied_neighbors_and_directions_of_last_visited_location.values()
+                .map(|neighbor_location| {
+                    *neighbor_location
+                }).collect();
+        for just_added_neighbor in location_and_unadded_neighbors.just_added_neighbors.clone(){
+            let optional_just_added_location = util_functions::remove_by_value(
+                &just_added_neighbor,
+                &mut unvisited_neighbors_of_just_visited
+            );
+            if optional_just_added_location.is_none(){
+                return Err(error_handler::DataStructError::ItemNotFound(just_added_neighbor))
+            }
+        }
+        Ok(unvisited_neighbors_of_just_visited)
     }
 
     pub fn get_spanning_tree(&self, traveller_type: GridTravellerType) -> Result<GridTree, GridTreeError> {

@@ -1,3 +1,4 @@
+use bevy::utils::petgraph::visit::Data;
 use crate::{costume_event::ui_event, prelude::*};
 
 #[derive(Debug, Clone, Copy)]
@@ -55,7 +56,7 @@ pub enum TileBoardError {
 #[derive(Debug, Clone, Copy)]
 pub enum GridError {
     InvalidIndex(GridLocation),
-    InvalidPositionVector(Vec2)
+    InvalidPositionVector(Vec2),
 }
 
 #[derive(Debug, Clone, Copy)]

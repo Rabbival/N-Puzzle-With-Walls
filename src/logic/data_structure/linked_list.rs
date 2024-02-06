@@ -1,7 +1,7 @@
+use std::fmt::{Debug, Formatter};
 use crate::output::error_handler;
 
-/// a data structure for which if a node is removed
-/// all next ones follow
+/// a data structure for which if a node is removed all next ones follow
 pub struct LinkedList<T: Ord + Copy>{
 	list: Vec<T>,
 	next_index: usize
@@ -52,5 +52,13 @@ impl<T: Ord + Copy> LinkedList<T>{
 			}
 		}
 		None
+	}
+}
+
+impl<T: Ord + Copy + Debug> Debug for LinkedList<T>{
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+		f.debug_struct("Linked List")
+			.field("list", &self.list)
+			.finish()
 	}
 }
