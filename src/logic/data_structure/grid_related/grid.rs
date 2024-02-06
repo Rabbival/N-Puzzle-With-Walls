@@ -13,27 +13,56 @@ impl<T: Clone> Grid<T> {
     /// we'll mark it and all the nodes after it as a part of a cycle
     pub fn all_nodes_in_cycles(&self) -> Result<bool, error_handler::DataStructError<GridLocation>>{
         let grid_traveller = GridTraveller::from_grid(self, GridTravellerType::DFS);
+        let mut grid_tree = GridTree::from_root(grid_traveller.locations_to_visit[0]);
         let mut locations_not_in_cycle = LinkedList::<GridLocation>::new();
+
         for location_and_unadded_neighbors in grid_traveller {
-            locations_not_in_cycle.push(location_and_unadded_neighbors.just_visited_location);
-
-
-            info!("locations not in cycle: {:?}", locations_not_in_cycle);
-
-
-            let already_visited_neighbors =
-                self.find_already_visited_neighbors(&location_and_unadded_neighbors)?;
-            // if we got to a place already visited, it closes a cycle
-            for already_visited_neighbor in already_visited_neighbors{
-
-                
-                info!("ordered to remove: {:?}", already_visited_neighbor);
-
-
-                locations_not_in_cycle.remove_by_value(&already_visited_neighbor);
-            }
+            self.progress_traveller_and_update_cycles(
+                location_and_unadded_neighbors,
+                &mut locations_not_in_cycle,
+                &mut grid_tree
+            )?;
         }
         Ok(locations_not_in_cycle.is_empty())
+    }
+
+    //NTS: I want to make sure it doesn't ask the parent
+    // must take into consideration it can also be null in case we check the root
+    fn progress_traveller_and_update_cycles(
+        &self,
+        location_and_unadded_neighbors: LocationAndUnaddedNeighbors,
+        locations_not_in_cycle: &mut LinkedList<GridLocation>,
+        grid_tree: &mut GridTree,
+    ) -> Result<(), error_handler::DataStructError<GridLocation>>
+    {
+        let just_visited_location = location_and_unadded_neighbors.just_visited_location;
+        let just_added_neighbors = location_and_unadded_neighbors.just_added_neighbors.clone();
+        let last_visited_location_tree_node = grid_tree.get_grid_tree_node(&just_visited_location);
+        let last_visited_location_parent = last_visited_location_tree_node.unwrap().parent_location;
+        locations_not_in_cycle.push(just_visited_location);
+        for neighbor in just_added_neighbors {
+            if let Err(tree_error) = grid_tree.insert_leaf(neighbor, Some(just_visited_location)){
+                return Err(DataStructError::GridTreeError(tree_error));
+            }
+        }
+
+
+        info!("locations not in cycle: {:?}", locations_not_in_cycle);
+
+
+        let already_visited_neighbors =
+            self.find_already_visited_neighbors(&location_and_unadded_neighbors)?;
+
+        // if we got to a place already visited, it closes a cycle
+        for already_visited_neighbor in already_visited_neighbors{
+
+
+            info!("ordered to remove: {:?}", already_visited_neighbor);
+
+
+            locations_not_in_cycle.remove_by_value(&already_visited_neighbor);
+        }
+        Ok(())
     }
 
     fn find_already_visited_neighbors(

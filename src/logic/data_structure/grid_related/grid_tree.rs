@@ -170,6 +170,15 @@ impl Iterator for GridTree {
     }
 }
 
+// read-only functions
+impl GridTree{
+    pub fn get_grid_tree_node<'tree_lt>(&'tree_lt self, location: &GridLocation)
+        -> Option<&'tree_lt GridTreeNode>
+    {
+        self.nodes.get(location)
+    }
+}
+
 impl Default for GridTree {
     fn default() -> Self {
         Self::new()

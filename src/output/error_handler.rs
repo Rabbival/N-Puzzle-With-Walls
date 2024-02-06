@@ -31,6 +31,7 @@ pub enum BoardGenerationError {
 pub enum DataStructError<T> {
     ItemNotFound(T),
     KeyAlreadyExists,
+    GridTreeError(GridTreeError)
 }
 
 #[derive(Debug, Clone, Copy)]
