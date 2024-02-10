@@ -42,6 +42,15 @@ impl<'a, T: Clone> GridTraveller<'a, T> {
     fn added_mark(&mut self, location: &GridLocation) -> Option<&mut bool> {
         Some(&mut self.cells_locations_with_added_mark.get_mut(location)?.0)
     }
+
+    pub fn mark_as_visited(&mut self, location_to_mark: &GridLocation){
+        for (index, location_to_visit) in self.locations_to_visit.iter().enumerate(){
+            if *location_to_visit == *location_to_mark {
+                self.locations_to_visit.remove(index);
+                break;
+            }
+        }
+    }
 }
 
 impl<'a, T: Clone> Iterator for GridTraveller<'a, T> {

@@ -37,8 +37,6 @@ impl<T: Clone> Grid<T> {
     {
         let just_visited_location = location_and_unadded_neighbors.just_visited_location;
         let just_added_neighbors = location_and_unadded_neighbors.just_added_neighbors.clone();
-        let last_visited_location_tree_node = grid_tree.get_grid_tree_node(&just_visited_location);
-        let last_visited_location_parent = last_visited_location_tree_node.unwrap().parent_location;
         locations_not_in_cycle.push(just_visited_location);
         for neighbor in just_added_neighbors {
             if let Err(tree_error) = grid_tree.insert_leaf(neighbor, Some(just_visited_location)){
