@@ -36,7 +36,7 @@ pub mod prelude {
         board_manager::*,
         board_props::{board_properties::*, update_board_properties::*, BoardPropsPlugins},
         data_structure::{
-            grid_related::{grid::*, grid_location::*, grid_traveller::*, grid_tree::*},
+            grid_related::{grid::*, grid_location::*, grid_traveller::*, grid_tree::*, grid_cycle_checker::*},
             indexed_value::*,
             util_functions::*,
             linked_list::*,
