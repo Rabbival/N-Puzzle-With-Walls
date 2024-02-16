@@ -9,8 +9,8 @@ pub struct Grid<T: Clone> {
 //grid travelling functions
 impl<T: Clone> Grid<T> {
     pub fn all_nodes_in_cycles(&self) -> Result<bool, error_handler::DataStructError<GridLocation>>{
-        let mut grid_cycle_checker = GridCycleChecker::new(&self);
-        grid_cycle_checker.all_nodes_in_cycles(&self)
+        let mut grid_cycle_checker = GridCycleChecker::new(self);
+        grid_cycle_checker.all_nodes_in_cycles(self)
     }
 
     pub fn get_spanning_tree(&self, traveller_type: GridTravellerType) -> Result<GridTree, GridTreeError> {

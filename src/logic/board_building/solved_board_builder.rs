@@ -39,7 +39,6 @@ fn generate_solved_board(
         Err(error) => {
             generation_error_event_writer.send(ui_event::ShowGenerationError(error));
             game_state.set(GameState::Regular);
-            return;
         }
     }
 }
@@ -149,6 +148,9 @@ fn determine_wall_location(
             grid_tree,
             grid_tree_iter,
         )?.0;
+
+        info!("tried placing a wall in {:?}", chosen_wall_location);
+
     }
 
     if wall_location_found {
@@ -166,7 +168,7 @@ fn determine_wall_location(
                 forbid_spawn_in_neighbors_of_location(
                     &neighbor_location,
                     possible_spawn_locations,
-                    &neighbor_count_grid,
+                    neighbor_count_grid,
                 );
             }
         }
@@ -204,7 +206,7 @@ fn roll_and_validate_wall_location(
         },
         LocationFoundInPossibleLocations(true) => {
             let chosen_tile_value_result: Result<Option<u8>, GridError> =
-                neighbor_count_grid.set_none_get_former(&chosen_wall_location);
+                neighbor_count_grid.set_none_get_former(chosen_wall_location);
 
             match ensure_all_walls_in_cycle(
                 chosen_wall_location,
@@ -273,7 +275,7 @@ fn ensure_all_walls_in_cycle(
             }else{
                 put_cell_back_in_place(
                     chosen_wall_location,
-                    &chosen_tile_value_result,
+                    chosen_tile_value_result,
                     neighbor_count_grid
                 )?;
                 Ok(AllTilesStillInCycles(false))
@@ -299,8 +301,8 @@ fn ensure_connectivity(
             Ok(GraphIsStillConnected(true))
         } else {
             put_cell_back_in_place(
-                &chosen_wall_location,
-                &chosen_tile_value_result,
+                chosen_wall_location,
+                chosen_tile_value_result,
                 neighbor_count_grid
             )?;
             Ok(GraphIsStillConnected(false))
@@ -317,11 +319,9 @@ fn put_cell_back_in_place(
 {
     let chosen_tile_value= 
         wrap_if_error(chosen_tile_value_result_ref)?;
-    Ok(
         wrap_if_error
             (&neighbor_count_grid_ref_mut.set
-                (chosen_wall_location_ref, chosen_tile_value.unwrap()))?
-    )
+                (chosen_wall_location_ref, chosen_tile_value.unwrap()))
 }
 
 fn initialize_neighbor_count_grid(

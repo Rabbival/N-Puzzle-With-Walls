@@ -1,14 +1,8 @@
 use rand::Rng;
-use crate::prelude::GridLocation;
 
 pub fn remove_by_value<T: PartialEq>(item_to_remove: &T, list_to_remove_from: &mut Vec<T>) -> Option<T> {
     let optional_index_to_remove = item_to_index(item_to_remove, list_to_remove_from);
-    match optional_index_to_remove {
-        Some(index_to_remove) => {
-            Some(list_to_remove_from.swap_remove(index_to_remove))
-        }
-        None => None,
-    }
+    optional_index_to_remove.map(|index_to_remove| list_to_remove_from.swap_remove(index_to_remove))
 }
 
 pub fn item_to_index<T: PartialEq>(item_to_find: &T, list_to_find_in: &Vec<T>) -> Option<usize> {

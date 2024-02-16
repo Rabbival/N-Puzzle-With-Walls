@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use crate::{logic::data_structure::util_functions, prelude::*};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GridTraveller<'a, T: Clone> {
     grid: &'a Grid<T>,
     /// keeps track of added locations,

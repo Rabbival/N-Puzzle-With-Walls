@@ -2,19 +2,13 @@ use std::fmt::{Debug, Formatter};
 use crate::output::error_handler;
 
 /// a data structure for which if a node is removed all next ones follow
+#[derive(Default)]
 pub struct LinkedList<T: Ord + Copy>{
 	list: Vec<T>,
 	next_index: usize
 }
 
 impl<T: Ord + Copy> LinkedList<T>{
-	pub fn new() -> LinkedList<T>{
-		Self { 
-			list: vec![],
-			next_index: 0
-		}
-	}
-
 	pub fn is_empty(&self) -> bool{
 		self.next_index == 0
 	}
@@ -45,10 +39,8 @@ impl<T: Ord + Copy> LinkedList<T>{
 		for (item_index, item) in self.list.iter().enumerate(){
 			if item_index >= self.next_index{
 				return None;
-			}else{
-				if item == item_to_find {
-					return Some(item_index);
-				}
+			}else if item == item_to_find {
+				return Some(item_index);
 			}
 		}
 		None

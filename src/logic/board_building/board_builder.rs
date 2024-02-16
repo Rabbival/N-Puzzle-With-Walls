@@ -1,5 +1,5 @@
 use crate::{
-    costume_event::{board_set_event, ui_event},
+    costume_event::ui_event,
     output::{error_handler, print_to_console},
     prelude::*,
 };
@@ -46,7 +46,6 @@ fn build_a_new_board(
         Err(error) => {
             generation_error_event_writer.send(ui_event::ShowGenerationError(error));
             game_state.set(GameState::Regular);
-            return;
         }
         Ok(newborn_board) => {
             let attempt_result =

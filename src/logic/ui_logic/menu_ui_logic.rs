@@ -72,17 +72,16 @@ fn update_menu_ui_after_press_general(
 ) {
     for button_event in button_event_listener.read() {
         let menu_button_action = button_event.action;
-        let button_action_discriminant;
         let pressed_button_entity = button_event.entity;
-        match menu_button_action {
+        let button_action_discriminant = match menu_button_action {
             MenuButtonAction::ChangeSize(_)
             | MenuButtonAction::ChangeEmptyTilesCount(_)
             | MenuButtonAction::ChangeGenerationMethod(_)
             | MenuButtonAction::ChangeSpanningTreeGeneration(_) => {
-                button_action_discriminant = mem::discriminant(&menu_button_action);
+                mem::discriminant(&menu_button_action)
             }
             _ => continue,
-        }
+        };
 
         for (previous_button, mut previous_color, menu_button_action_of_chosen) in
             currently_chosen.iter_mut()

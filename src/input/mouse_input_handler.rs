@@ -69,14 +69,13 @@ fn handle_mouse_click(
     }
     let grid_location_from_click = 
         GridLocation::from_world(&game_board.grid, cursor_position);
-    let optional_occupied_tile_location ;
-    match grid_location_from_click{
+    let optional_occupied_tile_location = match grid_location_from_click{
         Ok(grid_location) => 
-            optional_occupied_tile_location=grid_location,
+            grid_location,
         Err(grid_error) => {
             return Err(error_handler::TileMoveError::GridError(grid_error));
         }
-    }
+    };
     
     match game_board.is_tile_empty(&optional_occupied_tile_location) {
         Err(tile_board_error) =>

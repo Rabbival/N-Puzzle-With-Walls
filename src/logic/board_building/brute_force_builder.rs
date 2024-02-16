@@ -72,7 +72,7 @@ fn determine_next_shift_direction(
     // unless it's a dead end in which it has to turn back
     if optional_directions.len() > 1 {
         remove_opposite_of_previous_shift_direction_from_possible_shift_locations(
-            &shift_tracker,
+            shift_tracker,
             &mut optional_directions
         )?;
     }
@@ -92,7 +92,7 @@ fn determine_next_shift_direction(
         Err(error) => {
             match error{
                 TileMoveError::TriedToSwitchEmptyWithEmpty => Ok(MoveDecidedAndRegistered(false)),
-                _ => return Err(error_handler::BoardGenerationError::TileMoveError(error))
+                _ => Err(error_handler::BoardGenerationError::TileMoveError(error))
             }
         },
         Ok(_) => {
