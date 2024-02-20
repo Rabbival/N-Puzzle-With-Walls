@@ -103,6 +103,9 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
 
         // if we got to a place already added, we closed a cycle
         for already_added_neighbor in already_added_neighbors{
+            if self.cycle_markers.contains_key(&already_added_neighbor){
+                continue;
+            }
             self.cycle_markers.insert(already_added_neighbor, InCycle(true));
 
 
@@ -150,6 +153,11 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
                 self.mark_location_as_part_of_cycle_if_it_wasnt_marked_so(last_tracked_travelled_location)?;
                 let optional_parent_of_last_tracked =
                     self.grid_tree.get_grid_tree_node(last_tracked_travelled_location).unwrap().parent_location;
+
+
+                info!("parent of last tracked location: {:?}", optional_parent_of_last_tracked);
+
+
                 if let Some(parent_of_last_tracked) = optional_parent_of_last_tracked{
                     if parent_of_last_tracked == parent_of_already_added_neighbor {
                         break;
@@ -160,7 +168,6 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
                 return Err(error_handler::DataStructError::GridTreeError(ParentNotFound));
             }
 
-            util_functions::remove_by_value(&parent_of_already_added_neighbor, &mut self.locations_visited_in_order);
             self.mark_location_as_part_of_cycle_if_it_wasnt_marked_so(&parent_of_already_added_neighbor)?;
         }
         Ok(())
