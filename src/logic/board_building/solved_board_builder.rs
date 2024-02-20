@@ -148,9 +148,6 @@ fn determine_wall_location(
             grid_tree,
             grid_tree_iter,
         )?.0;
-
-        info!("tried placing a wall in {:?}", chosen_wall_location);
-
     }
 
     if wall_location_found {
@@ -207,6 +204,11 @@ fn roll_and_validate_wall_location(
         LocationFoundInPossibleLocations(true) => {
             let chosen_tile_value_result: Result<Option<u8>, GridError> =
                 neighbor_count_grid.set_none_get_former(chosen_wall_location);
+
+
+
+            info!("checking cycles for wall in {:?}", chosen_wall_location);
+
 
             match ensure_all_walls_in_cycle(
                 chosen_wall_location,
