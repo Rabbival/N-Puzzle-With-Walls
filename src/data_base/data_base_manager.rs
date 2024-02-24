@@ -1,9 +1,8 @@
-use std::fs;
+use json::{stringify, stringify_pretty};
 use crate::costume_event::db_event;
+use crate::input::json_loader;
+use crate::output::{print_to_console, text_saver};
 use crate::prelude::*;
-use std::fs::File;
-use std::io::prelude::*;
-use bevy::a11y::accesskit::Role::Directory;
 
 #[derive(Resource, Default)]
 pub struct DataBaseManager{
@@ -27,33 +26,40 @@ fn draw_from_data_base(
 	db_manager: Res<DataBaseManager>
 ){
 	for load_request in event_listener.read(){
-		//temp body
+		let requested_layout_index = load_request.0.0;
 		let saved_layouts_ref = db_manager.get_saved_layouts_ref();
-		
+		if requested_layout_index >= saved_layouts_ref.len(){
+			print_to_console::print_system_log(SystemLog::RequestedFileDoesntExist);
+		}else{
+			let parsed_json = json_loader::read_from_file(
+				FolderToAccess::SavedLayouts,
+				format!("layout_{:?}",requested_layout_index)
+			);
+			if parsed_json.is_err(){
+				print_to_console::print_system_log(SystemLog::RequestedFileDoesntExist);
+			}
+
+
+			info!("{}", parsed_json.unwrap());
+
+
+		}
 	}
 }
 
 fn save_to_data_base(
-	event_listener: EventReader<db_event::SaveToDB>,
-	db_manager: ResMut<DataBaseManager>
-){
-	save_to_data_base_inner(event_listener, db_manager).unwrap();
-}
-
-fn save_to_data_base_inner(
 	mut event_listener: EventReader<db_event::SaveToDB>,
 	mut db_manager: ResMut<DataBaseManager>
-) -> std::io::Result<()>
-{
+){
 	for save_request in event_listener.read(){
-		db_manager.as_mut().insert_layout(&save_request.0);
+		text_saver::write_to_file(
+			FolderToAccess::SavedLayouts,
+			format!("layout_{:?}", db_manager.saved_layouts.len()),
+			String::from(stringify_pretty(save_request.0.clone(), 4))
+		).unwrap();
 
-		//TODO: a folder can't be created twice, create it only if it doesn't exist
-		fs::create_dir("saved_layouts")?;
-		let mut file = File::create("saved_layouts/file_name_lmao.txt")?;
-		file.write_all(&format!("{:?}", save_request.0).as_bytes())?;
+		db_manager.as_mut().insert_layout(&save_request.0);
 	}
-	Ok(())
 }
 
 impl DataBaseManager{

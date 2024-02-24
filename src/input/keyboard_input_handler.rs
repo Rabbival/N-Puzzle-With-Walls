@@ -2,6 +2,7 @@ use crate::{
     costume_event::{app_event, board_set_event, move_tile_event},
     prelude::*,
 };
+use crate::costume_event::db_event;
 
 pub struct KeyboardInputHandlerPlugin;
 
@@ -14,6 +15,11 @@ impl Plugin for KeyboardInputHandlerPlugin {
                     move_tiles_with_keyboard.run_if(in_state(AppState::Game)),
                     listen_for_reset,
                     open_menu,
+
+
+                    listed_for_debug_key_which_is_k
+
+
                 )
                     .chain()
                     .in_set(InputSystemSets::InputListening),
@@ -68,5 +74,17 @@ fn listen_for_app_closing(
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         end_game_event_writer.send(app_event::EndGame);
+    }
+}
+
+
+
+
+fn listed_for_debug_key_which_is_k(
+    mut event_writer: EventWriter<db_event::LoadFromDB>,
+    keyboard_input: Res<Input<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::K) {
+        event_writer.send(db_event::LoadFromDB(DomainBoardIndex(0)));
     }
 }

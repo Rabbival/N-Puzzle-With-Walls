@@ -76,7 +76,7 @@ pub fn generate_solved_board_inner(
     }
 
     write_to_db_event_writer.send(db_event::SaveToDB(DomainBoard{
-        board_propes: *applied_props,
+        board_props: *applied_props,
         wall_locations
     }));
 

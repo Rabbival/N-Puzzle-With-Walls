@@ -27,6 +27,7 @@ pub mod prelude {
     };
     pub use crate::input::{
         button_input::*, keyboard_input_handler::*, mouse_input_handler::*, move_request::*,
+        json_loader::*,
         InputPlugin,
     };
     pub use crate::logic::{
@@ -51,6 +52,7 @@ pub mod prelude {
             eternal_button_action::*,
             game_button_action::*,
             tile_type::*,
+            folder_to_access::*,
         },
         states::{app_state::*, game_state::*, StatePlugin},
         tile::*,
@@ -68,6 +70,7 @@ pub mod prelude {
             GraphicsPlugin, OnOwnScreenVisibility,
         },
         print_to_console::*,
+        text_saver::*,
     };
     pub use crate::screen_setup::*;
     pub use crate::system_sets::*;

@@ -110,3 +110,14 @@ pub fn print_possible_solution<T: Iterator<Item = BasicDirection>>(
         info!("{:?}", dir);
     }
 }
+
+#[derive(Debug)]
+pub enum SystemLog{
+    FolderCreated,
+    FolderExists,
+    RequestedFileDoesntExist,
+}
+
+pub fn print_system_log(system_log: SystemLog){
+    info!("{:?}", system_log);
+}

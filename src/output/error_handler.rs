@@ -81,3 +81,8 @@ pub fn board_generation_error_handler(
         print_board_generation_error(generation_error.0);
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum CustomJsonError {
+    CouldntParseJson
+}

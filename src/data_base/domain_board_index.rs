@@ -1,2 +1,2 @@
 #[derive(Debug)]
-pub struct DomainBoardIndex(pub u8);
+pub struct DomainBoardIndex(pub usize);
