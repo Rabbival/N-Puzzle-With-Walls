@@ -122,6 +122,7 @@ fn wrap_if_error<T>(result: Result<T, error_handler::GridError>)
 
 #[cfg(test)]
 mod tests {
+    use crate::costume_event::db_event;
     use crate::logic::{board_building::solved_board_builder, enums::basic_direction};
 
     use super::*;
@@ -131,6 +132,7 @@ mod tests {
         let mut app = App::new();
         app.add_event::<move_tile_event::UpdateTileLocationGraphics>()
             .add_event::<move_tile_event::CheckIfBoardIsSolved>()
+            .add_event::<db_event::SaveToDB>()
             .add_systems(Update, test_valid_request_inner);
         app.update();
     }
@@ -138,38 +140,44 @@ mod tests {
     fn test_valid_request_inner(
         mut graphics_writer: EventWriter<move_tile_event::UpdateTileLocationGraphics>,
         mut check_writer: EventWriter<move_tile_event::CheckIfBoardIsSolved>,
+        mut db_writer: EventWriter<db_event::SaveToDB>,
     ) {
-        assert!(!detected_as_invalid_request(
+        assert!(!detected_as_invalid_request_inner(
             basic_direction::BasicDirection::Up,
             &mut graphics_writer,
-            &mut check_writer
+            &mut check_writer,
+            &mut db_writer
         ));
-        assert!(detected_as_invalid_request(
+        assert!(detected_as_invalid_request_inner(
             basic_direction::BasicDirection::Right,
             &mut graphics_writer,
-            &mut check_writer
+            &mut check_writer,
+            &mut db_writer
         ));
-        assert!(detected_as_invalid_request(
+        assert!(detected_as_invalid_request_inner(
             basic_direction::BasicDirection::Down,
             &mut graphics_writer,
-            &mut check_writer
+            &mut check_writer,
+            &mut db_writer
         ));
-        assert!(!detected_as_invalid_request(
+        assert!(!detected_as_invalid_request_inner(
             basic_direction::BasicDirection::Left,
             &mut graphics_writer,
-            &mut check_writer
+            &mut check_writer,
+            &mut db_writer
         ));
     }
 
-    fn detected_as_invalid_request(
+    fn detected_as_invalid_request_inner(
         from_dir: basic_direction::BasicDirection,
         graphics_writer: &mut EventWriter<move_tile_event::UpdateTileLocationGraphics>,
         check_writer: &mut EventWriter<move_tile_event::CheckIfBoardIsSolved>,
+        db_writer: &mut EventWriter<db_event::SaveToDB>,
     ) -> bool {
         let mut board =
             solved_board_builder::generate_solved_board_inner(
                 &BoardProperties::default(),
-                &mut DataBaseManager::default()
+                db_writer
             ).unwrap();
         board.ignore_player_input = false;
         let direction_check_outcome =

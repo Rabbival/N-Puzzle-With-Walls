@@ -105,6 +105,7 @@ fn handle_mouse_click(
 
 #[cfg(test)]
 mod tests {
+    use crate::costume_event::db_event;
     use crate::logic::board_building::solved_board_builder;
 
     use super::*;
@@ -176,18 +177,23 @@ mod tests {
     fn test_valid_location() {
         let mut app = App::new();
         app.add_event::<move_tile_event::SwitchTilesLogic>()
+            .add_event::<db_event::SaveToDB>()
             .add_systems(Update, test_valid_location_inner);
         app.update();
     }
 
-    fn test_valid_location_inner(mut event_writer: EventWriter<move_tile_event::SwitchTilesLogic>) {
-        assert!(test_no_tile_in_cell(&mut event_writer));
-        assert!(test_empty_slot(&mut event_writer));
-        assert!(test_no_empty_neighbor(&mut event_writer));
+    fn test_valid_location_inner(
+        mut switch_tiles_logic_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
+        mut db_writer: EventWriter<db_event::SaveToDB>
+    ) {
+        assert!(test_no_tile_in_cell(&mut switch_tiles_logic_writer, &mut db_writer));
+        assert!(test_empty_slot(&mut switch_tiles_logic_writer));
+        assert!(test_no_empty_neighbor(&mut switch_tiles_logic_writer, &mut db_writer));
     }
 
     fn test_no_tile_in_cell(
         event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>,
+        db_writer: &mut EventWriter<db_event::SaveToDB>,
     ) -> bool {
         let mut board = TileBoard::default();
         board.ignore_player_input = false;
@@ -198,7 +204,10 @@ mod tests {
         }
     }
 
-    fn test_empty_slot(event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>) -> bool {
+    fn test_empty_slot(
+        event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>,
+    ) -> bool
+    {
         let mut board = TileBoard::default();
         board.ignore_player_input = false;
         board.set(
@@ -217,11 +226,13 @@ mod tests {
 
     fn test_no_empty_neighbor(
         event_writer: &mut EventWriter<move_tile_event::SwitchTilesLogic>,
-    ) -> bool {
+        db_writer: &mut EventWriter<db_event::SaveToDB>,
+    ) -> bool
+    {
         let mut board: TileBoard =
             solved_board_builder::generate_solved_board_inner(
                 &BoardProperties::default(),
-                &mut DataBaseManager::default()
+                db_writer
             ).unwrap();
         board.ignore_player_input = false;
 

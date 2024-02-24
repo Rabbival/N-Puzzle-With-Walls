@@ -1,10 +1,11 @@
 use crate::{logic::data_structure::util_functions, output::error_handler, prelude::*, costume_event::ui_event};
+use crate::costume_event::db_event;
 
 /// mustn't be more than 2 as there will always be a corner
 /// shouldn't be less than 1 or we might get useless spaces
 const MIN_NEIGHBORS: u8 = 2;
 
-const SOLVED_BOARD_WITH_WALLS_MAX_GENERATION_ATTEMPTS: u8 = 10;
+const SOLVED_BOARD_WITH_WALLS_MAX_GENERATION_ATTEMPTS: u8 = 20;
 
 struct WallLocationChosen(pub bool);
 struct LocationFoundInPossibleLocations(pub bool);
@@ -27,12 +28,12 @@ fn generate_solved_board(
     mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
     mut solved_board_query: Query<&mut TileBoard, With<SolvedBoard>>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
-    mut db_manager: ResMut<DataBaseManager>,
     mut game_state: ResMut<NextState<GameState>>,
+    mut write_to_db_event_writer: EventWriter<db_event::SaveToDB>
 ){
     match generate_solved_board_inner(
         applied_board_props_query.single(),
-        db_manager.as_mut()
+        &mut write_to_db_event_writer
     ) {
         Ok(board) => {
             *solved_board_query.single_mut() = board;
@@ -47,7 +48,7 @@ fn generate_solved_board(
 
 pub fn generate_solved_board_inner(
     applied_props: &BoardProperties,
-    db_manager: &mut DataBaseManager
+    write_to_db_event_writer: &mut EventWriter<db_event::SaveToDB>
 ) -> Result<TileBoard, BoardGenerationError> {
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut solved_board = TileBoard::new(grid_side_length);
@@ -74,10 +75,10 @@ pub fn generate_solved_board_inner(
             (&spawn_walls_in_locations(&wall_locations, &mut solved_board))?;
     }
 
-    db_manager.insert_layout(SavedLayout{
+    write_to_db_event_writer.send(db_event::SaveToDB(DomainBoard{
         board_propes: *applied_props,
         wall_locations
-    });
+    }));
 
     let mut empty_tile_counter = applied_props.empty_count;
     'outer_for: for i in (0..grid_side_length_u32).rev() {
@@ -418,6 +419,15 @@ mod tests {
 
     #[test]
     fn test_connectivity_bfs_tree() {
+        let mut app = App::new();
+        app.add_event::<db_event::SaveToDB>()
+            .add_systems(Update, test_connectivity_bfs_tree_inner);
+        app.update();
+    }
+
+    fn test_connectivity_bfs_tree_inner(
+        mut event_writer: EventWriter<db_event::SaveToDB>,
+    ) {
         const ATTEMPT_COUNT: usize = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
         let board_props: BoardProperties = BoardProperties {
@@ -426,20 +436,27 @@ mod tests {
             tree_traveller_type: GridTravellerType::BFS,
             ..Default::default()
         };
-        let mut dummy_db_manager = DataBaseManager::default();
         for _ in 0..ATTEMPT_COUNT {
-            let solved_board = 
+            let solved_board =
                 generate_solved_board_inner(
                     &board_props,
-                    &mut dummy_db_manager
+                    &mut event_writer
                 ).unwrap();
             assert!(solved_board.grid.is_connected_graph());
         }
-        assert_eq!(dummy_db_manager.get_saved_layouts_ref().len(), ATTEMPT_COUNT);
     }
 
     #[test]
     fn test_connectivity_dfs_tree() {
+        let mut app = App::new();
+        app.add_event::<db_event::SaveToDB>()
+            .add_systems(Update, test_connectivity_dfs_tree_inner);
+        app.update();
+    }
+
+    fn test_connectivity_dfs_tree_inner(
+        mut event_writer: EventWriter<db_event::SaveToDB>,
+    ) {
         const ATTEMPT_COUNT: usize = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
         let board_props: BoardProperties = BoardProperties {
@@ -448,15 +465,13 @@ mod tests {
             tree_traveller_type: GridTravellerType::DFS,
             ..Default::default()
         };
-        let mut dummy_db_manager = DataBaseManager::default();
         for _ in 0..ATTEMPT_COUNT {
-            let solved_board = 
+            let solved_board =
                 generate_solved_board_inner(
                     &board_props,
-                    &mut dummy_db_manager
+                    &mut event_writer
                 ).unwrap();
             assert!(solved_board.grid.is_connected_graph());
         }
-        assert_eq!(dummy_db_manager.get_saved_layouts_ref().len(), ATTEMPT_COUNT);
     }
 }

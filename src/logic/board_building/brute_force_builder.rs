@@ -171,17 +171,27 @@ struct LocationShiftTracker{
 
 #[cfg(test)]
 mod tests {
+    use crate::costume_event::db_event;
     use super::*;
 
     const RANDOM_RANGE_FOR_TESTING: (u8, u8) = (31,41);
 
     #[test]
-    fn several_attempts_at_generating_unsolved_boards(){
+    fn several_attempts_at_generating_unsolved_boards() {
+        let mut app = App::new();
+        app.add_event::<db_event::SaveToDB>()
+            .add_systems(Update, several_attempts_at_generating_unsolved_boards_inner);
+        app.update();
+    }
+
+    fn several_attempts_at_generating_unsolved_boards_inner(
+        mut event_writer: EventWriter<db_event::SaveToDB>,
+    ){
         const ATTEMPT_COUNT: u8 = 10;
         let solved_board
             =generate_solved_board_inner(
                 &BoardProperties::default(),
-                &mut DataBaseManager::default()
+                &mut event_writer
             ).unwrap();
         for _ in 0..ATTEMPT_COUNT{
             assert_ne!(solved_board.grid, 

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-#[derive(Debug)]
-pub struct SavedLayout{
+#[derive(Debug, Clone, Default)]
+pub struct DomainBoard{
 	pub board_propes: BoardProperties,
 	pub wall_locations: Vec<GridLocation>
 }
