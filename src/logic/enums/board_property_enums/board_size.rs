@@ -42,7 +42,7 @@ impl BoardSize {
             BoardSize::Small => 3,
             BoardSize::Medium => 5,
             BoardSize::Large => 8,
-            BoardSize::Giant => 30,
+            BoardSize::Giant => 20,
         }
     }
 }

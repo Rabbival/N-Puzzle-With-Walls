@@ -6,7 +6,6 @@ use crate::prelude::GridTreeError::ParentNotFound;
 pub struct GridCycleChecker<'a, T: Clone>{
     grid_traveller: GridTraveller<'a, T>,
     grid_tree: GridTree,
-    locations_visited_in_order: Vec<GridLocation>,
     cycle_markers: HashMap<GridLocation, InCycle>,
     locations_not_in_cycle_counter: u32
 }
@@ -18,7 +17,6 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
         Self{
             grid_traveller: grid_traveller.clone(),
             grid_tree: GridTree::from_root(grid_traveller.locations_to_visit[0]),
-            locations_visited_in_order: Vec::new(),
             cycle_markers: HashMap::new(),
             locations_not_in_cycle_counter: 0
         }
@@ -59,7 +57,6 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
         let just_visited_location = location_and_unadded_neighbors.just_visited_location;
         let just_added_neighbors = location_and_unadded_neighbors.just_added_neighbors.clone();
 
-        self.locations_visited_in_order.push(just_visited_location);
         // don't want to override already found neighbors (inserted when spotted)
         if !self.cycle_markers.contains_key(&just_visited_location){
             self.cycle_markers.insert(just_visited_location, InCycle(false));
@@ -96,7 +93,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
 
 
 
-        info!("just visited: {:?}", just_visited_location);
+        // info!("just visited: {:?}", just_visited_location);
         // info!("spotted already added neighbors: {:?}", already_added_neighbors);
 
 
@@ -109,10 +106,10 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
             self.cycle_markers.insert(already_added_neighbor, InCycle(true));
 
 
-            info!("marked as part of cycle {:?}", already_added_neighbor);
+            // info!("marked as part of cycle {:?}", already_added_neighbor);
 
 
-            self.declare_locations_as_part_of_cycle_by_parent_of(already_added_neighbor)?;
+            self.declare_locations_as_part_of_cycle_by_parent_of(already_added_neighbor, just_visited_location)?;
         }
         Ok(())
     }
@@ -141,30 +138,30 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
 
     fn declare_locations_as_part_of_cycle_by_parent_of(
         &mut self,
-        already_added_neighbor: GridLocation
+        already_added_neighbor: GridLocation,
+        just_visited_location: GridLocation
     ) -> Result<(), error_handler::DataStructError<GridLocation>>
     {
+        self.mark_location_as_part_of_cycle_if_it_wasnt_marked_so(&just_visited_location)?;
         let optional_already_added_neighbor_parent =
             self.grid_tree.get_grid_tree_node(&already_added_neighbor).unwrap().parent_location;
         if let Some(parent_of_already_added_neighbor) = optional_already_added_neighbor_parent{
-            let locations_visited_in_order = self.locations_visited_in_order.clone();
-            let mut locations_reverse_iterator = locations_visited_in_order.iter().rev();
-            for last_tracked_travelled_location in &mut locations_reverse_iterator{
-                self.mark_location_as_part_of_cycle_if_it_wasnt_marked_so(last_tracked_travelled_location)?;
-                let optional_parent_of_last_tracked =
-                    self.grid_tree.get_grid_tree_node(last_tracked_travelled_location).unwrap().parent_location;
-
-
-                info!("parent of last tracked location: {:?}", optional_parent_of_last_tracked);
-
-
-                if let Some(parent_of_last_tracked) = optional_parent_of_last_tracked{
-                    if parent_of_last_tracked == parent_of_already_added_neighbor {
-                        break;
-                    }
+            let mut optional_parent_of_last_tracked =
+                self.grid_tree.get_grid_tree_node(&just_visited_location).unwrap().parent_location;
+            while let Some(track_back_parent) = optional_parent_of_last_tracked{
+                self.mark_location_as_part_of_cycle_if_it_wasnt_marked_so(&track_back_parent)?;
+                if track_back_parent == parent_of_already_added_neighbor {
+                    break;
                 }
+
+
+                // info!("parent of last tracked location: {:?}", optional_parent_of_last_tracked);
+
+
+                optional_parent_of_last_tracked =
+                    self.grid_tree.get_grid_tree_node(&track_back_parent).unwrap().parent_location;
             }
-            if locations_reverse_iterator.count() == 0 {
+            if optional_parent_of_last_tracked.is_none() {
                 return Err(error_handler::DataStructError::GridTreeError(ParentNotFound));
             }
 
@@ -188,7 +185,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
                     *locations_not_in_cycle_counter -= 1;
 
 
-                    info!("marked as part of cycle {:?}", location_to_mark);
+                    // info!("marked as part of cycle {:?}", location_to_mark);
 
 
                 }

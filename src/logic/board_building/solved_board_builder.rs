@@ -4,6 +4,8 @@ use crate::{logic::data_structure::util_functions, output::error_handler, prelud
 /// shouldn't be less than 1 or we might get useless spaces
 const MIN_NEIGHBORS: u8 = 2;
 
+const SOLVED_BOARD_WITH_WALLS_MAX_GENERATION_ATTEMPTS: u8 = 10;
+
 struct WallLocationChosen(pub bool);
 struct LocationFoundInPossibleLocations(pub bool);
 struct AllTilesStillInCycles(pub bool);
@@ -53,7 +55,21 @@ pub fn generate_solved_board_inner(
     let mut wall_locations = vec![];
 
     if applied_props.wall_count > 0 {
-        wall_locations = determine_wall_locations(applied_props)?;
+        let mut wall_location_determination_attempt = 1;
+        let mut wall_location_determination_result =
+            determine_wall_locations(applied_props);
+        while wall_location_determination_attempt < SOLVED_BOARD_WITH_WALLS_MAX_GENERATION_ATTEMPTS
+            && wall_location_determination_result.is_err()
+        {
+            wall_location_determination_result = determine_wall_locations(applied_props);
+            wall_location_determination_attempt += 1;
+        }
+        match wall_location_determination_result{
+            Ok(just_determined_wall_locations) => {
+                wall_locations = just_determined_wall_locations;
+            },
+            Err(wall_location_finding_error) => return Err(wall_location_finding_error)
+        }
         wrap_if_error
             (&spawn_walls_in_locations(&wall_locations, &mut solved_board))?;
     }
@@ -207,7 +223,7 @@ fn roll_and_validate_wall_location(
 
 
 
-            info!("checking cycles for wall in {:?}", chosen_wall_location);
+            // info!("checking cycles for wall in {:?}", chosen_wall_location);
 
 
             match ensure_all_walls_in_cycle(

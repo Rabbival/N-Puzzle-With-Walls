@@ -2,6 +2,8 @@ use crate::{output::error_handler, prelude::*};
 
 use rand::Rng;
 
+pub const PERMUTATION_BOARD_GENERATION_ATTEMPTS: u8 = 5;
+
 /// builds a new board based on the one it gets
 pub fn generate_board_by_vector_permutation(
     solved_board: &TileBoard,
@@ -38,7 +40,7 @@ fn make_valid_permutation_out_of_vector(
     let mut permutation;
     let permutation_length = sorted_vector.len();
 
-    for _attempt in 0..BOARD_GENERATION_ATTEMPTS {
+    for _attempt in 0..PERMUTATION_BOARD_GENERATION_ATTEMPTS {
         //generate random permutation
         let mut cloned_sorted = sorted_vector.clone();
         let mut cloned_sorted_size = permutation_length;
