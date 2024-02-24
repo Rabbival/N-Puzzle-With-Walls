@@ -66,6 +66,11 @@ pub enum EntityRelatedCustomError {
     DataStructError(DataStructError<Tile>),
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum CustomJsonError {
+    CouldntParseJson
+}
+
 pub struct ErrorHandlerPlugin;
 
 impl Plugin for ErrorHandlerPlugin {
@@ -80,9 +85,4 @@ pub fn board_generation_error_handler(
     for generation_error in event_listener.read() {
         print_board_generation_error(generation_error.0);
     }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum CustomJsonError {
-    CouldntParseJson
 }

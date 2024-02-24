@@ -1,6 +1,6 @@
 use crate::{prelude::*, output::error_handler};
 use std::fmt;
-use json::JsonValue;
+use serde_json::json;
 
 #[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug, Ord, PartialOrd)]
 pub struct GridLocation {
@@ -50,6 +50,13 @@ impl GridLocation {
             0.0,
         )
     }
+
+    fn to_json(&self) -> serde_json::Value {
+        json!({
+			"row": self.row,
+			"col": self.col,
+		})
+    }
 }
 
 impl From<IVec2> for GridLocation {
@@ -69,14 +76,5 @@ impl fmt::Display for GridLocation {
         fmt.write_str(&self.col.to_string())?;
         fmt.write_str(" ]")?;
         Ok(())
-    }
-}
-
-impl Into<JsonValue> for GridLocation {
-    fn into(self) -> JsonValue {
-        json::object! {
-            "row": JsonValue::from(self.row),
-            "col": JsonValue::from(self.col)
-        }
     }
 }

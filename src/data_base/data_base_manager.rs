@@ -1,4 +1,4 @@
-use json::{stringify, stringify_pretty};
+use serde_json::json;
 use crate::costume_event::db_event;
 use crate::input::json_loader;
 use crate::output::{print_to_console, text_saver};
@@ -55,7 +55,7 @@ fn save_to_data_base(
 		text_saver::write_to_file(
 			FolderToAccess::SavedLayouts,
 			format!("layout_{:?}", db_manager.saved_layouts.len()),
-			String::from(stringify_pretty(save_request.0.clone(), 4))
+			String::from(json!(save_request.0.clone()))
 		).unwrap();
 
 		db_manager.as_mut().insert_layout(&save_request.0);

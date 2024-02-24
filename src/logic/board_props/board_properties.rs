@@ -1,4 +1,4 @@
-use json::JsonValue;
+use serde_json::json;
 use crate::{costume_event::screen_changing_event, prelude::*};
 
 pub const DEFAULT_EMPTY_COUNT: u8 = 1;
@@ -84,14 +84,14 @@ impl Default for BoardProperties {
     }
 }
 
-impl Into<JsonValue> for BoardProperties {
-    fn into(self) -> JsonValue {
-        json::object! {
-            "size": <BoardSize as Into<JsonValue>>::into(self.size),
-            "wall_count": <u8 as Into<JsonValue>>::into(self.wall_count),
-            "empty_count": <u8 as Into<JsonValue>>::into(self.empty_count),
-            "generation_method": <BoardGenerationMethod as Into<JsonValue>>::into(self.generation_method),
-            "tree_traveller_type": <GridTravellerType as Into<JsonValue>>::into(self.tree_traveller_type),
-        }
+impl BoardProperties {
+    fn to_json(&self) -> serde_json::Value {
+        json!({
+            "size": self.size,
+            "wall_count": self.wall_count,
+            "empty_count": self.empty_count,
+            "generation_method": self.generation_method,
+            "tree_traveller_type": self.tree_traveller_type,
+		})
     }
 }

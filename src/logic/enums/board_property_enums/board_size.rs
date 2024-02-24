@@ -1,6 +1,5 @@
 use enum_iterator::{all, Sequence};
 use std::fmt;
-use json::JsonValue;
 
 #[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum BoardSize {
@@ -46,16 +45,8 @@ impl BoardSize {
             BoardSize::Giant => 20,
         }
     }
-}
 
-impl fmt::Display for BoardSize {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-impl Into<JsonValue> for BoardSize {
-    fn into(self) -> JsonValue {
+    pub fn to_json(&self) -> serde_json::Value {
         match self {
             BoardSize::Tiny => "Tiny".into(),
             BoardSize::Small => "Small".into(),
@@ -63,5 +54,11 @@ impl Into<JsonValue> for BoardSize {
             BoardSize::Large => "Large".into(),
             BoardSize::Giant => "Giant".into(),
         }
+    }
+}
+
+impl fmt::Display for BoardSize {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }

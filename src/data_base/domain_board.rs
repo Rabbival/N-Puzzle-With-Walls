@@ -1,4 +1,4 @@
-use json::JsonValue;
+use serde_json::json;
 use crate::prelude::*;
 
 #[derive(Debug, Clone, Default)]
@@ -7,11 +7,11 @@ pub struct DomainBoard{
 	pub wall_locations: Vec<GridLocation>
 }
 
-impl Into<JsonValue> for DomainBoard {
-	fn into(self) -> JsonValue {
-		let mut json_obj = JsonValue::new_object();
-		json_obj["board_props"] = self.board_props.into();
-		json_obj["wall_locations"] = self.wall_locations.into();
-		json_obj
+impl DomainBoard {
+	fn to_json(&self) -> serde_json::Value {
+		json!({
+			"board_props": json!(self.board_props),
+			"wall_locations": json!(self.wall_locations),
+		})
 	}
 }
