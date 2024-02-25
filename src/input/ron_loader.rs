@@ -7,7 +7,7 @@ pub fn domain_board_from_file(folder_to_load_from: FolderToAccess, file_to_load:
     -> Result<DomainBoard, error_handler::CustomRonError>
 {
     let file_path = PathBuf::from(&folder_to_load_from.to_string())
-        .join(format!("{}.txt", file_to_load));
+        .join(file_to_load);
     match fs::read_to_string(&file_path){
         Err(_) => return Err(error_handler::CustomRonError::CouldntParseRon),
         Ok(file_content_as_string) => {
