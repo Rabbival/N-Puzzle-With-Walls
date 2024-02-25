@@ -27,7 +27,7 @@ pub mod prelude {
     };
     pub use crate::input::{
         button_input::*, keyboard_input_handler::*, mouse_input_handler::*, move_request::*,
-        json_loader::*,
+        ron_loader::*,
         InputPlugin,
     };
     pub use crate::logic::{

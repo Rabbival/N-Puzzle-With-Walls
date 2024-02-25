@@ -67,8 +67,8 @@ pub enum EntityRelatedCustomError {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum CustomJsonError {
-    CouldntParseJson
+pub enum CustomRonError {
+    CouldntParseRon
 }
 
 pub struct ErrorHandlerPlugin;

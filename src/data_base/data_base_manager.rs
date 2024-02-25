@@ -1,6 +1,6 @@
-use serde_json::json;
+
 use crate::costume_event::db_event;
-use crate::input::json_loader;
+use crate::input::ron_loader;
 use crate::output::{print_to_console, text_saver};
 use crate::prelude::*;
 
@@ -31,18 +31,15 @@ fn draw_from_data_base(
 		if requested_layout_index >= saved_layouts_ref.len(){
 			print_to_console::print_system_log(SystemLog::RequestedFileDoesntExist);
 		}else{
-			let parsed_json = json_loader::read_from_file(
+			let parsed_ron = ron_loader::domain_board_from_file(
 				FolderToAccess::SavedLayouts,
 				format!("layout_{:?}",requested_layout_index)
 			);
-			if parsed_json.is_err(){
+			if parsed_ron.is_err(){
 				print_to_console::print_system_log(SystemLog::RequestedFileDoesntExist);
+			}else{
+				let domain_board = parsed_ron.unwrap();
 			}
-
-
-			info!("{}", parsed_json.unwrap());
-
-
 		}
 	}
 }
@@ -52,10 +49,12 @@ fn save_to_data_base(
 	mut db_manager: ResMut<DataBaseManager>
 ){
 	for save_request in event_listener.read(){
+		let layout_ron_string = ron::ser::to_string_pretty(
+			&save_request.0, ron::ser::PrettyConfig::default()).unwrap();
 		text_saver::write_to_file(
 			FolderToAccess::SavedLayouts,
 			format!("layout_{:?}", db_manager.saved_layouts.len()),
-			String::from(json!(save_request.0.clone()))
+			layout_ron_string
 		).unwrap();
 
 		db_manager.as_mut().insert_layout(&save_request.0);

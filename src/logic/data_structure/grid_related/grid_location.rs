@@ -1,8 +1,8 @@
 use crate::{prelude::*, output::error_handler};
 use std::fmt;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 
-#[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug, Ord, PartialOrd)]
+#[derive(Component, Default, Eq, PartialEq, Hash, Clone, Copy, Debug, Ord, PartialOrd, Deserialize, Serialize)]
 pub struct GridLocation {
     pub row: i32,
     pub col: i32,
@@ -49,13 +49,6 @@ impl GridLocation {
             -1.0 * (self.row as f32) * ATLAS_CELL_SQUARE_SIZE,
             0.0,
         )
-    }
-
-    fn to_json(&self) -> serde_json::Value {
-        json!({
-			"row": self.row,
-			"col": self.col,
-		})
     }
 }
 

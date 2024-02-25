@@ -1619,7 +1619,8 @@ dependencies = [
  "bevy",
  "enum-iterator",
  "rand",
- "serde_json",
+ "ron",
+ "serde",
 ]
 
 [[package]]

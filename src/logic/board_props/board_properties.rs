@@ -1,4 +1,6 @@
-use serde_json::json;
+use std::fmt;
+use std::fmt::Formatter;
+use serde::{Deserialize, Serialize};
 use crate::{costume_event::screen_changing_event, prelude::*};
 
 pub const DEFAULT_EMPTY_COUNT: u8 = 1;
@@ -9,7 +11,7 @@ pub struct AppliedBoardProperties;
 #[derive(Component)]
 pub struct PlannedBoardProperties;
 
-#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 pub struct BoardProperties {
     pub size: BoardSize,
     pub wall_count: u8,
@@ -84,14 +86,19 @@ impl Default for BoardProperties {
     }
 }
 
-impl BoardProperties {
-    fn to_json(&self) -> serde_json::Value {
-        json!({
-            "size": self.size,
-            "wall_count": self.wall_count,
-            "empty_count": self.empty_count,
-            "generation_method": self.generation_method,
-            "tree_traveller_type": self.tree_traveller_type,
-		})
+impl fmt::Display for BoardProperties{
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
+        fmt.write_str("BoardProperties(size: ")?;
+        fmt.write_str(&self.size.to_string())?;
+        fmt.write_str(", wall_count: ")?;
+        fmt.write_str(&self.wall_count.to_string())?;
+        fmt.write_str(", empty_count: ")?;
+        fmt.write_str(&self.empty_count.to_string())?;
+        fmt.write_str(", generation_method: ")?;
+        fmt.write_str(&self.generation_method.to_string())?;
+        fmt.write_str(", tree_traveller_type: ")?;
+        fmt.write_str(&self.tree_traveller_type.to_string())?;
+        fmt.write_str(")")?;
+        Ok(())
     }
 }

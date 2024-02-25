@@ -1,7 +1,8 @@
 use enum_iterator::{all, Sequence};
 use std::fmt;
+use serde::{Deserialize, Serialize};
 
-#[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub enum BoardGenerationMethod {
     #[default]
     Auto,
@@ -12,14 +13,6 @@ pub enum BoardGenerationMethod {
 impl BoardGenerationMethod {
     pub fn as_list() -> Vec<BoardGenerationMethod> {
         all::<BoardGenerationMethod>().collect::<Vec<BoardGenerationMethod>>()
-    }
-
-    fn to_json(&self) -> serde_json::Value {
-        match self {
-            BoardGenerationMethod::Auto => "Auto".into(),
-            BoardGenerationMethod::Manual => "Manual".into(),
-            BoardGenerationMethod::Load => "Load".into(),
-        }
     }
 }
 

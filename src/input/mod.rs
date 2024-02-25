@@ -4,7 +4,7 @@ pub mod button_input;
 pub mod keyboard_input_handler;
 pub mod mouse_input_handler;
 pub mod move_request;
-pub mod json_loader;
+pub mod ron_loader;
 
 pub struct InputPlugin;
 

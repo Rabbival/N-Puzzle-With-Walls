@@ -1,7 +1,8 @@
 use enum_iterator::{all, Sequence};
 use std::fmt;
+use serde::{Deserialize, Serialize};
 
-#[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub enum BoardSize {
     Tiny,
     #[default]
@@ -43,16 +44,6 @@ impl BoardSize {
             BoardSize::Medium => 5,
             BoardSize::Large => 8,
             BoardSize::Giant => 20,
-        }
-    }
-
-    pub fn to_json(&self) -> serde_json::Value {
-        match self {
-            BoardSize::Tiny => "Tiny".into(),
-            BoardSize::Small => "Small".into(),
-            BoardSize::Medium => "Medium".into(),
-            BoardSize::Large => "Large".into(),
-            BoardSize::Giant => "Giant".into(),
         }
     }
 }

@@ -1,7 +1,8 @@
 use enum_iterator::{all, Sequence};
 use std::fmt;
+use serde::{Deserialize, Serialize};
 
-#[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub enum GridTravellerType {
     #[default]
     BFS,
@@ -11,13 +12,6 @@ pub enum GridTravellerType {
 impl GridTravellerType {
     pub fn as_list() -> Vec<GridTravellerType> {
         all::<GridTravellerType>().collect::<Vec<GridTravellerType>>()
-    }
-
-    fn to_json(&self) -> serde_json::Value {
-        match self {
-            GridTravellerType::BFS => "BFS".into(),
-            GridTravellerType::DFS => "DFS".into(),
-        }
     }
 }
 
