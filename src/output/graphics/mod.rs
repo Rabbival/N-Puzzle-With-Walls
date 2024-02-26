@@ -5,6 +5,7 @@ pub mod menu_spawner;
 pub mod tile_graphics;
 pub mod ui_graphics;
 pub mod messages_graphics;
+pub mod camera;
 
 pub struct GraphicsPlugin;
 

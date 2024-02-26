@@ -94,7 +94,7 @@ pub fn print_tile_move_error(move_error: TileMoveError) {
     }
 }
 
-pub fn print_entity_related_error(entity_error: EntityRelatedCustomError) {
+pub fn print_entity_related_error(entity_error: EntityRelatedCostumeError) {
     error!("{:?}", entity_error);
 }
 

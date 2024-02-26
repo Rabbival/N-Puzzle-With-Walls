@@ -62,7 +62,7 @@ fn move_existing_tiles_inner(
     tile_dictionary: &HashMap<Tile, Option<Entity>>,
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
     commands: &mut Commands,
-) -> Result<(), EntityRelatedCustomError> {
+) -> Result<(), EntityRelatedCostumeError> {
     for (grid_location, tile_from_cell) in grid.iter() {
         let spawn_location = grid_location.to_world();
         match tile_dictionary.get(tile_from_cell) {
@@ -74,14 +74,14 @@ fn move_existing_tiles_inner(
             }
             Some(optional_entity) => match optional_entity {
                 None => {
-                    return Err(EntityRelatedCustomError::NoEntity);
+                    return Err(EntityRelatedCostumeError::NoEntity);
                 }
                 Some(entity) => {
                     if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
                         tile_transform.translation = spawn_location;
                         commands.entity(*entity).insert(StayForNextBoardTag);
                     } else {
-                        return Err(EntityRelatedCustomError::EntityNotInQuery);
+                        return Err(EntityRelatedCostumeError::EntityNotInQuery);
                     }
                 }
             },
@@ -229,7 +229,7 @@ fn update_tile_entity_positions_inner(
         tile_transform.translation = new_location_for_tile.to_world();
     } else {
         return Err(TileMoveError::EntityRelated(
-            EntityRelatedCustomError::EntityNotInQuery,
+            EntityRelatedCostumeError::EntityNotInQuery,
         ));
     }
     Ok(())
@@ -241,11 +241,11 @@ fn extract_tile_entity(
 ) -> Result<Entity, TileMoveError> {
     match tile_dictionary.get(tile) {
         None => Err(TileMoveError::EntityRelated(
-            EntityRelatedCustomError::DataStructError(DataStructError::ItemNotFound(*tile)),
+            EntityRelatedCostumeError::DataStructError(DataStructError::ItemNotFound(*tile)),
         )),
         Some(optional_entity) => match optional_entity {
             None => Err(TileMoveError::EntityRelated(
-                EntityRelatedCustomError::NoEntity,
+                EntityRelatedCostumeError::NoEntity,
             )),
             Some(entity) => Ok(*entity),
         },

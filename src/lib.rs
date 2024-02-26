@@ -8,6 +8,7 @@ mod output;
 mod screen_setup;
 mod system_sets;
 mod data_base;
+mod system;
 
 pub mod prelude {
     pub use bevy::reflect::TypeUuid;
@@ -16,32 +17,32 @@ pub mod prelude {
     pub use crate::app::*;
     pub use crate::bundles::tile_bundle::*;
     pub use crate::costume_event::{
-        app_event::*, board_set_event::*, move_tile_event::*, screen_changing_event::*,
-        ui_event::*, ui_spawn_event::*, game_event::*, db_event::*, EventPlugins,
+        app_event::*, board_set_event::*, db_event::*, EventPlugins,
+        game_event::*, move_tile_event::*, screen_changing_event::*, ui_event::*, ui_spawn_event::*,
     };
     pub use crate::data_base::{
+        data_base_manager::*,
         DataBasePlugins,
         domain_board::*,
-        data_base_manager::*,
         domain_board_index::*,
     };
     pub use crate::input::{
-        button_input::*, keyboard_input_handler::*, mouse_input_handler::*, move_request::*,
-        ron_loader::*,
-        InputPlugin,
+        button_input::*, InputPlugin, keyboard_input_handler::*, mouse_input_handler::*,
+        move_request::*,
     };
     pub use crate::logic::{
         board_building::{
-            board_builder::*, board_entities_spawner::*, brute_force_builder::*,
-            permutation_builder::*, solved_board_builder::*, BoardBuildingPlugins,
+            board_builder::*, board_entities_spawner::*, BoardBuildingPlugins,
+            brute_force_builder::*, permutation_builder::*, solved_board_builder::*,
         },
         board_manager::*,
-        board_props::{board_properties::*, update_board_properties::*, BoardPropsPlugins},
+        board_props::{board_properties::*, BoardPropsPlugins, update_board_properties::*},
+        BoardPlugins,
         data_structure::{
-            grid_related::{grid::*, grid_location::*, grid_traveller::*, grid_tree::*, grid_cycle_checker::*},
+            grid_related::{grid::*, grid_cycle_checker::*, grid_location::*, grid_traveller::*, grid_tree::*},
             indexed_value::*,
-            util_functions::*,
             linked_list::*,
+            util_functions::*,
         },
         enums::{
             basic_direction::*,
@@ -50,26 +51,43 @@ pub mod prelude {
                 wall_tiles_change::*,
             },
             eternal_button_action::*,
+            folder_to_access::*,
             game_button_action::*,
             tile_type::*,
-            folder_to_access::*,
         },
         states::{app_state::*, game_state::*, StatePlugin},
         tile::*,
-        tile_dictionary::*,
         tile_board::*,
-        ui_logic::{eternal_ui_logic::*, menu_ui_logic::*, victory_ui_logic::*, UiLogicPlugin},
-        BoardPlugins,
+        tile_dictionary::*,
+        ui_logic::{eternal_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*},
     };
     pub use crate::output::{
-        asset_loader::*,
-        camera::*,
-        error_handler::*,
-        graphics::{
-            eternal_buttons_spawner::*, menu_spawner::*, tile_graphics::*, ui_graphics::*, messages_graphics::*,
-            GraphicsPlugin, OnOwnScreenVisibility,
+        console::{
+            costume_error::{
+                error_handler::*,
+                board_generation_error::*,
+                menu_error::*,
+                tile_move_error::*,
+                entity_related_costume_error::*,
+                costume_ron_error::*,
+                data_struct_error::{
+                    DataStructError,
+                    grid_tree_error::*,
+                    tile_board_error::*,
+                    grid_error::*,
+                },
+            },
+            print_to_console::*,
         },
-        print_to_console::*,
+        graphics::{
+            camera::*, eternal_buttons_spawner::*, GraphicsPlugin, menu_spawner::*, messages_graphics::*,
+            OnOwnScreenVisibility, tile_graphics::*, ui_graphics::*,
+        },
+    };
+    pub use crate::output::console::costume_error::data_struct_error::grid_tree_error::*;
+    pub use crate::system::{
+        asset_loader::*,
+        ron_loader::*,
         text_saver::*,
     };
     pub use crate::screen_setup::*;
