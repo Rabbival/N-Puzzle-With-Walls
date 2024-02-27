@@ -1,5 +1,3 @@
-use crate::logic::data_structure::util_functions;
-use crate::output::error_handler;
 use crate::prelude::*;
 use crate::prelude::GridTreeError::ParentNotFound;
 
@@ -25,7 +23,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
 
 impl<'a, T: Clone> GridCycleChecker<'a, T>{
     pub fn all_nodes_in_cycles(&mut self, grid: &Grid<T>)
-        -> Result<bool, error_handler::DataStructError<GridLocation>>
+        -> Result<bool, DataStructError<GridLocation>>
     {
         loop {
             let optional_location_and_newly_added_neighbors = self.grid_traveller.next();
@@ -52,7 +50,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
     fn add_visited_location_and_newly_added_neighbors(
         &mut self,
         location_and_unadded_neighbors: &LocationAndUnaddedNeighbors
-    ) -> Result<(), error_handler::DataStructError<GridLocation>>
+    ) -> Result<(), DataStructError<GridLocation>>
     {
         let just_visited_location = location_and_unadded_neighbors.just_visited_location;
         let just_added_neighbors = location_and_unadded_neighbors.just_added_neighbors.clone();
@@ -75,7 +73,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
         &mut self,
         location_and_unadded_neighbors: &LocationAndUnaddedNeighbors,
         grid: &Grid<T>
-    ) -> Result<(), error_handler::DataStructError<GridLocation>>
+    ) -> Result<(), DataStructError<GridLocation>>
     {
         let just_visited_location = location_and_unadded_neighbors.just_visited_location;
 
@@ -85,7 +83,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
         let optional_just_visited_location_parent =
             self.grid_tree.get_grid_tree_node(&just_visited_location).unwrap().parent_location;
         if let Some(parent_location) = optional_just_visited_location_parent {
-            util_functions::remove_by_value(
+            remove_by_value(
                 &parent_location,
                 &mut already_added_neighbors
             );
@@ -118,19 +116,19 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
         &self,
         location_and_unadded_neighbors: &LocationAndUnaddedNeighbors,
         grid: &Grid<T>
-    ) -> Result<Vec<GridLocation>,error_handler::DataStructError<GridLocation>> {
+    ) -> Result<Vec<GridLocation>,DataStructError<GridLocation>> {
         let neighbors_and_directions_of_last_visited_location =
             grid.get_all_occupied_neighbor_locations(&location_and_unadded_neighbors.just_visited_location);
         let neighbors_of_just_visited_location : Vec<GridLocation> =
             neighbors_and_directions_of_last_visited_location.values().copied().collect();
         let mut unadded_neighbors_of_last_visited_location = neighbors_of_just_visited_location;
         for just_added_neighbor in location_and_unadded_neighbors.just_added_neighbors.clone(){
-            let optional_just_added_location = util_functions::remove_by_value(
+            let optional_just_added_location = remove_by_value(
                 &just_added_neighbor,
                 &mut unadded_neighbors_of_last_visited_location
             );
             if optional_just_added_location.is_none(){
-                return Err(error_handler::DataStructError::ItemNotFound(just_added_neighbor))
+                return Err(DataStructError::ItemNotFound(just_added_neighbor))
             }
         }
         Ok(unadded_neighbors_of_last_visited_location)
@@ -140,7 +138,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
         &mut self,
         already_added_neighbor: GridLocation,
         just_visited_location: GridLocation
-    ) -> Result<(), error_handler::DataStructError<GridLocation>>
+    ) -> Result<(), DataStructError<GridLocation>>
     {
         self.mark_location_as_part_of_cycle_if_it_wasnt_marked_so(&just_visited_location)?;
         let optional_already_added_neighbor_parent =
@@ -162,7 +160,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
                     self.grid_tree.get_grid_tree_node(&track_back_parent).unwrap().parent_location;
             }
             if optional_parent_of_last_tracked.is_none() {
-                return Err(error_handler::DataStructError::GridTreeError(ParentNotFound));
+                return Err(DataStructError::GridTreeError(ParentNotFound));
             }
 
             self.mark_location_as_part_of_cycle_if_it_wasnt_marked_so(&parent_of_already_added_neighbor)?;
@@ -173,7 +171,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
     fn mark_location_as_part_of_cycle_if_it_wasnt_marked_so(
         &mut self,
         location_to_mark: &GridLocation
-    ) -> Result<(), error_handler::DataStructError<GridLocation>>
+    ) -> Result<(), DataStructError<GridLocation>>
     {
         let cycle_markers = &mut self.cycle_markers;
         let locations_not_in_cycle_counter = &mut self.locations_not_in_cycle_counter;
@@ -192,7 +190,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
                 Ok(())
             },
             None => {
-                Err(error_handler::DataStructError::ItemNotFound(*location_to_mark))
+                Err(DataStructError::ItemNotFound(*location_to_mark))
             }
         }
     }

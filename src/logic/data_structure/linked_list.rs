@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Formatter};
-use crate::output::error_handler;
+use crate::prelude::*;
 
 /// a data structure for which if a node is removed all next ones follow
 #[derive(Default)]
@@ -20,13 +20,13 @@ impl<T: Ord + Copy> LinkedList<T>{
 	}
 
 	pub fn remove_by_value(&mut self, ref_to_value_to_remove: &T)
-	-> Result<(), error_handler::DataStructError<T>>
+	-> Result<(), DataStructError<T>>
 	{
 		let optional_val_to_remove_index =
 			self.item_to_index(ref_to_value_to_remove);
 		match optional_val_to_remove_index{
 			None => {
-				Err(error_handler::DataStructError::ItemNotFound(*ref_to_value_to_remove))
+				Err(DataStructError::ItemNotFound(*ref_to_value_to_remove))
 			},
 			Some(index_to_remove) => {
 				self.next_index = index_to_remove;

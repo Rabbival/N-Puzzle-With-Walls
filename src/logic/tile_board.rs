@@ -1,4 +1,4 @@
-use crate::{input::move_request, output::error_handler, prelude::*};
+use crate::prelude::*;
 
 #[derive(Component, Clone, Debug)]
 pub struct TileBoard {
@@ -26,7 +26,7 @@ impl TileBoard {
     pub fn from_grid(
         grid: &Grid<Tile>,
         empty_tiles_count: u8,
-    ) -> Result<Self, error_handler::BoardGenerationError> {
+    ) -> Result<Self, BoardGenerationError> {
         let mut newborn_self = Self {
             grid: grid.clone(),
             empty_tile_locations: vec![],
@@ -49,7 +49,7 @@ impl TileBoard {
     pub fn empty_locations_to_solved_default(
         &mut self,
         empty_tiles_count: u8,
-    ) -> Result<(), error_handler::BoardGenerationError> {
+    ) -> Result<(), BoardGenerationError> {
         self.empty_tile_locations = self.available_locations_from_the_end(empty_tiles_count)?;
         Ok(())
     }
@@ -58,14 +58,14 @@ impl TileBoard {
     fn available_locations_from_the_end(
         &mut self,
         empty_tiles_count: u8,
-    ) -> Result<Vec<GridLocation>, error_handler::BoardGenerationError> {
+    ) -> Result<Vec<GridLocation>, BoardGenerationError> {
         let mut empty_tile_locations = vec![];
         let mut reversed_iter = self.iter_filtered().rev();
         for _empty_tile in 0..empty_tiles_count {
             let next_from_last_avaliable = reversed_iter.next();
             match next_from_last_avaliable {
                 Some((tile_location, _tile)) => empty_tile_locations.push(tile_location),
-                None => return Err(error_handler::BoardGenerationError::NotEnoughAvailableSpots),
+                None => return Err(BoardGenerationError::NotEnoughAvailableSpots),
             };
         }
         // we want them to appear in the same order they're indexed
@@ -100,7 +100,7 @@ impl TileBoard {
         &mut self,
         first: &GridLocation,
         second: &GridLocation,
-    ) -> Result<(), error_handler::TileMoveError> {
+    ) -> Result<(), TileMoveError> {
         let first_tile_type = wrap_to_tile_move_error
             (self.tiletype_in_location_if_none(first))?;
         let second_tile_type = wrap_to_tile_move_error
@@ -109,7 +109,7 @@ impl TileBoard {
         let empty_tile_index;
         if let TileType::Empty = first_tile_type {
             if let TileType::Empty = second_tile_type {
-                return Err(error_handler::TileMoveError::TriedToSwitchEmptyWithEmpty);
+                return Err(TileMoveError::TriedToSwitchEmptyWithEmpty);
             } else {
                 empty_tile_index = self.get(first).unwrap().unwrap().index;
                 self.empty_tile_locations[empty_tile_index] = *second;
@@ -124,16 +124,16 @@ impl TileBoard {
     }
 
     pub fn tiletype_in_location_if_none(&self, location: &GridLocation) 
-    -> Result<TileType, error_handler::TileBoardError> 
+    -> Result<TileType, TileBoardError>
     {
         match wrap_to_tile_board_error(self.get(location))?{
             Some(tile_ref) => Ok(tile_ref.tile_type),
-            None => Err(error_handler::TileBoardError::NoTileInCell(*location))
+            None => Err(TileBoardError::NoTileInCell(*location))
         }
     }
 
     pub fn tiletype_in_location(&self, location: &GridLocation) 
-    -> Result<Option<TileType>, error_handler::GridError> 
+    -> Result<Option<TileType>, GridError>
     {
         match self.get(location)?{
             Some(tile_ref) => Ok(Some(tile_ref.tile_type)),
@@ -143,7 +143,7 @@ impl TileBoard {
 
     /// if it gets an index out of empties bounds, sets the index to the last cell's
     pub fn get_empty_tile(&self, empty_tile_index: usize) 
-    -> Result<Option<&Tile>, error_handler::GridError> 
+    -> Result<Option<&Tile>, GridError>
     {
         let empty_tile_location = self.get_empty_tile_location(empty_tile_index);
         self.grid.get(empty_tile_location)
@@ -175,7 +175,7 @@ impl TileBoard {
     pub fn move_request_from_clicked_tile(
         &self,
         origin: &GridLocation,
-    ) -> Result<Option<move_request::MoveRequest>, error_handler::TileMoveError> {
+    ) -> Result<Option<MoveRequest>, TileMoveError> {
         let direct_neighbor_locations_walls_excluded = 
             self.get_direct_neighbor_locations_walls_excluded(origin);
         for (neighbor_direction, neighbor_location)
@@ -183,7 +183,7 @@ impl TileBoard {
         {
             if let Some(tile_in_cell) = self.get(&neighbor_location).unwrap() {
                 if tile_in_cell.tile_type == TileType::Empty {
-                    return Ok(Some(move_request::MoveRequest {
+                    return Ok(Some(MoveRequest {
                         move_neighbor_from_direction: neighbor_direction.opposite_direction(),
                         empty_tile_index: Some(tile_in_cell.index),
                     }));
@@ -225,31 +225,31 @@ impl TileBoard {
     }
 
     pub fn get(&self, location: &GridLocation) 
-    -> Result<Option<&Tile>, error_handler::GridError> 
+    -> Result<Option<&Tile>, GridError>
     {
         self.grid.get(location)
     }
 
     pub fn get_mut(&mut self, location: &GridLocation) 
-    -> Result<Option<&mut Tile>, error_handler::GridError> 
+    -> Result<Option<&mut Tile>, GridError>
     {
         self.grid.get_mut(location)
     }
 
     /// returns whether insertion was successful
-    pub fn set(&mut self, location: &GridLocation, content: Tile) -> Result<(), error_handler::GridError> {
+    pub fn set(&mut self, location: &GridLocation, content: Tile) -> Result<(), GridError> {
         self.grid.set(location, content)
     }
 
     /// returns an option with the previous value
     pub fn set_and_get_former(&mut self, location: &GridLocation, content: Tile)
-    -> Result<Option<Tile>,  error_handler::GridError>
+    -> Result<Option<Tile>,  GridError>
     {
         self.grid.set_and_get_former(location, content)
     }
 
     pub fn is_tile_empty(&self, location: &GridLocation) 
-    -> Result<bool, error_handler::TileBoardError> 
+    -> Result<bool, TileBoardError>
     {
         let tile_ref = self.none_check_get(location)?;
         match tile_ref.tile_type {
@@ -263,19 +263,19 @@ impl TileBoard {
     }
 
     fn none_check_get(&self, location: &GridLocation) 
-    -> Result<&Tile, error_handler::TileBoardError> 
+    -> Result<&Tile, TileBoardError>
     {
         match wrap_to_tile_board_error(self.get(location))? {
-            None => Err(error_handler::TileBoardError::NoTileInCell(*location)),
+            None => Err(TileBoardError::NoTileInCell(*location)),
             Some(tile_ref) => Ok(tile_ref),
         }
     }
 
     // fn none_check_get_mut(&mut self, location: &GridLocation) 
-    // -> Result<&Tile, error_handler::TileBoardError> 
+    // -> Result<&Tile, TileBoardError>
     // {
     //     match wrap_to_tile_board_error(self.get_mut(location))? {
-    //         None => Err(error_handler::TileBoardError::NoTileInCell(*location)),
+    //         None => Err(TileBoardError::NoTileInCell(*location)),
     //         Some(mut_tile_ref) => Ok(mut_tile_ref),
     //     }
     // }
@@ -288,21 +288,21 @@ impl Default for TileBoard {
 }
 
 
-fn wrap_to_tile_board_error<T>(result: Result<T, error_handler::GridError>) 
--> Result<T, error_handler::TileBoardError>{
+fn wrap_to_tile_board_error<T>(result: Result<T, GridError>)
+-> Result<T, TileBoardError>{
     match result {
         Err(grid_error) => {
-            Err(error_handler::TileBoardError::GridError(grid_error))
+            Err(TileBoardError::GridError(grid_error))
         },
         Ok(value) => Ok(value)
     }
 }
 
-fn wrap_to_tile_move_error<T>(result: Result<T, error_handler::TileBoardError>) 
--> Result<T, error_handler::TileMoveError>{
+fn wrap_to_tile_move_error<T>(result: Result<T, TileBoardError>)
+-> Result<T, TileMoveError>{
     match result {
         Err(board_error) => {
-            Err(error_handler::TileMoveError::TileBoardError(board_error))
+            Err(TileMoveError::TileBoardError(board_error))
         },
         Ok(value) => Ok(value)
     }

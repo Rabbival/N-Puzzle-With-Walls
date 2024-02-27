@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::error_handler};
+use crate::prelude::*;
 
 #[derive(Component, Clone, Debug)]
 pub struct Grid<T: Clone> {
@@ -8,7 +8,7 @@ pub struct Grid<T: Clone> {
 
 //grid travelling functions
 impl<T: Clone> Grid<T> {
-    pub fn all_nodes_in_cycles(&self) -> Result<bool, error_handler::DataStructError<GridLocation>>{
+    pub fn all_nodes_in_cycles(&self) -> Result<bool, DataStructError<GridLocation>>{
         let mut grid_cycle_checker = GridCycleChecker::new(self);
         grid_cycle_checker.all_nodes_in_cycles(self)
     }
@@ -138,7 +138,7 @@ impl<T: Clone> Grid<T> {
     }
 
     pub fn get(&self, location: &GridLocation) 
-    -> Result<Option<&T>, error_handler::GridError> 
+    -> Result<Option<&T>, GridError>
     {
         if self.valid_index(location) {
             let location_index = self.location_to_index(location);
@@ -147,12 +147,12 @@ impl<T: Clone> Grid<T> {
                 Some(cell_value) => Ok(cell_value.as_ref())
             }
         } else {
-            Err(error_handler::GridError::InvalidIndex(*location))
+            Err(GridError::InvalidIndex(*location))
         }
     }
 
     pub fn get_mut(&mut self, location: &GridLocation)
-    -> Result<Option<&mut T>, error_handler::GridError> 
+    -> Result<Option<&mut T>, GridError>
     {
         if self.valid_index(location) {
             let location_index = self.location_to_index(location);
@@ -161,23 +161,23 @@ impl<T: Clone> Grid<T> {
                 Some(cell_value) => Ok(cell_value.as_mut())
             }
         } else {
-            Err(error_handler::GridError::InvalidIndex(*location))
+            Err(GridError::InvalidIndex(*location))
         }
     }
 
     /// throws an error if the index is invalid
-    pub fn set(&mut self, location: &GridLocation, value: T) -> Result<(), error_handler::GridError> {
+    pub fn set(&mut self, location: &GridLocation, value: T) -> Result<(), GridError> {
         if self.valid_index(location) {
             self.grid[location.to_index(self.grid_side_length)] = Some(value);
             Ok(())
         }else{
-            Err(error_handler::GridError::InvalidIndex(*location))
+            Err(GridError::InvalidIndex(*location))
         }
     }
 
     /// returns an option with the previous value
     pub fn set_and_get_former(&mut self, location: &GridLocation, value: T) 
-    -> Result<Option<T>,  error_handler::GridError>
+    -> Result<Option<T>,  GridError>
     {
         if self.valid_index(location) {
             let former = self.grid[location.to_index(self.grid_side_length)].clone();
@@ -190,24 +190,24 @@ impl<T: Clone> Grid<T> {
 
     /// returns an option with the previous value
     pub fn set_none_get_former(&mut self, location: &GridLocation) 
-    -> Result<Option<T>, error_handler::GridError> 
+    -> Result<Option<T>, GridError>
     {
         if self.valid_index(location) {
             let former = self.grid[location.to_index(self.grid_side_length)].clone();
             self.grid[location.to_index(self.grid_side_length)] = None;
             Ok(former)
         } else {
-            Err(error_handler::GridError::InvalidIndex(*location))
+            Err(GridError::InvalidIndex(*location))
         }
     }
 
     pub fn swap_by_location(&mut self, first: &GridLocation, second: &GridLocation) 
-    -> Result<(), error_handler::GridError> 
+    -> Result<(), GridError>
     {
         if !self.valid_index(first){
-            Err(error_handler::GridError::InvalidIndex(*first)) 
+            Err(GridError::InvalidIndex(*first))
         }else if !self.valid_index(second){
-            Err(error_handler::GridError::InvalidIndex(*second)) 
+            Err(GridError::InvalidIndex(*second))
         }else{
             let first_location_index = self.location_to_index(first);
             let second_location_index = self.location_to_index(second);

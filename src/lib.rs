@@ -64,12 +64,13 @@ pub mod prelude {
     pub use crate::output::{
         console::{
             costume_error::{
+                MismatchError,
                 error_handler::*,
                 board_generation_error::*,
                 menu_error::*,
                 tile_move_error::*,
                 entity_related_costume_error::*,
-                costume_ron_error::*,
+                system_access_error::*,
                 data_struct_error::{
                     DataStructError,
                     grid_tree_error::*,
@@ -77,14 +78,19 @@ pub mod prelude {
                     grid_error::*,
                 },
             },
-            print_to_console::*,
+            costume_print::{
+                BevyPrintType,
+                print_display_deriver_vec,
+                game_log::*,
+                solution_printer::*,
+                system_log::*,
+            }
         },
         graphics::{
             camera::*, eternal_buttons_spawner::*, GraphicsPlugin, menu_spawner::*, messages_graphics::*,
             OnOwnScreenVisibility, tile_graphics::*, ui_graphics::*,
         },
     };
-    pub use crate::output::console::costume_error::data_struct_error::grid_tree_error::*;
     pub use crate::system::{
         asset_loader::*,
         ron_loader::*,

@@ -1,4 +1,4 @@
-use crate::{costume_event::ui_event, output::graphics::ui_graphics, prelude::*};
+use crate::prelude::*;
 
 pub mod eternal_ui_logic;
 pub mod menu_ui_logic;
@@ -17,7 +17,7 @@ impl Plugin for UiLogicPlugin {
 }
 
 fn toggle_button(
-    mut event_listener: EventReader<ui_event::ToggleButton>,
+    mut event_listener: EventReader<ToggleButton>,
     mut query: Query<(&mut BackgroundColor, Option<&SelectedOptionTag>), With<Button>>,
     mut commands: Commands,
 ) {
@@ -25,12 +25,12 @@ fn toggle_button(
         let entity_to_toggle = toggle_request.entity;
         if let Ok((mut button_color, optional_selected_tag)) = query.get_mut(entity_to_toggle) {
             if optional_selected_tag.is_none() {
-                ui_graphics::set_color_to_pressed(&mut button_color);
+                set_color_to_pressed(&mut button_color);
                 commands
                     .entity(toggle_request.entity)
                     .insert(SelectedOptionTag);
             } else {
-                ui_graphics::set_color_to_normal(&mut button_color);
+                set_color_to_normal(&mut button_color);
                 commands
                     .entity(entity_to_toggle)
                     .remove::<SelectedOptionTag>();

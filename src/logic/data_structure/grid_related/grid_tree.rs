@@ -1,5 +1,5 @@
 use super::grid_tree_node::*;
-use crate::{logic::data_structure::util_functions, prelude::*, output::error_handler};
+use crate::prelude::*;
 
 const MINIMAL_DEPTH: u8 = 2;
 
@@ -44,9 +44,9 @@ impl GridTree {
         &mut self,
         node: GridLocation,
         optional_parent_location: Option<GridLocation>,
-    ) -> Result<(), error_handler::GridTreeError> {
+    ) -> Result<(), GridTreeError> {
         if self.nodes.get(&node).is_some() {
-            Err(error_handler::GridTreeError::NodeAlreadyExists)
+            Err(GridTreeError::NodeAlreadyExists)
         } else {
             // if the tree is empty, the new node must have no parent
             if self.nodes.is_empty() {
@@ -55,18 +55,18 @@ impl GridTree {
                     self.leaves = vec![node];
                     Ok(())
                 } else {
-                    Err(error_handler::GridTreeError::ParentNotFound)
+                    Err(GridTreeError::ParentNotFound)
                 }
             } else if let Some(parent_location) = optional_parent_location {
                 let optional_parent_node = self.nodes.get_mut(&parent_location);
                 match optional_parent_node {
-                    None => Err(error_handler::GridTreeError::ParentNotFound),
+                    None => Err(GridTreeError::ParentNotFound),
                     Some(parent_node) => {
                         // if the parent was a leaf up to this point,
                         // remove it from the list of leaves
                         let parent_children_counter = &mut parent_node.children_counter;
                         if *parent_children_counter == 0 {
-                            util_functions::remove_by_value(&parent_location, &mut self.leaves);
+                            remove_by_value(&parent_location, &mut self.leaves);
                         }
                         *parent_children_counter += 1;
 
@@ -81,7 +81,7 @@ impl GridTree {
                     }
                 }
             } else {
-                Err(error_handler::GridTreeError::NodeNotConnectedToTree)
+                Err(GridTreeError::NodeNotConnectedToTree)
             }
         }
     }
@@ -94,11 +94,11 @@ impl GridTree {
         }
         let mut removed_leaf = match leaf_to_remove {
             Some(leaf_location) => {
-                util_functions::remove_by_value(&leaf_location, &mut self.leaves);
+                remove_by_value(&leaf_location, &mut self.leaves);
                 leaf_location
             }
             None => {
-                let index_to_remove = util_functions::random_index(&self.leaves);
+                let index_to_remove = random_index(&self.leaves);
                 self.leaves.remove(index_to_remove)
             }
         };
@@ -108,7 +108,7 @@ impl GridTree {
             if self.leaves.is_empty() {
                 return None;
             } else {
-                let index_to_remove = util_functions::random_index(&self.leaves);
+                let index_to_remove = random_index(&self.leaves);
                 removed_leaf = self.leaves.remove(index_to_remove);
                 leaf_depth = self.nodes.get(&removed_leaf).unwrap().depth;
             }
@@ -121,17 +121,17 @@ impl GridTree {
     /// to ensure their parents would become leaves too eventually
     /// returns true if the parent was found
     pub fn decrease_parent_child_count(&mut self, location: GridLocation) 
-    -> Result<(), error_handler::GridTreeError> 
+    -> Result<(), GridTreeError>
     {
         let optional_node_props = self.nodes.get(&location);
         match optional_node_props {
-            None => Err(error_handler::GridTreeError::NodeNotFound),
+            None => Err(GridTreeError::NodeNotFound),
             Some(node_props) => {
                 let optional_parent_location = node_props.parent_location;
                 if let Some(parent_location) = optional_parent_location {
                     let optional_parent_node = self.nodes.get_mut(&parent_location);
                     match optional_parent_node {
-                        None => Err(error_handler::GridTreeError::ParentNotFound),
+                        None => Err(GridTreeError::ParentNotFound),
                         Some(parent_node) => {
                             parent_node.children_counter -= 1;
                             // if the parent is a leaf

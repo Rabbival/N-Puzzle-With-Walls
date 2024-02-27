@@ -1,8 +1,4 @@
-use crate::{
-    costume_event::{board_set_event, ui_event},
-    output::print_to_console,
-    prelude::*,
-};
+use crate::prelude::*;
 
 pub struct UpdateBoardPropertiesPlugin;
 
@@ -27,8 +23,8 @@ impl Plugin for UpdateBoardPropertiesPlugin {
 
 /// for the planned board properties updates that don't require special treatment
 fn general_update_planned_board_properties(
-    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
-    mut button_event_writer_for_apply: EventWriter<ui_event::ApplyButtonPressed>,
+    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut button_event_writer_for_apply: EventWriter<ApplyButtonPressed>,
     mut planned_board_prop_query: Query<
         &mut BoardProperties,
         (
@@ -49,7 +45,7 @@ fn general_update_planned_board_properties(
 }
 
 fn general_update_planned_board_properties_inner(
-    button_event_writer_for_apply: &mut EventWriter<ui_event::ApplyButtonPressed>,
+    button_event_writer_for_apply: &mut EventWriter<ApplyButtonPressed>,
     menu_button_action: &MenuButtonAction,
     planned_board_prop: &mut BoardProperties,
     unapplied_menu_wall_count: &mut UnappliedMenuWallCount,
@@ -60,7 +56,7 @@ fn general_update_planned_board_properties_inner(
             if unapplied_menu_wall_count.0 > new_board_size.wall_count_upper_bound() {
                 unapplied_menu_wall_count.0 = new_board_size.wall_count_upper_bound();
                 //press the apply button to force apply
-                button_event_writer_for_apply.send(ui_event::ApplyButtonPressed {
+                button_event_writer_for_apply.send(ApplyButtonPressed {
                     action: MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),
                 })
             }
@@ -79,7 +75,7 @@ fn general_update_planned_board_properties_inner(
 }
 
 fn update_wall_count_unapplied(
-    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
+    mut button_event_listener: EventReader<MenuButtonPressed>,
     planned_board_prop_query: Query<
         &BoardProperties,
         (
@@ -111,14 +107,14 @@ fn update_wall_count_unapplied_inner(
                 if unapplied_menu_wall_count.0 < planned_board_prop.size.wall_count_upper_bound() {
                     unapplied_menu_wall_count.0 += 1;
                 } else {
-                    print_to_console::print_menu_error(MenuError::CantGoBeyondTileCountBounds(
+                    print_menu_error(MenuError::CantGoBeyondTileCountBounds(
                         *wall_count_action,
                     ));
                 }
             } else if unapplied_menu_wall_count.0 > 0 {
                 unapplied_menu_wall_count.0 -= 1;
             } else {
-                print_to_console::print_menu_error(MenuError::CantGoBeyondTileCountBounds(
+                print_menu_error(MenuError::CantGoBeyondTileCountBounds(
                     *wall_count_action,
                 ));
             }
@@ -128,7 +124,7 @@ fn update_wall_count_unapplied_inner(
 }
 
 fn apply_wall_count_to_planned_props(
-    mut apply_button_event_listener: EventReader<ui_event::ApplyButtonPressed>,
+    mut apply_button_event_listener: EventReader<ApplyButtonPressed>,
     mut planned_board_prop_query: Query<
         &mut BoardProperties,
         (
@@ -144,14 +140,14 @@ fn apply_wall_count_to_planned_props(
         {
             let mut planned_board_prop = planned_board_prop_query.single_mut();
             planned_board_prop.wall_count = unapplied_menu_wall_count.0;
-            print_to_console::game_log(GameLog::WallCountSet(planned_board_prop.wall_count));
+            game_log(GameLog::WallCountSet(planned_board_prop.wall_count));
         }
     }
 }
 
 pub fn set_applied_props_and_begin_generation(
-    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
-    mut spawn_board_event_writer: EventWriter<board_set_event::BuildNewBoard>,
+    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut spawn_board_event_writer: EventWriter<BuildNewBoard>,
     mut applied_board_prop_query: Query<
         &mut BoardProperties,
         (
@@ -173,7 +169,7 @@ pub fn set_applied_props_and_begin_generation(
             let mut applied_props = applied_board_prop_query.single_mut();
             *applied_props = *planned_board_prop;
 
-            spawn_board_event_writer.send(board_set_event::BuildNewBoard {
+            spawn_board_event_writer.send(BuildNewBoard {
                 reroll_solved: true,
             });
         }
@@ -293,7 +289,7 @@ mod tests {
     #[test]
     fn check_wall_count_becoming_smaller_size_max_when_above_it() {
         let mut app = App::new();
-        app.add_event::<ui_event::ApplyButtonPressed>().add_systems(
+        app.add_event::<ApplyButtonPressed>().add_systems(
             Update,
             check_wall_count_becoming_smaller_size_max_when_above_it_inner,
         );
@@ -301,7 +297,7 @@ mod tests {
     }
 
     fn check_wall_count_becoming_smaller_size_max_when_above_it_inner(
-        mut button_event_writer_for_apply: EventWriter<ui_event::ApplyButtonPressed>,
+        mut button_event_writer_for_apply: EventWriter<ApplyButtonPressed>,
     ) {
         assert!(goes_down_to_new_max_if_larger(
             BoardSize::Small,
@@ -313,7 +309,7 @@ mod tests {
     fn goes_down_to_new_max_if_larger(
         smaller_board_size: BoardSize,
         bigger_board_size: BoardSize,
-        button_event_writer_for_apply: &mut EventWriter<ui_event::ApplyButtonPressed>,
+        button_event_writer_for_apply: &mut EventWriter<ApplyButtonPressed>,
     ) -> bool {
         let mut planned_board_prop = BoardProperties::default();
         planned_board_prop.size = bigger_board_size;

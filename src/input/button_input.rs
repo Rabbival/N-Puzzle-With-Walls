@@ -1,8 +1,4 @@
-use crate::{
-    costume_event::{app_event, ui_event},
-    output::print_to_console,
-    prelude::*,
-};
+use crate::prelude::*;
 
 pub struct ButtonInputPlugin;
 
@@ -21,8 +17,8 @@ impl Plugin for ButtonInputPlugin {
 }
 
 fn handle_eternal_buttons(
-    mut end_game_event_writer: EventWriter<app_event::EndGame>,
-    mut menu_toggle_event_writer: EventWriter<app_event::ToggleMenu>,
+    mut end_game_event_writer: EventWriter<EndGame>,
+    mut menu_toggle_event_writer: EventWriter<ToggleMenu>,
     interaction_query: Query<
         (&Interaction, &EternalButtonAction),
         (Changed<Interaction>, With<EternalButton>),
@@ -31,9 +27,9 @@ fn handle_eternal_buttons(
     for (interaction, eternal_button_action) in interaction_query.iter() {
         if *interaction == Interaction::Pressed {
             match eternal_button_action {
-                EternalButtonAction::EndGame => end_game_event_writer.send(app_event::EndGame),
+                EternalButtonAction::EndGame => end_game_event_writer.send(EndGame),
                 EternalButtonAction::ToggleMenu => {
-                    menu_toggle_event_writer.send(app_event::ToggleMenu);
+                    menu_toggle_event_writer.send(ToggleMenu);
                 }
             }
         }
@@ -41,9 +37,9 @@ fn handle_eternal_buttons(
 }
 
 fn handle_menu_buttons(
-    mut button_event_writer: EventWriter<ui_event::MenuButtonPressed>,
-    mut apply_button_event_writer: EventWriter<ui_event::ApplyButtonPressed>,
-    mut reset_button_text_color_event_writer: EventWriter<ui_event::ResetButtonTextColor>,
+    mut button_event_writer: EventWriter<MenuButtonPressed>,
+    mut apply_button_event_writer: EventWriter<ApplyButtonPressed>,
+    mut reset_button_text_color_event_writer: EventWriter<ResetButtonTextColor>,
     interaction_query: Query<
         (
             &Interaction,
@@ -59,23 +55,23 @@ fn handle_menu_buttons(
     {
         if *interaction == Interaction::Pressed {
             if optional_apply_button_tag.is_some() {
-                apply_button_event_writer.send(ui_event::ApplyButtonPressed {
+                apply_button_event_writer.send(ApplyButtonPressed {
                     action: *menu_button_action,
                 });
             } else {
-                button_event_writer.send(ui_event::MenuButtonPressed {
+                button_event_writer.send(MenuButtonPressed {
                     entity,
                     action: *menu_button_action,
                 });
             }
 
             // if any button was pressed, turn back all the ui text that was turned red
-            reset_button_text_color_event_writer.send(ui_event::ResetButtonTextColor);
+            reset_button_text_color_event_writer.send(ResetButtonTextColor);
 
             match menu_button_action {
                 MenuButtonAction::GenerateBoard | MenuButtonAction::ChangeWallTilesCount(_) => {}
                 _ => {
-                    print_to_console::game_log(GameLog::BoardSettingsChanged(menu_button_action));
+                    game_log(GameLog::BoardSettingsChanged(menu_button_action));
                 }
             }
         }
@@ -83,8 +79,8 @@ fn handle_menu_buttons(
 }
 
 fn handle_victory_buttons(
-    mut button_event_writer: EventWriter<ui_event::VictoryButtonPressed>,
-    mut reset_button_text_color_event_writer: EventWriter<ui_event::ResetButtonTextColor>,
+    mut button_event_writer: EventWriter<VictoryButtonPressed>,
+    mut reset_button_text_color_event_writer: EventWriter<ResetButtonTextColor>,
     interaction_query: Query<
         (
             &Interaction,
@@ -97,12 +93,12 @@ fn handle_victory_buttons(
         interaction_query.iter()
     {
         if *interaction == Interaction::Pressed {
-            button_event_writer.send(ui_event::VictoryButtonPressed {
+            button_event_writer.send(VictoryButtonPressed {
                 action: *game_button_action
             });
 
             // if any button was pressed, turn back all the ui text that was turned red
-            reset_button_text_color_event_writer.send(ui_event::ResetButtonTextColor);
+            reset_button_text_color_event_writer.send(ResetButtonTextColor);
         }
     }
 }

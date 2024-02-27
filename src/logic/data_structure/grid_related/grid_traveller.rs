@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{logic::data_structure::util_functions, prelude::*};
+use crate::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct GridTraveller<'a, T: Clone> {
@@ -23,7 +23,7 @@ impl<'a, T: Clone> GridTraveller<'a, T> {
             .map(|(location, _)| (location, AddedToVisitPlan(false)))
             .collect();
         let first_location =
-            *util_functions::random_value(&cells_locations_with_added_mark.keys().collect());
+            *random_value(&cells_locations_with_added_mark.keys().collect());
         let first_added_mark = cells_locations_with_added_mark
             .get_mut(&first_location)
             .unwrap();

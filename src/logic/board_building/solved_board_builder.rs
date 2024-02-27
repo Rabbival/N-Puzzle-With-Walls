@@ -1,5 +1,4 @@
-use crate::{logic::data_structure::util_functions, output::error_handler, prelude::*, costume_event::ui_event};
-use crate::costume_event::db_event;
+use crate::prelude::*;
 
 /// mustn't be more than 2 as there will always be a corner
 /// shouldn't be less than 1 or we might get useless spaces
@@ -25,11 +24,11 @@ impl Plugin for SolvedBoardPlugin{
 }
 
 fn generate_solved_board(
-    mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
+    mut generation_error_event_writer: EventWriter<ShowGenerationError>,
     mut solved_board_query: Query<&mut TileBoard, With<SolvedBoard>>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<GameState>>,
-    mut write_to_db_event_writer: EventWriter<db_event::SaveToDB>
+    mut write_to_db_event_writer: EventWriter<SaveToDB>
 ){
     match generate_solved_board_inner(
         applied_board_props_query.single(),
@@ -40,7 +39,7 @@ fn generate_solved_board(
             game_state.set(GameState::SolvedBoardGenerated);
         },
         Err(error) => {
-            generation_error_event_writer.send(ui_event::ShowGenerationError(error));
+            generation_error_event_writer.send(ShowGenerationError(error));
             game_state.set(GameState::Regular);
         }
     }
@@ -48,7 +47,7 @@ fn generate_solved_board(
 
 pub fn generate_solved_board_inner(
     applied_props: &BoardProperties,
-    write_to_db_event_writer: &mut EventWriter<db_event::SaveToDB>
+    write_to_db_event_writer: &mut EventWriter<SaveToDB>
 ) -> Result<TileBoard, BoardGenerationError> {
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut solved_board = TileBoard::new(grid_side_length);
@@ -75,7 +74,7 @@ pub fn generate_solved_board_inner(
             (&spawn_walls_in_locations(&wall_locations, &mut solved_board))?;
     }
 
-    write_to_db_event_writer.send(db_event::SaveToDB(DomainBoard{
+    write_to_db_event_writer.send(SaveToDB(DomainBoard{
         board_props: *applied_props,
         wall_locations
     }));
@@ -113,7 +112,7 @@ pub fn generate_solved_board_inner(
 
 fn determine_wall_locations(
     applied_props: &BoardProperties,
-) -> Result<Vec<GridLocation>, error_handler::BoardGenerationError> {
+) -> Result<Vec<GridLocation>, BoardGenerationError> {
     let wall_count = applied_props.wall_count;
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut wall_spawn_locations = vec![];
@@ -131,7 +130,7 @@ fn determine_wall_locations(
             grid_tree = valid_grid_tree;
             grid_tree_iter = grid_tree.clone();
         },
-        Err(tree_error) => return Err(error_handler::BoardGenerationError::GridTreeError(tree_error))
+        Err(tree_error) => return Err(BoardGenerationError::GridTreeError(tree_error))
     }
 
     for _ in 0..wall_count {
@@ -188,7 +187,7 @@ fn determine_wall_location(
         }
         Ok(())
     }else{
-        Err(error_handler::BoardGenerationError::CouldntPlaceAllWalls)
+        Err(BoardGenerationError::CouldntPlaceAllWalls)
     }
 }
 
@@ -204,7 +203,7 @@ fn roll_and_validate_wall_location(
     (*chosen_wall_location, is_leaf) = match grid_tree_iter.next() {
         Some(tree_leaf) => (tree_leaf, true),
         None => (
-            util_functions::random_value(possible_spawn_locations),
+            random_value(possible_spawn_locations),
             false,
         )
     };
@@ -271,7 +270,7 @@ fn remove_wall_location_from_possible_locations(
         // if the leaf is valid, we want to remove it from its parent's count
         // to allow the parent to eventually (hopefully) become an available leaf
         if let Err(grid_tree_error) = grid_tree.decrease_parent_child_count(*chosen_wall_location){
-            Err(error_handler::BoardGenerationError::GridTreeError(grid_tree_error))
+            Err(BoardGenerationError::GridTreeError(grid_tree_error))
         }else{
             Ok(LocationFoundInPossibleLocations(true))
         }
@@ -286,7 +285,7 @@ fn ensure_all_walls_in_cycle(
 {
     match neighbor_count_grid.all_nodes_in_cycles() {
         Err(data_struct_error) => {
-            Err(error_handler::BoardGenerationError::CircleCheckError(data_struct_error))
+            Err(BoardGenerationError::CircleCheckError(data_struct_error))
         },
         Ok(all_in_cycles) => {
             if all_in_cycles{
@@ -334,7 +333,7 @@ fn put_cell_back_in_place(
     chosen_tile_value_result_ref: &Result<Option<u8>, GridError>,
     neighbor_count_grid_ref_mut: &mut Grid<u8>
 ) 
--> Result<(), error_handler::BoardGenerationError>
+-> Result<(), BoardGenerationError>
 {
     let chosen_tile_value= 
         wrap_if_error(chosen_tile_value_result_ref)?;
@@ -346,7 +345,7 @@ fn put_cell_back_in_place(
 fn initialize_neighbor_count_grid(
     allowed_wall_spawn_locations: &mut Vec<GridLocation>,
     grid_side_length: u8,
-) -> Result<Grid<u8>, error_handler::GridError> {
+) -> Result<Grid<u8>, GridError> {
     let mut neighbor_count_grid = Grid::new(grid_side_length);
     for inner_cell in neighbor_count_grid.all_locations_no_edges() {
         neighbor_count_grid.set(&inner_cell, 4)?;
@@ -376,7 +375,7 @@ fn forbid_spawn_in_neighbors_of_location(
     neighbor_count_grid: &Grid<u8>,
 ) {
     for neighbor_to_forbid in neighbor_count_grid.get_all_occupied_neighbor_locations(location) {
-        util_functions::remove_by_value::<GridLocation>(
+        remove_by_value::<GridLocation>(
             &neighbor_to_forbid.1,
             possible_spawn_locations,
         );
@@ -384,7 +383,7 @@ fn forbid_spawn_in_neighbors_of_location(
 }
 
 fn spawn_walls_in_locations(locations: &Vec<GridLocation>, board: &mut TileBoard)
--> Result<(), error_handler::GridError>
+-> Result<(), GridError>
 {
     for location in locations {
         board.set(location, Tile::new(TileType::Wall))?;
@@ -392,21 +391,21 @@ fn spawn_walls_in_locations(locations: &Vec<GridLocation>, board: &mut TileBoard
     Ok(())
 }
 
-fn wrap_if_error<T: Copy>(result: &Result<T, error_handler::GridError>) 
--> Result<T, error_handler::BoardGenerationError>{
+fn wrap_if_error<T: Copy>(result: &Result<T, GridError>)
+-> Result<T, BoardGenerationError>{
     match result {
         Err(grid_error) => {
-            Err(error_handler::BoardGenerationError::GridError(*grid_error))
+            Err(BoardGenerationError::GridError(*grid_error))
         },
         Ok(value) => Ok(*value)
     }
 }
 
 fn wrap_if_error_owned<T>(result: Result<T, GridError>)
-    -> Result<T, error_handler::BoardGenerationError>{
+    -> Result<T, BoardGenerationError>{
     match result {
         Err(grid_error) => {
-            Err(error_handler::BoardGenerationError::GridError(grid_error))
+            Err(BoardGenerationError::GridError(grid_error))
         },
         Ok(value) => Ok(value)
     }
@@ -420,13 +419,13 @@ mod tests {
     #[test]
     fn test_connectivity_bfs_tree() {
         let mut app = App::new();
-        app.add_event::<db_event::SaveToDB>()
+        app.add_event::<SaveToDB>()
             .add_systems(Update, test_connectivity_bfs_tree_inner);
         app.update();
     }
 
     fn test_connectivity_bfs_tree_inner(
-        mut event_writer: EventWriter<db_event::SaveToDB>,
+        mut event_writer: EventWriter<SaveToDB>,
     ) {
         const ATTEMPT_COUNT: usize = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
@@ -449,13 +448,13 @@ mod tests {
     #[test]
     fn test_connectivity_dfs_tree() {
         let mut app = App::new();
-        app.add_event::<db_event::SaveToDB>()
+        app.add_event::<SaveToDB>()
             .add_systems(Update, test_connectivity_dfs_tree_inner);
         app.update();
     }
 
     fn test_connectivity_dfs_tree_inner(
-        mut event_writer: EventWriter<db_event::SaveToDB>,
+        mut event_writer: EventWriter<SaveToDB>,
     ) {
         const ATTEMPT_COUNT: usize = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;

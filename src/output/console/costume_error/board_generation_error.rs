@@ -12,3 +12,7 @@ pub enum BoardGenerationError {
     GridTreeError(GridTreeError),
     GridError(GridError)
 }
+
+pub fn print_board_generation_error(error: BoardGenerationError) {
+    error!("board generation failed! error: {:?}", error);
+}

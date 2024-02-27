@@ -1,9 +1,6 @@
 use bevy::app::AppExit;
 
-use crate::{
-    costume_event::app_event,
-    prelude::*,
-};
+use crate::prelude::*;
 
 pub struct EternalUiLogicPlugin;
 
@@ -18,7 +15,7 @@ impl Plugin for EternalUiLogicPlugin {
 }
 
 fn toggle_menu(
-    mut event_listener: EventReader<app_event::ToggleMenu>,
+    mut event_listener: EventReader<ToggleMenu>,
     game_state: Res<State<AppState>>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
@@ -35,7 +32,7 @@ fn toggle_menu(
 }
 
 fn listen_for_app_close_request(
-    mut end_game_listener: EventReader<app_event::EndGame>,
+    mut end_game_listener: EventReader<EndGame>,
     mut app_exit_events: EventWriter<AppExit>,
 ) {
     for _ in end_game_listener.read() {

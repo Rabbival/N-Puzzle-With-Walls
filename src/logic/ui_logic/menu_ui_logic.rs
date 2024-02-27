@@ -1,8 +1,4 @@
-use crate::{
-    costume_event::{screen_changing_event, ui_event},
-    output::graphics::ui_graphics,
-    prelude::*,
-};
+use crate::prelude::*;
 use std::mem;
 
 pub struct MenuUiLogicPlugin;
@@ -29,7 +25,7 @@ impl Plugin for MenuUiLogicPlugin {
 }
 
 fn set_chosen_options_to_fit_current_props(
-    mut event_listener: EventReader<screen_changing_event::SetMenuElementsToFitCurrent>,
+    mut event_listener: EventReader<SetMenuElementsToFitCurrent>,
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction),
         (With<SelectedOptionTag>, Without<AppliedOptionTag>),
@@ -43,7 +39,7 @@ fn set_chosen_options_to_fit_current_props(
     for _event in event_listener.read() {
         // remove from previously chosen and not applied
         for (chosen_not_applied, mut not_applied_button_color, _) in currently_chosen.iter_mut() {
-            ui_graphics::set_color_to_normal(&mut not_applied_button_color);
+            set_color_to_normal(&mut not_applied_button_color);
             commands
                 .entity(chosen_not_applied)
                 .remove::<SelectedOptionTag>();
@@ -53,7 +49,7 @@ fn set_chosen_options_to_fit_current_props(
         for (should_be_marked_chosen, mut should_be_marked_button_color) in
             currently_applied.iter_mut()
         {
-            ui_graphics::set_color_to_pressed(&mut should_be_marked_button_color);
+            set_color_to_pressed(&mut should_be_marked_button_color);
             commands
                 .entity(should_be_marked_chosen)
                 .insert(SelectedOptionTag);
@@ -63,7 +59,7 @@ fn set_chosen_options_to_fit_current_props(
 
 /// for the planned board properties updates that don't require special treatment
 fn update_menu_ui_after_press_general(
-    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
+    mut button_event_listener: EventReader<MenuButtonPressed>,
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction),
         (With<SelectedOptionTag>, Without<ApplyButtonTag>),
@@ -87,7 +83,7 @@ fn update_menu_ui_after_press_general(
             currently_chosen.iter_mut()
         {
             if button_action_discriminant == mem::discriminant(menu_button_action_of_chosen) {
-                ui_graphics::set_color_to_normal(&mut previous_color);
+                set_color_to_normal(&mut previous_color);
                 commands
                     .entity(previous_button)
                     .remove::<SelectedOptionTag>();
@@ -100,7 +96,7 @@ fn update_menu_ui_after_press_general(
 }
 
 fn increase_or_decrease_wall_count_menu_ui_update(
-    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
+    mut button_event_listener: EventReader<MenuButtonPressed>,
     mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
     mut commands: Commands,
 ) {
@@ -109,7 +105,7 @@ fn increase_or_decrease_wall_count_menu_ui_update(
             let (apply_button, mut apply_button_color) = apply_button_query.single_mut();
             match wall_count_action {
                 WallTilesChange::Increase | WallTilesChange::Decrease => {
-                    ui_graphics::set_color_to_normal(&mut apply_button_color);
+                    set_color_to_normal(&mut apply_button_color);
                     commands.entity(apply_button).remove::<SelectedOptionTag>();
                 }
                 _ => {}
@@ -119,7 +115,7 @@ fn increase_or_decrease_wall_count_menu_ui_update(
 }
 
 fn apply_wall_count_menu_ui_update(
-    mut apply_button_event_listener: EventReader<ui_event::ApplyButtonPressed>,
+    mut apply_button_event_listener: EventReader<ApplyButtonPressed>,
     mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
     mut commands: Commands,
 ) {
@@ -130,7 +126,7 @@ fn apply_wall_count_menu_ui_update(
             commands
                 .entity(apply_button_entity)
                 .insert(SelectedOptionTag);
-            ui_graphics::set_color_to_pressed(&mut apply_button_color);
+            set_color_to_pressed(&mut apply_button_color);
         }
     }
 }
@@ -156,7 +152,7 @@ fn set_tree_generation_options_visibility(
 }
 
 fn set_applied_props(
-    mut button_event_listener: EventReader<ui_event::MenuButtonPressed>,
+    mut button_event_listener: EventReader<MenuButtonPressed>,
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction),
         (With<SelectedOptionTag>, Without<ApplyButtonTag>),

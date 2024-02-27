@@ -1,4 +1,4 @@
-use crate::{costume_event::{screen_changing_event, ui_event}, prelude::*};
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum AppState {
@@ -58,7 +58,7 @@ impl Plugin for AppStatePlugin {
 
 fn toggle_visibility_for_game_screen_elements(
     mut visibility_toggle_event_writer: EventWriter<
-        screen_changing_event::ToggleVisibilityForElementsWithTag,
+        ToggleVisibilityForElementsWithTag,
     >,
 ) {
     visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(OnScreenTag::Game));
@@ -71,23 +71,23 @@ fn toggle_board_lock(mut game_board_query: Query<&mut TileBoard, With<GameBoard>
 
 fn toggle_visibility_for_menu_screen_elements(
     mut visibility_toggle_event_writer: EventWriter<
-        screen_changing_event::ToggleVisibilityForElementsWithTag,
+        ToggleVisibilityForElementsWithTag,
     >,
 ) {
     visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(OnScreenTag::Menu));
 }
 
 fn set_menu_indicators_to_fit_current(
-    mut event_writer: EventWriter<screen_changing_event::SetPlannedPropertiesToFitCurrent>,
+    mut event_writer: EventWriter<SetPlannedPropertiesToFitCurrent>,
 ) {
     event_writer.send(SetPlannedPropertiesToFitCurrent);
 }
 
 fn toggle_menu_button(
-    mut button_toggle_event_writer: EventWriter<ui_event::ToggleButton>,
+    mut button_toggle_event_writer: EventWriter<ToggleButton>,
     menu_toggle_button_entity: Query<Entity, With<MenuToggleButton>>,
 ){
-    button_toggle_event_writer.send(ui_event::ToggleButton {
+    button_toggle_event_writer.send(ToggleButton {
         entity: menu_toggle_button_entity.single(),
     });
 }

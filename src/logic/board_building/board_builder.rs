@@ -1,10 +1,4 @@
-use crate::{
-    costume_event::ui_event,
-    output::{error_handler, print_to_console},
-    prelude::*,
-};
-
-use super::{brute_force_builder, permutation_builder};
+use crate::prelude::*;
 
 #[derive(Component)]
 pub struct SolvedBoard;
@@ -29,7 +23,7 @@ impl Plugin for BoardBuilderPlugin {
 }
 
 fn build_a_new_board(
-    mut generation_error_event_writer: EventWriter<ui_event::ShowGenerationError>,
+    mut generation_error_event_writer: EventWriter<ShowGenerationError>,
     solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
@@ -42,7 +36,7 @@ fn build_a_new_board(
         TileBoard::from_grid(solved_grid, applied_props.empty_count);
     match optional_newborn_tiletype_board {
         Err(error) => {
-            generation_error_event_writer.send(ui_event::ShowGenerationError(error));
+            generation_error_event_writer.send(ShowGenerationError(error));
             game_state.set(GameState::Regular);
         }
         Ok(newborn_board) => {
@@ -57,7 +51,7 @@ fn build_a_new_board(
                 }
                 Err(error) => {
                     game_state.set(GameState::Regular);
-                    generation_error_event_writer.send(ui_event::ShowGenerationError(error))
+                    generation_error_event_writer.send(ShowGenerationError(error))
                 }
             }
         }
@@ -67,15 +61,15 @@ fn build_a_new_board(
 pub fn generate_game_board(
     solved_board: TileBoard,
     generation_range: (u8, u8),
-) -> Result<TileBoard, error_handler::BoardGenerationError> {
+) -> Result<TileBoard, BoardGenerationError> {
     let attempt_result
-        =permutation_builder::generate_board_by_vector_permutation(&solved_board);
+        =generate_board_by_vector_permutation(&solved_board);
      //generation successful
     if let Ok(board) = attempt_result {
         return Ok(board);
     }
 
-    brute_force_builder::brute_force_generate_game_board(&solved_board, generation_range)
+    brute_force_generate_game_board(&solved_board, generation_range)
 }
 
 fn declare_board_generation_done(
@@ -93,6 +87,6 @@ fn declare_board_generation_done(
     } else {
         app_state.set(AppState::Game);
     }
-    print_to_console::game_log(GameLog::NewBoardGenerated);
+    game_log(GameLog::NewBoardGenerated);
     game_state.set(GameState::Regular);
 }

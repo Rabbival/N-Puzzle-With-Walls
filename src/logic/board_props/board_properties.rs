@@ -1,7 +1,7 @@
 use std::fmt;
 use std::fmt::Formatter;
 use serde::{Deserialize, Serialize};
-use crate::{costume_event::screen_changing_event, prelude::*};
+use crate::prelude::*;
 
 pub const DEFAULT_EMPTY_COUNT: u8 = 1;
 pub const DEFAULT_WALL_COUNT: u8 = 0;
@@ -47,8 +47,8 @@ fn create_current_and_planned_board_properties(mut commands: Commands) {
 
 /// sets the one that appears in the menu to fit the current configuration
 fn set_planned_props_to_fit_current(
-    mut event_writer: EventWriter<screen_changing_event::SetMenuElementsToFitCurrent>,
-    mut event_listener: EventReader<screen_changing_event::SetPlannedPropertiesToFitCurrent>,
+    mut event_writer: EventWriter<SetMenuElementsToFitCurrent>,
+    mut event_listener: EventReader<SetPlannedPropertiesToFitCurrent>,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
     applied_board_prop_query: Query<
         &BoardProperties,

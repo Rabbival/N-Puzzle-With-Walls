@@ -1,7 +1,4 @@
-use crate::{prelude::*, costume_event::game_event};
-
-use super::ui_graphics;
-
+use crate::prelude::*;
 
 #[derive(Component)]
 pub struct VictoryAnnouncementTag;
@@ -68,7 +65,7 @@ fn spawn_victory_message(
 						.spawn((
 							ButtonBundle {
 								style: button_style.clone(),
-								background_color: ui_graphics::NORMAL_BUTTON.into(),
+								background_color: NORMAL_BUTTON.into(),
 								..default()
 							},
 							VictoryButtonAction::ResetBoard,
@@ -88,7 +85,7 @@ fn spawn_victory_message(
 
 /// toggles both actual visibility and on_own_screen one
 fn toggle_victory_message_visibilities(
-	mut victory_listener: EventReader<game_event::ToggleVictoryMessage>,
+	mut victory_listener: EventReader<ToggleVictoryMessage>,
 	mut victory_message_query: Query<
 		(&mut Visibility, &mut OnOwnScreenVisibility),
 		With<VictoryAnnouncementTag>,

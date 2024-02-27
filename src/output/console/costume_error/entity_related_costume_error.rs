@@ -6,3 +6,7 @@ pub enum EntityRelatedCostumeError {
     EntityNotInQuery,
     DataStructError(DataStructError<Tile>),
 }
+
+pub fn print_entity_related_error(entity_error: EntityRelatedCostumeError) {
+    error!("{:?}", entity_error);
+}

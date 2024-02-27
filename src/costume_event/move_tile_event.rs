@@ -1,4 +1,4 @@
-use crate::{logic::enums::basic_direction, prelude::*};
+use crate::prelude::*;
 
 #[derive(Event)]
 pub struct UpdateTileLocationGraphics {
@@ -8,7 +8,7 @@ pub struct UpdateTileLocationGraphics {
 
 #[derive(Event)]
 pub struct SwitchTilesLogic {
-    pub move_neighbor_from_direction: basic_direction::BasicDirection,
+    pub move_neighbor_from_direction: BasicDirection,
     pub empty_tile_index: usize,
 }
 

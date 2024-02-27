@@ -1,5 +1,4 @@
-use crate::{output::error_handler, prelude::*};
-
+use crate::prelude::*;
 use rand::Rng;
 
 pub const PERMUTATION_BOARD_GENERATION_ATTEMPTS: u8 = 5;
@@ -7,7 +6,7 @@ pub const PERMUTATION_BOARD_GENERATION_ATTEMPTS: u8 = 5;
 /// builds a new board based on the one it gets
 pub fn generate_board_by_vector_permutation(
     solved_board: &TileBoard,
-) -> Result<TileBoard, error_handler::BoardGenerationError> {
+) -> Result<TileBoard, BoardGenerationError> {
     let solved_board_iterator = solved_board.iter_filtered();
     let mut sorted_tiles = vec![];
     let mut sorted_grid_locations = vec![];
@@ -21,7 +20,7 @@ pub fn generate_board_by_vector_permutation(
     let mut empty_grid_locations = vec![];
     for (location, content) in sorted_grid_locations.iter().zip(permutation.iter()) {
         if let Err(grid_error) = grid.set(location, *content){
-            return Err(error_handler::BoardGenerationError::GridError(grid_error));        
+            return Err(BoardGenerationError::GridError(grid_error));
         }
         if content.tile_type == TileType::Empty {
             empty_grid_locations.push(*location);
@@ -33,9 +32,9 @@ pub fn generate_board_by_vector_permutation(
 
 fn make_valid_permutation_out_of_vector(
     sorted_vector: &Vec<Tile>,
-) -> Result<Vec<Tile>, error_handler::BoardGenerationError> {
+) -> Result<Vec<Tile>, BoardGenerationError> {
     let mut permutation_result =
-        Err(error_handler::BoardGenerationError::VectorPermutationGenerationFailed);
+        Err(BoardGenerationError::VectorPermutationGenerationFailed);
     let mut rng = rand::thread_rng();
     let mut permutation;
     let permutation_length = sorted_vector.len();

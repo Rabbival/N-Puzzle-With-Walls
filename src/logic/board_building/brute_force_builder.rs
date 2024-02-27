@@ -1,5 +1,5 @@
 use rand::prelude::ThreadRng;
-use crate::{prelude::*, output::{print_to_console, error_handler}};
+use crate::prelude::*;
 
 use rand::Rng;
 
@@ -8,7 +8,7 @@ struct MoveDecidedAndRegistered(pub bool);
 pub fn brute_force_generate_game_board(
     solved_board: &TileBoard,
     generation_range: (u8, u8)
-) -> Result<TileBoard, error_handler::BoardGenerationError>
+) -> Result<TileBoard, BoardGenerationError>
 {
     let mut rng = rand::thread_rng();
     let mut location_shift_count=rng.gen_range(generation_range.0..generation_range.1);
@@ -49,7 +49,7 @@ pub fn brute_force_generate_game_board(
             .iter()
             .rev()
             .copied();
-        print_to_console::print_possible_solution(
+        print_possible_solution(
             shift_tracker.empty_index,
             reveresed_shift_order
         );
@@ -62,7 +62,7 @@ fn determine_next_shift_direction(
     board: &mut TileBoard,
     shift_tracker: &mut LocationShiftTracker,
     rng: &mut ThreadRng
-) -> Result<MoveDecidedAndRegistered, error_handler::BoardGenerationError>
+) -> Result<MoveDecidedAndRegistered, BoardGenerationError>
 {
     let empty_tile_location = shift_tracker.empty_location;
     let mut optional_directions=
@@ -92,7 +92,7 @@ fn determine_next_shift_direction(
         Err(error) => {
             match error{
                 TileMoveError::TriedToSwitchEmptyWithEmpty => Ok(MoveDecidedAndRegistered(false)),
-                _ => Err(error_handler::BoardGenerationError::TileMoveError(error))
+                _ => Err(BoardGenerationError::TileMoveError(error))
             }
         },
         Ok(_) => {
@@ -109,7 +109,7 @@ fn determine_next_shift_direction(
 fn remove_opposite_of_previous_shift_direction_from_possible_shift_locations(
     shift_tracker: &LocationShiftTracker,
     optional_directions: &mut HashMap<BasicDirection, GridLocation>
-) -> Result<(), error_handler::BoardGenerationError>
+) -> Result<(), BoardGenerationError>
 {
     let opposite_of_previous_shift=shift_tracker.previous_shift.opposite_direction();
     match opposite_of_previous_shift {
@@ -118,7 +118,7 @@ fn remove_opposite_of_previous_shift_direction_from_possible_shift_locations(
             Ok(())
         },
         None => {
-            Err(error_handler::BoardGenerationError::DirectionCouldntBeFlipped)
+            Err(BoardGenerationError::DirectionCouldntBeFlipped)
         }
     }
 }
@@ -136,13 +136,13 @@ fn choose_next_shift_direction(
 fn get_next_location_for_empty(
     optional_directions: &mut HashMap<BasicDirection, GridLocation>,
     chosen_direction: &BasicDirection
-) -> Result<GridLocation, error_handler::BoardGenerationError>
+) -> Result<GridLocation, BoardGenerationError>
 {
     let chosen_location_option=optional_directions.get(chosen_direction);
     match chosen_location_option{
         Some(chosen_location) => Ok(*chosen_location),
         None => {
-            Err(error_handler::BoardGenerationError::DirectionNotInMap
+            Err(BoardGenerationError::DirectionNotInMap
                 (DataStructError::ItemNotFound(*chosen_direction)))
         }
     }
@@ -171,7 +171,6 @@ struct LocationShiftTracker{
 
 #[cfg(test)]
 mod tests {
-    use crate::costume_event::db_event;
     use super::*;
 
     const RANDOM_RANGE_FOR_TESTING: (u8, u8) = (31,41);
@@ -179,13 +178,13 @@ mod tests {
     #[test]
     fn several_attempts_at_generating_unsolved_boards() {
         let mut app = App::new();
-        app.add_event::<db_event::SaveToDB>()
+        app.add_event::<SaveToDB>()
             .add_systems(Update, several_attempts_at_generating_unsolved_boards_inner);
         app.update();
     }
 
     fn several_attempts_at_generating_unsolved_boards_inner(
-        mut event_writer: EventWriter<db_event::SaveToDB>,
+        mut event_writer: EventWriter<SaveToDB>,
     ){
         const ATTEMPT_COUNT: u8 = 10;
         let solved_board

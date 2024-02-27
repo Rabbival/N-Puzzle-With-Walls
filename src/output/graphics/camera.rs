@@ -1,4 +1,4 @@
-use crate::{prelude::*, screen_setup};
+use crate::prelude::*;
 
 pub struct CameraPlugin;
 
@@ -21,7 +21,7 @@ fn adjust_camera_zoom_to_new_settings(
 ) {
     let grid_side_length = applied_board_props_query.single().size.to_grid_side_length();
     let new_camera_zoom =
-        grid_side_length as f32 * ATLAS_CELL_SQUARE_SIZE / screen_setup::BOARD_SIZE_IN_PIXELS;
+        grid_side_length as f32 * ATLAS_CELL_SQUARE_SIZE / BOARD_SIZE_IN_PIXELS;
 
     let (mut camera_transform, mut camera_projection) = camera_query.single_mut();
     camera_transform.translation.x =

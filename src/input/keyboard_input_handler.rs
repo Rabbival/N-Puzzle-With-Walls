@@ -1,8 +1,4 @@
-use crate::{
-    costume_event::{app_event, board_set_event, move_tile_event},
-    prelude::*,
-};
-use crate::costume_event::db_event;
+use crate::prelude::*;
 
 pub struct KeyboardInputHandlerPlugin;
 
@@ -30,7 +26,7 @@ impl Plugin for KeyboardInputHandlerPlugin {
 }
 
 fn move_tiles_with_keyboard(
-    mut logic_event_writer: EventWriter<move_tile_event::SwitchTilesLogic>,
+    mut logic_event_writer: EventWriter<SwitchTilesLogic>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     let move_requests = keyboard_input
@@ -40,7 +36,7 @@ fn move_tiles_with_keyboard(
         if request.move_neighbor_from_direction.is_none() || request.empty_tile_index.is_none() {
             continue;
         } else {
-            logic_event_writer.send(move_tile_event::SwitchTilesLogic {
+            logic_event_writer.send(SwitchTilesLogic {
                 move_neighbor_from_direction: request.move_neighbor_from_direction.unwrap(),
                 empty_tile_index: request.empty_tile_index.unwrap(),
             });
@@ -49,31 +45,31 @@ fn move_tiles_with_keyboard(
 }
 
 fn open_menu(
-    mut menu_toggle_event_writer: EventWriter<app_event::ToggleMenu>,
+    mut menu_toggle_event_writer: EventWriter<ToggleMenu>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
-        menu_toggle_event_writer.send(app_event::ToggleMenu)
+        menu_toggle_event_writer.send(ToggleMenu)
     }
 }
 
 /// resets the solved board if shift is pressed too
 fn listen_for_reset(
-    mut input_event_writer: EventWriter<board_set_event::BuildNewBoard>,
+    mut input_event_writer: EventWriter<BuildNewBoard>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::R) {
         let reroll_solved = keyboard_input.pressed(KeyCode::ShiftLeft);
-        input_event_writer.send(board_set_event::BuildNewBoard { reroll_solved });
+        input_event_writer.send(BuildNewBoard { reroll_solved });
     }
 }
 
 fn listen_for_app_closing(
-    mut end_game_event_writer: EventWriter<app_event::EndGame>,
+    mut end_game_event_writer: EventWriter<EndGame>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        end_game_event_writer.send(app_event::EndGame);
+        end_game_event_writer.send(EndGame);
     }
 }
 
@@ -81,10 +77,10 @@ fn listen_for_app_closing(
 
 
 fn listed_for_debug_key_which_is_k(
-    mut event_writer: EventWriter<db_event::LoadFromDB>,
+    mut event_writer: EventWriter<LoadFromDB>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::K) {
-        event_writer.send(db_event::LoadFromDB(DomainBoardIndex(0)));
+        event_writer.send(LoadFromDB(DomainBoardIndex(0)));
     }
 }

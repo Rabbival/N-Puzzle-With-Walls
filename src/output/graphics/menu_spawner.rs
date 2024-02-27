@@ -1,6 +1,4 @@
-use crate::{costume_event::ui_spawn_event, logic::board_props::board_properties, prelude::*};
-
-use super::ui_graphics;
+use crate::prelude::*;
 
 /// which option is applied to the current board,
 /// intended for when changing but not applying and reopening the
@@ -48,10 +46,10 @@ impl Plugin for MenuSpanwerPlugin {
 
 /// public to let eternal buttons spawner execute after it
 pub fn menu_setup(
-    mut button_event_writer: EventWriter<ui_spawn_event::SpawnButtons>,
-    mut big_button_event_writer: EventWriter<ui_spawn_event::SpawnBigButtons>,
-    mut tile_count_buttons_event_writer: EventWriter<ui_spawn_event::SpawnTileCountButtons>,
-    mut eternal_buttons_event_writer: EventWriter<ui_spawn_event::SpawnEternalButtons>,
+    mut button_event_writer: EventWriter<SpawnButtons>,
+    mut big_button_event_writer: EventWriter<SpawnBigButtons>,
+    mut tile_count_buttons_event_writer: EventWriter<SpawnTileCountButtons>,
+    mut eternal_buttons_event_writer: EventWriter<SpawnEternalButtons>,
 ) {
     let button_style = Style {
         width: Val::Px(150.0),
@@ -99,19 +97,19 @@ pub fn menu_setup(
         ..default()
     };
 
-    eternal_buttons_event_writer.send(ui_spawn_event::SpawnEternalButtons {
+    eternal_buttons_event_writer.send(SpawnEternalButtons {
         thin_button_style: thin_button_style.clone(),
         button_text_style: eternal_button_text_style.clone(),
     });
-    button_event_writer.send(ui_spawn_event::SpawnButtons {
+    button_event_writer.send(SpawnButtons {
         button_style: button_style.clone(),
         button_text_style: button_text_style.clone(),
     });
-    big_button_event_writer.send(ui_spawn_event::SpawnBigButtons {
+    big_button_event_writer.send(SpawnBigButtons {
         big_button_style,
         big_button_text_style,
     });
-    tile_count_buttons_event_writer.send(ui_spawn_event::SpawnTileCountButtons {
+    tile_count_buttons_event_writer.send(SpawnTileCountButtons {
         regular_button_style: button_style,
         thin_button_style,
         button_text_style,
@@ -120,7 +118,7 @@ pub fn menu_setup(
 }
 
 fn spawn_generate_button(
-    mut big_button_event_reader: EventReader<ui_spawn_event::SpawnBigButtons>,
+    mut big_button_event_reader: EventReader<SpawnBigButtons>,
     mut commands: Commands,
 ) {
     for big_button_event in big_button_event_reader.read() {
@@ -158,7 +156,7 @@ fn spawn_generate_button(
                             .spawn((
                                 ButtonBundle {
                                     style: button_style.clone(),
-                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                    background_color: NORMAL_BUTTON.into(),
                                     ..default()
                                 },
                                 MenuButtonAction::GenerateBoard,
@@ -176,7 +174,7 @@ fn spawn_generate_button(
 }
 
 fn spawn_generation_options(
-    mut button_event_reader: EventReader<ui_spawn_event::SpawnButtons>,
+    mut button_event_reader: EventReader<SpawnButtons>,
     mut commands: Commands,
 ) {
     for button_event in button_event_reader.read() {
@@ -235,7 +233,7 @@ fn spawn_generation_options(
                                     let mut button_entity = parent.spawn((
                                         ButtonBundle {
                                             style: button_style.clone(),
-                                            background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                            background_color: NORMAL_BUTTON.into(),
                                             ..default()
                                         },
                                         MenuButtonAction::ChangeGenerationMethod(generation_method),
@@ -261,7 +259,7 @@ fn spawn_generation_options(
 }
 
 fn spawn_size_options(
-    mut button_event_reader: EventReader<ui_spawn_event::SpawnButtons>,
+    mut button_event_reader: EventReader<SpawnButtons>,
     mut commands: Commands,
 ) {
     for button_event in button_event_reader.read() {
@@ -305,7 +303,7 @@ fn spawn_size_options(
                             let mut button_entity = parent.spawn((
                                 ButtonBundle {
                                     style: button_style.clone(),
-                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                    background_color: NORMAL_BUTTON.into(),
                                     ..default()
                                 },
                                 MenuButtonAction::ChangeSize(board_size),
@@ -330,7 +328,7 @@ fn spawn_size_options(
 }
 
 fn spawn_tile_counter(
-    mut button_event_reader: EventReader<ui_spawn_event::SpawnTileCountButtons>,
+    mut button_event_reader: EventReader<SpawnTileCountButtons>,
     mut commands: Commands,
 ) {
     for button_event in button_event_reader.read() {
@@ -384,7 +382,7 @@ fn spawn_tile_counter(
                             let mut button_entity = parent.spawn((
                                 ButtonBundle {
                                     style: regular_button_style.clone(),
-                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                    background_color: NORMAL_BUTTON.into(),
                                     ..default()
                                 },
                                 MenuButtonAction::ChangeSpanningTreeGeneration(traveller_type),
@@ -434,7 +432,7 @@ fn spawn_tile_counter(
                             let mut button_entity = parent.spawn((
                                 ButtonBundle {
                                     style: thin_button_style.clone(),
-                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                    background_color: NORMAL_BUTTON.into(),
                                     ..default()
                                 },
                                 action,
@@ -445,7 +443,7 @@ fn spawn_tile_counter(
                                     ButtonText,
                                 ));
                             });
-                            if empty_tiles_count == board_properties::DEFAULT_EMPTY_COUNT {
+                            if empty_tiles_count == DEFAULT_EMPTY_COUNT {
                                 button_entity.insert(SelectedOptionTag);
                                 button_entity.insert(AppliedOptionTag);
                             }
@@ -494,7 +492,7 @@ fn spawn_tile_counter(
                                         let mut arrow_button_entity = parent.spawn((
                                             ButtonBundle {
                                                 style: thin_button_style.clone(),
-                                                background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                                background_color: NORMAL_BUTTON.into(),
                                                 ..default()
                                             },
                                             action.unwrap(),
@@ -515,7 +513,7 @@ fn spawn_tile_counter(
                         let mut apply_button_entity = parent.spawn((
                             ButtonBundle {
                                 style: regular_button_style.clone(),
-                                background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                background_color: NORMAL_BUTTON.into(),
                                 ..default()
                             },
                             MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),

@@ -1,4 +1,4 @@
-use crate::{costume_event::ui_event, prelude::*};
+use crate::prelude::*;
 
 pub struct ErrorHandlerPlugin;
 
@@ -9,7 +9,7 @@ impl Plugin for ErrorHandlerPlugin {
 }
 
 pub fn board_generation_error_handler(
-    mut event_listener: EventReader<ui_event::ShowGenerationError>,
+    mut event_listener: EventReader<ShowGenerationError>,
 ) {
     for generation_error in event_listener.read() {
         print_board_generation_error(generation_error.0);

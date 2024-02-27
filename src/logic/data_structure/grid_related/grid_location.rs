@@ -1,4 +1,4 @@
-use crate::{prelude::*, output::error_handler};
+use crate::prelude::*;
 use std::fmt;
 use serde::{Deserialize, Serialize};
 
@@ -26,10 +26,10 @@ impl GridLocation {
 
     /// grid provided to check that the index is valid for its size
     pub fn from_world<T: Clone>(grid: &Grid<T>, position: Vec2) 
-    -> Result<Self, error_handler::GridError>
+    -> Result<Self, GridError>
     {
         if position.x<ATLAS_CELL_SQUARE_SIZE*-0.5 || position.y>ATLAS_CELL_SQUARE_SIZE*0.5{
-            Err(error_handler::GridError::InvalidPositionVector(position))
+            Err(GridError::InvalidPositionVector(position))
         }else{
             let location = GridLocation {
                 row: (-1.0 * (position.y / ATLAS_CELL_SQUARE_SIZE) + 0.5) as i32,
@@ -38,7 +38,7 @@ impl GridLocation {
             if grid.valid_index(&location) {
                 Ok(location)
             } else {
-                Err(error_handler::GridError::InvalidIndex(location))
+                Err(GridError::InvalidIndex(location))
             }
         }
     }

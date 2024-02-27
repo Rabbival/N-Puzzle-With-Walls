@@ -1,6 +1,4 @@
-use crate::{costume_event::ui_spawn_event, prelude::*};
-
-use super::{menu_spawner, ui_graphics};
+use crate::prelude::*;
 
 /// buttons that are always on the screen
 #[derive(Component)]
@@ -15,13 +13,13 @@ impl Plugin for EternalButtonsSpanwerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Startup,
-            (spawn_exit_button, spawn_menu_toggling_button).after(menu_spawner::menu_setup),
+            (spawn_exit_button, spawn_menu_toggling_button).after(menu_setup),
         );
     }
 }
 
 fn spawn_exit_button(
-    mut eternal_buttons_event_reader: EventReader<ui_spawn_event::SpawnEternalButtons>,
+    mut eternal_buttons_event_reader: EventReader<SpawnEternalButtons>,
     mut commands: Commands,
 ) {
     for eternal_button_event in eternal_buttons_event_reader.read() {
@@ -56,7 +54,7 @@ fn spawn_exit_button(
                             .spawn((
                                 ButtonBundle {
                                     style: button_style.clone(),
-                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                    background_color: NORMAL_BUTTON.into(),
                                     ..default()
                                 },
                                 EternalButton,
@@ -74,7 +72,7 @@ fn spawn_exit_button(
 }
 
 fn spawn_menu_toggling_button(
-    mut eternal_buttons_event_reader: EventReader<ui_spawn_event::SpawnEternalButtons>,
+    mut eternal_buttons_event_reader: EventReader<SpawnEternalButtons>,
     mut commands: Commands,
 ) {
     for eternal_button_event in eternal_buttons_event_reader.read() {
@@ -109,7 +107,7 @@ fn spawn_menu_toggling_button(
                             .spawn((
                                 ButtonBundle {
                                     style: button_style.clone(),
-                                    background_color: ui_graphics::NORMAL_BUTTON.into(),
+                                    background_color: NORMAL_BUTTON.into(),
                                     ..default()
                                 },
                                 EternalButton,

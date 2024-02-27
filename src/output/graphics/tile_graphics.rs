@@ -1,10 +1,5 @@
-use crate::{
-    costume_event::{board_set_event, move_tile_event},
-    logic::tile_dictionary,
-    prelude::*,
-};
-use bevy::{prelude::*, utils::HashMap};
-use crate::output::print_to_console;
+use crate::prelude::*;
+use bevy::utils::HashMap;
 
 #[derive(Component)]
 pub struct StayForNextBoardTag;
@@ -36,11 +31,11 @@ impl Plugin for TileGraphicsPlugin {
 }
 
 fn move_existing_tiles(
-    mut event_writer: EventWriter<board_set_event::SpawnTileInLocation>,
+    mut event_writer: EventWriter<SpawnTileInLocation>,
     board_query: Query<&TileBoard, With<GameBoard>>,
     tile_dictionary: Query<
-        &tile_dictionary::TileDictionary,
-        With<tile_dictionary::TileDictionaryTag>,
+        &TileDictionary,
+        With<TileDictionaryTag>,
     >,
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
     mut commands: Commands,
@@ -52,12 +47,12 @@ fn move_existing_tiles(
         &mut tile_transforms,
         &mut commands,
     ) {
-        print_to_console::print_entity_related_error(error);
+        print_entity_related_error(error);
     }
 }
 
 fn move_existing_tiles_inner(
-    event_writer: &mut EventWriter<board_set_event::SpawnTileInLocation>,
+    event_writer: &mut EventWriter<SpawnTileInLocation>,
     grid: &Grid<Tile>,
     tile_dictionary: &HashMap<Tile, Option<Entity>>,
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
@@ -67,7 +62,7 @@ fn move_existing_tiles_inner(
         let spawn_location = grid_location.to_world();
         match tile_dictionary.get(tile_from_cell) {
             None => {
-                event_writer.send(board_set_event::SpawnTileInLocation {
+                event_writer.send(SpawnTileInLocation {
                     tile: *tile_from_cell,
                     location: spawn_location,
                 })
@@ -94,8 +89,8 @@ fn despawn_unused_tiles_and_clear_tag(
     tagged_tiles: Query<Entity, (With<Tile>, With<StayForNextBoardTag>)>,
     untagged_tiles: Query<(Entity, &Tile), Without<StayForNextBoardTag>>,
     mut tile_dictionary_query: Query<
-        &mut tile_dictionary::TileDictionary,
-        With<tile_dictionary::TileDictionaryTag>,
+        &mut TileDictionary,
+        With<TileDictionaryTag>,
     >,
     mut commands: Commands,
 ) {
@@ -117,13 +112,13 @@ fn despawn_unused_tiles_and_clear_tag(
 }
 
 fn spawn_tiles(
-    mut event_listener: EventReader<board_set_event::SpawnTileInLocation>,
+    mut event_listener: EventReader<SpawnTileInLocation>,
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
     font: Res<TileTextFont>,
     mut tile_dictionary: Query<
-        &mut tile_dictionary::TileDictionary,
-        With<tile_dictionary::TileDictionaryTag>,
+        &mut TileDictionary,
+        With<TileDictionaryTag>,
     >,
 ) {
     if event_listener.is_empty() {
@@ -199,10 +194,10 @@ fn declare_post_game_board_gen_changes_done(
 }
 
 fn update_tile_entity_positions(
-    mut graphics_switch_tiles_listener: EventReader<move_tile_event::UpdateTileLocationGraphics>,
+    mut graphics_switch_tiles_listener: EventReader<UpdateTileLocationGraphics>,
     tile_dictionary: Query<
-        &tile_dictionary::TileDictionary,
-        With<tile_dictionary::TileDictionaryTag>,
+        &TileDictionary,
+        With<TileDictionaryTag>,
     >,
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
 ) {

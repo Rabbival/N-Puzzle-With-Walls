@@ -1,4 +1,4 @@
-use crate::{costume_event::ui_event, prelude::*};
+use crate::prelude::*;
 
 pub const NORMAL_BUTTON: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const HOVERED_BUTTON: Color = Color::rgb(0.2, 0.2, 0.2);
@@ -54,7 +54,7 @@ fn update_wall_tiles_count_visuals(
 }
 
 fn reset_color_for_button_text(
-    mut event_listener: EventReader<ui_event::ResetButtonTextColor>,
+    mut event_listener: EventReader<ResetButtonTextColor>,
     mut generation_text_query: Query<&mut Text, With<ButtonText>>,
 ) {
     for _ in event_listener.read() {
@@ -68,7 +68,7 @@ fn reset_color_for_button_text(
 }
 
 fn flash_generation_text_red(
-    mut event_listener: EventReader<ui_event::ShowGenerationError>,
+    mut event_listener: EventReader<ShowGenerationError>,
     mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>,
 ) {
     let generation_text_color = &mut generation_text_query.single_mut().sections[0].style.color;
