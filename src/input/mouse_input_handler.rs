@@ -179,14 +179,13 @@ mod tests {
         mut switch_tiles_logic_writer: EventWriter<SwitchTilesLogic>,
         mut db_writer: EventWriter<SaveToDB>
     ) {
-        assert!(test_no_tile_in_cell(&mut switch_tiles_logic_writer, &mut db_writer));
+        assert!(test_no_tile_in_cell(&mut switch_tiles_logic_writer));
         assert!(test_empty_slot(&mut switch_tiles_logic_writer));
         assert!(test_no_empty_neighbor(&mut switch_tiles_logic_writer, &mut db_writer));
     }
 
     fn test_no_tile_in_cell(
         event_writer: &mut EventWriter<SwitchTilesLogic>,
-        db_writer: &mut EventWriter<SaveToDB>,
     ) -> bool {
         let mut board = TileBoard::default();
         board.ignore_player_input = false;

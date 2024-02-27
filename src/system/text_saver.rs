@@ -14,13 +14,3 @@ pub fn write_to_file(
     fs::write(&file_path, file_content)?;
     Ok(())
 }
-
-fn create_folder_if_none_exists_yet(
-    folder_to_put_file_in: FolderToAccess
-){
-    if fs::create_dir(folder_to_put_file_in.to_string()).is_err(){
-        print_system_log(SystemLog::FolderExists);
-    }else{
-        print_system_log(SystemLog::FolderCreated);
-    }
-}
