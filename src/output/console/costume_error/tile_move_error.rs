@@ -30,7 +30,15 @@ pub fn print_tile_move_error(move_error: TileMoveError) {
         }
         TileMoveError::TriedToSwitchEmptyWithEmpty => {
             info!("tried to switch empty with empty, hence no swap was performed");
-        }
+        },
+        TileMoveError::GridError(grid_error) => {
+            match grid_error{
+                GridError::InvalidPositionVector(position) => {
+                    warn!("clicked position {:?} can't be converted to a valid grid location", position)
+                },
+                _ => error!("{:?}", grid_error)
+            }
+        },
         _ => {
             error!("{:?}", move_error)
         }
