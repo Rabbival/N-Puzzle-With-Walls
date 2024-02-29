@@ -34,6 +34,7 @@ pub mod prelude {
         board_building::{
             board_builder::*, board_entities_spawner::*, BoardBuildingPlugins,
             brute_force_builder::*, permutation_builder::*, solved_board_builder::*,
+            wall_placement_validator::*,
         },
         board_manager::*,
         board_props::{board_properties::*, BoardPropsPlugins, update_board_properties::*},
