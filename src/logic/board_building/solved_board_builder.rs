@@ -52,23 +52,11 @@ pub fn generate_solved_board_inner(
     let mut wall_locations = vec![];
 
     if applied_props.wall_count > 0 {
-        let mut wall_location_determination_attempt = 1;
-        let mut wall_location_determination_result =
-            determine_wall_locations(applied_props);
-        while wall_location_determination_attempt < SOLVED_BOARD_WITH_WALLS_MAX_GENERATION_ATTEMPTS
-            && wall_location_determination_result.is_err()
-        {
-            wall_location_determination_result = determine_wall_locations(applied_props);
-            wall_location_determination_attempt += 1;
-        }
-        match wall_location_determination_result{
-            Ok(just_determined_wall_locations) => {
-                wall_locations = just_determined_wall_locations;
-            },
-            Err(wall_location_finding_error) => return Err(wall_location_finding_error)
-        }
-        wrap_if_error
-            (&spawn_walls_in_locations(&wall_locations, &mut solved_board))?;
+        determine_wall_locations(
+            applied_props,
+            &mut wall_locations,
+            &mut solved_board
+        )?;
     }
 
     write_to_db_event_writer.send(SaveToDB(DomainBoard{
@@ -76,9 +64,32 @@ pub fn generate_solved_board_inner(
         wall_locations
     }));
 
+    spawn_empty_tiles(
+        applied_props,
+        &grid_side_length_u32,
+        &mut solved_board,
+    )?;
+
+    spawn_numbered_uninitialized_tiles(
+        &grid_side_length_u32,
+        &mut solved_board,
+    )?;
+
+    solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;
+    solved_board.index_all_tile_types();
+    solved_board.ignore_player_input = true;
+    Ok(solved_board)
+}
+
+fn spawn_empty_tiles(
+    applied_props: &BoardProperties,
+    grid_side_length_u32: &u32,
+    solved_board: &mut TileBoard
+) -> Result<(), BoardGenerationError>
+{
     let mut empty_tile_counter = applied_props.empty_count;
-    'outer_for: for i in (0..grid_side_length_u32).rev() {
-        for j in (0..grid_side_length_u32).rev() {
+    'outer_for: for i in (0..*grid_side_length_u32).rev() {
+        for j in (0..*grid_side_length_u32).rev() {
             let location = GridLocation::new(i as i32, j as i32);
             if wrap_if_error(&solved_board.tiletype_in_location(&location))?.is_none() {
                 wrap_if_error
@@ -90,9 +101,16 @@ pub fn generate_solved_board_inner(
             }
         }
     }
+    Ok(())
+}
 
-    for i in 0..grid_side_length_u32 {
-        for j in 0..grid_side_length_u32 {
+fn spawn_numbered_uninitialized_tiles(
+    grid_side_length_u32: &u32,
+    solved_board: &mut TileBoard
+) -> Result<(), BoardGenerationError>
+{
+    for i in 0..*grid_side_length_u32 {
+        for j in 0..*grid_side_length_u32 {
             let location = GridLocation::new(i as i32, j as i32);
             if wrap_if_error(&solved_board.tiletype_in_location(&location))?.is_none() {
                 wrap_if_error
@@ -100,16 +118,39 @@ pub fn generate_solved_board_inner(
             }
         }
     }
-
-    solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;
-    solved_board.index_all_tile_types();
-    solved_board.ignore_player_input = true;
-    Ok(solved_board)
+    Ok(())
 }
 
 fn determine_wall_locations(
     applied_props: &BoardProperties,
-) -> Result<Vec<GridLocation>, BoardGenerationError> {
+    wall_locations: &mut Vec<GridLocation>,
+    solved_board: &mut TileBoard
+) -> Result<(), BoardGenerationError>
+{
+    let mut wall_location_determination_attempt = 1;
+    let mut wall_location_determination_result =
+        determine_wall_locations_inner(applied_props);
+    while wall_location_determination_attempt < SOLVED_BOARD_WITH_WALLS_MAX_GENERATION_ATTEMPTS
+        && wall_location_determination_result.is_err()
+    {
+        wall_location_determination_result = determine_wall_locations_inner(applied_props);
+        wall_location_determination_attempt += 1;
+    }
+    match wall_location_determination_result{
+        Ok(just_determined_wall_locations) => {
+            *wall_locations = just_determined_wall_locations;
+        },
+        Err(wall_location_finding_error) => return Err(wall_location_finding_error)
+    }
+    wrap_if_error
+        (&spawn_walls_in_locations(&wall_locations, solved_board))?;
+    Ok(())
+}
+
+fn determine_wall_locations_inner(
+    applied_props: &BoardProperties,
+) -> Result<Vec<GridLocation>, BoardGenerationError>
+{
     let wall_count = applied_props.wall_count;
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut wall_spawn_locations = vec![];
