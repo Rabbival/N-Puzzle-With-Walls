@@ -4,6 +4,8 @@ use crate::prelude::*;
 pub enum SystemLog{
     FolderCreated(String),
     FolderExists(String),
+    WroteToFile(String),
+    FileDeleted(String),
 }
 
 pub fn print_system_log(system_log: SystemLog){

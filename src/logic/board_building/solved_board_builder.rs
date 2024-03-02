@@ -143,7 +143,7 @@ fn determine_wall_locations(
         Err(wall_location_finding_error) => return Err(wall_location_finding_error)
     }
     wrap_if_error
-        (&spawn_walls_in_locations(&wall_locations, solved_board))?;
+        (&spawn_walls_in_locations(wall_locations, solved_board))?;
     Ok(())
 }
 

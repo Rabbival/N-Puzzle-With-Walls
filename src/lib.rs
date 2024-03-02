@@ -95,8 +95,8 @@ pub mod prelude {
     pub use crate::system::{
         asset_loader::*,
         ron_loader::*,
-        text_saver::*,
-        folder_access::*,
+        text_file_system_access::*,
+        system_access::*,
     };
     pub use crate::screen_setup::*;
     pub use crate::system_sets::*;

@@ -77,10 +77,10 @@ fn listen_for_app_closing(
 
 
 fn listed_for_debug_key_which_is_k(
-    mut event_writer: EventWriter<LoadFromDB>,
+    mut event_writer: EventWriter<ClearDB>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::K) {
-        event_writer.send(LoadFromDB(DomainBoardIndex(0)));
+        event_writer.send(ClearDB);
     }
 }
