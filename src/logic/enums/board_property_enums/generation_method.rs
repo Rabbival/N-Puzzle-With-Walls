@@ -14,6 +14,14 @@ impl BoardGenerationMethod {
     pub fn as_list() -> Vec<BoardGenerationMethod> {
         all::<BoardGenerationMethod>().collect::<Vec<BoardGenerationMethod>>()
     }
+    
+    pub fn to_generation_button_text(&self) -> String {
+        match self{
+            BoardGenerationMethod::Auto => String::from("Generate"),
+            BoardGenerationMethod::Manual => String::from("Build"),
+            BoardGenerationMethod::Load => String::from("Load"),
+        }
+    }
 }
 
 impl fmt::Display for BoardGenerationMethod {

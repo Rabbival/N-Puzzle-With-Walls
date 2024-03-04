@@ -14,10 +14,14 @@ impl Plugin for MenuGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (
-                (flash_generation_text_red, reset_color_for_button_text)
-                    .run_if(in_state(AppState::Menu)),
+    (
                 update_button_color,
+                (
+                    flash_generation_text_red, 
+                    reset_color_for_button_text,
+                    update_generate_button_text
+                )
+                    .run_if(in_state(AppState::Menu)),
                 (update_wall_tiles_count_visuals)
                     .run_if(resource_changed::<UnappliedMenuWallCount>()),
             ),
@@ -51,6 +55,20 @@ fn update_wall_tiles_count_visuals(
 ) {
     let mut text = wall_count_text_query.single_mut();
     text.sections[0].value = unapplied_menu_wall_count.0.to_string();
+}
+
+fn update_generate_button_text(
+    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>,
+) {
+    for button_event in button_event_listener.read() {
+        if let MenuButtonAction::ChangeGenerationMethod(generation_method) 
+            = button_event.action 
+        {
+            let mut text = generation_text_query.single_mut();
+            text.sections[0].value = generation_method.to_generation_button_text();
+        }
+    }
 }
 
 fn reset_color_for_button_text(

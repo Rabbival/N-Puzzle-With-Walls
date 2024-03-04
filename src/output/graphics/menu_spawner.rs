@@ -163,7 +163,10 @@ fn spawn_generate_button(
                             ))
                             .with_children(|parent| {
                                 parent.spawn((
-                                    TextBundle::from_section("Generate", button_text_style.clone()),
+                                    TextBundle::from_section(
+                                        BoardGenerationMethod::default().to_generation_button_text(), 
+                                        button_text_style.clone()
+                                    ),
                                     BoardGenerationTextTag,
                                     ButtonText,
                                 ));
