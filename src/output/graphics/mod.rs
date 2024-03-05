@@ -1,22 +1,19 @@
+use crate::output::graphics::ui::UiGraphicsPlugin;
 use crate::prelude::*;
 
-pub mod eternal_buttons_spawner;
-pub mod menu_spawner;
+
 pub mod tile_graphics;
-pub mod ui_graphics;
-pub mod messages_graphics;
 pub mod camera;
+pub mod ui;
 
 pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
+            UiGraphicsPlugin,
+            CameraPlugin,
             TileGraphicsPlugin,
-            MenuGraphicsPlugin,
-            MenuSpanwerPlugin,
-            EternalButtonsSpanwerPlugin,
-            MessagesGraphicsPlugin,
         ))
         .add_systems(
             Update,
@@ -36,7 +33,7 @@ fn toggle_visibility_for_entities_with_tag(
     mut toggle_their_visibility: Query<(
         &mut Visibility,
         Option<&OnOwnScreenVisibility>,
-        &OnScreenTag,
+        &CustomOnScreenTag,
     )>,
 ) {
     for tag_container in event_listener.read() {

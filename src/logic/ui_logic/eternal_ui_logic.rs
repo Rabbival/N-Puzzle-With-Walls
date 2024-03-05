@@ -18,14 +18,27 @@ fn toggle_menu(
     mut event_listener: EventReader<ToggleMenu>,
     game_state: Res<State<AppState>>,
     mut next_state: ResMut<NextState<AppState>>,
+    applied_board_prop_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
 ) {
     for _ in event_listener.read() {
+        let current_not_menu_state = 
+            applied_board_prop_query.single().generation_method.to_app_state();
         match game_state.get() {
-            AppState::Game => {
-                next_state.set(AppState::Menu);
-            }
             AppState::Menu => {
-                next_state.set(AppState::Game);
+                
+                
+                info!("not menu");
+                
+                
+                next_state.set(current_not_menu_state);
+            }
+            _ => {
+                next_state.set(AppState::Menu);
+                
+                
+                info!("menu");
+                
+                
             }
         }
     }

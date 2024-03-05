@@ -43,12 +43,12 @@ impl BasicDirection {
     }
 
     /// seems to be more intuitive
-    pub fn opposite_from_keycode(keycode: &KeyCode) -> Option<BasicDirection> {
+    pub fn from_keycode(keycode: &KeyCode) -> Option<BasicDirection> {
         match keycode {
-            KeyCode::W | KeyCode::Up => Some(BasicDirection::Down),
-            KeyCode::D | KeyCode::Right => Some(BasicDirection::Left),
-            KeyCode::S | KeyCode::Down => Some(BasicDirection::Up),
-            KeyCode::A | KeyCode::Left => Some(BasicDirection::Right),
+            KeyCode::W | KeyCode::Up => Some(BasicDirection::Up),
+            KeyCode::D | KeyCode::Right => Some(BasicDirection::Right),
+            KeyCode::S | KeyCode::Down => Some(BasicDirection::Down),
+            KeyCode::A | KeyCode::Left => Some(BasicDirection::Left),
             _ => None,
         }
     }

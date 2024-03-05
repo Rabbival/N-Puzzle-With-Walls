@@ -35,18 +35,12 @@ fn spawn_victory_message(
 
 	commands
 		.spawn((
-			NodeBundle {
-				style: Style {
-					width: Val::Percent(100.0),
-					height: Val::Percent(100.0),
-					align_items: AlignItems::End,
-					justify_content: JustifyContent::Center,
-					..default()
-				},
-				visibility: Visibility::Hidden,
-				..default()
-			},
-			OnScreenTag::Game,
+		   build_node_bundle_with_full_percentage_style(
+			   AlignItems::End,
+			   JustifyContent::Center,
+			   Visibility::Hidden
+		   ),
+			CustomOnScreenTag::Game,
 			VictoryAnnouncementTag,
 			OnOwnScreenVisibility(Visibility::Hidden),
 		))
@@ -65,7 +59,7 @@ fn spawn_victory_message(
 						.spawn((
 							ButtonBundle {
 								style: button_style.clone(),
-								background_color: NORMAL_BUTTON.into(),
+								background_color: super::NORMAL_BUTTON_COLOR.into(),
 								..default()
 							},
 							VictoryButtonAction::ResetBoard,

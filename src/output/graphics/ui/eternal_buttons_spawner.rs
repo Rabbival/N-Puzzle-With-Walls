@@ -7,9 +7,9 @@ pub struct EternalButton;
 #[derive(Component)]
 pub struct MenuToggleButton;
 
-pub struct EternalButtonsSpanwerPlugin;
+pub struct EternalButtonsSpawnerPlugin;
 
-impl Plugin for EternalButtonsSpanwerPlugin {
+impl Plugin for EternalButtonsSpawnerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Startup,
@@ -27,17 +27,11 @@ fn spawn_exit_button(
         let button_text_style = &eternal_button_event.button_text_style;
 
         commands
-            .spawn(NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::Start,
-                    justify_content: JustifyContent::End,
-                    ..default()
-                },
-                visibility: Visibility::Visible,
-                ..default()
-            })
+            .spawn(build_node_bundle_with_full_percentage_style(
+                AlignItems::Start,
+                JustifyContent::End,
+                Visibility::Visible
+            ))
             .with_children(|parent| {
                 parent
                     .spawn(NodeBundle {
@@ -54,7 +48,7 @@ fn spawn_exit_button(
                             .spawn((
                                 ButtonBundle {
                                     style: button_style.clone(),
-                                    background_color: NORMAL_BUTTON.into(),
+                                    background_color: super::NORMAL_BUTTON_COLOR.into(),
                                     ..default()
                                 },
                                 EternalButton,
@@ -80,17 +74,11 @@ fn spawn_menu_toggling_button(
         let button_text_style = &eternal_button_event.button_text_style;
 
         commands
-            .spawn(NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::Start,
-                    justify_content: JustifyContent::Start,
-                    ..default()
-                },
-                visibility: Visibility::Visible,
-                ..default()
-            })
+            .spawn(build_node_bundle_with_full_percentage_style(
+                AlignItems::Start,
+                JustifyContent::Start,
+                Visibility::Visible
+            ))
             .with_children(|parent| {
                 parent
                     .spawn(NodeBundle {
@@ -107,7 +95,7 @@ fn spawn_menu_toggling_button(
                             .spawn((
                                 ButtonBundle {
                                     style: button_style.clone(),
-                                    background_color: NORMAL_BUTTON.into(),
+                                    background_color: super::NORMAL_BUTTON_COLOR.into(),
                                     ..default()
                                 },
                                 EternalButton,

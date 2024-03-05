@@ -5,14 +5,18 @@ pub enum AppState {
     #[default]
     Menu,
     Game,
+    Builder,
+    Loader
 }
 
 /// tags should only be given to parents because visibility is inherited
 #[derive(Component, Default, PartialEq, Eq, Debug)]
-pub enum OnScreenTag {
+pub enum CustomOnScreenTag {
     #[default]
     Menu,
     Game,
+    Builder,
+    Loader
 }
 
 pub struct AppStatePlugin;
@@ -61,7 +65,7 @@ fn toggle_visibility_for_game_screen_elements(
         ToggleVisibilityForElementsWithTag,
     >,
 ) {
-    visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(OnScreenTag::Game));
+    visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(CustomOnScreenTag::Game));
 }
 
 fn toggle_board_lock(mut game_board_query: Query<&mut TileBoard, With<GameBoard>>) {
@@ -74,7 +78,7 @@ fn toggle_visibility_for_menu_screen_elements(
         ToggleVisibilityForElementsWithTag,
     >,
 ) {
-    visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(OnScreenTag::Menu));
+    visibility_toggle_event_writer.send(ToggleVisibilityForElementsWithTag(CustomOnScreenTag::Menu));
 }
 
 fn set_menu_indicators_to_fit_current(

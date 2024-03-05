@@ -59,10 +59,11 @@ pub fn generate_solved_board_inner(
         )?;
     }
 
-    write_to_db_event_writer.send(SaveToDB(DomainBoard{
-        board_props: *applied_props,
-        wall_locations
-    }));
+    //TODO: uncomment writing to db
+    // write_to_db_event_writer.send(SaveToDB(DomainBoard{
+    //     board_props: *applied_props,
+    //     wall_locations
+    // }));
 
     spawn_empty_tiles(
         applied_props,

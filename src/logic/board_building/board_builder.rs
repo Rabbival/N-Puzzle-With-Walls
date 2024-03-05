@@ -87,6 +87,7 @@ fn declare_board_generation_done(
     } else {
         app_state.set(AppState::Game);
     }
+    
     game_log(GameLog::NewBoardGenerated);
     game_state.set(GameState::Regular);
 }

@@ -28,7 +28,7 @@ impl Plugin for GameStatePlugin {
 				Update,
 					set_game_state_according_to_board_gen_request
 						.in_set(InputSystemSets::InputHandling)
-						.after(set_applied_props_and_begin_generation)
+						.after(set_applied_props_and_exit_menu)
 			)
 			;
 	}

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Event)]
+#[derive(Event, Debug)]
 pub struct UpdateTileLocationGraphics {
     pub tile: Tile,
     pub new_location: GridLocation,

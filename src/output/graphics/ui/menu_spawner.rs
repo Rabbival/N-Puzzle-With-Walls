@@ -127,18 +127,12 @@ fn spawn_generate_button(
 
         commands
             .spawn((
-                NodeBundle {
-                    style: Style {
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        align_items: AlignItems::End,
-                        justify_content: JustifyContent::Center,
-                        ..default()
-                    },
-                    visibility: Visibility::Hidden,
-                    ..default()
-                },
-                OnScreenTag::Menu,
+                build_node_bundle_with_full_percentage_style(
+                    AlignItems::End,
+                    JustifyContent::Center,
+                    Visibility::Hidden
+                ),
+                CustomOnScreenTag::Menu,
             ))
             .with_children(|parent| {
                 parent
@@ -156,7 +150,7 @@ fn spawn_generate_button(
                             .spawn((
                                 ButtonBundle {
                                     style: button_style.clone(),
-                                    background_color: NORMAL_BUTTON.into(),
+                                    background_color: super::NORMAL_BUTTON_COLOR.into(),
                                     ..default()
                                 },
                                 MenuButtonAction::GenerateBoard,
@@ -198,7 +192,7 @@ fn spawn_generation_options(
                     visibility: Visibility::Hidden,
                     ..default()
                 },
-                OnScreenTag::Menu,
+                CustomOnScreenTag::Menu,
             ))
             .with_children(|parent| {
                 //title
@@ -214,7 +208,7 @@ fn spawn_generation_options(
                             background_color: Color::INDIGO.into(),
                             ..default()
                         },
-                        OnScreenTag::Menu,
+                        CustomOnScreenTag::Menu,
                     ))
                     .with_children(|parent| {
                         parent.spawn(TextBundle::from_section(
@@ -236,7 +230,7 @@ fn spawn_generation_options(
                                     let mut button_entity = parent.spawn((
                                         ButtonBundle {
                                             style: button_style.clone(),
-                                            background_color: NORMAL_BUTTON.into(),
+                                            background_color: super::NORMAL_BUTTON_COLOR.into(),
                                             ..default()
                                         },
                                         MenuButtonAction::ChangeGenerationMethod(generation_method),
@@ -271,18 +265,12 @@ fn spawn_size_options(
 
         commands
             .spawn((
-                NodeBundle {
-                    style: Style {
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Start,
-                        ..default()
-                    },
-                    visibility: Visibility::Hidden,
-                    ..default()
-                },
-                OnScreenTag::Menu,
+               build_node_bundle_with_full_percentage_style(
+                   AlignItems::Center,
+                   JustifyContent::Start,
+                   Visibility::Hidden
+               ),
+                CustomOnScreenTag::Menu,
             ))
             .with_children(|parent| {
                 parent
@@ -306,7 +294,7 @@ fn spawn_size_options(
                             let mut button_entity = parent.spawn((
                                 ButtonBundle {
                                     style: button_style.clone(),
-                                    background_color: NORMAL_BUTTON.into(),
+                                    background_color: super::NORMAL_BUTTON_COLOR.into(),
                                     ..default()
                                 },
                                 MenuButtonAction::ChangeSize(board_size),
@@ -342,18 +330,12 @@ fn spawn_tile_counter(
 
         commands
             .spawn((
-                NodeBundle {
-                    style: Style {
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::End,
-                        ..default()
-                    },
-                    visibility: Visibility::Hidden,
-                    ..default()
-                },
-                OnScreenTag::Menu,
+               build_node_bundle_with_full_percentage_style(
+                   AlignItems::Center,
+                   JustifyContent::End,
+                   Visibility::Hidden
+               ),
+                CustomOnScreenTag::Menu,
             ))
             .with_children(|parent| {
                 parent
@@ -370,7 +352,7 @@ fn spawn_tile_counter(
                             visibility: Visibility::Hidden,
                             ..default()
                         },
-                        OnScreenTag::Menu,
+                        CustomOnScreenTag::Menu,
                         TreeGenerationOptionsTag,
                         OnOwnScreenVisibility(Visibility::Hidden),
                     ))
@@ -385,7 +367,7 @@ fn spawn_tile_counter(
                             let mut button_entity = parent.spawn((
                                 ButtonBundle {
                                     style: regular_button_style.clone(),
-                                    background_color: NORMAL_BUTTON.into(),
+                                    background_color: super::NORMAL_BUTTON_COLOR.into(),
                                     ..default()
                                 },
                                 MenuButtonAction::ChangeSpanningTreeGeneration(traveller_type),
@@ -435,7 +417,7 @@ fn spawn_tile_counter(
                             let mut button_entity = parent.spawn((
                                 ButtonBundle {
                                     style: thin_button_style.clone(),
-                                    background_color: NORMAL_BUTTON.into(),
+                                    background_color: super::NORMAL_BUTTON_COLOR.into(),
                                     ..default()
                                 },
                                 action,
@@ -495,7 +477,7 @@ fn spawn_tile_counter(
                                         let mut arrow_button_entity = parent.spawn((
                                             ButtonBundle {
                                                 style: thin_button_style.clone(),
-                                                background_color: NORMAL_BUTTON.into(),
+                                                background_color: super::NORMAL_BUTTON_COLOR.into(),
                                                 ..default()
                                             },
                                             action.unwrap(),
@@ -516,7 +498,7 @@ fn spawn_tile_counter(
                         let mut apply_button_entity = parent.spawn((
                             ButtonBundle {
                                 style: regular_button_style.clone(),
-                                background_color: NORMAL_BUTTON.into(),
+                                background_color: super::NORMAL_BUTTON_COLOR.into(),
                                 ..default()
                             },
                             MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),

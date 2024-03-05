@@ -68,7 +68,7 @@ fn update_menu_ui_after_press_general(
 ) {
     for button_event in button_event_listener.read() {
         let menu_button_action = button_event.action;
-        let pressed_button_entity = button_event.entity;
+        let pressed_button_color_entity = button_event.entity;
         let button_action_discriminant = match menu_button_action {
             MenuButtonAction::ChangeSize(_)
             | MenuButtonAction::ChangeEmptyTilesCount(_)
@@ -88,7 +88,7 @@ fn update_menu_ui_after_press_general(
                     .entity(previous_button)
                     .remove::<SelectedOptionTag>();
                 commands
-                    .entity(pressed_button_entity)
+                    .entity(pressed_button_color_entity)
                     .insert(SelectedOptionTag);
             }
         }

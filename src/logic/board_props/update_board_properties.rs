@@ -10,7 +10,7 @@ impl Plugin for UpdateBoardPropertiesPlugin {
                 (
                     general_update_planned_board_properties,
                     update_wall_count_unapplied,
-                    set_applied_props_and_begin_generation,
+                    set_applied_props_and_exit_menu,
                 )
                     .chain()
                     .in_set(InputSystemSets::InputHandling),
@@ -145,8 +145,9 @@ fn apply_wall_count_to_planned_props(
     }
 }
 
-pub fn set_applied_props_and_begin_generation(
+pub fn set_applied_props_and_exit_menu(
     mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut menu_toggle_event_writer: EventWriter<ToggleMenu>,
     mut spawn_board_event_writer: EventWriter<BuildNewBoard>,
     mut applied_board_prop_query: Query<
         &mut BoardProperties,
@@ -168,10 +169,18 @@ pub fn set_applied_props_and_begin_generation(
             let planned_board_prop = planned_board_prop_query.single_mut();
             let mut applied_props = applied_board_prop_query.single_mut();
             *applied_props = *planned_board_prop;
-
-            spawn_board_event_writer.send(BuildNewBoard {
-                reroll_solved: true,
-            });
+            
+            match applied_props.generation_method{
+                BoardGenerationMethod::Auto => {
+                    spawn_board_event_writer.send(BuildNewBoard {
+                        reroll_solved: true,
+                    });
+                },
+                // only board generation can fail (and force us to stay in the menu screen)
+                _ => {
+                    menu_toggle_event_writer.send(ToggleMenu);
+                }
+            }
         }
     }
 }

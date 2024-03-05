@@ -142,7 +142,7 @@ fn spawn_tiles(
                 },
                 TileBundle {
                     tile: tile_to_spawn,
-                    tag: OnScreenTag::Game,
+                    tag: CustomOnScreenTag::Game,
                 },
             ))
             .id();
@@ -201,12 +201,17 @@ fn update_tile_entity_positions(
     >,
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
 ) {
-    for tile_switch_request in graphics_switch_tiles_listener.read() {
+    for tile_location_graphic_update_request in graphics_switch_tiles_listener.read() {
+        
+        
+        info!("got a request: {:?}", tile_location_graphic_update_request);
+        
+        
         if let Err(move_error) = update_tile_entity_positions_inner(
             &mut tile_transforms,
             &tile_dictionary.single().entity_by_tile,
-            tile_switch_request.tile,
-            tile_switch_request.new_location,
+            tile_location_graphic_update_request.tile,
+            tile_location_graphic_update_request.new_location,
         ) {
             print_tile_move_error(move_error);
         }

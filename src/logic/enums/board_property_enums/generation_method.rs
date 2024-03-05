@@ -1,6 +1,7 @@
 use enum_iterator::{all, Sequence};
 use std::fmt;
 use serde::{Deserialize, Serialize};
+use crate::prelude::AppState;
 
 #[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub enum BoardGenerationMethod {
@@ -20,6 +21,14 @@ impl BoardGenerationMethod {
             BoardGenerationMethod::Auto => String::from("Generate"),
             BoardGenerationMethod::Manual => String::from("Build"),
             BoardGenerationMethod::Load => String::from("Load"),
+        }
+    }
+    
+    pub fn to_app_state(&self) -> AppState {
+        match self{
+            BoardGenerationMethod::Auto => AppState::Game,
+            BoardGenerationMethod::Manual => AppState::Builder,
+            BoardGenerationMethod::Load => AppState::Loader,
         }
     }
 }

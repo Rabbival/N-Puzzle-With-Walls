@@ -18,7 +18,6 @@ pub fn main() {
         //costume
         .add_plugins((
             DataBasePlugins,
-            CameraPlugin,
             InputPlugin,
             AssetLoaderPlugin,
             BoardPlugins,

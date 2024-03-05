@@ -142,7 +142,7 @@ impl TileBoard {
     }
 
     /// if it gets an index out of empties bounds, sets the index to the last cell's
-    pub fn get_empty_tile(&self, empty_tile_index: usize) 
+    pub fn get_empty_tile(&self, empty_tile_index: usize)
     -> Result<Option<&Tile>, GridError>
     {
         let empty_tile_location = self.get_empty_tile_location(empty_tile_index);

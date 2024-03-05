@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
 #[derive(Event, Default)]
-pub struct DespawnElementsWithTag(pub OnScreenTag);
+pub struct DespawnElementsWithTag(pub CustomOnScreenTag);
 
 #[derive(Event, Default)]
-pub struct ToggleVisibilityForElementsWithTag(pub OnScreenTag);
+pub struct ToggleVisibilityForElementsWithTag(pub CustomOnScreenTag);
 
 #[derive(Event, Default)]
 pub struct SetPlannedPropertiesToFitCurrent;

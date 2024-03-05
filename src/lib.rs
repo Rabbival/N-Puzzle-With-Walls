@@ -88,8 +88,17 @@ pub mod prelude {
             }
         },
         graphics::{
-            camera::*, eternal_buttons_spawner::*, GraphicsPlugin, menu_spawner::*, messages_graphics::*,
-            OnOwnScreenVisibility, tile_graphics::*, ui_graphics::*,
+            ui::{
+                eternal_buttons_spawner::*, menu_graphics::*, menu_spawner::*, messages_graphics::*,
+                UiGraphicsPlugin, 
+                build_node_bundle_with_full_percentage_style,
+                set_color_to_normal,
+                set_color_to_pressed
+            },
+            tile_graphics::*, 
+            camera::*,
+            GraphicsPlugin,
+            OnOwnScreenVisibility, 
         },
     };
     pub use crate::system::{

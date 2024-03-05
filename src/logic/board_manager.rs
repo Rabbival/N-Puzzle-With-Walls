@@ -47,34 +47,42 @@ fn move_tile_logic_inner(
     if game_board.ignore_player_input {
         return Err(TileMoveError::BoardFrozenToPlayer);
     }
+    
+    
+    info!("{:?}", game_board);
+    
 
     let empty_tile_neighbors = game_board.get_direct_neighbors_of_empty(empty_tile_index);
-    if let Some(&occupied_tile_location) = empty_tile_neighbors.get(&move_neighbor_from_direction) {
+    if let Some(&occupied_tile_original_location) = 
+        empty_tile_neighbors.get(&move_neighbor_from_direction) 
+    {
         let optional_occupied_tile = 
-            wrap_if_error(game_board.get(&occupied_tile_location))?;
+            wrap_if_error(game_board.get(&occupied_tile_original_location))?;
         if optional_occupied_tile.is_none() {
             return Err(TileMoveError::TileBoardError
-                (TileBoardError::NoTileInCell(occupied_tile_location)));
+                (TileBoardError::NoTileInCell(occupied_tile_original_location)));
         }
         let occupied_tile = *optional_occupied_tile.unwrap();
         if occupied_tile.tile_type == TileType::Wall {
             return Err(TileMoveError::TriedToSwitchWithAWall);
         }
 
-        let empty_tile_location = *game_board.get_empty_tile_location(empty_tile_index);
-        game_board.swap_tiles_by_location(&empty_tile_location, &occupied_tile_location)?;
+        let empty_tile_original_location = *game_board.get_empty_tile_location(empty_tile_index);
+        let empty_tile =
+            *wrap_if_error(game_board.get_empty_tile(empty_tile_index))?.unwrap();
+        game_board.swap_tiles_by_location(&empty_tile_original_location, &occupied_tile_original_location)?;
 
         // reminder that from this point the logic locations are swapped
 
-        game_log(GameLog::TilesMoved(&occupied_tile, &empty_tile_location));
+        game_log(GameLog::TilesMoved(&occupied_tile, &empty_tile_original_location));
 
         graphics_event_writer.send(UpdateTileLocationGraphics {
             tile: occupied_tile,
-            new_location: empty_tile_location,
+            new_location: empty_tile_original_location,
         });
         graphics_event_writer.send(UpdateTileLocationGraphics {
-            tile: *wrap_if_error(game_board.get_empty_tile(empty_tile_index))?.unwrap(),
-            new_location: occupied_tile_location,
+            tile: empty_tile,
+            new_location: occupied_tile_original_location,
         });
 
         check_if_board_is_solved_writer.send(CheckIfBoardIsSolved);
