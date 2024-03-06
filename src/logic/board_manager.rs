@@ -49,7 +49,7 @@ fn move_tile_logic_inner(
     }
     
     
-    info!("{:?}", game_board);
+    // info!("{:?}", game_board);
     
 
     let empty_tile_neighbors = game_board.get_direct_neighbors_of_empty(empty_tile_index);

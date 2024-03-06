@@ -204,7 +204,7 @@ fn update_tile_entity_positions(
     for tile_location_graphic_update_request in graphics_switch_tiles_listener.read() {
         
         
-        info!("got a request: {:?}", tile_location_graphic_update_request);
+        // info!("got a request: {:?}", tile_location_graphic_update_request);
         
         
         if let Err(move_error) = update_tile_entity_positions_inner(
