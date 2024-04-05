@@ -62,12 +62,12 @@ pub fn generate_game_board(
     solved_board: TileBoard,
     generation_range: (u8, u8),
 ) -> Result<TileBoard, BoardGenerationError> {
-    let attempt_result
-        =generate_board_by_vector_permutation(&solved_board);
-     //generation successful
-    if let Ok(board) = attempt_result {
-        return Ok(board);
-    }
+    // let attempt_result
+    //     =generate_board_by_vector_permutation(&solved_board);
+    //  //generation successful
+    // if let Ok(board) = attempt_result {
+    //     return Ok(board);
+    // }
 
     brute_force_generate_game_board(&solved_board, generation_range)
 }

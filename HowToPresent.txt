@@ -1,0 +1,4 @@
+*Begin with the goal (motivation)
+*What I achieved so far
+*How I mean to achieve my goals
+*Implementation (quality measures)

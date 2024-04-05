@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-pub const ATLAS_CELL_SQUARE_SIZE: f32 = 32.0;
+pub const ATLAS_CELL_SQUARE_SIZE: f32 = 64.0;
 
 #[derive(Resource, Deref, DerefMut, Clone, Default)]
 pub struct SpriteAtlas(pub Handle<TextureAtlas>);
@@ -30,8 +30,8 @@ fn sprite_atlas_setup(
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
         Vec2::new(ATLAS_CELL_SQUARE_SIZE, ATLAS_CELL_SQUARE_SIZE),
-        4,
-        4,
+        2,
+        2,
         None,
         None,
     );

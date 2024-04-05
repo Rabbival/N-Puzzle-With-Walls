@@ -165,7 +165,7 @@ fn spawn_tiles(
                             number_to_display.to_string(),
                             TextStyle {
                                 font: font.0.clone(),
-                                font_size: 29.0,
+                                font_size: ATLAS_CELL_SQUARE_SIZE*0.88,
                                 color: text_color,
                             },
                         )],
