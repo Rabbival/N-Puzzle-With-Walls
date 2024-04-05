@@ -359,7 +359,7 @@ fn spawn_tile_counter(
                     .with_children(|parent| {
                         //title
                         parent.spawn(TextBundle::from_section(
-                            " Wall MST Gen ",
+                            " Default Wall \n   Placing ",
                             small_text_style.clone(),
                         ));
                         //buttons
@@ -375,7 +375,7 @@ fn spawn_tile_counter(
                             button_entity.with_children(|parent| {
                                 parent.spawn((
                                     TextBundle::from_section(
-                                        traveller_type.to_string(),
+                                        traveller_type.to_button_option_text(),
                                         small_text_style.clone(),
                                     ),
                                     ButtonText,
