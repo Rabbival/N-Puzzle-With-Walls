@@ -10,6 +10,7 @@ pub struct SpawnButtons {
 pub struct SpawnBigButtons {
     pub big_button_style: Style,
     pub big_button_text_style: TextStyle,
+    pub tiny_red_text_style: TextStyle
 }
 
 #[derive(Event, Default)]

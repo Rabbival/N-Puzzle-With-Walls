@@ -21,7 +21,7 @@ impl Plugin for UiGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
             MenuGraphicsPlugin,
-            MenuSpanwerPlugin,
+            MenuSpawnerPlugin,
             EternalButtonsSpawnerPlugin,
             MessagesGraphicsPlugin,
         ))
@@ -35,15 +35,18 @@ impl Plugin for UiGraphicsPlugin {
 pub fn build_node_bundle_with_full_percentage_style(
     align_items: AlignItems,
     justify_content: JustifyContent,
-    visibility: Visibility
+    visibility: Visibility,
+    flex_direction: Option<FlexDirection>
 ) -> NodeBundle
 {
+    let flex_direction = flex_direction.unwrap_or_else(|| FlexDirection::default());
     NodeBundle {
         style: Style {
             width: Val::Percent(100.0),
             height: Val::Percent(100.0),
             align_items,
             justify_content,
+            flex_direction,
             ..default()
         },
         visibility,

@@ -24,9 +24,9 @@ pub struct TreeGenerationOptionsTag;
 #[derive(Component)]
 pub struct ButtonText;
 
-pub struct MenuSpanwerPlugin;
+pub struct MenuSpawnerPlugin;
 
-impl Plugin for MenuSpanwerPlugin {
+impl Plugin for MenuSpawnerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Startup,
@@ -97,6 +97,12 @@ pub fn menu_setup(
         ..default()
     };
 
+    let tiny_red_text_style = TextStyle {
+        font_size: 22.0,
+        color: Color::RED,
+        ..default()
+    };
+
     eternal_buttons_event_writer.send(SpawnEternalButtons {
         thin_button_style: thin_button_style.clone(),
         button_text_style: eternal_button_text_style.clone(),
@@ -108,12 +114,13 @@ pub fn menu_setup(
     big_button_event_writer.send(SpawnBigButtons {
         big_button_style,
         big_button_text_style,
+        tiny_red_text_style
     });
     tile_count_buttons_event_writer.send(SpawnTileCountButtons {
         regular_button_style: button_style,
         thin_button_style,
         button_text_style,
-        small_text_style,
+        small_text_style
     });
 }
 
@@ -124,13 +131,15 @@ fn spawn_generate_button(
     for big_button_event in big_button_event_reader.read() {
         let button_style = &big_button_event.big_button_style;
         let button_text_style = &big_button_event.big_button_text_style;
+        let tiny_red_text_style = &big_button_event.tiny_red_text_style;
 
         commands
             .spawn((
                 build_node_bundle_with_full_percentage_style(
                     AlignItems::End,
                     JustifyContent::Center,
-                    Visibility::Hidden
+                    Visibility::Hidden,
+                    Some(FlexDirection::ColumnReverse)
                 ),
                 CustomOnScreenTag::Menu,
             ))
@@ -138,7 +147,7 @@ fn spawn_generate_button(
                 parent
                     .spawn(NodeBundle {
                         style: Style {
-                            flex_direction: FlexDirection::Column,
+                            flex_direction: FlexDirection::ColumnReverse,
                             align_items: AlignItems::Center,
                             ..default()
                         },
@@ -166,6 +175,31 @@ fn spawn_generate_button(
                                 ));
                             });
                     });
+                //unapplied changes warning text
+                parent
+                    // tree generation options
+                    .spawn((
+                        NodeBundle {
+                            style: Style {
+                                flex_direction: FlexDirection::Column,
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Center,
+                                ..default()
+                            },
+                            background_color: Color::NONE.into(),
+                            visibility: Visibility::Hidden,
+                            ..default()
+                        },
+                        CustomOnScreenTag::Menu,
+                        //TODO: put special tag for it here
+                        OnOwnScreenVisibility(Visibility::Hidden),
+                    ))
+                    .with_children(|parent| {
+                        parent.spawn(TextBundle::from_section(
+                            " Note: you have unapplied changes ",
+                            tiny_red_text_style.clone()
+                        ));
+                    });
             });
     }
 }
@@ -180,18 +214,12 @@ fn spawn_generation_options(
 
         commands
             .spawn((
-                NodeBundle {
-                    style: Style {
-                        width: Val::Percent(100.0),
-                        height: Val::Percent(100.0),
-                        flex_direction: FlexDirection::Column,
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Start,
-                        ..default()
-                    },
-                    visibility: Visibility::Hidden,
-                    ..default()
-                },
+                build_node_bundle_with_full_percentage_style(
+                    AlignItems::Center,
+                    JustifyContent::Start,
+                    Visibility::Hidden,
+                    Some(FlexDirection::Column)
+                ),
                 CustomOnScreenTag::Menu,
             ))
             .with_children(|parent| {
@@ -268,7 +296,8 @@ fn spawn_size_options(
                build_node_bundle_with_full_percentage_style(
                    AlignItems::Center,
                    JustifyContent::Start,
-                   Visibility::Hidden
+                   Visibility::Hidden,
+                   None
                ),
                 CustomOnScreenTag::Menu,
             ))
@@ -333,7 +362,8 @@ fn spawn_tile_counter(
                build_node_bundle_with_full_percentage_style(
                    AlignItems::Center,
                    JustifyContent::End,
-                   Visibility::Hidden
+                   Visibility::Hidden,
+                   None
                ),
                 CustomOnScreenTag::Menu,
             ))
