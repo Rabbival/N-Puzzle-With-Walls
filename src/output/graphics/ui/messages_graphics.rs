@@ -38,7 +38,8 @@ fn spawn_victory_message(
 		   build_node_bundle_with_full_percentage_style(
 			   AlignItems::End,
 			   JustifyContent::Center,
-			   Visibility::Hidden
+			   Visibility::Hidden,
+			   None
 		   ),
 			CustomOnScreenTag::Game,
 			VictoryAnnouncementTag,

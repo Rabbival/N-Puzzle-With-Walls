@@ -90,6 +90,7 @@ pub mod prelude {
         graphics::{
             ui::{
                 eternal_buttons_spawner::*, menu_graphics::*, menu_spawner::*, messages_graphics::*,
+                button_and_text_styles::*,
                 UiGraphicsPlugin, 
                 build_node_bundle_with_full_percentage_style,
                 set_color_to_normal,

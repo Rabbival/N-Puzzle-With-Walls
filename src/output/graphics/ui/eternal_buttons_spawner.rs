@@ -13,7 +13,7 @@ impl Plugin for EternalButtonsSpawnerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Startup,
-            (spawn_exit_button, spawn_menu_toggling_button).after(menu_setup),
+            (spawn_exit_button, spawn_menu_toggling_button)
         );
     }
 }
@@ -30,7 +30,8 @@ fn spawn_exit_button(
             .spawn(build_node_bundle_with_full_percentage_style(
                 AlignItems::Start,
                 JustifyContent::End,
-                Visibility::Visible
+                Visibility::Visible,
+                None
             ))
             .with_children(|parent| {
                 parent
@@ -77,7 +78,8 @@ fn spawn_menu_toggling_button(
             .spawn(build_node_bundle_with_full_percentage_style(
                 AlignItems::Start,
                 JustifyContent::Start,
-                Visibility::Visible
+                Visibility::Visible,
+                None
             ))
             .with_children(|parent| {
                 parent
