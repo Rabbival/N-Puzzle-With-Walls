@@ -93,29 +93,14 @@ fn spawn_generate_button(
                     });
                 //unapplied changes warning text
                 parent
-                    // tree generation options
                     .spawn((
-                        NodeBundle {
-                            style: Style {
-                                flex_direction: FlexDirection::Column,
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::Center,
-                                ..default()
-                            },
-                            background_color: Color::NONE.into(),
-                            visibility: Visibility::Hidden,
-                            ..default()
-                        },
-                        CustomOnScreenTag::Menu,
-                        //TODO: put special tag for it here
-                        OnOwnScreenVisibility(Visibility::Hidden),
-                    ))
-                    .with_children(|parent| {
-                        parent.spawn(TextBundle::from_section(
-                            " Note: you have unapplied changes ",
-                            tiny_red_text_style.clone()
-                        ));
-                    });
+                       TextBundle::from_section(
+                           "",
+                           tiny_red_text_style.clone()
+                       ),
+                       CustomOnScreenTag::Menu,
+                       TextAboveStartButton
+                    ));
             });
     }
 }

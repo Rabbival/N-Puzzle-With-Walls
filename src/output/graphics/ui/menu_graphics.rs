@@ -8,12 +8,12 @@ impl Plugin for MenuGraphicsPlugin {
             Update,
     (
                 (
+                    (update_wall_tiles_count_visuals)
+                        .run_if(resource_changed::<UnappliedMenuWallCount>()),
                     flash_generation_text_red,
                     update_generate_button_text
                 )
                     .run_if(in_state(AppState::Menu)),
-                (update_wall_tiles_count_visuals)
-                    .run_if(resource_changed::<UnappliedMenuWallCount>()),
             ),
         );
     }
@@ -45,8 +45,8 @@ fn flash_generation_text_red(
     mut event_listener: EventReader<ShowGenerationError>,
     mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>,
 ) {
-    let generation_text_color = &mut generation_text_query.single_mut().sections[0].style.color;
     for _ in event_listener.read() {
+        let generation_text_color = &mut generation_text_query.single_mut().sections[0].style.color;
         *generation_text_color = super::RED_TEXT_COLOR;
     }
 }

@@ -64,8 +64,7 @@ fn handle_menu_buttons(
                     action: *menu_button_action,
                 });
             }
-
-            // if any button was pressed, turn back all the ui text that was turned red
+            
             reset_button_text_color_event_writer.send(ResetButtonTextColor);
 
             match menu_button_action {
@@ -97,7 +96,6 @@ fn handle_victory_buttons(
                 action: *game_button_action
             });
 
-            // if any button was pressed, turn back all the ui text that was turned red
             reset_button_text_color_event_writer.send(ResetButtonTextColor);
         }
     }

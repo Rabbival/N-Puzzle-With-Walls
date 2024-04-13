@@ -47,6 +47,7 @@ pub mod prelude {
         },
         enums::{
             basic_direction::*,
+            text_above_start_button_type::*,
             board_property_enums::{
                 board_size::*, generation_method::*, grid_traveller_type::*, menu_button_action::*,
                 wall_tiles_change::*,
@@ -89,9 +90,14 @@ pub mod prelude {
         },
         graphics::{
             ui::{
-                eternal_buttons_spawner::*, menu_graphics::*, menu_spawner::*, messages_graphics::*,
+                messages::{
+                    MessagesGraphicsPlugin,
+                    victory_message::*,
+                    text_above_start_button::*,
+                },
+                eternal_buttons_spawner::*, menu_graphics::*, menu_spawner::*,
                 button_and_text_styles::*,
-                UiGraphicsPlugin, 
+                UiGraphicsPlugin,
                 build_node_bundle_with_full_percentage_style,
                 set_color_to_normal,
                 set_color_to_pressed

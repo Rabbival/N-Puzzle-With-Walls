@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
 pub mod menu_graphics;
-pub mod messages_graphics;
 pub mod eternal_buttons_spawner;
 pub mod menu_spawner;
 pub mod button_and_text_styles;
+pub mod messages;
 
 pub const NORMAL_BUTTON_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const HOVERED_BUTTON_COLOR: Color = Color::rgb(0.2, 0.2, 0.2);
