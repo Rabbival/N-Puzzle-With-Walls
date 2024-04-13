@@ -15,6 +15,8 @@ impl Plugin for UpdateBoardPropertiesPlugin {
                     .chain()
                     .in_set(InputSystemSets::InputHandling),
                 apply_wall_count_to_planned_props.in_set(InputSystemSets::PostMainChanges),
+                set_planned_props_to_fit_current
+                    .in_set(StateChangeSystemSets::PrepareToHandleStateChange),
             )
                 .run_if(in_state(AppState::Menu)),
         );
@@ -74,7 +76,7 @@ fn general_update_planned_board_properties_inner(
     }
 }
 
-fn update_wall_count_unapplied(
+pub fn update_wall_count_unapplied(
     mut button_event_listener: EventReader<MenuButtonPressed>,
     planned_board_prop_query: Query<
         &BoardProperties,
@@ -182,6 +184,35 @@ pub fn set_applied_props_and_exit_menu(
                 }
             }
         }
+    }
+}
+
+/// sets the one that appears in the menu to fit the current configuration
+fn set_planned_props_to_fit_current(
+    mut event_writer: EventWriter<SetMenuElementsToFitCurrent>,
+    mut event_listener: EventReader<SetPlannedPropertiesToFitCurrent>,
+    mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
+    applied_board_prop_query: Query<
+        &BoardProperties,
+        (
+            With<AppliedBoardProperties>,
+            Without<PlannedBoardProperties>,
+        ),
+    >,
+    mut planned_board_prop_query: Query<
+        &mut BoardProperties,
+        (
+            With<PlannedBoardProperties>,
+            Without<AppliedBoardProperties>,
+        ),
+    >,
+) {
+    for _event in event_listener.read() {
+        let current_props = applied_board_prop_query.single();
+        let mut planned_props = planned_board_prop_query.single_mut();
+        unapplied_menu_wall_count.0 = current_props.wall_count;
+        *planned_props = *current_props;
+        event_writer.send(SetMenuElementsToFitCurrent);
     }
 }
 

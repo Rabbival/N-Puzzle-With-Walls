@@ -6,7 +6,7 @@ impl Plugin for MenuGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-    (
+            (
                 (
                     (update_wall_tiles_count_visuals)
                         .run_if(resource_changed::<UnappliedMenuWallCount>()),

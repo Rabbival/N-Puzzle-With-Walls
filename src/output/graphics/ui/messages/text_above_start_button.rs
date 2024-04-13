@@ -10,9 +10,8 @@ impl Plugin for TextAboveStartButtonPlugin {
             .add_systems(
                 Update,
                 (
-                    /*(*/   warn_of_unapplied_changes
-                        .run_if(resource_changed::<UnappliedMenuWallCount>()),
-                    //cancel_unapplied_changes_warning).chain(),
+                    listen_for_apply_button_press,
+                    alert_player_of_unsaved_changes.after(update_wall_count_unapplied),
                     show_board_couldnt_be_generated_message
                 )
                     .run_if(in_state(AppState::Menu)),
@@ -20,11 +19,33 @@ impl Plugin for TextAboveStartButtonPlugin {
     }
 }
 
-fn warn_of_unapplied_changes(
+fn listen_for_apply_button_press(
+    mut event_listener: EventReader<ApplyButtonPressed>,
     mut text_above_start_button_query: Query<&mut Text, With<TextAboveStartButton>>
+){
+    for _apply_button_press in event_listener.read() {
+        let text_above_start_button = &mut text_above_start_button_query.single_mut().sections[0].value;
+        *text_above_start_button = TextAboveStartButtonType::NoText.to_string();
+    }
+}
+
+fn alert_player_of_unsaved_changes(
+    mut event_listener: EventReader<MenuButtonPressed>,
+    mut text_above_start_button_query: Query<&mut Text, With<TextAboveStartButton>>,
+    planned_board_properties_query: Query<&BoardProperties, With<PlannedBoardProperties>>,
+    unapplied_menu_wall_count: Res<UnappliedMenuWallCount>
 ) {
-    let text_above_start_button = &mut text_above_start_button_query.single_mut().sections[0].value;
-    *text_above_start_button = TextAboveStartButtonType::UnappliedChanges.to_string();
+    for menu_button_press in event_listener.read() {
+        if let MenuButtonAction::ChangeWallTilesCount(_) = menu_button_press.action{
+            let text_above_start_button = &mut text_above_start_button_query.single_mut().sections[0].value;
+            let applied_to_plan_wall_count = planned_board_properties_query.single().wall_count;
+            if unapplied_menu_wall_count.0 == applied_to_plan_wall_count{
+                *text_above_start_button = TextAboveStartButtonType::NoText.to_string();
+            }else{
+                *text_above_start_button = TextAboveStartButtonType::UnappliedChanges.to_string();
+            }
+        }
+    }
 }
 
 fn show_board_couldnt_be_generated_message(

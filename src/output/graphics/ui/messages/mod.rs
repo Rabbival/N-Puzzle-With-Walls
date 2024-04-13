@@ -12,6 +12,7 @@ impl Plugin for MessagesGraphicsPlugin {
 			.add_plugins((
 				VictoryMessagePlugin,
                 TextAboveStartButtonPlugin
-            ));
+            ))
+        ;
     }
 }
