@@ -26,15 +26,16 @@ impl Plugin for GraphicsPlugin {
 
 fn show_only_if_has_specified_screen_tag(
     app_next_state: Res<State<AppState>>,
-    mut toggle_their_visibility: Query<(
+    mut single_screen_entities: Query<(
         &mut Visibility,
         Option<&OnOwnScreenVisibility>,
         &CustomOnScreenTag,
-    )>,
+    ), Without<MultipleOnScreenTags>>,
+    mut multiple_screen_entities: Query<(&mut Visibility, &MultipleOnScreenTags), Without<CustomOnScreenTag>>,
 ) {
     if app_next_state.is_changed() {
         for (mut visibility, optional_own_screen_vis, entity_tag) in
-            toggle_their_visibility.iter_mut()
+            single_screen_entities.iter_mut()
         {
             if *app_next_state == entity_tag.0 {
                 if let Some(own_screen_vis) = optional_own_screen_vis {
@@ -45,6 +46,17 @@ fn show_only_if_has_specified_screen_tag(
             } else {
                 *visibility = Visibility::Hidden;
             }
+        }
+        'entity_for: for (mut visibility, screen_tags) in
+        multiple_screen_entities.iter_mut()
+        {
+            for screen_tag in screen_tags.0.iter() {
+                if *app_next_state == screen_tag.0 {
+                    *visibility = Visibility::Visible;
+                    continue 'entity_for;
+                }
+            }
+            *visibility = Visibility::Hidden;
         }
     }
 }

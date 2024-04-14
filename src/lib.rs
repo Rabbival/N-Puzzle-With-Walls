@@ -95,6 +95,7 @@ pub mod prelude {
             visibility_tags::{
                 custom_on_screen_tag::*,
                 on_own_screen_visibility::*,
+                multiple_on_screen_tags::*,
             },
             ui::{
                 build_node_bundle_with_full_percentage_style,
@@ -111,7 +112,6 @@ pub mod prelude {
             },
         },
     };
-    pub use crate::output::graphics::visibility_tags::custom_on_screen_tag::*;
     pub use crate::system::{
         asset_loader::*,
         ron_loader::*,

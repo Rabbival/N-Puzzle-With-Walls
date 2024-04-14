@@ -57,7 +57,11 @@ fn spawn_generate_button(
                     Visibility::Hidden,
                     Some(FlexDirection::ColumnReverse)
                 ),
-                CustomOnScreenTag(AppState::Menu),
+                MultipleOnScreenTags(vec![
+                    CustomOnScreenTag(AppState::Menu),
+                    CustomOnScreenTag(AppState::Builder),
+                    CustomOnScreenTag(AppState::Loader),
+                ]),
             ))
             .with_children(|parent| {
                 parent
@@ -98,7 +102,6 @@ fn spawn_generate_button(
                            "",
                            tiny_red_text_style.clone()
                        ),
-                       CustomOnScreenTag(AppState::Menu),
                        TextAboveStartButton
                     ));
             });
