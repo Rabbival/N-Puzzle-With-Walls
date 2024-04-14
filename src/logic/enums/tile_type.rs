@@ -22,7 +22,6 @@ impl TileType {
     }
 }
 
-// enable comparison to &TileType from both sides
 impl PartialEq<&TileType> for TileType {
     fn eq(&self, other: &&Self) -> bool {
         self == *other

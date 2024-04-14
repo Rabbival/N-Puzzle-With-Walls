@@ -15,8 +15,20 @@ impl Plugin for TextAboveStartButtonPlugin {
                     show_board_couldnt_be_generated_message
                 )
                     .run_if(in_state(AppState::Menu)),
+            )
+            .add_systems(
+                OnEnter(AppState::Menu),
+                reset_message_when_menu_reopens
+                    .in_set(StateChangeSystemSets::StateChangeListening)
             );
     }
+}
+
+fn reset_message_when_menu_reopens(
+    mut text_above_start_button_query: Query<&mut Text, With<TextAboveStartButton>>
+){
+    let text_above_start_button = &mut text_above_start_button_query.single_mut().sections[0].value;
+    *text_above_start_button = TextAboveStartButtonType::NoText.to_string();
 }
 
 fn listen_for_apply_button_press(

@@ -47,7 +47,6 @@ pub mod prelude {
         },
         enums::{
             basic_direction::*,
-            text_above_start_button_type::*,
             board_property_enums::{
                 board_size::*, generation_method::*, grid_traveller_type::*, menu_button_action::*,
                 wall_tiles_change::*,
@@ -55,6 +54,7 @@ pub mod prelude {
             eternal_button_action::*,
             folder_to_access::*,
             game_button_action::*,
+            text_above_start_button_type::*,
             tile_type::*,
         },
         states::{app_state::*, game_state::*, StatePlugin},
@@ -66,53 +66,57 @@ pub mod prelude {
     pub use crate::output::{
         console::{
             costume_error::{
-                MismatchError,
-                error_handler::*,
                 board_generation_error::*,
-                menu_error::*,
-                tile_move_error::*,
-                entity_related_costume_error::*,
-                system_access_error::*,
                 data_struct_error::{
                     DataStructError,
+                    grid_error::*,
                     grid_tree_error::*,
                     tile_board_error::*,
-                    grid_error::*,
                 },
+                entity_related_costume_error::*,
+                error_handler::*,
+                menu_error::*,
+                MismatchError,
+                system_access_error::*,
+                tile_move_error::*,
             },
             costume_print::{
                 BevyPrintType,
-                print_display_deriver_vec,
                 game_log::*,
+                print_display_deriver_vec,
                 solution_printer::*,
                 system_log::*,
             }
         },
         graphics::{
-            ui::{
-                messages::{
-                    MessagesGraphicsPlugin,
-                    victory_message::*,
-                    text_above_start_button::*,
-                },
-                eternal_buttons_spawner::*, menu_graphics::*, menu_spawner::*,
-                button_and_text_styles::*,
-                UiGraphicsPlugin,
-                build_node_bundle_with_full_percentage_style,
-                set_color_to_normal,
-                set_color_to_pressed
-            },
-            tile_graphics::*, 
             camera::*,
             GraphicsPlugin,
-            OnOwnScreenVisibility, 
+            tile_graphics::*,
+            visibility_tags::{
+                custom_on_screen_tag::*,
+                on_own_screen_visibility::*,
+            },
+            ui::{
+                build_node_bundle_with_full_percentage_style,
+                button_and_text_styles::*, eternal_buttons_spawner::*, menu_graphics::*,
+                menu_spawner::*,
+                messages::{
+                    MessagesGraphicsPlugin,
+                    text_above_start_button::*,
+                    victory_message::*,
+                },
+                set_color_to_normal,
+                set_color_to_pressed,
+                UiGraphicsPlugin
+            },
         },
     };
+    pub use crate::output::graphics::visibility_tags::custom_on_screen_tag::*;
     pub use crate::system::{
         asset_loader::*,
         ron_loader::*,
-        text_file_system_access::*,
         system_access::*,
+        text_file_system_access::*,
     };
     pub use crate::screen_setup::*;
     pub use crate::system_sets::*;

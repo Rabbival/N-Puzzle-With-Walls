@@ -25,20 +25,10 @@ fn toggle_menu(
             applied_board_prop_query.single().generation_method.to_app_state();
         match game_state.get() {
             AppState::Menu => {
-                
-                
-                info!("not menu");
-                
-                
                 next_state.set(current_not_menu_state);
             }
             _ => {
                 next_state.set(AppState::Menu);
-                
-                
-                info!("menu");
-                
-                
             }
         }
     }

@@ -142,7 +142,7 @@ fn spawn_tiles(
                 },
                 TileBundle {
                     tile: tile_to_spawn,
-                    tag: CustomOnScreenTag::Game,
+                    tag: CustomOnScreenTag(AppState::Game),
                 },
             ))
             .id();

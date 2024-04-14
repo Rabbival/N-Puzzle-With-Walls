@@ -57,7 +57,7 @@ fn spawn_generate_button(
                     Visibility::Hidden,
                     Some(FlexDirection::ColumnReverse)
                 ),
-                CustomOnScreenTag::Menu,
+                CustomOnScreenTag(AppState::Menu),
             ))
             .with_children(|parent| {
                 parent
@@ -98,7 +98,7 @@ fn spawn_generate_button(
                            "",
                            tiny_red_text_style.clone()
                        ),
-                       CustomOnScreenTag::Menu,
+                       CustomOnScreenTag(AppState::Menu),
                        TextAboveStartButton
                     ));
             });
@@ -121,7 +121,7 @@ fn spawn_generation_options(
                     Visibility::Hidden,
                     Some(FlexDirection::Column)
                 ),
-                CustomOnScreenTag::Menu,
+                CustomOnScreenTag(AppState::Menu),
             ))
             .with_children(|parent| {
                 //title
@@ -137,7 +137,7 @@ fn spawn_generation_options(
                             background_color: Color::INDIGO.into(),
                             ..default()
                         },
-                        CustomOnScreenTag::Menu,
+                        CustomOnScreenTag(AppState::Menu),
                     ))
                     .with_children(|parent| {
                         parent.spawn(TextBundle::from_section(
@@ -200,7 +200,7 @@ fn spawn_size_options(
                    Visibility::Hidden,
                    None
                ),
-                CustomOnScreenTag::Menu,
+                CustomOnScreenTag(AppState::Menu),
             ))
             .with_children(|parent| {
                 parent
@@ -266,7 +266,7 @@ fn spawn_tile_counter(
                    Visibility::Hidden,
                    None
                ),
-                CustomOnScreenTag::Menu,
+                CustomOnScreenTag(AppState::Menu),
             ))
             .with_children(|parent| {
                 parent
@@ -283,7 +283,7 @@ fn spawn_tile_counter(
                             visibility: Visibility::Hidden,
                             ..default()
                         },
-                        CustomOnScreenTag::Menu,
+                        CustomOnScreenTag(AppState::Menu),
                         TreeGenerationOptionsTag,
                         OnOwnScreenVisibility(Visibility::Hidden),
                     ))

@@ -41,7 +41,7 @@ fn spawn_victory_message(
                 Visibility::Hidden,
                 None
             ),
-            CustomOnScreenTag::Game,
+            CustomOnScreenTag(AppState::Game),
             VictoryAnnouncementTag,
             OnOwnScreenVisibility(Visibility::Hidden),
         ))
