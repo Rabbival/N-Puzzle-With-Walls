@@ -68,7 +68,7 @@ fn handle_menu_buttons(
             reset_button_text_color_event_writer.send(ResetButtonTextColor);
 
             match menu_button_action {
-                MenuButtonAction::GenerateBoard | MenuButtonAction::ChangeWallTilesCount(_) => {}
+                MenuButtonAction::MainButtonPressed | MenuButtonAction::ChangeWallTilesCount(_) => {}
                 _ => {
                     game_log(GameLog::BoardSettingsChanged(menu_button_action));
                 }

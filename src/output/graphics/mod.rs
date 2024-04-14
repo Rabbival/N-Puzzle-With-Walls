@@ -25,21 +25,17 @@ impl Plugin for GraphicsPlugin {
 }
 
 fn show_only_if_has_specified_screen_tag(
-    app_next_state: Res<State<AppState>>,
-    mut single_screen_entities: Query<(
-        &mut Visibility,
-        Option<&OnOwnScreenVisibility>,
-        &CustomOnScreenTag,
-    ), Without<MultipleOnScreenTags>>,
+    app_state: Res<State<AppState>>,
+    mut single_screen_entities: Query<(&mut Visibility, &CustomOnScreenTag), Without<MultipleOnScreenTags>>,
     mut multiple_screen_entities: Query<(&mut Visibility, &MultipleOnScreenTags), Without<CustomOnScreenTag>>,
 ) {
-    if app_next_state.is_changed() {
-        for (mut visibility, optional_own_screen_vis, entity_tag) in
+    if app_state.is_changed() {
+        for (mut visibility, screen_tag) in
             single_screen_entities.iter_mut()
         {
-            if *app_next_state == entity_tag.0 {
-                if let Some(own_screen_vis) = optional_own_screen_vis {
-                    *visibility = own_screen_vis.0;
+            if *app_state == screen_tag.screen {
+                if let Some(own_screen_vis) = screen_tag.on_own_screen_visibility {
+                    *visibility = own_screen_vis;
                 }else{
                     *visibility = Visibility::Visible;
                 }
@@ -51,8 +47,12 @@ fn show_only_if_has_specified_screen_tag(
         multiple_screen_entities.iter_mut()
         {
             for screen_tag in screen_tags.0.iter() {
-                if *app_next_state == screen_tag.0 {
-                    *visibility = Visibility::Visible;
+                if *app_state == screen_tag.screen {
+                    if let Some(own_screen_vis) = screen_tag.on_own_screen_visibility {
+                        *visibility = own_screen_vis;
+                    } else {
+                        *visibility = Visibility::Visible;      
+                    }
                     continue 'entity_for;
                 }
             }

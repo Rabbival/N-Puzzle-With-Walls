@@ -41,9 +41,11 @@ fn spawn_victory_message(
                 Visibility::Hidden,
                 None
             ),
-            CustomOnScreenTag(AppState::Game),
+            CustomOnScreenTag{
+                screen: AppState::Game,
+                on_own_screen_visibility: Some(Visibility::Hidden)
+            },
             VictoryAnnouncementTag,
-            OnOwnScreenVisibility(Visibility::Hidden),
         ))
         .with_children(|parent| {
             parent
@@ -82,19 +84,21 @@ fn spawn_victory_message(
 fn toggle_victory_message_visibilities(
     mut victory_listener: EventReader<ToggleVictoryMessage>,
     mut victory_message_query: Query<
-        (&mut Visibility, &mut OnOwnScreenVisibility),
+        (&mut Visibility, &mut CustomOnScreenTag),
         With<VictoryAnnouncementTag>,
     >,
 ){
     for _victory_announcement in victory_listener.read(){
-        let (mut victory_message_vis, mut victory_message_on_own_screen_vis) =
+        let (mut victory_message_vis, mut custom_on_screen_tag) =
             victory_message_query.single_mut();
-        if *victory_message_vis == Visibility::Visible {
-            *victory_message_vis = Visibility::Hidden;
-            victory_message_on_own_screen_vis.0 = Visibility::Hidden;
-        } else {
-            *victory_message_vis = Visibility::Visible;
-            victory_message_on_own_screen_vis.0 = Visibility::Visible;
+        if let Some(own_screen_vis_for_toggle) = &mut custom_on_screen_tag.on_own_screen_visibility{
+            if *victory_message_vis == Visibility::Visible {
+                *victory_message_vis = Visibility::Hidden;
+                *own_screen_vis_for_toggle = Visibility::Hidden;
+            } else {
+                *victory_message_vis = Visibility::Visible;
+                *own_screen_vis_for_toggle = Visibility::Visible;
+            }
         }
     }
 }

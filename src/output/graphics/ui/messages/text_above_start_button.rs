@@ -17,7 +17,7 @@ impl Plugin for TextAboveStartButtonPlugin {
                     .run_if(in_state(AppState::Menu)),
             )
             .add_systems(
-                OnEnter(AppState::Menu),
+                OnExit(AppState::Menu),
                 reset_message_when_menu_reopens
                     .in_set(StateChangeSystemSets::StateChangeListening)
             );

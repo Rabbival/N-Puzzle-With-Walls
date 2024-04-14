@@ -7,5 +7,5 @@ pub enum MenuButtonAction {
     ChangeEmptyTilesCount(u8),
     ChangeGenerationMethod(BoardGenerationMethod),
     ChangeSpanningTreeGeneration(GridTravellerType),
-    GenerateBoard,
+    MainButtonPressed,
 }

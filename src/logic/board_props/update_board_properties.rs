@@ -167,7 +167,7 @@ pub fn set_applied_props_and_exit_menu(
     >,
 ) {
     for button_event in button_event_listener.read() {
-        if let MenuButtonAction::GenerateBoard = button_event.action {
+        if let MenuButtonAction::MainButtonPressed = button_event.action {
             let planned_board_prop = planned_board_prop_query.single_mut();
             let mut applied_props = applied_board_prop_query.single_mut();
             *applied_props = *planned_board_prop;

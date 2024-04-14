@@ -11,7 +11,7 @@ impl Plugin for MenuGraphicsPlugin {
                     (update_wall_tiles_count_visuals)
                         .run_if(resource_changed::<UnappliedMenuWallCount>()),
                     flash_generation_text_red,
-                    update_generate_button_text
+                    update_main_button_text
                 )
                     .run_if(in_state(AppState::Menu)),
             ),
@@ -27,7 +27,7 @@ fn update_wall_tiles_count_visuals(
     text.sections[0].value = unapplied_menu_wall_count.0.to_string();
 }
 
-fn update_generate_button_text(
+fn update_main_button_text(
     mut button_event_listener: EventReader<MenuButtonPressed>,
     mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>,
 ) {

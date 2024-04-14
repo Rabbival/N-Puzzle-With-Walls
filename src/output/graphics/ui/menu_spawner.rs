@@ -58,9 +58,18 @@ fn spawn_generate_button(
                     Some(FlexDirection::ColumnReverse)
                 ),
                 MultipleOnScreenTags(vec![
-                    CustomOnScreenTag(AppState::Menu),
-                    CustomOnScreenTag(AppState::Builder),
-                    CustomOnScreenTag(AppState::Loader),
+                    CustomOnScreenTag{
+                        screen: AppState::Menu,
+                        on_own_screen_visibility: None
+                    },
+                    CustomOnScreenTag{
+                        screen: AppState::Builder,
+                        on_own_screen_visibility: None
+                    },
+                    CustomOnScreenTag{
+                        screen: AppState::Loader,
+                        on_own_screen_visibility: None
+                    },
                 ]),
             ))
             .with_children(|parent| {
@@ -82,7 +91,7 @@ fn spawn_generate_button(
                                     background_color: super::NORMAL_BUTTON_COLOR.into(),
                                     ..default()
                                 },
-                                MenuButtonAction::GenerateBoard,
+                                MenuButtonAction::MainButtonPressed,
                             ))
                             .with_children(|parent| {
                                 parent.spawn((
@@ -124,7 +133,10 @@ fn spawn_generation_options(
                     Visibility::Hidden,
                     Some(FlexDirection::Column)
                 ),
-                CustomOnScreenTag(AppState::Menu),
+                CustomOnScreenTag{
+                    screen: AppState::Menu,
+                    on_own_screen_visibility: None
+                },
             ))
             .with_children(|parent| {
                 //title
@@ -140,7 +152,10 @@ fn spawn_generation_options(
                             background_color: Color::INDIGO.into(),
                             ..default()
                         },
-                        CustomOnScreenTag(AppState::Menu),
+                        CustomOnScreenTag{
+                            screen: AppState::Menu,
+                            on_own_screen_visibility: None
+                        },
                     ))
                     .with_children(|parent| {
                         parent.spawn(TextBundle::from_section(
@@ -203,7 +218,10 @@ fn spawn_size_options(
                    Visibility::Hidden,
                    None
                ),
-                CustomOnScreenTag(AppState::Menu),
+               CustomOnScreenTag{
+                   screen: AppState::Menu,
+                   on_own_screen_visibility: None
+               },
             ))
             .with_children(|parent| {
                 parent
@@ -269,7 +287,10 @@ fn spawn_tile_counter(
                    Visibility::Hidden,
                    None
                ),
-                CustomOnScreenTag(AppState::Menu),
+               CustomOnScreenTag{
+                   screen: AppState::Menu,
+                   on_own_screen_visibility: None
+               },
             ))
             .with_children(|parent| {
                 parent
@@ -286,9 +307,11 @@ fn spawn_tile_counter(
                             visibility: Visibility::Hidden,
                             ..default()
                         },
-                        CustomOnScreenTag(AppState::Menu),
+                        CustomOnScreenTag{
+                            screen: AppState::Menu,
+                            on_own_screen_visibility: Some(Visibility::Hidden)
+                        },
                         TreeGenerationOptionsTag,
-                        OnOwnScreenVisibility(Visibility::Hidden),
                     ))
                     .with_children(|parent| {
                         //title

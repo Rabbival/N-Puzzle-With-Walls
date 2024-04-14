@@ -94,7 +94,6 @@ pub mod prelude {
             tile_graphics::*,
             visibility_tags::{
                 custom_on_screen_tag::*,
-                on_own_screen_visibility::*,
                 multiple_on_screen_tags::*,
             },
             ui::{

@@ -134,19 +134,21 @@ fn apply_wall_count_menu_ui_update(
 fn set_tree_generation_options_visibility(
     unapplied_menu_wall_count: Res<UnappliedMenuWallCount>,
     mut tree_generation_options_query: Query<
-        (&mut Visibility, &mut OnOwnScreenVisibility),
+        (&mut Visibility, &mut CustomOnScreenTag),
         With<TreeGenerationOptionsTag>,
     >,
 ) {
     if unapplied_menu_wall_count.is_changed() {
-        let (mut current_visibility, mut own_screen_vis_for_toggle) =
+        let (mut current_visibility, mut custom_on_screen_tag) =
             tree_generation_options_query.single_mut();
-        if unapplied_menu_wall_count.0 == 0 {
-            *current_visibility = Visibility::Hidden;
-            own_screen_vis_for_toggle.0 = Visibility::Hidden;
-        } else {
-            *current_visibility = Visibility::Visible;
-            own_screen_vis_for_toggle.0 = Visibility::Visible;
+        if let Some(own_screen_vis_for_toggle) = &mut custom_on_screen_tag.on_own_screen_visibility{
+            if unapplied_menu_wall_count.0 == 0 {
+                *current_visibility = Visibility::Hidden;
+                *own_screen_vis_for_toggle = Visibility::Hidden;
+            } else {
+                *current_visibility = Visibility::Visible;
+                *own_screen_vis_for_toggle = Visibility::Visible;
+            }
         }
     }
 }
@@ -161,7 +163,7 @@ fn set_applied_props(
     mut commands: Commands,
 ) {
     for button_event in button_event_listener.read() {
-        if let MenuButtonAction::GenerateBoard = button_event.action {
+        if let MenuButtonAction::MainButtonPressed = button_event.action {
             // remove applied from previous settings
             for previously_applied in currently_applied.iter_mut() {
                 commands
