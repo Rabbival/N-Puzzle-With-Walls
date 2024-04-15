@@ -17,6 +17,9 @@ pub struct VictoryButtonPressed {
 }
 
 #[derive(Event)]
+pub struct SaveWallsLayoutButtonPressed;
+
+#[derive(Event)]
 pub struct ShowGenerationError(pub BoardGenerationError);
 
 #[derive(Event)]
@@ -35,6 +38,7 @@ impl Plugin for UiEventPlugin {
             .add_event::<ApplyButtonPressed>()
             .add_event::<VictoryButtonPressed>()
             .add_event::<ShowGenerationError>()
+            .add_event::<SaveWallsLayoutButtonPressed>()
             .add_event::<ResetButtonTextColor>()
             .add_event::<ToggleButton>();
     }

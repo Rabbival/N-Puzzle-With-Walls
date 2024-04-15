@@ -142,10 +142,7 @@ fn spawn_tiles(
                 },
                 TileBundle {
                     tile: tile_to_spawn,
-                    tag: CustomOnScreenTag{
-                        screen: AppState::Game,
-                        on_own_screen_visibility: None
-                    },
+                    tag: simple_on_screen_tag(AppState::Game),
                 },
             ))
             .id();

@@ -10,6 +10,7 @@ impl Plugin for ButtonInputPlugin {
                 handle_menu_buttons.run_if(in_state(AppState::Menu)),
                 handle_victory_buttons.run_if(in_state(GameState::Victory)),
                 handle_eternal_buttons,
+                handle_save_walls_layout_button,
             )
                 .in_set(InputSystemSets::InputListening),
         );
@@ -97,6 +98,18 @@ fn handle_victory_buttons(
             });
 
             reset_button_text_color_event_writer.send(ResetButtonTextColor);
+        }
+    }
+}
+
+fn handle_save_walls_layout_button(
+    mut button_event_writer: EventWriter<SaveWallsLayoutButtonPressed>,
+    interaction_query: Query<&Interaction, (Changed<Interaction>, With<SaveWallsLayoutButton>)>,
+) {
+    for interaction in interaction_query.iter()
+    {
+        if *interaction == Interaction::Pressed {
+            button_event_writer.send(SaveWallsLayoutButtonPressed);
         }
     }
 }

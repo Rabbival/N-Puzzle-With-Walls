@@ -1,6 +1,7 @@
 pub mod victory_message;
 
 pub mod text_above_start_button;
+pub mod text_above_save_button;
 
 use crate::prelude::*;
 
@@ -11,7 +12,8 @@ impl Plugin for MessagesGraphicsPlugin {
         app
 			.add_plugins((
 				VictoryMessagePlugin,
-                TextAboveStartButtonPlugin
+                TextAboveStartButtonPlugin,
+                TextAboveSaveButtonPlugin
             ))
         ;
     }

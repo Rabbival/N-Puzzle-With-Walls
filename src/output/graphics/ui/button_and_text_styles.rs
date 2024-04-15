@@ -59,13 +59,24 @@ pub fn button_and_text_styles_emitter(
 
     let small_text_style = TextStyle {
         font_size: 30.0,
-        //color: Color::DARK_GRAY,
         ..default()
     };
 
     let tiny_red_text_style = TextStyle {
         font_size: 22.0,
         color: Color::RED,
+        ..default()
+    };
+
+    let save_walls_layout_button_style = Style {
+        width: Val::Px(450.0),
+        height: Val::Px(50.0),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    };
+    let save_walls_layout_button_text_style = TextStyle {
+        font_size: 40.0,
         ..default()
     };
 
@@ -80,6 +91,8 @@ pub fn button_and_text_styles_emitter(
     big_button_event_writer.send(SpawnBigButtons {
         big_button_style,
         big_button_text_style,
+        save_walls_layout_button_style,
+        save_walls_layout_button_text_style,
         tiny_red_text_style
     });
     tile_count_buttons_event_writer.send(SpawnTileCountButtons {

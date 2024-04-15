@@ -18,13 +18,13 @@ impl Plugin for TextAboveStartButtonPlugin {
             )
             .add_systems(
                 OnExit(AppState::Menu),
-                reset_message_when_menu_reopens
+                reset_text_above_start_button
                     .in_set(StateChangeSystemSets::StateChangeListening)
             );
     }
 }
 
-fn reset_message_when_menu_reopens(
+fn reset_text_above_start_button(
     mut text_above_start_button_query: Query<&mut Text, With<TextAboveStartButton>>
 ){
     let text_above_start_button = &mut text_above_start_button_query.single_mut().sections[0].value;

@@ -58,18 +58,9 @@ fn spawn_generate_button(
                     Some(FlexDirection::ColumnReverse)
                 ),
                 MultipleOnScreenTags(vec![
-                    CustomOnScreenTag{
-                        screen: AppState::Menu,
-                        on_own_screen_visibility: None
-                    },
-                    CustomOnScreenTag{
-                        screen: AppState::Builder,
-                        on_own_screen_visibility: None
-                    },
-                    CustomOnScreenTag{
-                        screen: AppState::Loader,
-                        on_own_screen_visibility: None
-                    },
+                    simple_on_screen_tag(AppState::Menu),
+                    simple_on_screen_tag(AppState::Builder),
+                    simple_on_screen_tag(AppState::Loader),
                 ]),
             ))
             .with_children(|parent| {
@@ -104,7 +95,6 @@ fn spawn_generate_button(
                                 ));
                             });
                     });
-                //unapplied changes warning text
                 parent
                     .spawn((
                        TextBundle::from_section(
@@ -133,10 +123,7 @@ fn spawn_generation_options(
                     Visibility::Hidden,
                     Some(FlexDirection::Column)
                 ),
-                CustomOnScreenTag{
-                    screen: AppState::Menu,
-                    on_own_screen_visibility: None
-                },
+                simple_on_screen_tag(AppState::Menu),
             ))
             .with_children(|parent| {
                 //title
@@ -152,10 +139,7 @@ fn spawn_generation_options(
                             background_color: Color::INDIGO.into(),
                             ..default()
                         },
-                        CustomOnScreenTag{
-                            screen: AppState::Menu,
-                            on_own_screen_visibility: None
-                        },
+                        simple_on_screen_tag(AppState::Menu),
                     ))
                     .with_children(|parent| {
                         parent.spawn(TextBundle::from_section(
@@ -218,10 +202,7 @@ fn spawn_size_options(
                    Visibility::Hidden,
                    None
                ),
-               CustomOnScreenTag{
-                   screen: AppState::Menu,
-                   on_own_screen_visibility: None
-               },
+               simple_on_screen_tag(AppState::Menu),
             ))
             .with_children(|parent| {
                 parent
@@ -287,10 +268,7 @@ fn spawn_tile_counter(
                    Visibility::Hidden,
                    None
                ),
-               CustomOnScreenTag{
-                   screen: AppState::Menu,
-                   on_own_screen_visibility: None
-               },
+               simple_on_screen_tag(AppState::Menu),
             ))
             .with_children(|parent| {
                 parent
