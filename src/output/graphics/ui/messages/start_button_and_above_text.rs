@@ -81,8 +81,14 @@ fn update_main_button_text_to_show_functionality(
 
 fn show_board_couldnt_be_generated(
     mut event_listener: EventReader<ShowGenerationError>,
-    mut main_button_text_query: Query<&mut Text, With<BoardGenerationTextTag>>,
-    mut text_above_start_button_query: Query<&mut Text, With<TextAboveStartButton>>
+    mut main_button_text_query: Query<
+        &mut Text, 
+        (With<BoardGenerationTextTag>, Without<TextAboveStartButton>)
+    >,
+    mut text_above_start_button_query: Query<
+        &mut Text,
+        (With<TextAboveStartButton>, Without<BoardGenerationTextTag>)
+    >,
 ) {
     for _ in event_listener.read() {
         set_text_section_value_and_color(
