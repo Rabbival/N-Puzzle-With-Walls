@@ -1,4 +1,5 @@
 use enum_iterator::Sequence;
+use crate::prelude::SaveAttemptOutcome;
 
 #[derive(Debug, Sequence, PartialEq, Eq, Hash, PartialOrd, Clone, Copy)]
 pub enum TextAboveSaveButtonType {
@@ -9,6 +10,20 @@ pub enum TextAboveSaveButtonType {
 }
 
 impl TextAboveSaveButtonType{
+    pub fn from_save_attempt_outcome(save_attempt_outcome: SaveAttemptOutcome) -> Self {
+        match save_attempt_outcome{
+            SaveAttemptOutcome::LayoutSavedSuccessfully => {
+                TextAboveSaveButtonType::LayoutSavedSuccessfully
+            },
+            SaveAttemptOutcome::WallLayoutAlreadyExistsInMemory => {
+                TextAboveSaveButtonType::WallLayoutAlreadyExistsInMemory
+            },
+            SaveAttemptOutcome::WallsLayoutsAtCapacity => {
+                TextAboveSaveButtonType::WallsLayoutsAtCapacity
+            }
+        }
+    }
+    
     pub fn to_string(&self) -> String{
         match self{
             TextAboveSaveButtonType::NoText => {

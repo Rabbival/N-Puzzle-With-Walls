@@ -1,7 +1,7 @@
 pub mod victory_message;
 
-pub mod text_above_start_button;
-pub mod text_above_save_button;
+pub mod start_button_and_above_text;
+pub mod save_button_and_above_text;
 
 use crate::prelude::*;
 

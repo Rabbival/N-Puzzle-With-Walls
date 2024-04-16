@@ -10,6 +10,7 @@ pub mod ui_event;
 pub mod ui_spawn_event;
 pub mod game_event;
 pub mod db_event;
+pub mod system_event;
 
 pub struct EventPlugins;
 
@@ -24,6 +25,7 @@ impl Plugin for EventPlugins {
             AppEventPlugin,
             GameEventPlugin,
             DataBaseEventPlugin,
+            SystemEventPlugin
         ));
     }
 }

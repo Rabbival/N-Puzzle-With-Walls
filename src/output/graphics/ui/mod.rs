@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub mod menu_graphics;
+pub mod menu_graphics_general;
 pub mod eternal_buttons_spawner;
 pub mod menu_spawner;
 pub mod button_and_text_styles;
@@ -14,6 +14,7 @@ pub const PRESSED_BUTTON_COLOR: Color = Color::rgb(0.3, 0.3, 0.3);
 
 pub const NORMAL_TEXT_COLOR: Color = Color::WHITE;
 pub const RED_TEXT_COLOR: Color = Color::ORANGE_RED;
+pub const GREEN_TEXT_COLOR: Color = Color::LIME_GREEN;
 
 
 
@@ -85,7 +86,7 @@ fn reset_color_for_button_text(
     for _ in event_listener.read() {
         for mut button_text in generation_text_query.iter_mut() {
             let button_text_color = &mut button_text.sections[0].style.color;
-            if *button_text_color == RED_TEXT_COLOR {
+            if *button_text_color != NORMAL_TEXT_COLOR {
                 *button_text_color = NORMAL_TEXT_COLOR;
             }
         }
@@ -98,4 +99,20 @@ pub fn set_color_to_normal(background_color: &mut BackgroundColor) {
 
 pub fn set_color_to_pressed(background_color: &mut BackgroundColor) {
     *background_color = PRESSED_BUTTON_COLOR.into();
+}
+
+pub fn set_text_section_value_and_color(
+    text_section_ref: &mut TextSection, 
+    new_color: Option<Color>, 
+    new_value: Option<String>
+){
+
+    if let Some(text_new_color) =  new_color {
+        let text_above_save_button_color = &mut text_section_ref.style.color;
+        *text_above_save_button_color = text_new_color;
+    }
+    if let Some(text_new_value) =  new_value {
+        let text_above_save_button_value = &mut text_section_ref.value;
+        *text_above_save_button_value = text_new_value.to_string();
+    }
 }

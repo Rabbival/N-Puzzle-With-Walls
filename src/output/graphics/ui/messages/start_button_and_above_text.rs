@@ -1,3 +1,4 @@
+use crate::output::graphics::ui::RED_TEXT_COLOR;
 use crate::prelude::*;
 #[derive(Component)]
 pub struct TextAboveStartButton;
@@ -12,7 +13,8 @@ impl Plugin for TextAboveStartButtonPlugin {
                 (
                     listen_for_apply_button_press,
                     alert_player_of_unsaved_changes.after(update_wall_count_unapplied),
-                    show_board_couldnt_be_generated_message
+                    show_board_couldnt_be_generated,
+                    update_main_button_text_to_show_functionality
                 )
                     .run_if(in_state(AppState::Menu)),
             )
@@ -60,12 +62,38 @@ fn alert_player_of_unsaved_changes(
     }
 }
 
-fn show_board_couldnt_be_generated_message(
+fn update_main_button_text_to_show_functionality(
+    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>,
+) {
+    for button_event in button_event_listener.read() {
+        if let MenuButtonAction::ChangeGenerationMethod(generation_method)
+            = button_event.action
+        {
+            set_text_section_value_and_color(
+                &mut generation_text_query.single_mut().sections[0],
+                None,
+                Some(generation_method.to_generation_button_text())
+            );
+        }
+    }
+}
+
+fn show_board_couldnt_be_generated(
     mut event_listener: EventReader<ShowGenerationError>,
+    mut main_button_text_query: Query<&mut Text, With<BoardGenerationTextTag>>,
     mut text_above_start_button_query: Query<&mut Text, With<TextAboveStartButton>>
 ) {
     for _ in event_listener.read() {
-        let text_above_start_button = &mut text_above_start_button_query.single_mut().sections[0].value;
-        *text_above_start_button = TextAboveStartButtonType::CouldntGenerateBoard.to_string();
+        set_text_section_value_and_color(
+            &mut text_above_start_button_query.single_mut().sections[0],
+            None,
+            Some(TextAboveStartButtonType::CouldntGenerateBoard.to_string())
+        );
+        set_text_section_value_and_color(
+            &mut main_button_text_query.single_mut().sections[0],
+            Some(RED_TEXT_COLOR), 
+            None
+        );
     }
 }

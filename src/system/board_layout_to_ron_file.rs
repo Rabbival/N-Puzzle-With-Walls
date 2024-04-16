@@ -9,6 +9,7 @@ impl Plugin for BoardLayoutToRonFilePlugin{
 }
 
 fn listen_for_save_requests(
+    mut event_writer: EventWriter<LayoutSaveAttemptOutcomeEvent>,
     mut event_listener: EventReader<SaveWallsLayoutButtonPressed>,
     mut write_to_db_event_writer: EventWriter<SaveToDB>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
@@ -20,5 +21,8 @@ fn listen_for_save_requests(
             board_props: *applied_board_props_query.single(),
             wall_locations
         }));
+        
+        //until there's logic
+        event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::LayoutSavedSuccessfully));
     }
 }
