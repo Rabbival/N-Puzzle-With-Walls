@@ -131,9 +131,10 @@ mod tests {
     #[test]
     fn test_valid_request() {
         let mut app = App::new();
-        app.add_event::<UpdateTileLocationGraphics>()
+        app
+            .init_resource::<CurrentBoardWallLocations>()
+            .add_event::<UpdateTileLocationGraphics>()
             .add_event::<CheckIfBoardIsSolved>()
-            .add_event::<SaveToDB>()
             .add_systems(Update, test_valid_request_inner);
         app.update();
     }
@@ -141,31 +142,31 @@ mod tests {
     fn test_valid_request_inner(
         mut graphics_writer: EventWriter<UpdateTileLocationGraphics>,
         mut check_writer: EventWriter<CheckIfBoardIsSolved>,
-        mut db_writer: EventWriter<SaveToDB>,
+        mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>
     ) {
         assert!(!detected_as_invalid_request_inner(
             BasicDirection::Up,
             &mut graphics_writer,
             &mut check_writer,
-            &mut db_writer
+            &mut current_board_wall_locations
         ));
         assert!(detected_as_invalid_request_inner(
             BasicDirection::Right,
             &mut graphics_writer,
             &mut check_writer,
-            &mut db_writer
+            &mut current_board_wall_locations
         ));
         assert!(detected_as_invalid_request_inner(
             BasicDirection::Down,
             &mut graphics_writer,
             &mut check_writer,
-            &mut db_writer
+            &mut current_board_wall_locations
         ));
         assert!(!detected_as_invalid_request_inner(
             BasicDirection::Left,
             &mut graphics_writer,
             &mut check_writer,
-            &mut db_writer
+            &mut current_board_wall_locations
         ));
     }
 
@@ -173,13 +174,12 @@ mod tests {
         from_dir: BasicDirection,
         graphics_writer: &mut EventWriter<UpdateTileLocationGraphics>,
         check_writer: &mut EventWriter<CheckIfBoardIsSolved>,
-        db_writer: &mut EventWriter<SaveToDB>,
+        current_board_wall_locations: &mut ResMut<CurrentBoardWallLocations>
     ) -> bool {
-        let mut board =
-            generate_solved_board_inner(
-                &BoardProperties::default(),
-                db_writer
-            ).unwrap();
+        let mut board = generate_solved_board_inner(
+            &BoardProperties::default(),
+            current_board_wall_locations
+        ).unwrap();
         board.ignore_player_input = false;
         let direction_check_outcome =
             move_tile_logic_inner(graphics_writer, check_writer, from_dir, 0, &mut board.clone());

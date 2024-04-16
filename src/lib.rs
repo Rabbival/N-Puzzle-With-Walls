@@ -37,7 +37,10 @@ pub mod prelude {
             wall_placement_validator::*,
         },
         board_manager::*,
-        board_props::{board_properties::*, BoardPropsPlugins, update_board_properties::*},
+        board_props::{
+            board_properties::*, BoardPropsPlugins, update_board_properties::*,
+            current_board_wall_locations::*,
+        },
         BoardPlugins,
         data_structure::{
             grid_related::{grid::*, grid_cycle_checker::*, grid_location::*, grid_traveller::*, grid_tree::*},
@@ -118,6 +121,7 @@ pub mod prelude {
         ron_loader::*,
         system_access::*,
         text_file_system_access::*,
+        board_layout_to_ron_file::*,
     };
     pub use crate::screen_setup::*;
     pub use crate::system_sets::*;

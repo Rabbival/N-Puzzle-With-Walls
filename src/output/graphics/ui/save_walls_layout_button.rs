@@ -10,7 +10,10 @@ pub struct GameScreenButtonSpawnerPlugin;
 
 impl Plugin for GameScreenButtonSpawnerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_save_walls_layout_button);
+        
+        app
+            .add_systems(Startup, spawn_save_walls_layout_button)
+            .add_systems(Update, flash_save_walls_layout_button_text_red);
     }
 }
 
@@ -73,4 +76,14 @@ fn spawn_save_walls_layout_button(
                     ));
             });
     }
+}
+
+fn flash_save_walls_layout_button_text_red(
+    // mut event_listener: EventReader<BoardSavingError>,
+    // mut save_walls_layout_text: Query<&mut Text, With<SaveWallsLayoutTextTag>>
+){
+    // for _ in event_listener.read(){
+    //     let generation_text_color = &mut save_walls_layout_text.single_mut().sections[0].style.color;
+    //     *generation_text_color = super::RED_TEXT_COLOR;
+    // }
 }

@@ -170,18 +170,18 @@ mod tests {
     fn test_valid_location() {
         let mut app = App::new();
         app.add_event::<SwitchTilesLogic>()
-            .add_event::<SaveToDB>()
+            .init_resource::<CurrentBoardWallLocations>()
             .add_systems(Update, test_valid_location_inner);
         app.update();
     }
 
     fn test_valid_location_inner(
         mut switch_tiles_logic_writer: EventWriter<SwitchTilesLogic>,
-        mut db_writer: EventWriter<SaveToDB>
+        mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>
     ) {
         assert!(test_no_tile_in_cell(&mut switch_tiles_logic_writer));
         assert!(test_empty_slot(&mut switch_tiles_logic_writer));
-        assert!(test_no_empty_neighbor(&mut switch_tiles_logic_writer, &mut db_writer));
+        assert!(test_no_empty_neighbor(&mut switch_tiles_logic_writer, &mut current_board_wall_locations));
     }
 
     fn test_no_tile_in_cell(
@@ -218,14 +218,13 @@ mod tests {
 
     fn test_no_empty_neighbor(
         event_writer: &mut EventWriter<SwitchTilesLogic>,
-        db_writer: &mut EventWriter<SaveToDB>,
+        current_board_wall_locations: &mut ResMut<CurrentBoardWallLocations>
     ) -> bool
     {
-        let mut board: TileBoard =
-            generate_solved_board_inner(
-                &BoardProperties::default(),
-                db_writer
-            ).unwrap();
+        let mut board: TileBoard = generate_solved_board_inner(
+            &BoardProperties::default(),
+            current_board_wall_locations
+        ).unwrap();
         board.ignore_player_input = false;
 
         //fill all empties

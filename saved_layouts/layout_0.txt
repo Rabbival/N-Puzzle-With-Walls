@@ -1,0 +1,19 @@
+(
+    board_props: (
+        size: Small,
+        wall_count: 2,
+        empty_count: 1,
+        generation_method: Auto,
+        tree_traveller_type: BFS,
+    ),
+    wall_locations: [
+        (
+            row: 0,
+            col: 3,
+        ),
+        (
+            row: 2,
+            col: 1,
+        ),
+    ],
+)

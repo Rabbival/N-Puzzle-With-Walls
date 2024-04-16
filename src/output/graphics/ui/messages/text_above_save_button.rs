@@ -29,12 +29,22 @@ fn reset_text_above_save_button(
     *text_above_save_button = TextAboveSaveButtonType::NoText.to_string();
 }
 
-fn im_a_dummy_function_to_check_the_text(
-    mut event_listener: EventReader<SaveWallsLayoutButtonPressed>,
+//TODO: make it green and don't remember to turn it back to red after
+fn show_walls_layout_saved_successfully_message(
+    //TODO: listen to successful save event
     mut text_above_save_button_query: Query<&mut Text, With<TextAboveSaveButton>>
+){
+    let text_above_save_button = &mut text_above_save_button_query.single_mut().sections[0].value;
+    *text_above_save_button = TextAboveSaveButtonType::LayoutSavedSuccessfully.to_string();
+}
+
+
+fn im_a_dummy_function_to_check_the_text(
+    // mut event_listener: EventReader<BoardSavingError>,
+    // mut text_above_save_button_query: Query<&mut Text, With<TextAboveSaveButton>>
 ) {
-    for _ in event_listener.read() {
-        let text_above_save_button = &mut text_above_save_button_query.single_mut().sections[0].value;
-        *text_above_save_button = TextAboveSaveButtonType::WallLayoutAlreadyExistsInMemory.to_string();
-    }
+    // for _ in event_listener.read() {
+    //     let text_above_save_button = &mut text_above_save_button_query.single_mut().sections[0].value;
+    //     *text_above_save_button = TextAboveSaveButtonType::WallLayoutAlreadyExistsInMemory.to_string();
+    // }
 }

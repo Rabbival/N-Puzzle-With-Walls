@@ -25,11 +25,11 @@ fn generate_solved_board(
     mut solved_board_query: Query<&mut TileBoard, With<SolvedBoard>>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<GameState>>,
-    mut write_to_db_event_writer: EventWriter<SaveToDB>
+    mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>
 ){
     match generate_solved_board_inner(
         applied_board_props_query.single(),
-        &mut write_to_db_event_writer
+        &mut current_board_wall_locations
     ) {
         Ok(board) => {
             *solved_board_query.single_mut() = board;
@@ -44,7 +44,7 @@ fn generate_solved_board(
 
 pub fn generate_solved_board_inner(
     applied_props: &BoardProperties,
-    write_to_db_event_writer: &mut EventWriter<SaveToDB>
+    current_board_wall_locations_ref: &mut ResMut<CurrentBoardWallLocations>
 ) -> Result<TileBoard, BoardGenerationError> {
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut solved_board = TileBoard::new(grid_side_length);
@@ -58,12 +58,6 @@ pub fn generate_solved_board_inner(
             &mut solved_board
         )?;
     }
-
-    //TODO: uncomment writing to db
-    // write_to_db_event_writer.send(SaveToDB(DomainBoard{
-    //     board_props: *applied_props,
-    //     wall_locations
-    // }));
 
     spawn_empty_tiles(
         applied_props,
@@ -79,6 +73,7 @@ pub fn generate_solved_board_inner(
     solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;
     solved_board.index_all_tile_types();
     solved_board.ignore_player_input = true;
+    current_board_wall_locations_ref.0 = wall_locations;
     Ok(solved_board)
 }
 
@@ -384,14 +379,13 @@ mod tests {
     #[test]
     fn test_connectivity_bfs_tree() {
         let mut app = App::new();
-        app.add_event::<SaveToDB>()
+        app
+            .init_resource::<CurrentBoardWallLocations>()
             .add_systems(Update, test_connectivity_bfs_tree_inner);
         app.update();
     }
 
-    fn test_connectivity_bfs_tree_inner(
-        mut event_writer: EventWriter<SaveToDB>,
-    ) {
+    fn test_connectivity_bfs_tree_inner(mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>) {
         const ATTEMPT_COUNT: usize = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
         let board_props: BoardProperties = BoardProperties {
@@ -402,10 +396,7 @@ mod tests {
         };
         for _ in 0..ATTEMPT_COUNT {
             let solved_board =
-                generate_solved_board_inner(
-                    &board_props,
-                    &mut event_writer
-                ).unwrap();
+                generate_solved_board_inner(&board_props, &mut current_board_wall_locations).unwrap();
             assert!(solved_board.grid.is_connected_graph());
         }
     }
@@ -413,14 +404,13 @@ mod tests {
     #[test]
     fn test_connectivity_dfs_tree() {
         let mut app = App::new();
-        app.add_event::<SaveToDB>()
+        app
+            .init_resource::<CurrentBoardWallLocations>()
             .add_systems(Update, test_connectivity_dfs_tree_inner);
         app.update();
     }
 
-    fn test_connectivity_dfs_tree_inner(
-        mut event_writer: EventWriter<SaveToDB>,
-    ) {
+    fn test_connectivity_dfs_tree_inner(mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>) {
         const ATTEMPT_COUNT: usize = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
         let board_props: BoardProperties = BoardProperties {
@@ -430,11 +420,7 @@ mod tests {
             ..Default::default()
         };
         for _ in 0..ATTEMPT_COUNT {
-            let solved_board =
-                generate_solved_board_inner(
-                    &board_props,
-                    &mut event_writer
-                ).unwrap();
+            let solved_board = generate_solved_board_inner(&board_props, &mut current_board_wall_locations).unwrap();
             assert!(solved_board.grid.is_connected_graph());
         }
     }

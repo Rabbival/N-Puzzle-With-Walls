@@ -178,20 +178,19 @@ mod tests {
     #[test]
     fn several_attempts_at_generating_unsolved_boards() {
         let mut app = App::new();
-        app.add_event::<SaveToDB>()
+        app.init_resource::<CurrentBoardWallLocations>()
             .add_systems(Update, several_attempts_at_generating_unsolved_boards_inner);
         app.update();
     }
 
     fn several_attempts_at_generating_unsolved_boards_inner(
-        mut event_writer: EventWriter<SaveToDB>,
+        mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>
     ){
         const ATTEMPT_COUNT: u8 = 10;
-        let solved_board
-            =generate_solved_board_inner(
-                &BoardProperties::default(),
-                &mut event_writer
-            ).unwrap();
+        let solved_board =generate_solved_board_inner(
+            &BoardProperties::default(),
+            &mut current_board_wall_locations
+        ).unwrap();
         for _ in 0..ATTEMPT_COUNT{
             assert_ne!(solved_board.grid, 
                 match generate_game_board(solved_board.clone(), RANDOM_RANGE_FOR_TESTING){

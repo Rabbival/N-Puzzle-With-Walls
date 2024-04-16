@@ -5,6 +5,7 @@ pub enum TextAboveSaveButtonType {
     NoText,
     WallLayoutAlreadyExistsInMemory,
     WallsLayoutsAtCapacity,
+    LayoutSavedSuccessfully
 }
 
 impl TextAboveSaveButtonType{
@@ -18,7 +19,10 @@ impl TextAboveSaveButtonType{
             },
             TextAboveSaveButtonType::WallsLayoutsAtCapacity => {
                 String::from("Layouts memory at capacity, Delete some to save new ones.")
-            }
+            },
+            TextAboveSaveButtonType::LayoutSavedSuccessfully => {
+                String::from("Walls layout saved successfully!")
+            },
         }
     }
 }

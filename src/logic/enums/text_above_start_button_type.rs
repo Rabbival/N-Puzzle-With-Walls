@@ -4,7 +4,8 @@ use enum_iterator::Sequence;
 pub enum TextAboveStartButtonType {
     NoText,
     UnappliedChanges,
-    CouldntGenerateBoard
+    CouldntGenerateBoard,
+    TriedLoadingAnInvalidBoard
 }
 
 impl TextAboveStartButtonType{
@@ -18,7 +19,10 @@ impl TextAboveStartButtonType{
             },
             TextAboveStartButtonType::CouldntGenerateBoard => {
                 String::from(" No board could be generated ")
-            }
+            },
+            TextAboveStartButtonType::TriedLoadingAnInvalidBoard => {
+                String::from(" Tried loading an invalid board ")
+            },
         }
     }
 }
