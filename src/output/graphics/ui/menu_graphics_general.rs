@@ -1,4 +1,3 @@
-use crate::output::graphics::ui::RED_TEXT_COLOR;
 use crate::prelude::*;
 
 pub struct MenuGraphicsPlugin;

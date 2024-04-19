@@ -1,4 +1,3 @@
-use crate::costume_event::timed_events::TimedEventsPlugin;
 use crate::prelude::*;
 
 use self::game_event::GameEventPlugin;
@@ -12,7 +11,6 @@ pub mod ui_spawn_event;
 pub mod game_event;
 pub mod db_event;
 pub mod system_event;
-pub mod timed_events;
 
 pub struct EventPlugins;
 
@@ -28,7 +26,6 @@ impl Plugin for EventPlugins {
             GameEventPlugin,
             DataBaseEventPlugin,
             SystemEventPlugin,
-            TimedEventsPlugin
         ));
     }
 }

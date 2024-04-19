@@ -20,11 +20,6 @@ pub mod prelude {
         app_event::*, board_set_event::*, db_event::*, EventPlugins,
         game_event::*, move_tile_event::*, screen_changing_event::*, system_event::*, ui_event::*,
         ui_spawn_event::*,
-        timed_events::{
-            timed_event::*,
-            timed_events_manager::*,
-            TimedEventsPlugin,
-        }
     };
     pub use crate::data_base::{
         data_base_manager::*,

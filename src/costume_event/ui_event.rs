@@ -26,6 +26,9 @@ pub struct ShowGenerationError(pub BoardGenerationError);
 pub struct ResetButtonTextColor;
 
 #[derive(Event)]
+pub struct ResetTextAboveSaveButton;
+
+#[derive(Event)]
 pub struct ToggleButton {
     pub entity: Entity,
 }
@@ -40,6 +43,7 @@ impl Plugin for UiEventPlugin {
             .add_event::<ShowGenerationError>()
             .add_event::<SaveWallsLayoutButtonPressed>()
             .add_event::<ResetButtonTextColor>()
-            .add_event::<ToggleButton>();
+            .add_event::<ToggleButton>()
+            .add_event::<ResetTextAboveSaveButton>();
     }
 }
