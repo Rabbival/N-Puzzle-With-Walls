@@ -57,7 +57,10 @@ fn spawn_generate_button(
                 MultipleOnScreenTags(vec![
                     simple_on_screen_tag(AppState::Menu),
                     simple_on_screen_tag(AppState::Builder),
-                    simple_on_screen_tag(AppState::Loader),
+                    CustomOnScreenTag{
+                        screen: AppState::Loader,
+                        on_own_screen_visibility: Some(Visibility::Hidden)
+                    },
                 ]),
             ))
             .with_children(|parent| {

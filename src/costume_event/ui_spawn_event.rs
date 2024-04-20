@@ -33,6 +33,8 @@ pub struct SpawnEternalButtons {
 pub struct SpawnLoaderButtons {
     pub thin_button_style: Style,
     pub button_text_style: TextStyle,
+    pub board_props_button_style: Style,
+    pub tiny_text_style: TextStyle,
 }
 
 pub struct UiSpawnEventPlugin;

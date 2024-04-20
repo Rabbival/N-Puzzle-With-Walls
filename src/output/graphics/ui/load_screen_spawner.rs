@@ -1,5 +1,12 @@
 use crate::prelude::*;
 
+const LAYOUT_MARGINS_RECT: UiRect = UiRect {
+    top: Val::Px(50.0),
+    right: Val::Px(30.0),
+    bottom: Val::Px(50.0),
+    left: Val::Px(30.0)
+};
+
 pub struct LoadScreenSpawnerPlugin;
 
 impl Plugin for LoadScreenSpawnerPlugin{
@@ -30,7 +37,94 @@ fn spawn_load_screen_arrows(
             "<",
             &mut commands
         );
+
+
+        //TODO: change to actual buttons when the time comes
+        //currently here to demonstrate how one can load only when a layout is chosen
+        commands
+            .spawn((
+                build_node_bundle_with_full_percentage_style(
+                    AlignItems::Center,
+                    JustifyContent::Center,
+                    Visibility::Hidden,
+                    Some(FlexDirection::Column)
+                ),
+                simple_on_screen_tag(AppState::Loader),
+            ))
+            .with_children(|parent| {
+                //first row
+                parent.spawn(NodeBundle {
+                    style: Style {
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Start,
+                        ..default()
+                    },
+                    ..default()
+                }).with_children(|parent| {
+                    spawn_layout_entity(
+                        parent,
+                        &button_event
+                    );
+                    spawn_layout_entity(
+                        parent,
+                        &button_event
+                    );
+                });
+                //second row
+                parent.spawn(NodeBundle {
+                    style: Style {
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    ..default()
+                }).with_children(|parent| {
+                    spawn_layout_entity(
+                        parent,
+                        &button_event
+                    );
+                    spawn_layout_entity(
+                        parent,
+                        &button_event
+                    );
+                });
+            });
     }
+}
+
+fn spawn_layout_entity(
+    parent: &mut ChildBuilder,
+    button_event: &SpawnLoaderButtons
+    //TODO: action
+){
+    parent.spawn(NodeBundle {
+        style: Style {
+            flex_direction: FlexDirection::Row,
+            align_items: AlignItems::Center,
+            margin: LAYOUT_MARGINS_RECT,
+            ..default()
+        },
+        ..default()
+    }).with_children(|parent| {
+        let mut layout_entity = parent.spawn((
+            ButtonBundle {
+                style: button_event.board_props_button_style.clone(),
+                background_color: super::NORMAL_BUTTON_COLOR.into(),
+                ..default()
+            },
+            //TODO: put action here
+        ));
+        layout_entity.with_children(|parent| {
+            parent.spawn((
+                TextBundle::from_section(
+                    DomainBoard::default().to_string_for_button(),
+                    button_event.tiny_text_style.clone(),
+                ),
+                ButtonText,
+            ));
+        });
+        //TODO: .with_children for the layout itself
+    });
 }
 
 fn spawn_load_screen_arrow(
@@ -83,5 +177,5 @@ fn spawn_load_screen_arrow(
                     });
                 });
         });
-    
+
 }

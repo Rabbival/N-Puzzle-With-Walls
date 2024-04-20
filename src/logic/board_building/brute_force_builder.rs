@@ -35,23 +35,28 @@ pub fn brute_force_generate_game_board(
 
     for _shift in 0..location_shift_count{
         for shift_tracker in &mut location_shift_trackers{
-            determine_next_shift_direction(
+            let move_registered = determine_next_shift_direction(
                 &mut board,
                 shift_tracker,
                 &mut rng
-            )?;
+            )?.0;
+            if move_registered{
+                
+            }else{
+                
+            }
         }
     }
 
     //generation was successful
     for shift_tracker in location_shift_trackers{
-        let reveresed_shift_order=shift_tracker.shift_direction_sequence
+        let reversed_shift_order=shift_tracker.shift_direction_sequence
             .iter()
             .rev()
             .copied();
         print_possible_solution(
             shift_tracker.empty_index,
-            reveresed_shift_order
+            reversed_shift_order
         );
     }
     

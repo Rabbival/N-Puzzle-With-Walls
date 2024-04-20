@@ -63,6 +63,11 @@ pub fn button_and_text_styles_emitter(
         ..default()
     };
 
+    let tiny_text_style = TextStyle {
+        font_size: 20.0,
+        ..default()
+    };
+
     let tiny_red_text_style = TextStyle {
         font_size: 22.0,
         color: Color::RED,
@@ -78,6 +83,14 @@ pub fn button_and_text_styles_emitter(
     };
     let save_walls_layout_button_text_style = TextStyle {
         font_size: 40.0,
+        ..default()
+    };
+
+    let board_props_button_style = Style {
+        width: Val::Px(240.0),
+        height: Val::Px(240.0),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Start,
         ..default()
     };
 
@@ -100,10 +113,12 @@ pub fn button_and_text_styles_emitter(
         regular_button_style: button_style,
         thin_button_style: thin_button_style.clone(),
         button_text_style: button_text_style.clone(),
-        small_text_style
+        small_text_style: small_text_style.clone()
     });
     loader_screen_buttons_event_writer.send(SpawnLoaderButtons {
         thin_button_style,
-        button_text_style
+        button_text_style,
+        board_props_button_style,
+        tiny_text_style
     });
 }
