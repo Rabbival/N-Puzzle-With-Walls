@@ -25,7 +25,7 @@ pub mod prelude {
         data_base_manager::*,
         DataBasePlugins,
         domain_board::*,
-        domain_board_index::*,
+        domain_board_name_without_prefix::*,
     };
     pub use crate::input::{
         button_input::*, InputPlugin, keyboard_input_handler::*, mouse_input_handler::*,

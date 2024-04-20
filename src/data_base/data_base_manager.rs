@@ -1,8 +1,6 @@
 use crate::prelude::*;
 use crate::system::system_access::create_folder_if_none_exists_yet;
 
-#[derive(Debug, Eq, PartialEq, Hash)]
-pub struct DomainBoardNameWithoutPostfix(pub String);
 
 #[derive(Resource, Default)]
 pub struct DataBaseManager{
@@ -17,6 +15,7 @@ impl Plugin for DataBaseManagerPlugin{
 			.add_systems(Startup, read_system_text_files_into_db)
 			.add_systems(Update, (
 				save_to_data_base_and_system,
+				remove_from_data_base_and_system,
 				listen_to_db_clearing_request
 			));
 	}
@@ -68,6 +67,36 @@ fn save_to_data_base_and_system(
 	}
 }
 
+fn remove_from_data_base_and_system(
+	mut event_listener: EventReader<RemoveFromDB>,
+	mut db_manager: ResMut<DataBaseManager>
+){
+	for removal_request in event_listener.read(){
+		if let Err(system_access_error) =
+			remove_from_data_base_and_system_inner(&removal_request.0, db_manager.as_mut())
+		{
+			print_system_access_error(system_access_error);
+		}
+	}
+}
+
+fn remove_from_data_base_and_system_inner(
+	layout_board_name_ref: &DomainBoardNameWithoutPostfix,
+	db_manager: &mut DataBaseManager
+) -> Result<(), SystemAccessError>
+{
+	if delete_text_file(
+		FolderToAccess::SavedLayouts,
+		layout_board_name_ref.0.clone()
+	).is_err()
+	{
+		Err(SystemAccessError::CouldntFindFile(FileName(layout_board_name_ref.0.clone())))
+	}else{
+		db_manager.remove_layout(layout_board_name_ref);
+		Ok(())
+	}
+}
+
 fn listen_to_db_clearing_request(
 	mut event_listener: EventReader<ClearDB>,
 	mut db_manager: ResMut<DataBaseManager>
@@ -99,9 +128,11 @@ fn listen_to_db_clearing_request_inner(
 				String::from(valid_text_file_name_excluding_postfix)
 			);
 			if file_deletion_result.is_err(){
-				return Err(SystemAccessError::RequestedFileDoesntExist(FileName(valid_text_file_name)));
+				return Err(SystemAccessError::CouldntFindFile(FileName(valid_text_file_name)));
 			}
-			db_manager.remove_layout(String::from(valid_text_file_name_excluding_postfix));
+			db_manager.remove_layout(
+				&DomainBoardNameWithoutPostfix(String::from(valid_text_file_name_excluding_postfix))
+			);
 		}
 	}
 	Ok(())
@@ -112,8 +143,8 @@ impl DataBaseManager{
 		self.saved_layouts.insert(DomainBoardNameWithoutPostfix(name), layout.clone());
 	}
 
-	pub fn remove_layout(&mut self, name: String){
-		self.saved_layouts.remove(&DomainBoardNameWithoutPostfix(name));
+	pub fn remove_layout(&mut self, name: &DomainBoardNameWithoutPostfix){
+		self.saved_layouts.remove(name);
 	}
 
 	pub fn get_saved_layouts_ref(&self) -> &HashMap<DomainBoardNameWithoutPostfix, DomainBoard>{
