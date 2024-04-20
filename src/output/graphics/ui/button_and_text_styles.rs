@@ -16,6 +16,7 @@ pub fn button_and_text_styles_emitter(
     mut big_button_event_writer: EventWriter<SpawnBigButtons>,
     mut tile_count_buttons_event_writer: EventWriter<SpawnTileCountButtons>,
     mut eternal_buttons_event_writer: EventWriter<SpawnEternalButtons>,
+    mut loader_screen_buttons_event_writer: EventWriter<SpawnLoaderButtons>,
 ) {
     let button_style = Style {
         width: Val::Px(150.0),
@@ -97,8 +98,12 @@ pub fn button_and_text_styles_emitter(
     });
     tile_count_buttons_event_writer.send(SpawnTileCountButtons {
         regular_button_style: button_style,
-        thin_button_style,
-        button_text_style,
+        thin_button_style: thin_button_style.clone(),
+        button_text_style: button_text_style.clone(),
         small_text_style
+    });
+    loader_screen_buttons_event_writer.send(SpawnLoaderButtons {
+        thin_button_style,
+        button_text_style
     });
 }

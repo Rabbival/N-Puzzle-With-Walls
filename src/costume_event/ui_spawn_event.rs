@@ -29,6 +29,12 @@ pub struct SpawnEternalButtons {
     pub button_text_style: TextStyle,
 }
 
+#[derive(Event, Default)]
+pub struct SpawnLoaderButtons {
+    pub thin_button_style: Style,
+    pub button_text_style: TextStyle,
+}
+
 pub struct UiSpawnEventPlugin;
 
 impl Plugin for UiSpawnEventPlugin {
@@ -36,6 +42,7 @@ impl Plugin for UiSpawnEventPlugin {
         app.add_event::<SpawnButtons>()
             .add_event::<SpawnBigButtons>()
             .add_event::<SpawnTileCountButtons>()
+            .add_event::<SpawnLoaderButtons>()
             .add_event::<SpawnEternalButtons>();
     }
 }
