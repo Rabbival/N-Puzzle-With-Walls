@@ -109,16 +109,16 @@ pub mod prelude {
             GraphicsPlugin,
             tile_graphics::*,
             ui::{
-                build_node_bundle_with_full_percentage_style,
                 button_and_text_styles::*,
                 eternal_buttons_spawner::*, menu_graphics_general::*, menu_spawner::*,
-                loader_screen_spawner::*,
+                loader_screen_spawner::*, loader_graphics_general::*,
                 messages::{
                     MessagesGraphicsPlugin,
                     save_button_and_above_text::*,
                     start_button_and_above_text::*,
                     victory_message::*,
                 }, save_walls_layout_button::*,
+                build_node_bundle_with_full_percentage_style,
                 set_color_to_normal,
                 set_color_to_pressed,
                 set_text_section_value_and_color,

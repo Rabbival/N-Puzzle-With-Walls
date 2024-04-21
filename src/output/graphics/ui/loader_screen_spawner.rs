@@ -8,7 +8,7 @@ const LAYOUT_MARGINS_RECT: UiRect = UiRect {
 };
 
 //TODO: show in the bottom of the screen "delete" [chosen layout if there's any here] "load"
-//spawn the layout entity with the spawn_layout_entity fn
+// spawn the layout entity with the spawn_layout_entity fn
 #[derive(Component)]
 pub struct ChosenLayoutTag;
 

@@ -44,6 +44,9 @@ fn read_system_text_files_into_db_inner(
 			FolderToAccess::SavedLayouts,
 			valid_text_file_name
 		)?;
+		
+		//TODO: if you choose to validate board quality, do it here
+		
 		db_manager.insert_layout(String::from(valid_text_file_name_excluding_postfix), &domain_board);
 	}
 	Ok(())

@@ -4,7 +4,7 @@ use crate::prelude::*;
 #[derive(Resource, Default)]
 pub struct SavedLayoutsScreensManager {
     pub saved_layouts_screens: Vec<SavedLayoutsScreen>,
-    pub currently_displayed_screen: u8
+    pub currently_displayed_screen: usize
 }
 
 pub struct SavedLayoutsScreensManagerPlugin;
