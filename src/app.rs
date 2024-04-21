@@ -11,16 +11,16 @@ pub fn main() {
         //costume basics
         .add_plugins((
             SystemSetsPlugin,
-            EventPlugins,
+            EventPlugin,
             StatePlugin,
             ErrorHandlerPlugin,
         ))
         //costume
         .add_plugins((
-            DataBasePlugins,
+            DataBasePlugin,
             InputPlugin,
             AssetLoaderPlugin,
-            BoardPlugins,
+            BoardPlugin,
             GraphicsPlugin,
             TileDictionaryPlugin,
             BoardLayoutToRonFilePlugin

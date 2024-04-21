@@ -1,5 +1,5 @@
 use bevy::input::keyboard::KeyCode;
-use enum_iterator::{all, Sequence};
+use enum_iterator::Sequence;
 
 pub const BASIC_DIRECTION_COUNT: u8 = 4;
 
@@ -36,10 +36,6 @@ impl BasicDirection {
             3 => Some(BasicDirection::Left),
             _ => None,
         }
-    }
-
-    pub fn get_directions_as_vec() -> Vec<BasicDirection> {
-        all::<BasicDirection>().collect::<Vec<_>>()
     }
 
     /// seems to be more intuitive

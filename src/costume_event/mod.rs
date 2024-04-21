@@ -12,9 +12,9 @@ pub mod game_event;
 pub mod db_event;
 pub mod system_event;
 
-pub struct EventPlugins;
+pub struct EventPlugin;
 
-impl Plugin for EventPlugins {
+impl Plugin for EventPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
             ResetEventPlugin,

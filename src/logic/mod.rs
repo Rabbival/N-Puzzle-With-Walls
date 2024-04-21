@@ -10,16 +10,18 @@ pub mod tile;
 pub mod tile_dictionary;
 pub mod tile_board;
 pub mod ui_logic;
+pub mod loader_screen_logic;
 
-pub struct BoardPlugins;
+pub struct BoardPlugin;
 
-impl Plugin for BoardPlugins {
+impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
-            BoardBuildingPlugins,
-            BoardPropsPlugins,
+            BoardBuildingPlugin,
+            BoardPropsPlugin,
             BoardManagerPlugin,
             UiLogicPlugin,
+            LoaderScreenLogicPlugin,
         ));
     }
 }

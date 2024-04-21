@@ -7,9 +7,14 @@ const LAYOUT_MARGINS_RECT: UiRect = UiRect {
     left: Val::Px(30.0)
 };
 
-pub struct LoadScreenSpawnerPlugin;
+//TODO: show in the bottom of the screen "delete" [chosen layout if there's any here] "load"
+//spawn the layout entity with the spawn_layout_entity fn
+#[derive(Component)]
+pub struct ChosenLayoutTag;
 
-impl Plugin for LoadScreenSpawnerPlugin{
+pub struct LoaderScreenSpawnerPlugin;
+
+impl Plugin for LoaderScreenSpawnerPlugin{
     fn build(&self, app: &mut App) {
         app.add_systems(
             Startup,
@@ -42,16 +47,14 @@ fn spawn_load_screen_arrows(
         //TODO: change to actual buttons when the time comes
         //currently here to demonstrate how one can load only when a layout is chosen
         commands
-            .spawn((
+            .spawn(
                 build_node_bundle_with_full_percentage_style(
                     AlignItems::Center,
                     JustifyContent::Center,
                     Visibility::Hidden,
                     Some(FlexDirection::Column)
-                ),
-                simple_on_screen_tag(AppState::Loader),
-            ))
-            .with_children(|parent| {
+                )
+            ).with_children(|parent| {
                 //first row
                 parent.spawn(NodeBundle {
                     style: Style {
@@ -63,11 +66,13 @@ fn spawn_load_screen_arrows(
                 }).with_children(|parent| {
                     spawn_layout_entity(
                         parent,
-                        &button_event
+                        &button_event,
+                        LoaderScreenSlot::TopLeft
                     );
                     spawn_layout_entity(
                         parent,
-                        &button_event
+                        &button_event,
+                        LoaderScreenSlot::TopRight
                     );
                 });
                 //second row
@@ -81,11 +86,13 @@ fn spawn_load_screen_arrows(
                 }).with_children(|parent| {
                     spawn_layout_entity(
                         parent,
-                        &button_event
+                        &button_event,
+                        LoaderScreenSlot::BottomLeft
                     );
                     spawn_layout_entity(
                         parent,
-                        &button_event
+                        &button_event,
+                        LoaderScreenSlot::BottomRight
                     );
                 });
             });
@@ -94,8 +101,8 @@ fn spawn_load_screen_arrows(
 
 fn spawn_layout_entity(
     parent: &mut ChildBuilder,
-    button_event: &SpawnLoaderButtons
-    //TODO: action
+    button_event: &SpawnLoaderButtons,
+    loader_screen_slot: LoaderScreenSlot
 ){
     parent.spawn(NodeBundle {
         style: Style {
@@ -112,15 +119,21 @@ fn spawn_layout_entity(
                 background_color: super::NORMAL_BUTTON_COLOR.into(),
                 ..default()
             },
-            //TODO: put action here
+            LoaderScreenSlotTag(loader_screen_slot),
+            CustomOnScreenTag{
+                screen: AppState::Menu,
+                on_own_screen_visibility: Some(Visibility::Hidden)
+            }
         ));
         layout_entity.with_children(|parent| {
             parent.spawn((
                 TextBundle::from_section(
+                    //TODO: add the layout's name as "name_here"
                     DomainBoard::default().to_string_for_button(),
                     button_event.tiny_text_style.clone(),
                 ),
                 ButtonText,
+                LoaderScreenLayoutTextTag(loader_screen_slot),
             ));
         });
         //TODO: .with_children for the layout itself

@@ -1,3 +1,4 @@
+use enum_iterator::all;
 use crate::prelude::*;
 
 #[derive(Component, Clone, Debug)]
@@ -76,7 +77,7 @@ impl TileBoard {
 
 impl TileBoard {
     pub fn index_all_tile_types(&mut self) {
-        for tile_type in TileType::get_tile_types_as_vec() {
+        for tile_type in all::<TileType>() {
             self.index_tile_of_type(tile_type);
         }
     }

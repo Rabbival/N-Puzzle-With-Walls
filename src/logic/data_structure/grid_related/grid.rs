@@ -1,3 +1,4 @@
+use enum_iterator::all;
 use crate::prelude::*;
 
 #[derive(Component, Clone, Debug)]
@@ -44,7 +45,7 @@ impl<T: Clone> Grid<T> {
     ) -> HashMap<BasicDirection, GridLocation> 
     {
         let mut valid_neighbors: HashMap<BasicDirection, GridLocation> = HashMap::new();
-        for dir in BasicDirection::get_directions_as_vec() {
+        for dir in all::<BasicDirection>() {
             if let Some(neighbor_location) = self.occupied_neighbor_location(origin, &dir) {
                 valid_neighbors.insert(dir, neighbor_location);
             }

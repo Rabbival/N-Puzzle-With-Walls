@@ -7,9 +7,9 @@ pub mod permutation_builder;
 pub mod solved_board_builder;
 pub mod wall_placement_validator;
 
-pub struct BoardBuildingPlugins;
+pub struct BoardBuildingPlugin;
 
-impl Plugin for BoardBuildingPlugins {
+impl Plugin for BoardBuildingPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((BoardEntitiesSpawnerPlugin, BoardBuilderPlugin, SolvedBoardPlugin));
     }

@@ -10,6 +10,7 @@ mod system_sets;
 mod data_base;
 mod system;
 
+
 pub mod prelude {
     pub use bevy::reflect::TypeUuid;
     pub use bevy::{prelude::*, utils::HashMap};
@@ -17,13 +18,13 @@ pub mod prelude {
     pub use crate::app::*;
     pub use crate::bundles::tile_bundle::*;
     pub use crate::costume_event::{
-        app_event::*, board_set_event::*, db_event::*, EventPlugins,
+        app_event::*, board_set_event::*, db_event::*, EventPlugin,
         game_event::*, move_tile_event::*, screen_changing_event::*, system_event::*, ui_event::*,
         ui_spawn_event::*,
     };
     pub use crate::data_base::{
         data_base_manager::*,
-        DataBasePlugins,
+        DataBasePlugin,
         domain_board::*,
         domain_board_name_without_prefix::*,
     };
@@ -33,16 +34,16 @@ pub mod prelude {
     };
     pub use crate::logic::{
         board_building::{
-            board_builder::*, board_entities_spawner::*, BoardBuildingPlugins,
+            board_builder::*, board_entities_spawner::*, BoardBuildingPlugin,
             brute_force_builder::*, permutation_builder::*, solved_board_builder::*,
             wall_placement_validator::*,
         },
         board_manager::*,
         board_props::{
-            board_properties::*, BoardPropsPlugins, current_board_wall_locations::*,
+            board_properties::*, BoardPropsPlugin, current_board_wall_locations::*,
             update_board_properties::*,
         },
-        BoardPlugins,
+        BoardPlugin,
         data_structure::{
             grid_related::{grid::*, grid_cycle_checker::*, grid_location::*, grid_traveller::*, grid_tree::*},
             indexed_value::*,
@@ -51,6 +52,7 @@ pub mod prelude {
         },
         enums::{
             basic_direction::*,
+            loader_screen_slot::*,
             board_property_enums::{
                 board_size::*, generation_method::*, grid_traveller_type::*, menu_button_action::*,
                 wall_tiles_change::*,
@@ -66,6 +68,10 @@ pub mod prelude {
                 text_above_start_button_type::*,
                 victory_button_action::*,
             },
+        },
+        loader_screen_logic::{
+            LoaderScreenLogicPlugin, saved_layouts_screen::*, saved_layouts_screens_manager::*,
+            loader_screen_layout_text_tag::*,
         },
         states::{app_state::*, game_state::*, StatePlugin},
         tile::*,
@@ -106,7 +112,7 @@ pub mod prelude {
                 build_node_bundle_with_full_percentage_style,
                 button_and_text_styles::*,
                 eternal_buttons_spawner::*, menu_graphics_general::*, menu_spawner::*,
-                load_screen_spawner::*,
+                loader_screen_spawner::*,
                 messages::{
                     MessagesGraphicsPlugin,
                     save_button_and_above_text::*,

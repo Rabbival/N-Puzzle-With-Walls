@@ -1,4 +1,4 @@
-use enum_iterator::{all, Sequence};
+use enum_iterator::Sequence;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, Default, Sequence)]
 pub enum TileType {
@@ -15,10 +15,6 @@ impl TileType {
             TileType::Numbered => 1,
             TileType::Wall => 2,
         }
-    }
-
-    pub fn get_tile_types_as_vec() -> Vec<Self> {
-        all::<Self>().collect::<Vec<_>>()
     }
 }
 
