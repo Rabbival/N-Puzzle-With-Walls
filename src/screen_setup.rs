@@ -10,7 +10,7 @@ pub struct ScreenSetupPlugin;
 impl Plugin for ScreenSetupPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(
-            DefaultPlugin
+            DefaultPlugins
                 .set(ImagePlugin::default_nearest())
                 .set(WindowPlugin {
                     primary_window: Some(Window {

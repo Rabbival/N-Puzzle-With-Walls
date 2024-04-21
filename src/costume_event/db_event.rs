@@ -4,7 +4,7 @@ use crate::prelude::*;
 pub struct SaveToDB(pub DomainBoard);
 
 #[derive(Event)]
-pub struct RemoveFromDB(pub DomainBoardNameWithoutPostfix);
+pub struct RemoveFromDB(pub SavedLayoutIndex);
 
 #[derive(Event)]
 pub struct ClearDB;

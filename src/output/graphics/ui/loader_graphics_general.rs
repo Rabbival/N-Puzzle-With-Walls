@@ -1,3 +1,4 @@
+use enum_iterator::all;
 use crate::prelude::*;
 
 
@@ -10,17 +11,23 @@ impl Plugin for LoaderGraphicsGeneralPlugin {
     }
 }
 
+//TODO: iterate over the screen slots enum, then for each matching one in the queries:
+// layout_entities_query - if its screen tag exists in the currently displayed, show it, hide if not
+// layout_texts_query - if the screen tag exists in the currently displayed, take its properties
+// from the DB manager by name
 fn show_currently_displayed_saved_layouts_screen(
     data_base_manager: Res<DataBaseManager>,
-    saved_layouts_screens_manager: Res<SavedLayoutsScreensManager>
+    saved_layouts_screens_manager: ResMut<DisplayedLoaderScreenNumber>
 ){
-    let currently_displayed_screen_ref = 
-        &saved_layouts_screens_manager.saved_layouts_screens[saved_layouts_screens_manager.currently_displayed_screen];
-    
-    //TODO: iterate over the screen slots enum, then for each matching one in the queries:
-    // layout_entities_query - if its screen tag exists in the currently displayed, show it, hide if not
-    // layout_texts_query - if the screen tag exists in the currently displayed, take its properties
-    // from the DB manager by name
+    for screen_slot in all::<LoaderScreenSlot>(){
+        // let currently_displayed_screen_ref =
+        //     &data_base_manager.get_saved_layouts_ref().get(
+        //         get_layout_index_by_screen_and_slot(
+        //              saved_layouts_screens_manager.0, 
+        //              screen_slot
+        //          )
+        //     );
+    }
 }
 
 

@@ -34,6 +34,7 @@ fn listen_for_save_requests(
                 event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::WallLayoutAlreadyExistsInMemory));
             }else{
                 write_to_db_event_writer.send(SaveToDB(DomainBoard{
+                    board_name: db_manager.generate_default_name_for_board(),
                     board_props: *applied_board_props_query.single(),
                     wall_locations
                 }));
@@ -44,13 +45,13 @@ fn listen_for_save_requests(
 }
 
 fn board_exists_in_db(
-    saved_layouts: &HashMap<DomainBoardNameWithoutPostfix, DomainBoard>,
+    saved_layouts: &Vec<DomainBoard>,
     new_board_size: &BoardSize,
     new_wall_locations: &Vec<GridLocation>
 ) -> bool {
     for saved_layout in saved_layouts{
-        if saved_layout.1.board_props.size == *new_board_size
-            && *new_wall_locations == saved_layout.1.wall_locations {
+        if saved_layout.board_props.size == *new_board_size
+            && *new_wall_locations == saved_layout.wall_locations {
             return true;
         }
     }

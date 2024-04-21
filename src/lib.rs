@@ -26,7 +26,6 @@ pub mod prelude {
         data_base_manager::*,
         DataBasePlugin,
         domain_board::*,
-        domain_board_name_without_prefix::*,
     };
     pub use crate::input::{
         button_input::*, InputPlugin, keyboard_input_handler::*, mouse_input_handler::*,
@@ -70,8 +69,8 @@ pub mod prelude {
             },
         },
         loader_screen_logic::{
-            LoaderScreenLogicPlugin, saved_layouts_screen::*, saved_layouts_screens_manager::*,
-            loader_screen_layout_text_tag::*,
+            LoaderScreenLogicPlugin, displayed_loader_screen::*,
+            loader_screen_layout_text_tag::*, layout_loader_screen_and_slot::*,
         },
         states::{app_state::*, game_state::*, StatePlugin},
         tile::*,

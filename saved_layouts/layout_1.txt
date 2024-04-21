@@ -1,20 +1,16 @@
 (
-    board_name: "layout_0",
+    board_name: "layout_1",
     board_props: (
         size: Small,
-        wall_count: 2,
+        wall_count: 1,
         empty_count: 1,
         generation_method: Auto,
         tree_traveller_type: BFS,
     ),
     wall_locations: [
         (
-            row: 2,
-            col: 2,
-        ),
-        (
-            row: 1,
-            col: 1,
+            row: 0,
+            col: 3,
         ),
     ],
 )

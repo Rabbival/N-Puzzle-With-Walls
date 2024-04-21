@@ -4,8 +4,11 @@ use crate::system::system_access::create_folder_if_none_exists_yet;
 
 #[derive(Resource, Default)]
 pub struct DataBaseManager{
-	saved_layouts: HashMap<DomainBoardNameWithoutPostfix, DomainBoard>,
+	saved_layouts: Vec<DomainBoard>,
 }
+
+#[derive(Default, Debug)]
+pub struct SavedLayoutIndex(pub usize);
 
 pub struct DataBaseManagerPlugin;
 
@@ -38,8 +41,6 @@ fn read_system_text_files_into_db_inner(
 		get_all_valid_text_file_names_in_folder(FolderToAccess::SavedLayouts);
 
 	for valid_text_file_name in valid_text_file_names{
-		let valid_text_file_name_excluding_postfix =
-			&valid_text_file_name.clone()[..valid_text_file_name.len()-4];
 		let domain_board = domain_board_from_file(
 			FolderToAccess::SavedLayouts,
 			valid_text_file_name
@@ -47,7 +48,7 @@ fn read_system_text_files_into_db_inner(
 		
 		//TODO: if you choose to validate board quality, do it here
 		
-		db_manager.insert_layout(String::from(valid_text_file_name_excluding_postfix), &domain_board);
+		db_manager.insert_layout(&domain_board);
 	}
 	Ok(())
 }
@@ -59,14 +60,14 @@ fn save_to_data_base_and_system(
 	for save_request in event_listener.read(){
 		let layout_content_string = ron::ser::to_string_pretty(
 			&save_request.0, ron::ser::PrettyConfig::default()).unwrap();
-		let layout_name_string = format!("layout_{:?}", db_manager.saved_layouts.len());
+		let layout_name_string = db_manager.generate_default_name_for_board();
 		write_to_file(
 			FolderToAccess::SavedLayouts,
 			layout_name_string.clone(),
 			layout_content_string
 		).unwrap();
 
-		db_manager.as_mut().insert_layout(layout_name_string, &save_request.0);
+		db_manager.as_mut().insert_layout(&save_request.0);
 	}
 }
 
@@ -84,19 +85,23 @@ fn remove_from_data_base_and_system(
 }
 
 fn remove_from_data_base_and_system_inner(
-	layout_board_name_ref: &DomainBoardNameWithoutPostfix,
+	layout_index: &SavedLayoutIndex,
 	db_manager: &mut DataBaseManager
 ) -> Result<(), SystemAccessError>
 {
-	if delete_text_file(
-		FolderToAccess::SavedLayouts,
-		layout_board_name_ref.0.clone()
-	).is_err()
-	{
-		Err(SystemAccessError::CouldntFindFile(FileName(layout_board_name_ref.0.clone())))
-	}else{
-		db_manager.remove_layout(layout_board_name_ref);
-		Ok(())
+	match db_manager.remove_layout_by_index(layout_index){
+		Some(removed_domain_board)=> {
+			if delete_text_file(
+				FolderToAccess::SavedLayouts,
+				removed_domain_board.board_name.clone()
+			).is_err()
+			{
+				Err(SystemAccessError::CouldntFindFile(FileName(removed_domain_board.board_name.clone())))
+			}else{
+				Ok(())
+			}
+		},
+		None => Ok(())
 	}
 }
 
@@ -119,6 +124,7 @@ fn listen_to_db_clearing_request_inner(
 ) -> Result<(), SystemAccessError>
 {
 	for _clear_request in event_listener.read(){
+		db_manager.saved_layouts = vec!();
 		create_folder_if_none_exists_yet(FolderToAccess::SavedLayouts);
 		let valid_text_file_names =
 			get_all_valid_text_file_names_in_folder(FolderToAccess::SavedLayouts);
@@ -133,24 +139,30 @@ fn listen_to_db_clearing_request_inner(
 			if file_deletion_result.is_err(){
 				return Err(SystemAccessError::CouldntFindFile(FileName(valid_text_file_name)));
 			}
-			db_manager.remove_layout(
-				&DomainBoardNameWithoutPostfix(String::from(valid_text_file_name_excluding_postfix))
-			);
 		}
 	}
 	Ok(())
 }
 
 impl DataBaseManager{
-	pub fn insert_layout(&mut self, name: String, layout: &DomainBoard){
-		self.saved_layouts.insert(DomainBoardNameWithoutPostfix(name), layout.clone());
+	pub fn insert_layout(&mut self, layout: &DomainBoard){
+		self.saved_layouts.push(layout.clone());
 	}
 
-	pub fn remove_layout(&mut self, name: &DomainBoardNameWithoutPostfix){
-		self.saved_layouts.remove(name);
+	pub fn remove_layout_by_index(&mut self, index: &SavedLayoutIndex) -> Option<DomainBoard>{
+		let index_value = index.0;
+		if index_value >= 0 && index_value < self.saved_layouts.len(){
+			Some(self.saved_layouts.remove(index.0))	
+		}else{
+			None
+		}
 	}
 
-	pub fn get_saved_layouts_ref(&self) -> &HashMap<DomainBoardNameWithoutPostfix, DomainBoard>{
+	pub fn get_saved_layouts_ref(&self) -> &Vec<DomainBoard>{
 		&self.saved_layouts
+	}
+	
+	pub fn generate_default_name_for_board(&self) -> String {
+		format!("layout_{:?}", self.saved_layouts.len())
 	}
 }
