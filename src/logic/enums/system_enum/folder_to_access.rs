@@ -1,14 +1,18 @@
+use std::fmt::{Display, Formatter};
+
 #[derive(Debug, Clone, Copy)]
 pub enum FolderToAccess {
     SavedLayouts
 }
 
-impl FolderToAccess{
-    pub fn to_string(&self) -> String{
-        match self{
-            FolderToAccess::SavedLayouts => {
-                String::from("saved_layouts")
-            }
-        }
+impl Display for FolderToAccess{
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        fmt.write_str(
+            match self{
+                FolderToAccess::SavedLayouts => {
+                    "saved_layouts"
+                }
+            })?;
+        Ok(())
     }
 }

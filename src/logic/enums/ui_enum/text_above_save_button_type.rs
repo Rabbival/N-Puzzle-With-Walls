@@ -1,5 +1,6 @@
+use std::fmt::{Display, Formatter};
 use enum_iterator::Sequence;
-use crate::prelude::SaveAttemptOutcome;
+use crate::prelude::{SaveAttemptOutcome};
 
 #[derive(Debug, Sequence, PartialEq, Eq, Hash, PartialOrd, Clone, Copy)]
 pub enum TextAboveSaveButtonType {
@@ -23,21 +24,24 @@ impl TextAboveSaveButtonType{
             }
         }
     }
-    
-    pub fn to_string(&self) -> String{
-        match self{
-            TextAboveSaveButtonType::NoText => {
-                String::from("")
-            },
-            TextAboveSaveButtonType::WallLayoutAlreadyExistsInMemory => {
-                String::from("This walls layout is already saved")
-            },
-            TextAboveSaveButtonType::WallsLayoutsAtCapacity => {
-                String::from("Layouts memory at capacity, Delete some to save new ones.")
-            },
-            TextAboveSaveButtonType::LayoutSavedSuccessfully => {
-                String::from("Walls layout saved successfully!")
-            },
-        }
+}
+
+impl Display for TextAboveSaveButtonType{
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        fmt.write_str(match self{
+                TextAboveSaveButtonType::NoText => {
+                    ""
+                },
+                TextAboveSaveButtonType::WallLayoutAlreadyExistsInMemory => {
+                    "This walls layout is already saved"
+                },
+                TextAboveSaveButtonType::WallsLayoutsAtCapacity => {
+                    "Layouts memory at capacity, Delete some to save new ones."
+                },
+                TextAboveSaveButtonType::LayoutSavedSuccessfully => {
+                    "Walls layout saved successfully!"
+                },
+            })?;
+        Ok(())
     }
 }

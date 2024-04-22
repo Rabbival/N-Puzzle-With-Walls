@@ -50,7 +50,7 @@ pub fn build_node_bundle_with_full_percentage_style(
     flex_direction: Option<FlexDirection>
 ) -> NodeBundle
 {
-    let flex_direction = flex_direction.unwrap_or_else(|| FlexDirection::default());
+    let flex_direction = flex_direction.unwrap_or_default();
     NodeBundle {
         style: Style {
             width: Val::Percent(100.0),

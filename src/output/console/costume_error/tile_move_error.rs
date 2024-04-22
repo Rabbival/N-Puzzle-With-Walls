@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+const PRINT_GRID_ERROR_RELATED_TILE_MOVE_ERRORS : bool = false;
+
 #[derive(Debug, Clone, Copy)]
 pub enum TileMoveError {
     TileBoardError(TileBoardError),
@@ -32,11 +34,13 @@ pub fn print_tile_move_error(move_error: TileMoveError) {
             info!("tried to switch empty with empty, hence no swap was performed");
         },
         TileMoveError::GridError(grid_error) => {
-            match grid_error{
-                GridError::InvalidPositionVector(position) => {
-                    warn!("clicked position {:?} can't be converted to a valid grid location", position)
-                },
-                _ => error!("{:?}", grid_error)
+            if PRINT_GRID_ERROR_RELATED_TILE_MOVE_ERRORS{
+                match grid_error{
+                    GridError::InvalidPositionVector(position) => {
+                        warn!("clicked position {:?} can't be converted to a valid grid location", position)
+                    },
+                    _ => error!("{:?}", grid_error)
+                }
             }
         },
         _ => {

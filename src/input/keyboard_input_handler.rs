@@ -31,7 +31,7 @@ fn move_tiles_with_keyboard(
 ) {
     let move_requests = keyboard_input
         .get_just_pressed()
-        .map(|keycode| MoveRequest::new(keycode));
+        .map(MoveRequest::new);
     for request in move_requests {
         if request.move_neighbor_from_direction.is_none() || request.empty_tile_index.is_none() {
             continue;

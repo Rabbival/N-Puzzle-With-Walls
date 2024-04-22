@@ -66,12 +66,12 @@ fn spawn_load_screen_arrows(
                 }).with_children(|parent| {
                     spawn_layout_entity(
                         parent,
-                        &button_event,
+                        button_event,
                         LoaderScreenSlot::TopLeft
                     );
                     spawn_layout_entity(
                         parent,
-                        &button_event,
+                        button_event,
                         LoaderScreenSlot::TopRight
                     );
                 });
@@ -86,12 +86,12 @@ fn spawn_load_screen_arrows(
                 }).with_children(|parent| {
                     spawn_layout_entity(
                         parent,
-                        &button_event,
+                        button_event,
                         LoaderScreenSlot::BottomLeft
                     );
                     spawn_layout_entity(
                         parent,
-                        &button_event,
+                        button_event,
                         LoaderScreenSlot::BottomRight
                     );
                 });
