@@ -33,6 +33,12 @@ pub struct ToggleButton {
     pub entity: Entity,
 }
 
+#[derive(Event)]
+pub struct LoaderScreenArrowPressed {
+    pub action: ScreenChangeArrowsAction,
+}
+
+
 pub struct UiEventPlugin;
 
 impl Plugin for UiEventPlugin {
@@ -44,6 +50,7 @@ impl Plugin for UiEventPlugin {
             .add_event::<SaveWallsLayoutButtonPressed>()
             .add_event::<ResetButtonTextColor>()
             .add_event::<ToggleButton>()
-            .add_event::<ResetTextAboveSaveButton>();
+            .add_event::<ResetTextAboveSaveButton>()
+            .add_event::<LoaderScreenArrowPressed>();
     }
 }

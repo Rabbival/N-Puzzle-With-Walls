@@ -26,6 +26,7 @@ pub mod prelude {
         data_base_manager::*,
         DataBasePlugin,
         domain_board::*,
+        saved_layout_index::*,
     };
     pub use crate::input::{
         button_input::*, InputPlugin, keyboard_input_handler::*, mouse_input_handler::*,
@@ -66,6 +67,7 @@ pub mod prelude {
                 text_above_save_button_type::*,
                 text_above_start_button_type::*,
                 victory_button_action::*,
+                screen_change_arrows_action::*,
             },
         },
         loader_screen_logic::{
@@ -76,7 +78,7 @@ pub mod prelude {
         tile::*,
         tile_board::*,
         tile_dictionary::*,
-        ui_logic::{eternal_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*},
+        ui_logic::{eternal_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*, loader_ui_logic::*,},
     };
     pub use crate::output::{
         console::{
@@ -109,8 +111,8 @@ pub mod prelude {
             tile_graphics::*,
             ui::{
                 button_and_text_styles::*,
-                eternal_buttons_spawner::*, menu_graphics_general::*, menu_spawner::*,
-                loader_screen_spawner::*, loader_graphics_general::*,
+                eternal_buttons_spawner::*, menu_spawner::*,
+                loader_screen_spawner::*, 
                 messages::{
                     MessagesGraphicsPlugin,
                     save_button_and_above_text::*,

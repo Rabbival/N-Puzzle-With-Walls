@@ -2,31 +2,36 @@ use enum_iterator::all;
 use crate::prelude::*;
 
 
-pub struct LoaderGraphicsGeneralPlugin;
+pub struct LoaderUiLogicPlugin;
 
-impl Plugin for LoaderGraphicsGeneralPlugin {
+impl Plugin for LoaderUiLogicPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-                OnEnter(AppState::Loader), 
-                show_currently_displayed_saved_layouts_screen
-                    .in_set(StateChangeSystemSets::PrepareToHandleStateChange),
-            )
-            .add_systems(Update, listen_for_layouts_screens_change_requests);
+            OnEnter(AppState::Loader),
+            show_currently_displayed_saved_layouts_screen
+                .in_set(StateChangeSystemSets::PrepareToHandleStateChange),
+        )
+            .add_systems(
+                Update,(
+                    update_slots_info_after_change
+                        .run_if(resource_changed::<DisplayedLoaderScreenNumber>()),
+                    update_slots_info_after_change
+                        .run_if(resource_changed::<DataBaseManager>())
+                )
+            );
     }
 }
 
-// layout_entities_query - if its screen tag exists in the currently displayed, show it, hide if not
-// layout_texts_query - if the screen tag exists in the currently displayed, show its properties
 fn show_currently_displayed_saved_layouts_screen(
     data_base_manager: Res<DataBaseManager>,
-    displayed_loader_screen_number: ResMut<DisplayedLoaderScreenNumber>,
+    displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
     mut layout_slots_query: Query<(&LoaderScreenSlotTag, &mut CustomOnScreenTag, &Children)>,
     mut layout_slot_text_query: Query<&mut Text>,
 ){
     for screen_slot in all::<LoaderScreenSlot>(){
         let optional_layout_to_display =
             data_base_manager.get_saved_layouts_ref().get(
-                get_layout_index_by_screen_and_slot(
+                SavedLayoutIndex::from_screen_and_slot(
                     displayed_loader_screen_number.0,
                     screen_slot
                 ).0
@@ -73,11 +78,7 @@ fn handle_screen_slot_content_and_visibility(
         }
         Ok(())
     }else{
-        for (
-            layout_slot_tag,
-            mut layout_slot_on_screen_tag,
-            _
-        )
+        for (layout_slot_tag, mut layout_slot_on_screen_tag, _)
         in layout_slots_query.iter_mut()
         {
             if layout_slot_tag.0 == slot{
@@ -88,7 +89,16 @@ fn handle_screen_slot_content_and_visibility(
     }
 }
 
-
-//TODO: get requests when arrows are pressed. make sure to ensure the values would stay within
-// the saved_layouts_screens_manager's boundaries
-fn listen_for_layouts_screens_change_requests(){}
+fn update_slots_info_after_change(
+    data_base_manager: Res<DataBaseManager>,
+    displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
+    layout_slots_query: Query<(&LoaderScreenSlotTag, &mut CustomOnScreenTag, &Children)>,
+    layout_slot_text_query: Query<&mut Text>,
+){
+    show_currently_displayed_saved_layouts_screen(
+        data_base_manager,
+        displayed_loader_screen_number,
+        layout_slots_query,
+        layout_slot_text_query,
+    )
+}

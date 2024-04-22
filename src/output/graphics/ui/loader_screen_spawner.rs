@@ -34,18 +34,17 @@ fn spawn_load_screen_arrows(
             button_event,
             JustifyContent::End,
             ">",
+            ScreenChangeArrowsAction::Next,
             &mut commands
         );
         spawn_load_screen_arrow(
             button_event,
             JustifyContent::Start,
             "<",
+            ScreenChangeArrowsAction::Previous,
             &mut commands
         );
-
-
-        //TODO: change to actual buttons when the time comes
-        //currently here to demonstrate how one can load only when a layout is chosen
+        
         commands
             .spawn(
                 build_node_bundle_with_full_percentage_style(
@@ -142,7 +141,7 @@ fn spawn_load_screen_arrow(
     button_event: &SpawnLoaderButtons,
     content_side: JustifyContent,
     text_value: impl Into<String>,
-    //TODO: action
+    screen_change_action: ScreenChangeArrowsAction,
     commands: &mut Commands
 ){
     let thin_button_style = &button_event.thin_button_style;
@@ -175,7 +174,7 @@ fn spawn_load_screen_arrow(
                             background_color: super::NORMAL_BUTTON_COLOR.into(),
                             ..default()
                         },
-                        //TODO: put action here
+                        screen_change_action
                     ));
                     arrow_button_entity.with_children(|parent| {
                         parent.spawn((

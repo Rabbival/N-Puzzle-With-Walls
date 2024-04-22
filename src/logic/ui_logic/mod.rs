@@ -3,12 +3,18 @@ use crate::prelude::*;
 pub mod eternal_ui_logic;
 pub mod menu_ui_logic;
 pub mod victory_ui_logic;
+pub mod loader_ui_logic;
 
 pub struct UiLogicPlugin;
 
 impl Plugin for UiLogicPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((MenuUiLogicPlugin, EternalUiLogicPlugin, VictoryUiLogicPlugin))
+        app.add_plugins((
+            MenuUiLogicPlugin, 
+            EternalUiLogicPlugin, 
+            VictoryUiLogicPlugin, 
+            LoaderUiLogicPlugin
+        ))
             .add_systems(
                 Update,
                 toggle_button.in_set(InputSystemSets::PostMainChanges),

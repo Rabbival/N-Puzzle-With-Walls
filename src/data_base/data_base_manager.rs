@@ -7,9 +7,6 @@ pub struct DataBaseManager{
 	saved_layouts: Vec<DomainBoard>,
 }
 
-#[derive(Default, Debug)]
-pub struct SavedLayoutIndex(pub usize);
-
 pub struct DataBaseManagerPlugin;
 
 impl Plugin for DataBaseManagerPlugin{
@@ -107,12 +104,12 @@ fn remove_from_data_base_and_system_inner(
 
 fn listen_to_db_clearing_request(
 	mut event_listener: EventReader<ClearDB>,
-	mut db_manager: ResMut<DataBaseManager>
+	db_manager: ResMut<DataBaseManager>
 ){
 	if let Err(system_access_error) =
 		listen_to_db_clearing_request_inner(
 			&mut event_listener,
-			db_manager.as_mut()
+			db_manager
 		){
 		print_system_access_error(system_access_error);
 	}
@@ -120,7 +117,7 @@ fn listen_to_db_clearing_request(
 
 fn listen_to_db_clearing_request_inner(
 	event_listener: &mut EventReader<ClearDB>,
-	db_manager: &mut DataBaseManager
+	mut db_manager: ResMut<DataBaseManager>
 ) -> Result<(), SystemAccessError>
 {
 	for _clear_request in event_listener.read(){
@@ -152,7 +149,7 @@ impl DataBaseManager{
 	pub fn remove_layout_by_index(&mut self, index: &SavedLayoutIndex) -> Option<DomainBoard>{
 		let index_value = index.0;
 		if index_value < self.saved_layouts.len(){
-			Some(self.saved_layouts.remove(index.0))	
+			Some(self.saved_layouts.swap_remove(index.0))	
 		}else{
 			None
 		}

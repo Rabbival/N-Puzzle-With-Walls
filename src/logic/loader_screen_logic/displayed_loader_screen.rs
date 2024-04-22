@@ -7,17 +7,36 @@ pub struct DisplayedLoaderScreenPlugin;
 
 impl Plugin for DisplayedLoaderScreenPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<DisplayedLoaderScreenNumber>();
+        app.init_resource::<DisplayedLoaderScreenNumber>()
+            .add_systems(Update,
+                listen_to_screen_change_arrows_presses
+            );
     }
 }
 
-pub fn get_layout_index_by_screen_and_slot(screen: usize, slot: LoaderScreenSlot) -> SavedLayoutIndex {
-    SavedLayoutIndex(screen*SAVED_LAYOUTS_PER_SCREEN + slot.to_layout_offset())
-}
-
-pub fn try_get_layout_screen_and_slot_by_index(index: SavedLayoutIndex) -> Option<LayoutLoaderScreenAndSlot> {
-    Some(LayoutLoaderScreenAndSlot{
-        screen: index.0 / SAVED_LAYOUTS_PER_SCREEN,
-        slot: LoaderScreenSlot::try_from_layout_offset(index.0 % SAVED_LAYOUTS_PER_SCREEN)?
-    })
+fn listen_to_screen_change_arrows_presses(
+    mut event_listener: EventReader<LoaderScreenArrowPressed>, 
+    mut displayed_loader_screen_number: ResMut<DisplayedLoaderScreenNumber>,
+    data_base_manager: Res<DataBaseManager>,
+){
+    for change_request in event_listener.read(){
+        let max_not_empty_screen =
+            data_base_manager.get_saved_layouts_ref().len() / SAVED_LAYOUTS_PER_SCREEN;
+        match change_request.action{
+            ScreenChangeArrowsAction::Next => {
+                if displayed_loader_screen_number.0 < max_not_empty_screen {
+                    displayed_loader_screen_number.0 += 1;
+                } else{
+                    displayed_loader_screen_number.0 = 0;
+                }
+            } 
+            ScreenChangeArrowsAction::Previous => {
+                if displayed_loader_screen_number.0 > 0 {
+                    displayed_loader_screen_number.0 -= 1;
+                } else{
+                    displayed_loader_screen_number.0 = max_not_empty_screen;
+                }
+            }
+        }
+    }
 }

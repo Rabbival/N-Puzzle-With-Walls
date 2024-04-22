@@ -9,8 +9,10 @@ impl Plugin for ButtonInputPlugin {
             (
                 handle_menu_buttons.run_if(in_state(AppState::Menu)),
                 handle_victory_buttons.run_if(in_state(GameState::Victory)),
+                handle_save_walls_layout_button.run_if(in_state(AppState::Game)),
+                handle_loader_buttons.run_if(in_state(AppState::Loader)),
                 handle_eternal_buttons,
-                handle_save_walls_layout_button,
+                
             )
                 .in_set(InputSystemSets::InputListening),
         );
@@ -110,6 +112,20 @@ fn handle_save_walls_layout_button(
     {
         if *interaction == Interaction::Pressed {
             button_event_writer.send(SaveWallsLayoutButtonPressed);
+        }
+    }
+}
+
+fn handle_loader_buttons(
+    mut button_event_writer: EventWriter<LoaderScreenArrowPressed>,
+    screen_change_arrows_query: Query<(&Interaction, &ScreenChangeArrowsAction), Changed<Interaction>>,
+) {
+    for (interaction, arrow_action) in screen_change_arrows_query.iter()
+    {
+        if *interaction == Interaction::Pressed {
+            button_event_writer.send(LoaderScreenArrowPressed{
+                action: *arrow_action
+            });
         }
     }
 }

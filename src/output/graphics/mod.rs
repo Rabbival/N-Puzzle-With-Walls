@@ -26,10 +26,12 @@ impl Plugin for GraphicsPlugin {
 
 fn show_only_if_has_specified_screen_tag(
     app_state: Res<State<AppState>>,
+    data_base_manager: Res<DataBaseManager>,
+    displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
     mut single_screen_entities: Query<(&mut Visibility, &CustomOnScreenTag), Without<MultipleOnScreenTags>>,
     mut multiple_screen_entities: Query<(&mut Visibility, &MultipleOnScreenTags), Without<CustomOnScreenTag>>,
 ) {
-    if app_state.is_changed() {
+    if app_state.is_changed() || displayed_loader_screen_number.is_changed() || data_base_manager.is_changed(){
         for (mut visibility, screen_tag) in
             single_screen_entities.iter_mut()
         {

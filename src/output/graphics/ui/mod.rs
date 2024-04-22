@@ -1,13 +1,11 @@
 use crate::prelude::*;
 
-pub mod menu_graphics_general;
 pub mod eternal_buttons_spawner;
 pub mod menu_spawner;
 pub mod button_and_text_styles;
 pub mod messages;
 pub mod save_walls_layout_button;
 pub mod loader_screen_spawner;
-pub mod loader_graphics_general;
 
 pub const NORMAL_BUTTON_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const HOVERED_BUTTON_COLOR: Color = Color::rgb(0.2, 0.2, 0.2);
@@ -27,14 +25,12 @@ pub struct UiGraphicsPlugin;
 impl Plugin for UiGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
-            MenuGraphicsPlugin,
             MenuSpawnerPlugin,
             EternalButtonsSpawnerPlugin,
             MessagesGraphicsPlugin,
             ButtonAndTextStylesPlugin,
             GameScreenButtonSpawnerPlugin,
             LoaderScreenSpawnerPlugin,
-            LoaderGraphicsGeneralPlugin
         ))
         .add_systems(Update, (
             update_button_color,
