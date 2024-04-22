@@ -151,7 +151,7 @@ impl DataBaseManager{
 
 	pub fn remove_layout_by_index(&mut self, index: &SavedLayoutIndex) -> Option<DomainBoard>{
 		let index_value = index.0;
-		if index_value >= 0 && index_value < self.saved_layouts.len(){
+		if index_value < self.saved_layouts.len(){
 			Some(self.saved_layouts.remove(index.0))	
 		}else{
 			None

@@ -121,19 +121,17 @@ fn spawn_layout_entity(
             },
             LoaderScreenSlotTag(loader_screen_slot),
             CustomOnScreenTag{
-                screen: AppState::Menu,
+                screen: AppState::Loader,
                 on_own_screen_visibility: Some(Visibility::Hidden)
             }
         ));
         layout_entity.with_children(|parent| {
             parent.spawn((
                 TextBundle::from_section(
-                    //TODO: add the layout's name as "name_here"
                     DomainBoard::default().to_string_for_button(),
                     button_event.tiny_text_style.clone(),
                 ),
                 ButtonText,
-                LoaderScreenLayoutTextTag(loader_screen_slot),
             ));
         });
         //TODO: .with_children for the layout itself

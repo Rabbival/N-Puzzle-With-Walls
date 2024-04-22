@@ -33,7 +33,8 @@ impl Plugin for UiGraphicsPlugin {
             MessagesGraphicsPlugin,
             ButtonAndTextStylesPlugin,
             GameScreenButtonSpawnerPlugin,
-            LoaderScreenSpawnerPlugin
+            LoaderScreenSpawnerPlugin,
+            LoaderGraphicsGeneralPlugin
         ))
         .add_systems(Update, (
             update_button_color,

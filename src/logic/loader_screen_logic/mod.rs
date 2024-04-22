@@ -8,8 +8,6 @@ pub struct LoaderScreenLogicPlugin;
 
 impl Plugin for LoaderScreenLogicPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((
-            DisplayedLoaderScreenPlugin
-        ));
+        app.add_plugins(DisplayedLoaderScreenPlugin);
     }
 }
