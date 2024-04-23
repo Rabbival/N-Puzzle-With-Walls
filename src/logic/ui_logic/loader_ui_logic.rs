@@ -9,7 +9,7 @@ impl Plugin for LoaderUiLogicPlugin {
         app.add_systems(
             OnEnter(AppState::Loader),(
                 show_currently_displayed_saved_layouts_screen,
-                only_show_screen_switching_arrows_if_theres_more_than_one_available_screen,
+                only_show_arrows_if_theres_more_than_one_available_screen,
                 ).in_set(StateChangeSystemSets::PrepareToHandleStateChange),
         )
             .add_systems(
@@ -91,10 +91,10 @@ fn handle_screen_slot_content_and_visibility(
     }
 }
 
-fn only_show_screen_switching_arrows_if_theres_more_than_one_available_screen(
+fn only_show_arrows_if_theres_more_than_one_available_screen(
     
 ){
-    todo!()
+    //TODO
 }
 
 fn update_slots_info_and_arrows_after_change(
@@ -109,7 +109,7 @@ fn update_slots_info_and_arrows_after_change(
         layout_slots_query,
         layout_slot_text_query,
     );
-    only_show_screen_switching_arrows_if_theres_more_than_one_available_screen(
+    only_show_arrows_if_theres_more_than_one_available_screen(
         
     )
 }

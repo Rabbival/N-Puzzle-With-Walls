@@ -60,7 +60,7 @@ fn general_update_planned_board_properties_inner(
                 //press the apply button to force apply
                 button_event_writer_for_apply.send(ApplyButtonPressed {
                     action: MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),
-                })
+                });
             }
         }
         MenuButtonAction::ChangeEmptyTilesCount(new_empty_count) => {

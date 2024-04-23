@@ -19,7 +19,6 @@ impl Plugin for TileGraphicsPlugin {
                 OnEnter(GameState::GameBoardGenerated),
                 (
                     move_existing_tiles,
-                    apply_deferred,
                     despawn_unused_tiles_and_clear_tag,
                     spawn_tiles,
                     declare_post_game_board_gen_changes_done
@@ -65,7 +64,7 @@ fn move_existing_tiles_inner(
                 event_writer.send(SpawnTileInLocation {
                     tile: *tile_from_cell,
                     location: spawn_location,
-                })
+                });
             }
             Some(optional_entity) => match optional_entity {
                 None => {
@@ -134,8 +133,11 @@ fn spawn_tiles(
         let tile_entity_id = commands
             .spawn((
                 SpriteSheetBundle {
-                    atlas: sprite_atlas.0.clone(),
-                    sprite: TextureAtlasSprite::new(tile_to_spawn.tile_type.to_atlas_index()),
+                    atlas: TextureAtlas{
+                        layout: sprite_atlas.atlas_handle.clone(),
+                        index: tile_to_spawn.tile_type.to_atlas_index()
+                    },
+                    texture: sprite_atlas.image_handle.clone(),
                     transform: Transform::from_translation(spawn_location),
                     visibility: Visibility::Hidden,
                     ..default()

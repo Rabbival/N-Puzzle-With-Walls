@@ -13,7 +13,7 @@ pub struct AppStatePlugin;
 
 impl Plugin for AppStatePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<AppState>()
+        app.init_state::<AppState>()
             .add_systems(
                 OnExit(AppState::Game),
                     toggle_board_lock,

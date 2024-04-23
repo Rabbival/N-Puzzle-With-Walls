@@ -73,7 +73,7 @@ fn spawn_are_you_sure_message(
                                 parent.spawn((TextBundle::from_section(
                                         AreYouSureMessageType::DeleteAllBoards.to_string(),
                                         text_style.clone(),
-                                    ).with_text_alignment(JustifyText::Center),
+                                    ).with_text_justify(JustifyText::Center),
                                   ButtonText,
                                   AreYouSureMessageTextTag
                                 ));

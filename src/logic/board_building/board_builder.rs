@@ -51,7 +51,7 @@ fn build_a_new_board(
                 }
                 Err(error) => {
                     game_state.set(GameState::Regular);
-                    generation_error_event_writer.send(ShowGenerationError(error))
+                    generation_error_event_writer.send(ShowGenerationError(error));
                 }
             }
         }

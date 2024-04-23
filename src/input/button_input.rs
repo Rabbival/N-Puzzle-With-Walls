@@ -30,7 +30,9 @@ fn handle_eternal_buttons(
     for (interaction, eternal_button_action) in interaction_query.iter() {
         if *interaction == Interaction::Pressed {
             match eternal_button_action {
-                EternalButtonAction::EndGame => end_game_event_writer.send(EndGame),
+                EternalButtonAction::EndGame => {
+                    end_game_event_writer.send(EndGame);
+                },
                 EternalButtonAction::ToggleMenu => {
                     menu_toggle_event_writer.send(ToggleMenu);
                 }

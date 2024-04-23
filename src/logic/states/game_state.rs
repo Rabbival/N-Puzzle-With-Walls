@@ -15,7 +15,7 @@ pub struct GameStatePlugin;
 
 impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<GameState>()
+        app.init_state::<GameState>()
 			.add_systems(
 				OnEnter(GameState::Victory),
 					toggle_victory,
