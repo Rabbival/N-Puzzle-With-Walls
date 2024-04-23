@@ -120,6 +120,7 @@ pub mod prelude {
                     save_button_and_above_text::*,
                     start_button_and_above_text::*,
                     victory_message::*,
+                    are_you_sure_message::*,
                 },
                 save_walls_layout_button::*,
                 set_color_to_normal,

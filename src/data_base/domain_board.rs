@@ -3,6 +3,9 @@ use std::fmt::Formatter;
 use serde::{Deserialize, Serialize};
 use crate::prelude::*;
 
+#[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Clone)]
+pub struct DomainBoardName(pub String);
+
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct DomainBoard{
 	/// note that this is not necessarily the name of the file, 

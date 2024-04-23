@@ -9,6 +9,7 @@ impl Plugin for KeyboardInputHandlerPlugin {
             (
                 (
                     move_tiles_with_keyboard.run_if(in_state(AppState::Game)),
+                    move_between_loader_screens.run_if(in_state(AppState::Loader)),
                     listen_for_reset,
                     open_menu,
 
@@ -40,6 +41,32 @@ fn move_tiles_with_keyboard(
                 move_neighbor_from_direction: request.move_neighbor_from_direction.unwrap(),
                 empty_tile_index: request.empty_tile_index.unwrap(),
             });
+        }
+    }
+}
+
+fn move_between_loader_screens(
+    mut event_writer: EventWriter<LoaderScreenArrowPressed>,
+    keyboard_input: Res<Input<KeyCode>>,
+) {
+    let screen_change_requests = keyboard_input
+        .get_just_pressed()
+        .map(BasicDirection::from_keycode);
+    for request in screen_change_requests {
+        if let Some(valid_direction) = request {
+            match valid_direction{
+                BasicDirection::Right => {
+                    event_writer.send(LoaderScreenArrowPressed{
+                        action: ScreenChangeArrowsAction::Next
+                    });
+                },
+                BasicDirection::Left => {
+                    event_writer.send(LoaderScreenArrowPressed{
+                        action: ScreenChangeArrowsAction::Previous
+                    });
+                },
+                _ => {}
+            }
         }
     }
 }

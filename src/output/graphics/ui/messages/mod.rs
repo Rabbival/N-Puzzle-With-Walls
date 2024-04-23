@@ -2,6 +2,7 @@ pub mod victory_message;
 
 pub mod start_button_and_above_text;
 pub mod save_button_and_above_text;
+pub mod are_you_sure_message;
 
 use crate::prelude::*;
 
@@ -13,7 +14,8 @@ impl Plugin for MessagesGraphicsPlugin {
 			.add_plugins((
 				VictoryMessagePlugin,
                 TextAboveStartButtonPlugin,
-                TextAboveSaveButtonPlugin
+                TextAboveSaveButtonPlugin,
+                AreYouSureMessagePlugin
             ))
         ;
     }

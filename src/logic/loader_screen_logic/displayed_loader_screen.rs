@@ -1,3 +1,4 @@
+use std::cmp::max;
 use crate::prelude::*;
 
 #[derive(Resource, Default)]
@@ -21,7 +22,7 @@ fn listen_to_screen_change_arrows_presses(
 ){
     for change_request in event_listener.read(){
         let max_not_empty_screen =
-            data_base_manager.get_saved_layouts_ref().len() / SAVED_LAYOUTS_PER_SCREEN;
+            max((data_base_manager.get_saved_layouts_ref().len() / SAVED_LAYOUTS_PER_SCREEN) -1, 0);
         match change_request.action{
             ScreenChangeArrowsAction::Next => {
                 if displayed_loader_screen_number.0 < max_not_empty_screen {
