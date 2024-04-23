@@ -12,25 +12,15 @@ impl Plugin for ButtonAndTextStylesPlugin {
 }
 
 pub fn button_and_text_styles_emitter(
-    mut button_event_writer: EventWriter<SpawnButtons>,
-    mut big_button_event_writer: EventWriter<SpawnBigButtons>,
-    mut tile_count_buttons_event_writer: EventWriter<SpawnTileCountButtons>,
-    mut eternal_buttons_event_writer: EventWriter<SpawnEternalButtons>,
-    mut loader_screen_buttons_event_writer: EventWriter<SpawnLoaderButtons>,
+    mut spawn_texts_and_buttons_writer: EventWriter<SpawnTextsAndButtons>,
 ) {
-    let button_style = Style {
-        width: Val::Px(150.0),
-        height: Val::Px(50.0),
-        margin: UiRect::all(Val::Px(15.0)),
+    let board_props_button_style = Style {
+        width: Val::Px(240.0),
+        height: Val::Px(240.0),
         justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
+        align_items: AlignItems::Start,
         ..default()
     };
-    let button_text_style = TextStyle {
-        font_size: 40.0,
-        ..default()
-    };
-
     let big_button_style = Style {
         width: Val::Px(300.0),
         height: Val::Px(80.0),
@@ -39,11 +29,21 @@ pub fn button_and_text_styles_emitter(
         align_items: AlignItems::Center,
         ..default()
     };
-    let big_button_text_style = TextStyle {
-        font_size: 60.0,
+    let space_bar_looking_button_style = Style {
+        width: Val::Px(450.0),
+        height: Val::Px(50.0),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
         ..default()
     };
-
+    let common_button_style = Style {
+        width: Val::Px(150.0),
+        height: Val::Px(50.0),
+        margin: UiRect::all(Val::Px(15.0)),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    };
     let thin_button_style = Style {
         width: Val::Px(50.0),
         height: Val::Px(50.0),
@@ -52,75 +52,44 @@ pub fn button_and_text_styles_emitter(
         align_items: AlignItems::Center,
         ..default()
     };
-
-    let eternal_button_text_style = TextStyle {
+    
+    let giant_text_style = TextStyle {
+        font_size: 60.0,
+        ..default()
+    };
+    let big_text_style = TextStyle {
         font_size: 50.0,
         ..default()
     };
-
+    let medium_text_style = TextStyle {
+        font_size: 40.0,
+        ..default()
+    };
     let small_text_style = TextStyle {
         font_size: 30.0,
         ..default()
     };
-
     let tiny_text_style = TextStyle {
-        font_size: 20.0,
+        font_size: 22.0,
         ..default()
     };
-
     let tiny_red_text_style = TextStyle {
         font_size: 22.0,
         color: Color::RED,
         ..default()
     };
 
-    let save_walls_layout_button_style = Style {
-        width: Val::Px(450.0),
-        height: Val::Px(50.0),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..default()
-    };
-    let save_walls_layout_button_text_style = TextStyle {
-        font_size: 40.0,
-        ..default()
-    };
-
-    let board_props_button_style = Style {
-        width: Val::Px(240.0),
-        height: Val::Px(240.0),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Start,
-        ..default()
-    };
-
-    eternal_buttons_event_writer.send(SpawnEternalButtons {
-        thin_button_style: thin_button_style.clone(),
-        button_text_style: eternal_button_text_style.clone(),
-    });
-    button_event_writer.send(SpawnButtons {
-        button_style: button_style.clone(),
-        button_text_style: button_text_style.clone(),
-    });
-    big_button_event_writer.send(SpawnBigButtons {
-        big_button_style: big_button_style.clone(),
-        big_button_text_style: big_button_text_style.clone(),
-        save_walls_layout_button_style: save_walls_layout_button_style.clone(),
-        save_walls_layout_button_text_style: save_walls_layout_button_text_style.clone(),
-        tiny_red_text_style
-    });
-    tile_count_buttons_event_writer.send(SpawnTileCountButtons {
-        regular_button_style: button_style,
-        thin_button_style: thin_button_style.clone(),
-        button_text_style: button_text_style.clone(),
-        small_text_style: small_text_style.clone()
-    });
-    loader_screen_buttons_event_writer.send(SpawnLoaderButtons {
-        thin_button_style,
-        button_text_style,
+    spawn_texts_and_buttons_writer.send(SpawnTextsAndButtons {
         board_props_button_style,
+        big_button_style,
+        space_bar_looking_button_style,
+        common_button_style,
+        thin_button_style,
+        giant_text_style,
+        big_text_style,
+        medium_text_style,
+        small_text_style,
         tiny_text_style,
-        save_walls_layout_button_style: save_walls_layout_button_style.clone(),
-        save_walls_layout_button_text_style: save_walls_layout_button_text_style.clone(),
+        tiny_red_text_style,
     });
 }

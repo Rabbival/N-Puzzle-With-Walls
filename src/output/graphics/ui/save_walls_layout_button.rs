@@ -15,13 +15,13 @@ impl Plugin for GameScreenButtonSpawnerPlugin {
 }
 
 fn spawn_save_walls_layout_button(
-    mut big_button_event_reader: EventReader<SpawnBigButtons>,
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ) {
-    for big_button_event in big_button_event_reader.read() {
-        let button_style = &big_button_event.save_walls_layout_button_style;
-        let button_text_style = &big_button_event.save_walls_layout_button_text_style;
-        let tiny_red_text_style = &big_button_event.tiny_red_text_style;
+    for spawn_request in spawn_event_reader.read() {
+        let button_style = &spawn_request.space_bar_looking_button_style;
+        let button_text_style = &spawn_request.medium_text_style;
+        let tiny_red_text_style = &spawn_request.tiny_red_text_style;
         commands
             .spawn(
                 (build_node_bundle_with_full_percentage_style(

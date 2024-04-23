@@ -24,14 +24,11 @@ impl Plugin for AreYouSureMessagePlugin{
 }
 
 fn spawn_are_you_sure_message(
-    mut spawn_event_reader: EventReader<SpawnBigButtons>,
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ) {
     for spawn_request in spawn_event_reader.read() {
-        let text_style = TextStyle {
-            font_size: 42.0,
-            ..default()
-        };
+        let text_style = &spawn_request.medium_text_style;
         let button_style = &spawn_request.big_button_style;
         commands
             .spawn((

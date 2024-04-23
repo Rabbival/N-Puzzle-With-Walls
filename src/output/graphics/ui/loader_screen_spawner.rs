@@ -26,19 +26,19 @@ impl Plugin for LoaderScreenSpawnerPlugin{
 }
 
 fn spawn_load_screen_arrows(
-    mut button_event_reader: EventReader<SpawnLoaderButtons>,
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ) {
-    for button_event in button_event_reader.read() {
+    for spawn_request in spawn_event_reader.read() {
         spawn_load_screen_arrow(
-            button_event,
+            spawn_request,
             JustifyContent::End,
             ">",
             LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Next),
             &mut commands
         );
         spawn_load_screen_arrow(
-            button_event,
+            spawn_request,
             JustifyContent::Start,
             "<",
             LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Previous),
@@ -65,12 +65,12 @@ fn spawn_load_screen_arrows(
                 }).with_children(|parent| {
                     spawn_layout_entity(
                         parent,
-                        button_event,
+                        spawn_request,
                         LoaderScreenSlot::TopLeft
                     );
                     spawn_layout_entity(
                         parent,
-                        button_event,
+                        spawn_request,
                         LoaderScreenSlot::TopRight
                     );
                 });
@@ -85,12 +85,12 @@ fn spawn_load_screen_arrows(
                 }).with_children(|parent| {
                     spawn_layout_entity(
                         parent,
-                        button_event,
+                        spawn_request,
                         LoaderScreenSlot::BottomLeft
                     );
                     spawn_layout_entity(
                         parent,
-                        button_event,
+                        spawn_request,
                         LoaderScreenSlot::BottomRight
                     );
                 });
@@ -123,7 +123,7 @@ fn spawn_load_screen_arrows(
                     .with_children(|parent| {
                         parent.spawn((
                             ButtonBundle {
-                                style: button_event.save_walls_layout_button_style.clone(),
+                                style: spawn_request.space_bar_looking_button_style.clone(),
                                 background_color: super::NORMAL_BUTTON_COLOR.into(),
                                 ..default()
                             },
@@ -133,7 +133,7 @@ fn spawn_load_screen_arrows(
                                 parent.spawn((
                                     TextBundle::from_section(
                                         "Delete All Boards",
-                                        button_event.save_walls_layout_button_text_style.clone()
+                                        spawn_request.medium_text_style.clone()
                                     ),
                                     ButtonText,
                                 ));
@@ -145,7 +145,7 @@ fn spawn_load_screen_arrows(
 
 fn spawn_layout_entity(
     parent: &mut ChildBuilder,
-    button_event: &SpawnLoaderButtons,
+    spawn_request: &SpawnTextsAndButtons,
     loader_screen_slot: LoaderScreenSlot
 ){
     parent.spawn(NodeBundle {
@@ -159,7 +159,7 @@ fn spawn_layout_entity(
     }).with_children(|parent| {
         let mut layout_entity = parent.spawn((
             ButtonBundle {
-                style: button_event.board_props_button_style.clone(),
+                style: spawn_request.board_props_button_style.clone(),
                 background_color: super::NORMAL_BUTTON_COLOR.into(),
                 ..default()
             },
@@ -173,7 +173,7 @@ fn spawn_layout_entity(
             parent.spawn((
                 TextBundle::from_section(
                     DomainBoard::default().to_string_for_button(),
-                    button_event.tiny_text_style.clone(),
+                    spawn_request.tiny_text_style.clone(),
                 ),
                 ButtonText,
             ));
@@ -183,14 +183,14 @@ fn spawn_layout_entity(
 }
 
 fn spawn_load_screen_arrow(
-    button_event: &SpawnLoaderButtons,
+    spawn_request: &SpawnTextsAndButtons,
     content_side: JustifyContent,
     text_value: impl Into<String>,
     loader_screen_action: LoaderScreenAction,
     commands: &mut Commands
 ){
-    let thin_button_style = &button_event.thin_button_style;
-    let button_text_style = &button_event.button_text_style;
+    let thin_button_style = &spawn_request.thin_button_style;
+    let medium_text_style = &spawn_request.medium_text_style;
 
     commands
         .spawn((
@@ -225,7 +225,7 @@ fn spawn_load_screen_arrow(
                         parent.spawn((
                             TextBundle::from_section(
                                 text_value,
-                                button_text_style.clone(),
+                                medium_text_style.clone(),
                             ),
                             ButtonText,
                         ));

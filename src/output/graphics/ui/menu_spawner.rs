@@ -38,13 +38,13 @@ impl Plugin for MenuSpawnerPlugin {
 }
 
 fn spawn_generate_button(
-    mut big_button_event_reader: EventReader<SpawnBigButtons>,
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ) {
-    for big_button_event in big_button_event_reader.read() {
-        let button_style = &big_button_event.big_button_style;
-        let button_text_style = &big_button_event.big_button_text_style;
-        let tiny_red_text_style = &big_button_event.tiny_red_text_style;
+    for spawn_request in spawn_event_reader.read() {
+        let button_style = &spawn_request.big_button_style;
+        let button_text_style = &spawn_request.giant_text_style;
+        let tiny_red_text_style = &spawn_request.tiny_red_text_style;
 
         commands
             .spawn((
@@ -104,12 +104,12 @@ fn spawn_generate_button(
 }
 
 fn spawn_generation_options(
-    mut button_event_reader: EventReader<SpawnButtons>,
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ) {
-    for button_event in button_event_reader.read() {
-        let button_style = &button_event.button_style;
-        let button_text_style = &button_event.button_text_style;
+    for spawn_request in spawn_event_reader.read() {
+        let button_style = &spawn_request.common_button_style;
+        let button_text_style = &spawn_request.medium_text_style;
 
         commands
             .spawn((
@@ -182,12 +182,12 @@ fn spawn_generation_options(
 }
 
 fn spawn_size_options(
-    mut button_event_reader: EventReader<SpawnButtons>,
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ) {
-    for button_event in button_event_reader.read() {
-        let button_style = &button_event.button_style;
-        let button_text_style = &button_event.button_text_style;
+    for spawn_request in spawn_event_reader.read() {
+        let button_style = &spawn_request.common_button_style;
+        let button_text_style = &spawn_request.medium_text_style;
 
         commands
             .spawn((
@@ -246,14 +246,14 @@ fn spawn_size_options(
 }
 
 fn spawn_tile_counter(
-    mut button_event_reader: EventReader<SpawnTileCountButtons>,
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ) {
-    for button_event in button_event_reader.read() {
-        let regular_button_style = &button_event.regular_button_style;
-        let thin_button_style = &button_event.thin_button_style;
-        let button_text_style = &button_event.button_text_style;
-        let small_text_style = &button_event.small_text_style;
+    for spawn_request in spawn_event_reader.read() {
+        let regular_button_style = &spawn_request.common_button_style;
+        let thin_button_style = &spawn_request.thin_button_style;
+        let button_text_style = &spawn_request.medium_text_style;
+        let small_text_style = &spawn_request.small_text_style;
 
         commands
             .spawn((

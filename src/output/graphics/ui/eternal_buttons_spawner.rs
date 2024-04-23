@@ -19,12 +19,12 @@ impl Plugin for EternalButtonsSpawnerPlugin {
 }
 
 fn spawn_exit_button(
-    mut eternal_buttons_event_reader: EventReader<SpawnEternalButtons>,
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ) {
-    for eternal_button_event in eternal_buttons_event_reader.read() {
-        let button_style = &eternal_button_event.thin_button_style;
-        let button_text_style = &eternal_button_event.button_text_style;
+    for spawn_request in spawn_event_reader.read() {
+        let button_style = &spawn_request.thin_button_style;
+        let button_text_style = &spawn_request.big_text_style;
 
         commands
             .spawn(build_node_bundle_with_full_percentage_style(
@@ -67,12 +67,12 @@ fn spawn_exit_button(
 }
 
 fn spawn_menu_toggling_button(
-    mut eternal_buttons_event_reader: EventReader<SpawnEternalButtons>,
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ) {
-    for eternal_button_event in eternal_buttons_event_reader.read() {
-        let button_style = &eternal_button_event.thin_button_style;
-        let button_text_style = &eternal_button_event.button_text_style;
+    for spawn_request in spawn_event_reader.read() {
+        let button_style = &spawn_request.thin_button_style;
+        let button_text_style = &spawn_request.big_text_style;
 
         commands
             .spawn(build_node_bundle_with_full_percentage_style(
