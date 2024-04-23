@@ -7,16 +7,17 @@ pub struct LoaderUiLogicPlugin;
 impl Plugin for LoaderUiLogicPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            OnEnter(AppState::Loader),
-            show_currently_displayed_saved_layouts_screen
-                .in_set(StateChangeSystemSets::PrepareToHandleStateChange),
+            OnEnter(AppState::Loader),(
+                show_currently_displayed_saved_layouts_screen,
+                only_show_screen_switching_arrows_if_theres_more_than_one_available_screen,
+                ).in_set(StateChangeSystemSets::PrepareToHandleStateChange),
         )
             .add_systems(
                 Update,(
-                    update_slots_info_after_change
+                    update_slots_info_and_arrows_after_change
                         .run_if(
-                            resource_changed::<DisplayedLoaderScreenNumber>()
-                                .or_else(resource_changed::<DataBaseManager>())
+                            resource_changed::<DisplayedLoaderScreenNumber>
+                                .or_else(resource_changed::<DataBaseManager>)
                         ).in_set(StateChangeSystemSets::PrepareToHandleStateChange),
                 )
             );
@@ -90,7 +91,13 @@ fn handle_screen_slot_content_and_visibility(
     }
 }
 
-fn update_slots_info_after_change(
+fn only_show_screen_switching_arrows_if_theres_more_than_one_available_screen(
+    
+){
+    todo!()
+}
+
+fn update_slots_info_and_arrows_after_change(
     data_base_manager: Res<DataBaseManager>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
     layout_slots_query: Query<(&LoaderScreenSlotTag, &mut CustomOnScreenTag, &Children)>,
@@ -101,5 +108,8 @@ fn update_slots_info_after_change(
         displayed_loader_screen_number,
         layout_slots_query,
         layout_slot_text_query,
+    );
+    only_show_screen_switching_arrows_if_theres_more_than_one_available_screen(
+        
     )
 }

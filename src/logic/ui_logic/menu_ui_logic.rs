@@ -9,7 +9,7 @@ impl Plugin for MenuUiLogicPlugin {
             Update,
             (
                 update_wall_tiles_count_visuals
-                    .run_if(resource_changed::<UnappliedMenuWallCount>()),
+                    .run_if(resource_changed::<UnappliedMenuWallCount>),
                 set_chosen_options_to_fit_current_props
                     .in_set(StateChangeSystemSets::HandleStateChange),
                 (

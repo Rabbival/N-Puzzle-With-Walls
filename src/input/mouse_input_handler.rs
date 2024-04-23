@@ -40,7 +40,7 @@ fn update_cursor_in_game_world(
 
 fn listen_for_mouse_click_in_game(
     mut logic_event_writer: EventWriter<SwitchTilesLogic>,
-    mouse: Res<Input<MouseButton>>,
+    mouse: Res<ButtonInput<MouseButton>>,
     cursor_position: Res<CursorPosition>,
     game_board_query: Query<&TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
 ) {

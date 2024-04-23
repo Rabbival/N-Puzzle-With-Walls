@@ -134,7 +134,7 @@ fn spawn_tiles(
         let tile_entity_id = commands
             .spawn((
                 SpriteSheetBundle {
-                    texture_atlas: sprite_atlas.0.clone(),
+                    atlas: sprite_atlas.0.clone(),
                     sprite: TextureAtlasSprite::new(tile_to_spawn.tile_type.to_atlas_index()),
                     transform: Transform::from_translation(spawn_location),
                     visibility: Visibility::Hidden,
@@ -169,7 +169,7 @@ fn spawn_tiles(
                                 color: text_color,
                             },
                         )],
-                        alignment: TextAlignment::Center,
+                        justify: JustifyText::Center,
                         linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
                     },
                     transform: Transform::from_translation(text_spawn_loc_relative),

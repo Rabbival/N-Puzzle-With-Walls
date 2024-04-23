@@ -73,7 +73,7 @@ fn spawn_are_you_sure_message(
                                 parent.spawn((TextBundle::from_section(
                                         AreYouSureMessageType::DeleteAllBoards.to_string(),
                                         text_style.clone(),
-                                    ).with_text_alignment(TextAlignment::Center),
+                                    ).with_text_alignment(JustifyText::Center),
                                   ButtonText,
                                   AreYouSureMessageTextTag
                                 ));
@@ -153,7 +153,7 @@ fn listen_for_are_you_sure_message_requests(
         if let LoaderScreenAction::WarnBeforeDeletion(are_you_sure_message_type) =
             loader_screen_action.action.clone()
         {
-           let are_you_sure_text_ref = 
+           let are_you_sure_text_ref =
                &mut are_you_sure_text_query.single_mut().sections[0].value;
            *are_you_sure_text_ref = are_you_sure_message_type.to_string();
             let are_you_sure_button_entity = are_you_sure_entity_query.single();

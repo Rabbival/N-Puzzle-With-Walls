@@ -41,10 +41,10 @@ impl BasicDirection {
     /// seems to be more intuitive
     pub fn from_keycode(keycode: &KeyCode) -> Option<BasicDirection> {
         match keycode {
-            KeyCode::W | KeyCode::Up => Some(BasicDirection::Up),
-            KeyCode::D | KeyCode::Right => Some(BasicDirection::Right),
-            KeyCode::S | KeyCode::Down => Some(BasicDirection::Down),
-            KeyCode::A | KeyCode::Left => Some(BasicDirection::Left),
+            KeyCode::KeyW | KeyCode::ArrowUp => Some(BasicDirection::Up),
+            KeyCode::KeyD | KeyCode::ArrowRight => Some(BasicDirection::Right),
+            KeyCode::KeyS | KeyCode::ArrowDown => Some(BasicDirection::Down),
+            KeyCode::KeyA | KeyCode::ArrowLeft => Some(BasicDirection::Left),
             _ => None,
         }
     }

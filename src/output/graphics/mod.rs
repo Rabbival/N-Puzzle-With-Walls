@@ -22,7 +22,7 @@ impl Plugin for GraphicsPlugin {
                     .in_set(StateChangeSystemSets::HandleStateChange),
                 set_visibility_for_entity
             )
-            
+
         );
     }
 }

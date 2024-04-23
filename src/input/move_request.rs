@@ -18,8 +18,8 @@ impl MoveRequest {
 
     fn empty_tile_index_from_keycode(keycode: &KeyCode) -> Option<usize> {
         match keycode {
-            KeyCode::W | KeyCode::D | KeyCode::S | KeyCode::A => Some(1),
-            KeyCode::Up | KeyCode::Right | KeyCode::Down | KeyCode::Left => Some(0),
+            KeyCode::KeyW | KeyCode::KeyD | KeyCode::KeyS | KeyCode::KeyA => Some(1),
+            KeyCode::ArrowUp | KeyCode::ArrowRight | KeyCode::ArrowDown | KeyCode::ArrowLeft => Some(0),
             _ => None,
         }
     }

@@ -12,7 +12,6 @@ mod system;
 
 
 pub mod prelude {
-    pub use bevy::reflect::TypeUuid;
     pub use bevy::{prelude::*, utils::HashMap};
 
     pub use crate::app::*;
