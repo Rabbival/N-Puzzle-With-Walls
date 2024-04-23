@@ -85,7 +85,7 @@ fn show_walls_layout_save_attempt_outcome(
         let text_above_save_button_section = 
             &mut text_above_save_button_query.single_mut().sections[0];
         let text_above_button_new_value = 
-            TextAboveSaveButtonType::from_save_attempt_outcome(layout_attempt_outcome.0).to_string();
+            TextAboveSaveButtonType::from_save_attempt_outcome(layout_attempt_outcome.0.clone()).to_string();
         let save_button_text_section = 
             &mut save_button_text_query.single_mut().sections[0];
         let save_button_text_new_value = None;
@@ -96,7 +96,7 @@ fn show_walls_layout_save_attempt_outcome(
             save_button_reset_timer = 
                 Timer::from_seconds(TIME_UNTIL_TEXT_ABOVE_SAVE_GOES_BACK_AFTER_SUCCESS, TimerMode::Once);
         }else{
-            text_above_button_new_color = None;
+            text_above_button_new_color = Some(RED_TEXT_COLOR);
             save_button_text_new_color = Some(RED_TEXT_COLOR);
             save_button_reset_timer =
                 Timer::from_seconds(TIME_UNTIL_TEXT_ABOVE_SAVE_GOES_BACK_AFTER_FAILURE, TimerMode::Once);

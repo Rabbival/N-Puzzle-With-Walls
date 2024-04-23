@@ -1,6 +1,8 @@
-#[derive(Debug, Clone, Copy, PartialEq)]
+use crate::prelude::ExistingWallLayoutName;
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum SaveAttemptOutcome {
-    WallLayoutAlreadyExistsInMemory,
+    WallLayoutAlreadyExistsInMemory(ExistingWallLayoutName),
     WallsLayoutsAtCapacity,
     LayoutSavedSuccessfully
 }

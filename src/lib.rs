@@ -52,7 +52,6 @@ pub mod prelude {
         },
         enums::{
             basic_direction::*,
-            loader_screen_slot::*,
             board_property_enums::{
                 board_size::*, generation_method::*, grid_traveller_type::*, menu_button_action::*,
                 wall_tiles_change::*,
@@ -63,23 +62,25 @@ pub mod prelude {
             },
             tile_type::*,
             ui_enum::{
+                are_you_sure_message_type::*,
                 eternal_button_action::*,
+                screen_change_arrows_action::*,
                 text_above_save_button_type::*,
                 text_above_start_button_type::*,
                 victory_button_action::*,
-                screen_change_arrows_action::*,
             },
         },
         loader_screen_logic::{
-            LoaderScreenLogicPlugin, displayed_loader_screen::*,
-            loader_screen_layout_text_tag::*, layout_loader_screen_and_slot::*,
+            displayed_loader_screen::*, layout_loader_screen_and_slot::*,
+            loader_screen_layout_text_tag::*, LoaderScreenLogicPlugin,
         },
         states::{app_state::*, game_state::*, StatePlugin},
         tile::*,
         tile_board::*,
         tile_dictionary::*,
-        ui_logic::{eternal_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*, loader_ui_logic::*,},
+        ui_logic::{eternal_ui_logic::*, loader_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*, },
     };
+    pub use crate::logic::enums::ui_enum::loader_screen_slot::*;
     pub use crate::output::{
         console::{
             costume_error::{
@@ -110,20 +111,20 @@ pub mod prelude {
             GraphicsPlugin,
             tile_graphics::*,
             ui::{
-                button_and_text_styles::*,
-                eternal_buttons_spawner::*, menu_spawner::*,
-                loader_screen_spawner::*, 
+                build_node_bundle_with_full_percentage_style,
+                button_and_text_styles::*, ButtonText,
+                eternal_buttons_spawner::*,
+                loader_screen_spawner::*, menu_spawner::*,
                 messages::{
                     MessagesGraphicsPlugin,
                     save_button_and_above_text::*,
                     start_button_and_above_text::*,
                     victory_message::*,
-                }, save_walls_layout_button::*,
-                build_node_bundle_with_full_percentage_style,
+                },
+                save_walls_layout_button::*,
                 set_color_to_normal,
                 set_color_to_pressed,
                 set_text_section_value_and_color,
-                ButtonText,
                 UiGraphicsPlugin
             },
             visibility_tags::{

@@ -14,10 +14,11 @@ impl Plugin for LoaderUiLogicPlugin {
             .add_systems(
                 Update,(
                     update_slots_info_after_change
-                        .run_if(resource_changed::<DisplayedLoaderScreenNumber>()),
-                    update_slots_info_after_change
-                        .run_if(resource_changed::<DataBaseManager>())
-                ).in_set(StateChangeSystemSets::PrepareToHandleStateChange)
+                        .run_if(
+                            resource_changed::<DisplayedLoaderScreenNumber>()
+                                .or_else(resource_changed::<DataBaseManager>())
+                        ).in_set(StateChangeSystemSets::PrepareToHandleStateChange),
+                )
             );
     }
 }

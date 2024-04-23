@@ -26,12 +26,12 @@ fn listen_for_save_requests(
         }
         else{
             let wall_locations = current_board_wall_locations.0.clone();
-            if board_exists_in_db(
+            if let Some(existing_board_name) = board_exists_in_db(
                 saved_layout_reference,
                 &applied_board_props_query.single().size,
                 &wall_locations
             ){
-                event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::WallLayoutAlreadyExistsInMemory));
+                event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::WallLayoutAlreadyExistsInMemory(existing_board_name)));
             }else{
                 write_to_db_event_writer.send(SaveToDB(DomainBoard{
                     board_name: db_manager.generate_default_name_for_board(),
@@ -48,12 +48,12 @@ fn board_exists_in_db(
     saved_layouts: &Vec<DomainBoard>,
     new_board_size: &BoardSize,
     new_wall_locations: &Vec<GridLocation>
-) -> bool {
+) -> Option<ExistingWallLayoutName> {
     for saved_layout in saved_layouts{
         if saved_layout.board_props.size == *new_board_size
             && *new_wall_locations == saved_layout.wall_locations {
-            return true;
+            return Some(ExistingWallLayoutName(saved_layout.board_name.clone()));
         }
     }
-    false
+    None
 }
