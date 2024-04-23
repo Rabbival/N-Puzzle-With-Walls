@@ -10,9 +10,7 @@ pub struct GameScreenButtonSpawnerPlugin;
 
 impl Plugin for GameScreenButtonSpawnerPlugin {
     fn build(&self, app: &mut App) {
-        
-        app
-            .add_systems(Startup, spawn_save_walls_layout_button);
+        app.add_systems(Startup, spawn_save_walls_layout_button);
     }
 }
 

@@ -95,7 +95,7 @@ fn listen_for_app_closing(
     mut end_game_event_writer: EventWriter<EndGame>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::Escape) {
+    if keyboard_input.just_pressed(KeyCode::Escape) && keyboard_input.pressed(KeyCode::ShiftLeft) {
         end_game_event_writer.send(EndGame);
     }
 }
