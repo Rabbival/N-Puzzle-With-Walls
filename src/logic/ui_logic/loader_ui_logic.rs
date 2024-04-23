@@ -14,7 +14,10 @@ impl Plugin for LoaderUiLogicPlugin {
         )
             .add_systems(
                 Update,(
-                    update_slots_info_and_arrows_after_change
+                    (
+                        update_slots_info_after_change,
+                        update_arrows_after_change
+                    )
                         .run_if(
                             resource_changed::<DisplayedLoaderScreenNumber>
                                 .or_else(resource_changed::<DataBaseManager>)
@@ -56,7 +59,6 @@ fn handle_screen_slot_content_and_visibility(
     layout_slot_text_query: &mut Query<&mut Text>
 ) -> Result<(), EntityRelatedCostumeError>
 {
-
     if let Some(layout) = optional_layout_to_display{
         for (
             layout_slot_tag,
@@ -92,12 +94,20 @@ fn handle_screen_slot_content_and_visibility(
 }
 
 fn only_show_arrows_if_theres_more_than_one_available_screen(
-    
+    data_base_manager: Res<DataBaseManager>,
+    mut arrows_visibility_tags_query: Query<&mut CustomOnScreenTag, With<ScreenChangeArrowTag>>
 ){
-    //TODO
+    let saved_layouts_count = data_base_manager.get_saved_layouts_ref().len();
+    for mut visibility_tag in arrows_visibility_tags_query.iter_mut(){
+        if saved_layouts_count <= SAVED_LAYOUTS_PER_SCREEN {
+            visibility_tag.on_own_screen_visibility = Some(Visibility::Hidden);
+        }else{
+            visibility_tag.on_own_screen_visibility = Some(Visibility::Visible);
+        }
+    }
 }
 
-fn update_slots_info_and_arrows_after_change(
+fn update_slots_info_after_change(
     data_base_manager: Res<DataBaseManager>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
     layout_slots_query: Query<(&LoaderScreenSlotTag, &mut CustomOnScreenTag, &Children)>,
@@ -109,7 +119,14 @@ fn update_slots_info_and_arrows_after_change(
         layout_slots_query,
         layout_slot_text_query,
     );
+}
+
+fn update_arrows_after_change(
+    data_base_manager: Res<DataBaseManager>,
+    arrows_visibility_tags_query: Query<&mut CustomOnScreenTag, With<ScreenChangeArrowTag>>
+){
     only_show_arrows_if_theres_more_than_one_available_screen(
-        
-    )
+        data_base_manager,
+        arrows_visibility_tags_query
+    );
 }

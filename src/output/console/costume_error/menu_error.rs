@@ -1,6 +1,7 @@
+use enum_iterator::Sequence;
 use crate::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, Sequence, PartialEq, Eq, Hash, PartialOrd, Clone, Copy)]
 pub enum MenuError {
     CantGoBeyondTileCountBounds(WallTilesChange),
 }

@@ -12,7 +12,10 @@ impl Plugin for TextAboveStartButtonPlugin {
                 Update,
                 (
                     listen_for_apply_button_press,
-                    alert_player_of_unsaved_changes.after(update_wall_count_unapplied),
+                    (
+                        alert_player_of_unsaved_changes,
+                        alert_player_of_reached_bounds
+                    ).after(update_wall_count_unapplied),
                     show_board_couldnt_be_generated,
                     update_main_button_text_to_show_functionality
                 )
@@ -61,6 +64,51 @@ fn alert_player_of_unsaved_changes(
         }
     }
 }
+
+pub fn alert_player_of_reached_bounds(
+    mut button_event_listener: EventReader<MenuButtonPressed>,
+    planned_board_prop_query: Query<
+        &BoardProperties,
+        (
+            With<PlannedBoardProperties>,
+            Without<AppliedBoardProperties>,
+        ),
+    >,
+    mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
+    mut text_above_start_button_query: Query<&mut Text, With<TextAboveStartButton>>,
+) {
+    for button_event in button_event_listener.read() {
+        if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action {
+            alert_player_of_reached_bounds_inner(
+                &wall_count_action,
+                planned_board_prop_query.single(),
+                &mut unapplied_menu_wall_count,
+                &mut text_above_start_button_query.single_mut().sections[0].value
+            );
+        }
+    }
+}
+
+fn alert_player_of_reached_bounds_inner(
+    wall_count_action: &WallTilesChange,
+    planned_board_prop: &BoardProperties,
+    unapplied_menu_wall_count: &mut UnappliedMenuWallCount,
+    text_above_start_button: &mut String
+) {
+    match wall_count_action {
+        WallTilesChange::Increase | WallTilesChange::Decrease => {
+            if let WallTilesChange::Increase = wall_count_action {
+                if unapplied_menu_wall_count.0 >= planned_board_prop.size.wall_count_upper_bound() {
+                    *text_above_start_button = TextAboveStartButtonType::MenuError(MenuError::CantGoBeyondTileCountBounds(*wall_count_action)).to_string();
+                }
+            } else if unapplied_menu_wall_count.0 <= 0 {
+                *text_above_start_button = TextAboveStartButtonType::MenuError(MenuError::CantGoBeyondTileCountBounds(*wall_count_action)).to_string();
+            }
+        }
+        _ => {}
+    }
+}
+
 
 fn update_main_button_text_to_show_functionality(
     mut button_event_listener: EventReader<MenuButtonPressed>,

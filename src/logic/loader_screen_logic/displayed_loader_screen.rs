@@ -24,13 +24,16 @@ fn listen_to_screen_change_arrows_presses(
             loader_screen_action.action
         {
             let saved_layouts_count = data_base_manager.get_saved_layouts_ref().len();
-            if saved_layouts_count < 1 {
+            if saved_layouts_count <= SAVED_LAYOUTS_PER_SCREEN {
                 continue;
             } else{
-                let max_full_screen = (saved_layouts_count / SAVED_LAYOUTS_PER_SCREEN) -1;
+                let mut max_full_screen = (saved_layouts_count / SAVED_LAYOUTS_PER_SCREEN) -1;
+                if saved_layouts_count % SAVED_LAYOUTS_PER_SCREEN == 0 {
+                    max_full_screen -= 1;
+                } 
                 match change_request{
                     ScreenChangeRequestType::Next => {
-                        if displayed_loader_screen_number.0 < max_full_screen {
+                        if displayed_loader_screen_number.0 <= max_full_screen {
                             displayed_loader_screen_number.0 += 1;
                         } else{
                             displayed_loader_screen_number.0 = 0;
@@ -40,7 +43,7 @@ fn listen_to_screen_change_arrows_presses(
                         if displayed_loader_screen_number.0 > 0 {
                             displayed_loader_screen_number.0 -= 1;
                         } else{
-                            displayed_loader_screen_number.0 = max_full_screen;
+                            displayed_loader_screen_number.0 = max_full_screen + 1;
                         }
                     }
                 }

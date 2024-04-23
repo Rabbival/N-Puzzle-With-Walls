@@ -12,6 +12,9 @@ const LAYOUT_MARGINS_RECT: UiRect = UiRect {
 #[derive(Component)]
 pub struct ChosenLayoutTag;
 
+#[derive(Component)]
+pub struct ScreenChangeArrowTag;
+
 pub struct LoaderScreenSpawnerPlugin;
 
 impl Plugin for LoaderScreenSpawnerPlugin{
@@ -19,32 +22,19 @@ impl Plugin for LoaderScreenSpawnerPlugin{
         app.add_systems(
             Startup,
             (
-                spawn_load_screen_arrows,
+                spawn_layout_slots,
+                spawn_delete_all_layouts_button,
+                spawn_load_screen_arrows
             )
         );
     }
 }
 
-fn spawn_load_screen_arrows(
+fn spawn_layout_slots(
     mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
-) {
+){
     for spawn_request in spawn_event_reader.read() {
-        spawn_load_screen_arrow(
-            spawn_request,
-            JustifyContent::End,
-            ">",
-            LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Next),
-            &mut commands
-        );
-        spawn_load_screen_arrow(
-            spawn_request,
-            JustifyContent::Start,
-            "<",
-            LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Previous),
-            &mut commands
-        );
-        
         commands
             .spawn(
                 build_node_bundle_with_full_percentage_style(
@@ -54,48 +44,94 @@ fn spawn_load_screen_arrows(
                     Some(FlexDirection::Column)
                 )
             ).with_children(|parent| {
-                //first row
-                parent.spawn(NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::Row,
-                        align_items: AlignItems::Start,
-                        ..default()
-                    },
+            //first row
+            parent.spawn(NodeBundle {
+                style: Style {
+                    flex_direction: FlexDirection::Row,
+                    align_items: AlignItems::Start,
                     ..default()
-                }).with_children(|parent| {
-                    spawn_layout_entity(
-                        parent,
-                        spawn_request,
-                        LoaderScreenSlot::TopLeft
-                    );
-                    spawn_layout_entity(
-                        parent,
-                        spawn_request,
-                        LoaderScreenSlot::TopRight
-                    );
-                });
-                //second row
-                parent.spawn(NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::Row,
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    ..default()
-                }).with_children(|parent| {
-                    spawn_layout_entity(
-                        parent,
-                        spawn_request,
-                        LoaderScreenSlot::BottomLeft
-                    );
-                    spawn_layout_entity(
-                        parent,
-                        spawn_request,
-                        LoaderScreenSlot::BottomRight
-                    );
-                });
+                },
+                ..default()
+            }).with_children(|parent| {
+                spawn_layout_entity(
+                    parent,
+                    spawn_request,
+                    LoaderScreenSlot::TopLeft
+                );
+                spawn_layout_entity(
+                    parent,
+                    spawn_request,
+                    LoaderScreenSlot::TopRight
+                );
             });
+            //second row
+            parent.spawn(NodeBundle {
+                style: Style {
+                    flex_direction: FlexDirection::Row,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                ..default()
+            }).with_children(|parent| {
+                spawn_layout_entity(
+                    parent,
+                    spawn_request,
+                    LoaderScreenSlot::BottomLeft
+                );
+                spawn_layout_entity(
+                    parent,
+                    spawn_request,
+                    LoaderScreenSlot::BottomRight
+                );
+            });
+        });
+    }
+}
 
+fn spawn_layout_entity(
+    parent: &mut ChildBuilder,
+    spawn_request: &SpawnTextsAndButtons,
+    loader_screen_slot: LoaderScreenSlot
+){
+    parent.spawn(NodeBundle {
+        style: Style {
+            flex_direction: FlexDirection::Row,
+            align_items: AlignItems::Center,
+            margin: LAYOUT_MARGINS_RECT,
+            ..default()
+        },
+        ..default()
+    }).with_children(|parent| {
+        let mut layout_entity = parent.spawn((
+            ButtonBundle {
+                style: spawn_request.board_props_button_style.clone(),
+                background_color: super::NORMAL_BUTTON_COLOR.into(),
+                ..default()
+            },
+            LoaderScreenSlotTag(loader_screen_slot),
+            CustomOnScreenTag{
+                screen: AppState::Loader,
+                on_own_screen_visibility: Some(Visibility::Hidden)
+            }
+        ));
+        layout_entity.with_children(|parent| {
+            parent.spawn((
+                TextBundle::from_section(
+                    DomainBoard::default().to_string_for_button(),
+                    spawn_request.tiny_text_style.clone(),
+                ),
+                ButtonText,
+            ));
+        });
+        //TODO: .with_children for the layout itself
+    });
+}
+
+fn spawn_delete_all_layouts_button(
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
+    mut commands: Commands,
+){
+    for spawn_request in spawn_event_reader.read() {
         commands
             .spawn((
                 build_node_bundle_with_full_percentage_style(
@@ -143,43 +179,26 @@ fn spawn_load_screen_arrows(
     }
 }
 
-fn spawn_layout_entity(
-    parent: &mut ChildBuilder,
-    spawn_request: &SpawnTextsAndButtons,
-    loader_screen_slot: LoaderScreenSlot
-){
-    parent.spawn(NodeBundle {
-        style: Style {
-            flex_direction: FlexDirection::Row,
-            align_items: AlignItems::Center,
-            margin: LAYOUT_MARGINS_RECT,
-            ..default()
-        },
-        ..default()
-    }).with_children(|parent| {
-        let mut layout_entity = parent.spawn((
-            ButtonBundle {
-                style: spawn_request.board_props_button_style.clone(),
-                background_color: super::NORMAL_BUTTON_COLOR.into(),
-                ..default()
-            },
-            LoaderScreenSlotTag(loader_screen_slot),
-            CustomOnScreenTag{
-                screen: AppState::Loader,
-                on_own_screen_visibility: Some(Visibility::Hidden)
-            }
-        ));
-        layout_entity.with_children(|parent| {
-            parent.spawn((
-                TextBundle::from_section(
-                    DomainBoard::default().to_string_for_button(),
-                    spawn_request.tiny_text_style.clone(),
-                ),
-                ButtonText,
-            ));
-        });
-        //TODO: .with_children for the layout itself
-    });
+fn spawn_load_screen_arrows(
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
+    mut commands: Commands,
+) {
+    for spawn_request in spawn_event_reader.read() {
+        spawn_load_screen_arrow(
+            spawn_request,
+            JustifyContent::End,
+            ">",
+            LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Next),
+            &mut commands
+        );
+        spawn_load_screen_arrow(
+            spawn_request,
+            JustifyContent::Start,
+            "<",
+            LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Previous),
+            &mut commands
+        );
+    }
 }
 
 fn spawn_load_screen_arrow(
@@ -200,7 +219,11 @@ fn spawn_load_screen_arrow(
                 Visibility::Hidden,
                 None
             ),
-            simple_on_screen_tag(AppState::Loader),
+            CustomOnScreenTag{
+                screen: AppState::Loader,
+                on_own_screen_visibility: Some(Visibility::Hidden)
+            },
+            ScreenChangeArrowTag
         ))
         .with_children(|parent| {
             parent.spawn(NodeBundle {
