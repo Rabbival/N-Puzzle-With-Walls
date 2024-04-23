@@ -103,10 +103,10 @@ pub fn button_and_text_styles_emitter(
         button_text_style: button_text_style.clone(),
     });
     big_button_event_writer.send(SpawnBigButtons {
-        big_button_style,
-        big_button_text_style,
-        save_walls_layout_button_style,
-        save_walls_layout_button_text_style,
+        big_button_style: big_button_style.clone(),
+        big_button_text_style: big_button_text_style.clone(),
+        save_walls_layout_button_style: save_walls_layout_button_style.clone(),
+        save_walls_layout_button_text_style: save_walls_layout_button_text_style.clone(),
         tiny_red_text_style
     });
     tile_count_buttons_event_writer.send(SpawnTileCountButtons {
@@ -119,6 +119,8 @@ pub fn button_and_text_styles_emitter(
         thin_button_style,
         button_text_style,
         board_props_button_style,
-        tiny_text_style
+        tiny_text_style,
+        save_walls_layout_button_style: save_walls_layout_button_style.clone(),
+        save_walls_layout_button_text_style: save_walls_layout_button_text_style.clone(),
     });
 }

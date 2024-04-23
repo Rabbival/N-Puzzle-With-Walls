@@ -10,6 +10,7 @@ impl Plugin for KeyboardInputHandlerPlugin {
                 (
                     move_tiles_with_keyboard.run_if(in_state(AppState::Game)),
                     move_between_loader_screens.run_if(in_state(AppState::Loader)),
+                    close_are_you_sure_message,
                     listen_for_reset,
                     open_menu,
 
@@ -77,6 +78,19 @@ fn open_menu(
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
         menu_toggle_event_writer.send(ToggleMenu)
+    }
+}
+
+fn close_are_you_sure_message(
+    mut entity_visibility_event_writer: EventWriter<SetEntityVisibility>,
+    keyboard_input: Res<Input<KeyCode>>,
+    are_you_sure_entity_query: Query<Entity, With<AreYouSureMessageTag>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        entity_visibility_event_writer.send(SetEntityVisibility{
+            entity: are_you_sure_entity_query.single(),
+            visibility: Visibility::Hidden
+        });
     }
 }
 

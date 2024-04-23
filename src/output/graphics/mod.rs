@@ -1,4 +1,3 @@
-use crate::output::graphics::ui::UiGraphicsPlugin;
 use crate::prelude::*;
 
 
@@ -18,8 +17,12 @@ impl Plugin for GraphicsPlugin {
         ))
         .add_systems(
             Update,
-            show_only_if_has_specified_screen_tag
-                .in_set(StateChangeSystemSets::HandleStateChange),
+            (
+                show_only_if_has_specified_screen_tag
+                    .in_set(StateChangeSystemSets::HandleStateChange),
+                set_visibility_for_entity
+            )
+            
         );
     }
 }
@@ -59,6 +62,18 @@ fn show_only_if_has_specified_screen_tag(
                 }
             }
             *visibility = Visibility::Hidden;
+        }
+    }
+}
+
+fn set_visibility_for_entity(
+    mut event_listener: EventReader<SetEntityVisibility>,
+    mut query: Query<&mut Visibility>,
+) {
+    for visibility_set_request in event_listener.read() {
+        let entity_to_toggle = visibility_set_request.entity;
+        if let Ok(mut entity_visibility) = query.get_mut(entity_to_toggle) {
+            *entity_visibility = visibility_set_request.visibility;
         }
     }
 }

@@ -95,6 +95,51 @@ fn spawn_load_screen_arrows(
                     );
                 });
             });
+
+        commands
+            .spawn((
+                build_node_bundle_with_full_percentage_style(
+                    AlignItems::Center,
+                    JustifyContent::Start,
+                    Visibility::Hidden,
+                    Some(FlexDirection::Column)
+                ),
+                simple_on_screen_tag(AppState::Loader),
+            ))
+            .with_children(|parent| {
+                parent
+                    .spawn((
+                        NodeBundle {
+                            style: Style {
+                                flex_direction: FlexDirection::Column,
+                                align_items: AlignItems::Center,
+                                justify_content: JustifyContent::Start,
+                                ..default()
+                            },
+                            background_color: Color::INDIGO.into(),
+                            ..default()
+                        },
+                    ))
+                    .with_children(|parent| {
+                        parent.spawn((
+                            ButtonBundle {
+                                style: button_event.save_walls_layout_button_style.clone(),
+                                background_color: super::NORMAL_BUTTON_COLOR.into(),
+                                ..default()
+                            },
+                            LoaderScreenAction::WarnBeforeDeletion(AreYouSureMessageType::DeleteAllBoards)
+                        ))
+                            .with_children(|parent| {
+                                parent.spawn((
+                                    TextBundle::from_section(
+                                        "Delete All Boards",
+                                        button_event.save_walls_layout_button_text_style.clone()
+                                    ),
+                                    ButtonText,
+                                ));
+                            });
+                    });
+            });
     }
 }
 

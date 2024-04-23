@@ -4,6 +4,9 @@ use crate::prelude::*;
 #[derive(Component)]
 pub struct AreYouSureMessageTag;
 
+#[derive(Component)]
+pub struct AreYouSureMessageTextTag;
+
 pub struct AreYouSureMessagePlugin;
 
 impl Plugin for AreYouSureMessagePlugin{
@@ -75,7 +78,7 @@ fn spawn_are_you_sure_message(
                                         text_style.clone(),
                                     ).with_text_alignment(TextAlignment::Center),
                                   ButtonText,
-                                  SaveWallsLayoutTextTag
+                                  AreYouSureMessageTextTag
                                 ));
                                 parent.spawn(are_you_sure_message_ui_gap());
                                 parent.spawn(NodeBundle {
@@ -144,7 +147,23 @@ fn are_you_sure_message_ui_gap() -> NodeBundle{
 }
 
 fn listen_for_are_you_sure_message_requests(
-
+    mut visibility_toggle_event_writer: EventWriter<SetEntityVisibility>,
+    mut event_listener: EventReader<LoaderScreenActionInitiated>,
+    are_you_sure_entity_query: Query<Entity, With<AreYouSureMessageTag>>,
+    mut are_you_sure_text_query: Query<&mut Text, With<AreYouSureMessageTextTag>>,
 ){
-
+    for loader_screen_action in event_listener.read(){
+        if let LoaderScreenAction::WarnBeforeDeletion(are_you_sure_message_type) =
+            loader_screen_action.action.clone()
+        {
+           let are_you_sure_text_ref = 
+               &mut are_you_sure_text_query.single_mut().sections[0].value;
+           *are_you_sure_text_ref = are_you_sure_message_type.to_string();
+            let are_you_sure_button_entity = are_you_sure_entity_query.single();
+            visibility_toggle_event_writer.send(SetEntityVisibility{
+                entity: are_you_sure_button_entity,
+                visibility: Visibility::Visible
+            });
+        }
+    }
 }

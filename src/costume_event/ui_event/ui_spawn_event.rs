@@ -35,6 +35,8 @@ pub struct SpawnLoaderButtons {
     pub button_text_style: TextStyle,
     pub board_props_button_style: Style,
     pub tiny_text_style: TextStyle,
+    pub save_walls_layout_button_style: Style,
+    pub save_walls_layout_button_text_style: TextStyle,
 }
 
 pub struct UiSpawnEventPlugin;

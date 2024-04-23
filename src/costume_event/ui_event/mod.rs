@@ -14,6 +14,12 @@ pub struct ToggleButton {
     pub entity: Entity,
 }
 
+#[derive(Event)]
+pub struct SetEntityVisibility {
+    pub entity: Entity,
+    pub visibility: Visibility
+}
+
 pub struct UiEventPlugin;
 
 impl Plugin for UiEventPlugin {
@@ -26,6 +32,7 @@ impl Plugin for UiEventPlugin {
                 GameUiEventPlugin,
             ))
             .add_event::<ResetButtonTextColor>()
-            .add_event::<ToggleButton>();
+            .add_event::<ToggleButton>()
+            .add_event::<SetEntityVisibility>();
     }
 }

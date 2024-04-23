@@ -27,7 +27,8 @@ pub mod prelude {
             ResetButtonTextColor,
             ToggleButton,
             ui_spawn_event::*,
-            UiEventPlugin
+            UiEventPlugin,
+            SetEntityVisibility
         }
     };
     pub use crate::data_base::{
@@ -77,7 +78,9 @@ pub mod prelude {
                     victory_button_action::*,
                 },
                 text_above_save_button_type::*,
-                text_above_start_button_type::*
+                text_above_start_button_type::*,
+                screen_change_request_type::*,
+                loader_screen_action::*,
             },
         },
         loader_screen_logic::{
@@ -90,8 +93,6 @@ pub mod prelude {
         tile_dictionary::*,
         ui_logic::{eternal_ui_logic::*, loader_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*, },
     };
-    pub use crate::logic::enums::ui_enum::loader_screen_action::*;
-    pub use crate::logic::enums::ui_enum::screen_change_request_type::*;
     pub use crate::output::{
         console::{
             costume_error::{

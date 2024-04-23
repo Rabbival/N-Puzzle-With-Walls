@@ -135,7 +135,6 @@ fn spawn_generation_options(
                             background_color: Color::INDIGO.into(),
                             ..default()
                         },
-                        simple_on_screen_tag(AppState::Menu),
                     ))
                     .with_children(|parent| {
                         parent.spawn(TextBundle::from_section(
