@@ -120,11 +120,11 @@ fn handle_loader_buttons(
     mut button_event_writer: EventWriter<LoaderScreenActionInitiated>,
     initiated_loader_actions_query: Query<(&Interaction, &LoaderScreenAction), Changed<Interaction>>,
 ) {
-    for (interaction, arrow_action) in initiated_loader_actions_query.iter()
+    for (interaction, loader_action) in initiated_loader_actions_query.iter()
     {
         if *interaction == Interaction::Pressed {
             button_event_writer.send(LoaderScreenActionInitiated{
-                action: *arrow_action
+                action: loader_action.clone()
             });
         }
     }
