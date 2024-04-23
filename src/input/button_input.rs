@@ -117,13 +117,13 @@ fn handle_save_walls_layout_button(
 }
 
 fn handle_loader_buttons(
-    mut button_event_writer: EventWriter<LoaderScreenArrowPressed>,
-    screen_change_arrows_query: Query<(&Interaction, &ScreenChangeArrowsAction), Changed<Interaction>>,
+    mut button_event_writer: EventWriter<LoaderScreenActionInitiated>,
+    initiated_loader_actions_query: Query<(&Interaction, &LoaderScreenAction), Changed<Interaction>>,
 ) {
-    for (interaction, arrow_action) in screen_change_arrows_query.iter()
+    for (interaction, arrow_action) in initiated_loader_actions_query.iter()
     {
         if *interaction == Interaction::Pressed {
-            button_event_writer.send(LoaderScreenArrowPressed{
+            button_event_writer.send(LoaderScreenActionInitiated{
                 action: *arrow_action
             });
         }

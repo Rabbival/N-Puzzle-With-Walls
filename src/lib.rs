@@ -19,8 +19,16 @@ pub mod prelude {
     pub use crate::bundles::tile_bundle::*;
     pub use crate::costume_event::{
         app_event::*, board_set_event::*, db_event::*, EventPlugin,
-        game_event::*, move_tile_event::*, screen_changing_event::*, system_event::*, ui_event::*,
-        ui_spawn_event::*,
+        game_event::*, move_tile_event::*, screen_changing_event::*, system_event::*,
+        ui_event::{
+            game_ui_event::*,
+            loader_ui_event::*,
+            menu_ui_event::*,
+            ResetButtonTextColor,
+            ToggleButton,
+            ui_spawn_event::*,
+            UiEventPlugin
+        }
     };
     pub use crate::data_base::{
         data_base_manager::*,
@@ -56,6 +64,7 @@ pub mod prelude {
                 board_size::*, generation_method::*, grid_traveller_type::*, menu_button_action::*,
                 wall_tiles_change::*,
             },
+            loader_screen_slot::*,
             system_enum::{
                 folder_to_access::*,
                 save_attempt_outcome::*,
@@ -63,11 +72,12 @@ pub mod prelude {
             tile_type::*,
             ui_enum::{
                 are_you_sure_message_type::*,
-                eternal_button_action::*,
-                screen_change_arrows_action::*,
+                button_actions::{
+                    eternal_button_action::*,
+                    victory_button_action::*,
+                },
                 text_above_save_button_type::*,
-                text_above_start_button_type::*,
-                victory_button_action::*,
+                text_above_start_button_type::*
             },
         },
         loader_screen_logic::{
@@ -80,7 +90,8 @@ pub mod prelude {
         tile_dictionary::*,
         ui_logic::{eternal_ui_logic::*, loader_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*, },
     };
-    pub use crate::logic::enums::ui_enum::loader_screen_slot::*;
+    pub use crate::logic::enums::ui_enum::loader_screen_action::*;
+    pub use crate::logic::enums::ui_enum::screen_change_request_type::*;
     pub use crate::output::{
         console::{
             costume_error::{
@@ -116,11 +127,11 @@ pub mod prelude {
                 eternal_buttons_spawner::*,
                 loader_screen_spawner::*, menu_spawner::*,
                 messages::{
+                    are_you_sure_message::*,
                     MessagesGraphicsPlugin,
                     save_button_and_above_text::*,
                     start_button_and_above_text::*,
                     victory_message::*,
-                    are_you_sure_message::*,
                 },
                 save_walls_layout_button::*,
                 set_color_to_normal,

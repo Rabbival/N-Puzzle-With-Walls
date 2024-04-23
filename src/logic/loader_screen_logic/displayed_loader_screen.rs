@@ -16,26 +16,30 @@ impl Plugin for DisplayedLoaderScreenPlugin {
 }
 
 fn listen_to_screen_change_arrows_presses(
-    mut event_listener: EventReader<LoaderScreenArrowPressed>, 
+    mut event_listener: EventReader<LoaderScreenActionInitiated>,
     mut displayed_loader_screen_number: ResMut<DisplayedLoaderScreenNumber>,
     data_base_manager: Res<DataBaseManager>,
 ){
-    for change_request in event_listener.read(){
-        let max_not_empty_screen =
-            max((data_base_manager.get_saved_layouts_ref().len() / SAVED_LAYOUTS_PER_SCREEN) -1, 0);
-        match change_request.action{
-            ScreenChangeArrowsAction::Next => {
-                if displayed_loader_screen_number.0 < max_not_empty_screen {
-                    displayed_loader_screen_number.0 += 1;
-                } else{
-                    displayed_loader_screen_number.0 = 0;
+    for loader_screen_action in event_listener.read(){
+        if let LoaderScreenAction::ChangeScreen(change_request) = 
+            loader_screen_action.action
+        {
+            let max_not_empty_screen =
+                max((data_base_manager.get_saved_layouts_ref().len() / SAVED_LAYOUTS_PER_SCREEN) -1, 0);
+            match change_request{
+                ScreenChangeRequestType::Next => {
+                    if displayed_loader_screen_number.0 < max_not_empty_screen {
+                        displayed_loader_screen_number.0 += 1;
+                    } else{
+                        displayed_loader_screen_number.0 = 0;
+                    }
                 }
-            } 
-            ScreenChangeArrowsAction::Previous => {
-                if displayed_loader_screen_number.0 > 0 {
-                    displayed_loader_screen_number.0 -= 1;
-                } else{
-                    displayed_loader_screen_number.0 = max_not_empty_screen;
+                ScreenChangeRequestType::Previous => {
+                    if displayed_loader_screen_number.0 > 0 {
+                        displayed_loader_screen_number.0 -= 1;
+                    } else{
+                        displayed_loader_screen_number.0 = max_not_empty_screen;
+                    }
                 }
             }
         }

@@ -34,14 +34,14 @@ fn spawn_load_screen_arrows(
             button_event,
             JustifyContent::End,
             ">",
-            ScreenChangeArrowsAction::Next,
+            LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Next),
             &mut commands
         );
         spawn_load_screen_arrow(
             button_event,
             JustifyContent::Start,
             "<",
-            ScreenChangeArrowsAction::Previous,
+            LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Previous),
             &mut commands
         );
         
@@ -141,7 +141,7 @@ fn spawn_load_screen_arrow(
     button_event: &SpawnLoaderButtons,
     content_side: JustifyContent,
     text_value: impl Into<String>,
-    screen_change_action: ScreenChangeArrowsAction,
+    loader_screen_action: LoaderScreenAction,
     commands: &mut Commands
 ){
     let thin_button_style = &button_event.thin_button_style;
@@ -174,7 +174,7 @@ fn spawn_load_screen_arrow(
                             background_color: super::NORMAL_BUTTON_COLOR.into(),
                             ..default()
                         },
-                        screen_change_action
+                        loader_screen_action
                     ));
                     arrow_button_entity.with_children(|parent| {
                         parent.spawn((

@@ -46,7 +46,7 @@ fn move_tiles_with_keyboard(
 }
 
 fn move_between_loader_screens(
-    mut event_writer: EventWriter<LoaderScreenArrowPressed>,
+    mut event_writer: EventWriter<LoaderScreenActionInitiated>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     let screen_change_requests = keyboard_input
@@ -56,13 +56,13 @@ fn move_between_loader_screens(
         if let Some(valid_direction) = request {
             match valid_direction{
                 BasicDirection::Right => {
-                    event_writer.send(LoaderScreenArrowPressed{
-                        action: ScreenChangeArrowsAction::Next
+                    event_writer.send(LoaderScreenActionInitiated{
+                        action: LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Next)
                     });
                 },
                 BasicDirection::Left => {
-                    event_writer.send(LoaderScreenArrowPressed{
-                        action: ScreenChangeArrowsAction::Previous
+                    event_writer.send(LoaderScreenActionInitiated{
+                        action: LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Previous)
                     });
                 },
                 _ => {}
