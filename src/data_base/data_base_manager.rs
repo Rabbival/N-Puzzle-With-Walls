@@ -143,13 +143,16 @@ fn listen_to_db_clearing_request_inner(
 
 impl DataBaseManager{
 	pub fn insert_layout(&mut self, layout: &DomainBoard){
-		self.saved_layouts.push(layout.clone());
+		let index = self.saved_layouts.partition_point(|saved_layout| 
+			saved_layout.board_name < layout.board_name
+		);
+		self.saved_layouts.insert(index, layout.clone());
 	}
 
 	pub fn remove_layout_by_index(&mut self, index: &SavedLayoutIndex) -> Option<DomainBoard>{
 		let index_value = index.0;
 		if index_value < self.saved_layouts.len(){
-			Some(self.saved_layouts.swap_remove(index.0))	
+			Some(self.saved_layouts.remove(index.0))	
 		}else{
 			None
 		}

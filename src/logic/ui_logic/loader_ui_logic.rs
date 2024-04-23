@@ -17,7 +17,7 @@ impl Plugin for LoaderUiLogicPlugin {
                         .run_if(resource_changed::<DisplayedLoaderScreenNumber>()),
                     update_slots_info_after_change
                         .run_if(resource_changed::<DataBaseManager>())
-                )
+                ).in_set(StateChangeSystemSets::PrepareToHandleStateChange)
             );
     }
 }
