@@ -12,7 +12,7 @@ impl Plugin for ButtonInputPlugin {
                 handle_save_walls_layout_button.run_if(in_state(AppState::Game)),
                 handle_loader_buttons.run_if(in_state(AppState::Loader)),
                 handle_eternal_buttons,
-                
+                handle_are_you_sure_message_buttons,
             )
                 .in_set(InputSystemSets::InputListening),
         );
@@ -127,6 +127,20 @@ fn handle_loader_buttons(
         if *interaction == Interaction::Pressed {
             button_event_writer.send(LoaderScreenActionInitiated{
                 action: loader_action.clone()
+            });
+        }
+    }
+}
+
+fn handle_are_you_sure_message_buttons(
+    mut are_you_sure_action_event_writer: EventWriter<AreYouSureMessageButtonEvent>,
+    are_you_sure_message_actions_query: Query<(&Interaction, &AreYouSureMessageButtonAction), Changed<Interaction>>,
+){
+    for (interaction, are_you_sure_action) in are_you_sure_message_actions_query.iter()
+    {
+        if *interaction == Interaction::Pressed {
+            are_you_sure_action_event_writer.send(AreYouSureMessageButtonEvent{
+                action: *are_you_sure_action
             });
         }
     }

@@ -20,6 +20,11 @@ pub struct SetEntityVisibility {
     pub visibility: Visibility
 }
 
+#[derive(Event)]
+pub struct AreYouSureMessageButtonEvent {
+    pub action: AreYouSureMessageButtonAction
+}
+
 pub struct UiEventPlugin;
 
 impl Plugin for UiEventPlugin {
@@ -33,6 +38,7 @@ impl Plugin for UiEventPlugin {
             ))
             .add_event::<ResetButtonTextColor>()
             .add_event::<ToggleButton>()
-            .add_event::<SetEntityVisibility>();
+            .add_event::<SetEntityVisibility>()
+            .add_event::<AreYouSureMessageButtonEvent>();
     }
 }

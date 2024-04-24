@@ -1,6 +1,6 @@
 use crate::prelude::{LayoutLoaderScreenAndSlot, LoaderScreenSlot, SAVED_LAYOUTS_PER_SCREEN};
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq, Eq, Hash, PartialOrd, Clone, Copy)]
 pub struct SavedLayoutIndex(pub usize);
 
 impl SavedLayoutIndex{

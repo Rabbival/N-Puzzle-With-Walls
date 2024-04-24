@@ -2,23 +2,17 @@ use crate::output::graphics::ui::NORMAL_BUTTON_COLOR;
 use crate::prelude::*;
 
 #[derive(Component)]
-pub struct AreYouSureMessageTag;
-
-#[derive(Component)]
 pub struct AreYouSureMessageTextTag;
 
-pub struct AreYouSureMessagePlugin;
 
-impl Plugin for AreYouSureMessagePlugin{
+pub struct AreYouSureMessageSpawnerPlugin;
+
+impl Plugin for AreYouSureMessageSpawnerPlugin{
     fn build(&self, app: &mut App) {
         app
             .add_systems(
                 Startup,
                 spawn_are_you_sure_message
-            )
-            .add_systems(
-                Update,
-                listen_for_are_you_sure_message_requests
             );
     }
 }
@@ -38,7 +32,7 @@ fn spawn_are_you_sure_message(
                     Visibility::Hidden,
                     Some(FlexDirection::Column)
                 ),
-                AreYouSureMessageTag,
+                AreYouSureMessageType::DeleteAllBoards,
             ))
             .with_children(|parent| {
                 parent
@@ -97,7 +91,7 @@ fn spawn_are_you_sure_message(
                                                 background_color: NORMAL_BUTTON_COLOR.into(),
                                                 ..default()
                                             },
-                                            //TODO: put button action here
+                                            AreYouSureMessageButtonAction::Confirm
                                         ))
                                         .with_children(|parent| {
                                             parent.spawn(TextBundle::from_section(
@@ -113,7 +107,7 @@ fn spawn_are_you_sure_message(
                                                 background_color: NORMAL_BUTTON_COLOR.into(),
                                                 ..default()
                                             },
-                                            //TODO: put button action here
+                                            AreYouSureMessageButtonAction::Cancel
                                         ))
                                         .with_children(|parent| {
                                             parent.spawn(TextBundle::from_section(
@@ -140,27 +134,5 @@ fn are_you_sure_message_ui_gap() -> NodeBundle{
             ..default()
         },
         ..default()
-    }
-}
-
-fn listen_for_are_you_sure_message_requests(
-    mut visibility_toggle_event_writer: EventWriter<SetEntityVisibility>,
-    mut event_listener: EventReader<LoaderScreenActionInitiated>,
-    are_you_sure_entity_query: Query<Entity, With<AreYouSureMessageTag>>,
-    mut are_you_sure_text_query: Query<&mut Text, With<AreYouSureMessageTextTag>>,
-){
-    for loader_screen_action in event_listener.read(){
-        if let LoaderScreenAction::WarnBeforeDeletion(are_you_sure_message_type) =
-            loader_screen_action.action.clone()
-        {
-           let are_you_sure_text_ref =
-               &mut are_you_sure_text_query.single_mut().sections[0].value;
-           *are_you_sure_text_ref = are_you_sure_message_type.to_string();
-            let are_you_sure_button_entity = are_you_sure_entity_query.single();
-            visibility_toggle_event_writer.send(SetEntityVisibility{
-                entity: are_you_sure_button_entity,
-                visibility: Visibility::Visible
-            });
-        }
     }
 }

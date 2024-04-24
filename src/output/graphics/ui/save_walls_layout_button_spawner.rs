@@ -4,6 +4,9 @@ use crate::prelude::*;
 pub struct SaveWallsLayoutButton;
 
 #[derive(Component)]
+pub struct TextAboveSaveButton;
+
+#[derive(Component)]
 pub struct SaveWallsLayoutTextTag;
 
 pub struct GameScreenButtonSpawnerPlugin;

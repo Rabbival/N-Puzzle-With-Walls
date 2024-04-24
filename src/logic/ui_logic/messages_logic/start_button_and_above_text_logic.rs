@@ -1,13 +1,10 @@
 use crate::output::graphics::ui::RED_TEXT_COLOR;
 use crate::prelude::*;
-#[derive(Component)]
-pub struct UpperTextAboveStartButton;
-#[derive(Component)]
-pub struct LowerTextAboveStartButton;
 
-pub struct TextAboveStartButtonPlugin;
 
-impl Plugin for TextAboveStartButtonPlugin {
+pub struct TextAboveStartButtonLogicPlugin;
+
+impl Plugin for TextAboveStartButtonLogicPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(
@@ -32,8 +29,8 @@ impl Plugin for TextAboveStartButtonPlugin {
 }
 
 fn reset_texts_above_start_button(
-    mut lower_text_above_start_button_query: Query<&mut Text, With<LowerTextAboveStartButton>>,
-    mut upper_text_above_start_button_query: Query<&mut Text, With<UpperTextAboveStartButton>>
+    mut lower_text_above_start_button_query: Query<&mut Text, (With<LowerTextAboveStartButton>, Without<UpperTextAboveStartButton>)>,
+    mut upper_text_above_start_button_query: Query<&mut Text, (With<UpperTextAboveStartButton>, Without<LowerTextAboveStartButton>)>,
 ){
     let lower_text_above_start_button = &mut lower_text_above_start_button_query.single_mut().sections[0].value;
     *lower_text_above_start_button = TextAboveStartButtonType::NoText.to_string();

@@ -21,6 +21,11 @@ pub struct BoardGenerationTextTag;
 #[derive(Component)]
 pub struct TreeGenerationOptionsTag;
 
+#[derive(Component)]
+pub struct UpperTextAboveStartButton;
+#[derive(Component)]
+pub struct LowerTextAboveStartButton;
+
 pub struct MenuSpawnerPlugin;
 
 impl Plugin for MenuSpawnerPlugin {

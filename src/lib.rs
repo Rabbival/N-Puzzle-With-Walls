@@ -27,7 +27,8 @@ pub mod prelude {
             ToggleButton,
             ui_spawn_event::*,
             UiEventPlugin,
-            SetEntityVisibility
+            SetEntityVisibility,
+            AreYouSureMessageButtonEvent,
         }
     };
     pub use crate::data_base::{
@@ -75,6 +76,7 @@ pub mod prelude {
                 button_actions::{
                     eternal_button_action::*,
                     victory_button_action::*,
+                    are_you_sure_message_button_action::*,
                 },
                 text_above_save_button_type::*,
                 text_above_start_button_type::*,
@@ -90,7 +92,14 @@ pub mod prelude {
         tile::*,
         tile_board::*,
         tile_dictionary::*,
-        ui_logic::{eternal_ui_logic::*, loader_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*, },
+        ui_logic::{eternal_ui_logic::*, loader_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*, 
+        messages_logic::{
+            MessagesGraphicsPlugin,
+            are_you_sure_message_logic::*,
+            save_button_and_above_text_logic::*,
+            start_button_and_above_text_logic::*,
+            victory_message_logic::*,
+        }},
     };
     pub use crate::output::{
         console::{
@@ -126,14 +135,12 @@ pub mod prelude {
                 button_and_text_styles::*, ButtonText,
                 eternal_buttons_spawner::*,
                 loader_screen_spawner::*, menu_spawner::*,
-                messages::{
-                    are_you_sure_message::*,
-                    MessagesGraphicsPlugin,
-                    save_button_and_above_text::*,
-                    start_button_and_above_text::*,
-                    victory_message::*,
+                messages_spawners::{
+                    are_you_sure_message_spawner::*,
+                    MessagesSpawnersPlugin,
+                    victory_message_spawner::*,
                 },
-                save_walls_layout_button::*,
+                save_walls_layout_button_spawner::*,
                 set_color_to_normal,
                 set_color_to_pressed,
                 set_text_section_value_and_color,

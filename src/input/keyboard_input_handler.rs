@@ -82,14 +82,12 @@ fn open_menu(
 }
 
 fn close_are_you_sure_message(
-    mut entity_visibility_event_writer: EventWriter<SetEntityVisibility>,
+    mut are_you_sure_action_event_writer: EventWriter<AreYouSureMessageButtonEvent>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    are_you_sure_entity_query: Query<Entity, With<AreYouSureMessageTag>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        entity_visibility_event_writer.send(SetEntityVisibility{
-            entity: are_you_sure_entity_query.single(),
-            visibility: Visibility::Hidden
+        are_you_sure_action_event_writer.send(AreYouSureMessageButtonEvent{
+            action: AreYouSureMessageButtonAction::Cancel
         });
     }
 }
@@ -118,10 +116,10 @@ fn listen_for_app_closing(
 
 
 fn listed_for_debug_key_which_is_k(
-    mut event_writer: EventWriter<ClearDB>,
+    
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyK) {
-        event_writer.send(ClearDB);
+        
     }
 }

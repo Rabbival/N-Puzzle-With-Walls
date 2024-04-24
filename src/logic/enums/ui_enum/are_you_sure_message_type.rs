@@ -1,10 +1,10 @@
 use std::fmt::{Display, Formatter};
-use crate::prelude::DomainBoardName;
+use crate::prelude::*;
 
-#[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Clone)]
+#[derive(Component, Debug, PartialEq, Eq, Hash, PartialOrd, Clone)]
 pub enum AreYouSureMessageType {
     DeleteAllBoards,
-    DeleteBoard(DomainBoardName)
+    DeleteBoard(DomainBoardName, SavedLayoutIndex)
 }
 
 impl Display for AreYouSureMessageType{
@@ -14,7 +14,7 @@ impl Display for AreYouSureMessageType{
                 AreYouSureMessageType::DeleteAllBoards => {
                     String::from("delete all the boards?\n(Note that this will delete\ntheir save files as well)")
                 },
-                AreYouSureMessageType::DeleteBoard(domain_board_to_delete) => {
+                AreYouSureMessageType::DeleteBoard(domain_board_to_delete, _) => {
                     format!("delete {}?\n(Note that this will delete\nits save file as well)", domain_board_to_delete.0)
                 },
             };

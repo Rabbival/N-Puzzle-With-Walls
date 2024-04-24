@@ -3,8 +3,8 @@ use crate::prelude::*;
 pub mod eternal_buttons_spawner;
 pub mod menu_spawner;
 pub mod button_and_text_styles;
-pub mod messages;
-pub mod save_walls_layout_button;
+pub mod messages_spawners;
+pub mod save_walls_layout_button_spawner;
 pub mod loader_screen_spawner;
 
 pub const NORMAL_BUTTON_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
@@ -27,7 +27,7 @@ impl Plugin for UiGraphicsPlugin {
         app.add_plugins((
             MenuSpawnerPlugin,
             EternalButtonsSpawnerPlugin,
-            MessagesGraphicsPlugin,
+            MessagesSpawnersPlugin,
             ButtonAndTextStylesPlugin,
             GameScreenButtonSpawnerPlugin,
             LoaderScreenSpawnerPlugin,

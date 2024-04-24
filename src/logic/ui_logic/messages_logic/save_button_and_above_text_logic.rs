@@ -4,15 +4,13 @@ use crate::prelude::*;
 const TIME_UNTIL_TEXT_ABOVE_SAVE_GOES_BACK_AFTER_SUCCESS: f32 = 2.0;
 const TIME_UNTIL_TEXT_ABOVE_SAVE_GOES_BACK_AFTER_FAILURE: f32 = 8.0;
 
-#[derive(Component)]
-pub struct TextAboveSaveButton;
 
 #[derive(Component)]
 pub struct SaveWallsLayoutTextResetTimer(pub Timer);
 
-pub struct TextAboveSaveButtonPlugin;
+pub struct TextAboveSaveButtonLogicPlugin;
 
-impl Plugin for TextAboveSaveButtonPlugin {
+impl Plugin for TextAboveSaveButtonLogicPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(

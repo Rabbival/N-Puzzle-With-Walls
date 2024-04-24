@@ -4,6 +4,7 @@ pub mod eternal_ui_logic;
 pub mod menu_ui_logic;
 pub mod victory_ui_logic;
 pub mod loader_ui_logic;
+pub mod messages_logic;
 
 pub struct UiLogicPlugin;
 
@@ -13,7 +14,8 @@ impl Plugin for UiLogicPlugin {
             MenuUiLogicPlugin, 
             EternalUiLogicPlugin, 
             VictoryUiLogicPlugin, 
-            LoaderUiLogicPlugin
+            LoaderUiLogicPlugin,
+            MessagesGraphicsPlugin
         ))
             .add_systems(
                 Update,
