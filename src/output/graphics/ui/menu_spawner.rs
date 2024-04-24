@@ -97,7 +97,15 @@ fn spawn_generate_button(
                            "",
                            tiny_red_text_style.clone()
                        ),
-                       TextAboveStartButton
+                       LowerTextAboveStartButton
+                    ));
+                parent
+                    .spawn((
+                        TextBundle::from_section(
+                            "",
+                            tiny_red_text_style.clone()
+                        ),
+                        UpperTextAboveStartButton
                     ));
             });
     }
