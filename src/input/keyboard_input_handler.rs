@@ -53,21 +53,19 @@ fn move_between_loader_screens(
     let screen_change_requests = keyboard_input
         .get_just_pressed()
         .map(BasicDirection::from_keycode);
-    for request in screen_change_requests {
-        if let Some(valid_direction) = request {
-            match valid_direction{
-                BasicDirection::Right => {
-                    event_writer.send(LoaderScreenActionInitiated{
-                        action: LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Next)
-                    });
-                },
-                BasicDirection::Left => {
-                    event_writer.send(LoaderScreenActionInitiated{
-                        action: LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Previous)
-                    });
-                },
-                _ => {}
-            }
+    for valid_direction in screen_change_requests.flatten() {
+        match valid_direction{
+            BasicDirection::Right => {
+                event_writer.send(LoaderScreenActionInitiated{
+                    action: LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Next)
+                });
+            },
+            BasicDirection::Left => {
+                event_writer.send(LoaderScreenActionInitiated{
+                    action: LoaderScreenAction::ChangeScreen(ScreenChangeRequestType::Previous)
+                });
+            },
+            _ => {}
         }
     }
 }

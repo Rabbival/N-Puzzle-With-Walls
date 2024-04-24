@@ -12,9 +12,10 @@ impl Plugin for TextAboveStartButtonLogicPlugin {
                 (
                     listen_for_apply_button_press,
                     (
+                        listen_for_alert_dismissal,
                         alert_player_of_reached_bounds.before(update_wall_count_unapplied),
-                        alert_player_of_unsaved_changes.after(update_wall_count_unapplied)
-                    ),
+                        alert_player_of_unsaved_changes.after(update_wall_count_unapplied),
+                    ).chain(),
                     show_board_couldnt_be_generated,
                     update_main_button_text_to_show_functionality
                 )
@@ -32,10 +33,16 @@ fn reset_texts_above_start_button(
     mut lower_text_above_start_button_query: Query<&mut Text, (With<LowerTextAboveStartButton>, Without<UpperTextAboveStartButton>)>,
     mut upper_text_above_start_button_query: Query<&mut Text, (With<UpperTextAboveStartButton>, Without<LowerTextAboveStartButton>)>,
 ){
-    let lower_text_above_start_button = &mut lower_text_above_start_button_query.single_mut().sections[0].value;
-    *lower_text_above_start_button = TextAboveStartButtonType::NoText.to_string();
-    let upper_text_above_start_button = &mut upper_text_above_start_button_query.single_mut().sections[0].value;
-    *upper_text_above_start_button = TextAboveStartButtonType::NoText.to_string();
+    set_text_section_value_and_color(
+        &mut lower_text_above_start_button_query.single_mut().sections[0],
+        None,
+        Some(TextAboveStartButtonType::NoText.to_string())
+    );
+    set_text_section_value_and_color(
+        &mut upper_text_above_start_button_query.single_mut().sections[0],
+        None,
+        Some(TextAboveStartButtonType::NoText.to_string())
+    );
 }
 
 fn listen_for_apply_button_press(
@@ -43,41 +50,53 @@ fn listen_for_apply_button_press(
     mut lower_text_above_start_button_query: Query<&mut Text, With<LowerTextAboveStartButton>>
 ){
     for _apply_button_press in event_listener.read() {
-        let lower_text_above_start_button = &mut lower_text_above_start_button_query.single_mut().sections[0].value;
-        *lower_text_above_start_button = TextAboveStartButtonType::NoText.to_string();
+        set_text_section_value_and_color(
+            &mut lower_text_above_start_button_query.single_mut().sections[0],
+            None,
+            Some(TextAboveStartButtonType::NoText.to_string())
+        );
     }
 }
 
 fn alert_player_of_unsaved_changes(
     mut event_listener: EventReader<MenuButtonPressed>,
-    mut lower_text_above_start_button_query: Query<&mut Text, (With<LowerTextAboveStartButton>, Without<UpperTextAboveStartButton>)>,
-    mut upper_text_above_start_button_query: Query<&mut Text, (With<UpperTextAboveStartButton>, Without<LowerTextAboveStartButton>)>,
+    mut lower_text_above_start_button_query: Query<&mut Text, With<LowerTextAboveStartButton>>,
     planned_board_properties_query: Query<&BoardProperties, With<PlannedBoardProperties>>,
     unapplied_menu_wall_count: Res<UnappliedMenuWallCount>
 ) {
     for menu_button_press in event_listener.read() {
         if let MenuButtonAction::ChangeWallTilesCount(_) = menu_button_press.action{
-            let lower_text_above_start_button = &mut lower_text_above_start_button_query.single_mut().sections[0].value;
             let applied_to_plan_wall_count = planned_board_properties_query.single().wall_count;
-            if unapplied_menu_wall_count.0 == applied_to_plan_wall_count{
-                *lower_text_above_start_button = TextAboveStartButtonType::NoText.to_string();
-            }else{
-                *lower_text_above_start_button = TextAboveStartButtonType::UnappliedChanges.to_string();
-            }
-            reset_upper_text_if_it_wasnt_changed_this_frame(
-              &mut upper_text_above_start_button_query.single_mut()  
+            let new_lower_text_above_start_button_value =
+                if unapplied_menu_wall_count.0 == applied_to_plan_wall_count{
+                    TextAboveStartButtonType::NoText.to_string()
+                }else{
+                    TextAboveStartButtonType::UnappliedChanges.to_string()
+                };
+            set_text_section_value_and_color(
+                &mut lower_text_above_start_button_query.single_mut().sections[0],
+                None,
+                Some(new_lower_text_above_start_button_value)
             );
         }
     }
 }
 
-fn reset_upper_text_if_it_wasnt_changed_this_frame(
-    upper_text_above_start_button_entity: &mut Mut<Text>
+fn listen_for_alert_dismissal(
+    mut event_listener: EventReader<DismissIrrelevantAlerts>,
+    mut upper_text_above_start_button_query: Query<&mut Text, With<UpperTextAboveStartButton>>,
 ){
-    if *upper_text_above_start_button_entity.sections[0].value != TextAboveStartButtonType::NoText.to_string()
-        && ! upper_text_above_start_button_entity.is_changed()
-    {
-        upper_text_above_start_button_entity.sections[0].value = TextAboveStartButtonType::NoText.to_string();
+    for _ in event_listener.read() {
+        let mut upper_text_above_start_button = upper_text_above_start_button_query.single_mut();
+        if *upper_text_above_start_button.sections[0].value != TextAboveStartButtonType::NoText.to_string()
+            && ! upper_text_above_start_button.is_changed()
+        {
+            set_text_section_value_and_color(
+                &mut upper_text_above_start_button.sections[0],
+                None,
+                Some(TextAboveStartButtonType::NoText.to_string())
+            );
+        }
     }
 }
 
@@ -118,12 +137,15 @@ fn alert_player_of_reached_bounds_inner(
                 if unapplied_menu_wall_count.0 >= planned_board_prop.size.wall_count_upper_bound() {
                     should_change_text_value = true;
                 }
-            } else if unapplied_menu_wall_count.0 <= 0 {
+            } else if unapplied_menu_wall_count.0 == 0 {
                 should_change_text_value = true;
             }
             if should_change_text_value {
-                upper_text_above_start_button_query.single_mut().sections[0].value =
-                    TextAboveStartButtonType::MenuError(MenuError::CantGoBeyondTileCountBounds(*wall_count_action)).to_string();
+                set_text_section_value_and_color(
+                    &mut upper_text_above_start_button_query.single_mut().sections[0],
+                    None,
+                    Some(TextAboveStartButtonType::MenuError(MenuError::CantGoBeyondTileCountBounds(*wall_count_action)).to_string())
+                );
             }
         }
         _ => {}

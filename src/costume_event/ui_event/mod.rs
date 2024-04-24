@@ -7,7 +7,7 @@ pub mod game_ui_event;
 
 
 #[derive(Event)]
-pub struct ResetButtonTextColor;
+pub struct DismissIrrelevantAlerts;
 
 #[derive(Event)]
 pub struct ToggleButton {
@@ -36,7 +36,7 @@ impl Plugin for UiEventPlugin {
                 LoaderUiEventPlugin,
                 GameUiEventPlugin,
             ))
-            .add_event::<ResetButtonTextColor>()
+            .add_event::<DismissIrrelevantAlerts>()
             .add_event::<ToggleButton>()
             .add_event::<SetEntityVisibility>()
             .add_event::<AreYouSureMessageButtonEvent>();

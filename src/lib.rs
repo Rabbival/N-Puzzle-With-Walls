@@ -23,7 +23,7 @@ pub mod prelude {
             game_ui_event::*,
             loader_ui_event::*,
             menu_ui_event::*,
-            ResetButtonTextColor,
+            DismissIrrelevantAlerts,
             ToggleButton,
             ui_spawn_event::*,
             UiEventPlugin,
@@ -98,7 +98,6 @@ pub mod prelude {
             are_you_sure_message_logic::*,
             save_button_and_above_text_logic::*,
             start_button_and_above_text_logic::*,
-            victory_message_logic::*,
         }},
     };
     pub use crate::output::{
@@ -138,7 +137,7 @@ pub mod prelude {
                 messages_spawners::{
                     are_you_sure_message_spawner::*,
                     MessagesSpawnersPlugin,
-                    victory_message_spawner::*,
+                    victory_message::*,
                 },
                 save_walls_layout_button_spawner::*,
                 set_color_to_normal,

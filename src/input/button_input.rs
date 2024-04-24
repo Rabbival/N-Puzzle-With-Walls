@@ -44,7 +44,7 @@ fn handle_eternal_buttons(
 fn handle_menu_buttons(
     mut button_event_writer: EventWriter<MenuButtonPressed>,
     mut apply_button_event_writer: EventWriter<ApplyButtonPressed>,
-    mut reset_button_text_color_event_writer: EventWriter<ResetButtonTextColor>,
+    mut reset_button_text_color_event_writer: EventWriter<DismissIrrelevantAlerts>,
     interaction_query: Query<
         (
             &Interaction,
@@ -70,7 +70,7 @@ fn handle_menu_buttons(
                 });
             }
             
-            reset_button_text_color_event_writer.send(ResetButtonTextColor);
+            reset_button_text_color_event_writer.send(DismissIrrelevantAlerts);
 
             match menu_button_action {
                 MenuButtonAction::MainButtonPressed | MenuButtonAction::ChangeWallTilesCount(_) => {}
@@ -84,7 +84,7 @@ fn handle_menu_buttons(
 
 fn handle_victory_buttons(
     mut button_event_writer: EventWriter<VictoryButtonPressed>,
-    mut reset_button_text_color_event_writer: EventWriter<ResetButtonTextColor>,
+    mut reset_button_text_color_event_writer: EventWriter<DismissIrrelevantAlerts>,
     interaction_query: Query<
         (
             &Interaction,
@@ -101,7 +101,7 @@ fn handle_victory_buttons(
                 action: *game_button_action
             });
 
-            reset_button_text_color_event_writer.send(ResetButtonTextColor);
+            reset_button_text_color_event_writer.send(DismissIrrelevantAlerts);
         }
     }
 }

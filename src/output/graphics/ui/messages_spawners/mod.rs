@@ -1,4 +1,4 @@
-pub mod victory_message_spawner;
+pub mod victory_message;
 pub mod are_you_sure_message_spawner;
 
 use crate::prelude::*;
@@ -9,7 +9,7 @@ impl Plugin for MessagesSpawnersPlugin {
     fn build(&self, app: &mut App) {
         app
 			.add_plugins((
-                VictoryMessageSpawnerPlugin,
+                VictoryMessagePlugin,
                 AreYouSureMessageSpawnerPlugin
             ))
         ;
