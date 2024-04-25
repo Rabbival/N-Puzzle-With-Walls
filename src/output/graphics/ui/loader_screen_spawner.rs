@@ -123,7 +123,7 @@ fn spawn_layout_entity(
                 ButtonText,
             ));
         });
-        //TODO: .with_children for the layout itself
+        //TODO: .with_children for the layout preview
     });
 }
 

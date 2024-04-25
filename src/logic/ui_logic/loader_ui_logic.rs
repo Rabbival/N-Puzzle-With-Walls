@@ -34,13 +34,14 @@ fn show_currently_displayed_saved_layouts_screen(
     mut layout_slot_text_query: Query<&mut Text>,
 ){
     for screen_slot in all::<LoaderScreenSlot>(){
-        let optional_layout_to_display =
-            data_base_manager.get_saved_layouts_ref().get(
-                SavedLayoutIndex::from_screen_and_slot(
-                    displayed_loader_screen_number.0,
-                    screen_slot
-                ).0
+        let optional_index_from_slot = 
+            SavedLayoutIndex::try_from_screen_and_slot(
+                displayed_loader_screen_number.0,
+                screen_slot
             );
+        if optional_index_from_slot.is_none()  { continue; }
+        let optional_layout_to_display =
+            data_base_manager.try_get_layout_ref(&optional_index_from_slot.unwrap());
         if let Err(entity_error) = handle_screen_slot_content_and_visibility(
             screen_slot,
             optional_layout_to_display,

@@ -10,7 +10,7 @@ impl Plugin for AreYouSureMessageLogicPlugin{
             .add_systems(
                 Update,
                 (
-                    listen_for_appear_requests,
+                    listen_for_loader_screen_actions,
                     listen_for_button_events
                 )
             );
@@ -27,7 +27,7 @@ fn set_are_you_sure_message_type_and_text(
 }
 
 
-fn listen_for_appear_requests(
+fn listen_for_loader_screen_actions(
     mut visibility_toggle_event_writer: EventWriter<SetEntityVisibility>,
     mut event_listener: EventReader<LoaderScreenActionInitiated>,
     mut are_you_sure_message_query: Query<(Entity, &mut AreYouSureMessageType)>,

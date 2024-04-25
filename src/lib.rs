@@ -36,6 +36,7 @@ pub mod prelude {
         DataBasePlugin,
         domain_board::*,
         saved_layout_index::*,
+        domain_board_name::*,
     };
     pub use crate::input::{
         button_input::*, InputPlugin, keyboard_input_handler::*, mouse_input_handler::*,
@@ -116,6 +117,7 @@ pub mod prelude {
                 MismatchError,
                 system_access_error::*,
                 tile_move_error::*,
+                board_loading_error::*,
             },
             costume_print::{
                 BevyPrintType,

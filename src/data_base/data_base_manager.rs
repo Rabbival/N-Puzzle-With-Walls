@@ -24,28 +24,34 @@ impl Plugin for DataBaseManagerPlugin{
 fn read_system_text_files_into_db(
 	mut db_manager: ResMut<DataBaseManager>
 ){
-	if let Err(system_access_error) = read_system_text_files_into_db_inner(db_manager.as_mut()){
-		print_system_access_error(system_access_error);
+	if let Err(board_loading_error) = read_system_text_files_into_db_inner(db_manager.as_mut()){
+		print_board_loading_error(board_loading_error);
 	}
 }
 
 fn read_system_text_files_into_db_inner(
 	db_manager: &mut DataBaseManager
-) -> Result<(), SystemAccessError>
+) -> Result<(), BoardLoadingError>
 {
 	create_folder_if_none_exists_yet(FolderToAccess::SavedLayouts);
 	let valid_text_file_names =
 		get_all_valid_text_file_names_in_folder(FolderToAccess::SavedLayouts);
 
 	for valid_text_file_name in valid_text_file_names{
-		let domain_board = domain_board_from_file(
+		match domain_board_from_file(
 			FolderToAccess::SavedLayouts,
 			valid_text_file_name
-		)?;
-		
-		//TODO: if you choose to validate board quality, do it here
-		
-		db_manager.insert_layout(&domain_board);
+		){
+			Err(system_access_error) => {
+				return Err(BoardLoadingError::SystemAccessError(system_access_error));
+			},
+			Ok(domain_board) => {
+
+				//TODO: validate wall count vs wall_count
+
+				db_manager.insert_layout(&domain_board);
+			}
+		}
 	}
 	Ok(())
 }
@@ -156,6 +162,10 @@ impl DataBaseManager{
 		}else{
 			None
 		}
+	}
+	
+	pub fn try_get_layout_ref(&self, index: &SavedLayoutIndex) -> Option<&DomainBoard> {
+		self.saved_layouts.get(index.0)
 	}
 
 	pub fn get_saved_layouts_ref(&self) -> &Vec<DomainBoard>{

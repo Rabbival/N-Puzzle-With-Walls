@@ -3,6 +3,7 @@ use crate::prelude::*;
 pub mod domain_board;
 pub mod data_base_manager;
 pub mod saved_layout_index;
+pub mod domain_board_name;
 
 pub struct DataBasePlugin;
 

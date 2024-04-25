@@ -1,9 +1,10 @@
+use enum_iterator::Sequence;
 use crate::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Clone)]
 pub struct FileName(pub String);
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Clone)]
 pub enum SystemAccessError {
     CouldntFindFile(FileName),
     CouldntParseFile(FileName),
