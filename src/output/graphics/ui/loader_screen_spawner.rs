@@ -73,7 +73,7 @@ fn spawn_bottom_line(
                     ))
                     .with_children(|parent| {
                         parent.spawn((TextBundle::from_section(
-                                "",
+                            "no chosen board",
                                 text_style.clone(),
                             ),
                             ChosenLayoutTextTag

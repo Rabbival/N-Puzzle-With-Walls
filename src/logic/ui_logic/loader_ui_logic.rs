@@ -23,35 +23,56 @@ impl Plugin for LoaderUiLogicPlugin {
             )
             .add_systems(
                 Update,(
-                    (
-                        update_chosen_visuals_and_bottom_line_functionality
-                    ).run_if(resource_changed::<ChosenLayoutScreenAndSlot>),
+                    update_chosen_visuals_and_bottom_line_functionality
+                    .run_if(resource_changed::<ChosenLayoutScreenAndSlot>),
                 )
             );
     }
 }
 
 fn update_chosen_visuals_and_bottom_line_functionality(
-    chosen_layout_screen_and_slot: Res<ChosenLayoutScreenAndSlot>,
-    loader_screen_action_query: Query<&LoaderScreenAction>,
+    optional_chosen_layout_screen_and_slot: Res<ChosenLayoutScreenAndSlot>,
+    mut loader_screen_action_query: Query<&mut LoaderScreenAction>,
+    mut chosen_layout_text_query: Query<&mut Text, With<ChosenLayoutTextTag>>,
     data_base_manager: Res<DataBaseManager>,
 ){
-    for action_carrier in loader_screen_action_query.iter(){
-        if chosen_layout_screen_and_slot.0.is_none() { continue; }
+    if let Some(chosen_layout_screen_and_slot) = 
+        optional_chosen_layout_screen_and_slot.0
+    {
         let calculate_db_index =
-            SavedLayoutIndex::from_screen_and_slot(chosen_layout_screen_and_slot.0.unwrap());
+            SavedLayoutIndex::from_screen_and_slot(chosen_layout_screen_and_slot);
         let new_chosen_ref_value = data_base_manager.try_get_layout_ref(&calculate_db_index);
-        match action_carrier{
-            LoaderScreenAction::GenerateBoard() => {
-
-            },
-            LoaderScreenAction::WarnBeforeDeletion() => {
-
-            },
-            LoaderScreenAction::JumpToChosenLayout() => {
-
-            },
-            _ => {}
+        let mut chosen_layout_text = chosen_layout_text_query.single_mut();
+        let updated_optional_index;
+        let updated_layout_name;
+        if let Some(board_ref) = new_chosen_ref_value{
+            chosen_layout_text.sections[0].value = String::from("chosen: ") + &board_ref.board_name;
+            updated_optional_index = Some(calculate_db_index);
+            updated_layout_name = DomainBoardName(board_ref.board_name.clone());
+        }else{
+            chosen_layout_text.sections[0].value = String::from("no chosen board");
+            updated_optional_index = None;
+            updated_layout_name = DomainBoardName(String::new());
+        }
+        
+        
+        for mut action_carrier in loader_screen_action_query.iter_mut(){
+            match action_carrier.as_mut(){
+                LoaderScreenAction::GenerateBoard(optional_index) => {
+                    *optional_index = updated_optional_index;
+                },
+                LoaderScreenAction::WarnBeforeDeletion(AreYouSureMessageType::DeleteBoard(optional_tuple)) => {
+                    if updated_optional_index.is_none() {
+                        *optional_tuple = None;
+                    }else{
+                        *optional_tuple = Some((updated_layout_name.clone(), updated_optional_index.unwrap()));
+                    }
+                },
+                LoaderScreenAction::JumpToChosenLayout(optional_index) => {
+                    *optional_index = updated_optional_index;
+                },
+                _ => {}
+            }
         }
     }
 }
