@@ -73,8 +73,10 @@ fn listen_for_button_events(
                 AreYouSureMessageType::DeleteAllBoards => {
                     clear_db_event_writer.send(ClearDB);
                 },
-                AreYouSureMessageType::DeleteBoard(_ , saved_layout_index) => {
-                    remove_from_db_event_writer.send(RemoveFromDB(*saved_layout_index));
+                AreYouSureMessageType::DeleteBoard(optional_domain_board_to_delete) => {
+                    if let Some((_ , saved_layout_index)) = optional_domain_board_to_delete {
+                        remove_from_db_event_writer.send(RemoveFromDB(*saved_layout_index));
+                    }
                 } 
             }
         }

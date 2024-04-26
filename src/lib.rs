@@ -62,6 +62,7 @@ pub mod prelude {
         },
         enums::{
             basic_direction::*,
+            board_quality::*,
             board_property_enums::{
                 board_size::*, generation_method::*, grid_traveller_type::*, menu_button_action::*,
                 wall_tiles_change::*,

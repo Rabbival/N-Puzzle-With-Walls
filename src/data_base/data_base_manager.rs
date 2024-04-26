@@ -45,15 +45,31 @@ fn read_system_text_files_into_db_inner(
 			Err(system_access_error) => {
 				return Err(BoardLoadingError::SystemAccessError(system_access_error));
 			},
-			Ok(domain_board) => {
-
-				//TODO: validate wall count vs wall_count
-
-				db_manager.insert_layout(&domain_board);
+			Ok(parsed_domain_board) => {
+				match determine_board_quality(&parsed_domain_board){
+					BoardQuality::Invalid => {
+						return Err(BoardLoadingError::WallListDoesntMatchWallCount(
+							DomainBoardName(parsed_domain_board.board_name.clone())
+						));
+					},
+					_ => {
+						//TODO: expand in the future
+					}
+				};
+				db_manager.insert_layout(&parsed_domain_board);
 			}
 		}
 	}
 	Ok(())
+}
+
+//TODO: expand in the future
+fn determine_board_quality(parsed_domain_board: &DomainBoard) -> BoardQuality{
+	if parsed_domain_board.wall_locations.len() != parsed_domain_board.board_props.wall_count as usize{
+		BoardQuality::Invalid
+	}else{
+		BoardQuality::BestQuality
+	}
 }
 
 fn save_to_data_base_and_system(

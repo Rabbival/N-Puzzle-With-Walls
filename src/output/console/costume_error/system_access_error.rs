@@ -1,4 +1,3 @@
-use enum_iterator::Sequence;
 use crate::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Clone)]

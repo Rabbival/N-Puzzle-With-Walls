@@ -4,4 +4,5 @@ use crate::prelude::*;
 pub enum LoaderScreenAction {
     ChangeScreen(ScreenChangeRequestType),
     WarnBeforeDeletion(AreYouSureMessageType),
+    GenerateBoard(Option<DomainBoard>),
 }

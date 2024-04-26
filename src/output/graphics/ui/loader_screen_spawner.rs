@@ -1,3 +1,4 @@
+use crate::output::graphics::ui::NORMAL_BUTTON_COLOR;
 use crate::prelude::*;
 
 const LAYOUT_MARGINS_RECT: UiRect = UiRect {
@@ -22,7 +23,8 @@ impl Plugin for LoaderScreenSpawnerPlugin{
         app.add_systems(
             Startup,
             (
-                spawn_layout_slots,
+                spawn_bottom_line,
+                spawn_layout_slots_to_choose_from,
                 spawn_delete_all_layouts_button,
                 spawn_load_screen_arrows
             )
@@ -30,7 +32,72 @@ impl Plugin for LoaderScreenSpawnerPlugin{
     }
 }
 
-fn spawn_layout_slots(
+fn spawn_bottom_line(
+    mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
+    mut commands: Commands,
+){
+    for spawn_request in spawn_event_reader.read() {
+        let text_style = &spawn_request.medium_text_style;
+        let button_style = &spawn_request.big_button_style;
+        //chosen slot
+        commands
+            .spawn(
+                build_node_bundle_with_full_percentage_style(
+                    AlignItems::End,
+                    JustifyContent::End,
+                    Visibility::Visible,
+                    Some(FlexDirection::Column)
+                )
+            ).with_children(|parent| {
+            parent.spawn(NodeBundle {
+                style: Style {
+                    flex_direction: FlexDirection::Row,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                ..default()
+            }).with_children(|parent| {
+                parent
+                    .spawn((
+                        ButtonBundle {
+                            style: button_style.clone(),
+                            background_color: NORMAL_BUTTON_COLOR.into(),
+                            ..default()
+                        },
+                        LoaderScreenAction::GenerateBoard(None)
+                    ))
+                    .with_children(|parent| {
+                        parent.spawn(TextBundle::from_section(
+                            "Generate",
+                            text_style.clone(),
+                        ));
+                    });
+                spawn_layout_entity(
+                    parent,
+                    spawn_request,
+                    LoaderScreenSlot::Chosen
+                );
+                parent
+                    .spawn((
+                        ButtonBundle {
+                            style: button_style.clone(),
+                            background_color: NORMAL_BUTTON_COLOR.into(),
+                            ..default()
+                        },
+                        LoaderScreenAction::WarnBeforeDeletion(AreYouSureMessageType::DeleteBoard(None))
+                    ))
+                    .with_children(|parent| {
+                        parent.spawn(TextBundle::from_section(
+                            "Delete Board",
+                            text_style.clone(),
+                        ));
+                    });
+            });
+        });
+    }
+}
+
+fn spawn_layout_slots_to_choose_from(
     mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ){
@@ -41,18 +108,21 @@ fn spawn_layout_slots(
                     AlignItems::Center,
                     JustifyContent::Center,
                     Visibility::Hidden,
-                    Some(FlexDirection::Column)
+                    Some(FlexDirection::Row)
                 )
             ).with_children(|parent| {
             //first row
-            parent.spawn(NodeBundle {
-                style: Style {
-                    flex_direction: FlexDirection::Row,
-                    align_items: AlignItems::Start,
+            parent.spawn((
+                NodeBundle {
+                    style: Style {
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Start,
+                        ..default()
+                    },
                     ..default()
                 },
-                ..default()
-            }).with_children(|parent| {
+                simple_on_screen_tag(AppState::Loader)
+            )).with_children(|parent| {
                 spawn_layout_entity(
                     parent,
                     spawn_request,

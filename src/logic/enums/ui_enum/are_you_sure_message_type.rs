@@ -4,7 +4,7 @@ use crate::prelude::*;
 #[derive(Component, Debug, PartialEq, Eq, Hash, PartialOrd, Clone)]
 pub enum AreYouSureMessageType {
     DeleteAllBoards,
-    DeleteBoard(DomainBoardName, SavedLayoutIndex)
+    DeleteBoard(Option<(DomainBoardName, SavedLayoutIndex)>)
 }
 
 impl Display for AreYouSureMessageType{
@@ -14,8 +14,15 @@ impl Display for AreYouSureMessageType{
                 AreYouSureMessageType::DeleteAllBoards => {
                     String::from("delete all the boards?\n(Note that this will delete\ntheir save files as well)")
                 },
-                AreYouSureMessageType::DeleteBoard(domain_board_to_delete, _) => {
-                    format!("delete {}?\n(Note that this will delete\nits save file as well)", domain_board_to_delete.0)
+                AreYouSureMessageType::DeleteBoard(optional_domain_board_to_delete) => {
+                    match optional_domain_board_to_delete{
+                        None => {
+                            String::from("do nothing?\n(please specify a board to delete)")
+                        },
+                        Some((board_name, _)) => {
+                            format!("delete {}?\n(Note that this will delete\nits save file as well)", board_name.0)
+                        }
+                    }
                 },
             };
         fmt.write_str(&message)?;

@@ -7,21 +7,17 @@ pub struct LoaderUiLogicPlugin;
 impl Plugin for LoaderUiLogicPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            OnEnter(AppState::Loader),(
+            OnEnter(AppState::Loader), (
                 show_currently_displayed_saved_layouts_screen,
                 only_show_arrows_if_theres_more_than_one_available_screen,
-                ).in_set(StateChangeSystemSets::PrepareToHandleStateChange),
+                ).before(crate::output::graphics::show_only_if_has_specified_screen_tag),
         )
             .add_systems(
                 Update,(
                     (
                         update_slots_info_after_change,
                         update_arrows_after_change
-                    )
-                        .run_if(
-                            resource_changed::<DisplayedLoaderScreenNumber>
-                                .or_else(resource_changed::<DataBaseManager>)
-                        ).in_set(StateChangeSystemSets::PrepareToHandleStateChange),
+                    ).before(crate::output::graphics::show_only_if_has_specified_screen_tag),
                 )
             );
     }
@@ -88,9 +84,28 @@ fn handle_screen_slot_content_and_visibility(
         {
             if layout_slot_tag.0 == slot{
                 layout_slot_on_screen_tag.on_own_screen_visibility = Some(Visibility::Hidden);
+
+                // println!("visibility tag update ran");
+                
             }
         }
         Ok(())
+    }
+}
+
+fn update_slots_info_after_change(
+    data_base_manager: Res<DataBaseManager>,
+    displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
+    layout_slots_query: Query<(&LoaderScreenSlotTag, &mut CustomOnScreenTag, &Children)>,
+    layout_slot_text_query: Query<&mut Text>,
+){
+    if displayed_loader_screen_number.is_changed() || data_base_manager.is_changed(){
+        show_currently_displayed_saved_layouts_screen(
+            data_base_manager,
+            displayed_loader_screen_number,
+            layout_slots_query,
+            layout_slot_text_query,
+        );
     }
 }
 
@@ -108,26 +123,14 @@ fn only_show_arrows_if_theres_more_than_one_available_screen(
     }
 }
 
-fn update_slots_info_after_change(
-    data_base_manager: Res<DataBaseManager>,
-    displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
-    layout_slots_query: Query<(&LoaderScreenSlotTag, &mut CustomOnScreenTag, &Children)>,
-    layout_slot_text_query: Query<&mut Text>,
-){
-    show_currently_displayed_saved_layouts_screen(
-        data_base_manager,
-        displayed_loader_screen_number,
-        layout_slots_query,
-        layout_slot_text_query,
-    );
-}
-
 fn update_arrows_after_change(
     data_base_manager: Res<DataBaseManager>,
     arrows_visibility_tags_query: Query<&mut CustomOnScreenTag, With<ScreenChangeArrowTag>>
 ){
-    only_show_arrows_if_theres_more_than_one_available_screen(
-        data_base_manager,
-        arrows_visibility_tags_query
-    );
+    if data_base_manager.is_changed(){
+        only_show_arrows_if_theres_more_than_one_available_screen(
+            data_base_manager,
+            arrows_visibility_tags_query
+        );
+    }
 }

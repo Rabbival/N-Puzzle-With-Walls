@@ -1,5 +1,3 @@
-use enum_iterator::Sequence;
-
 pub mod error_handler;
 pub mod menu_error;
 pub mod board_generation_error;

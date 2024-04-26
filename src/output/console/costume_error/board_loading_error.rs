@@ -10,7 +10,8 @@ pub fn print_board_loading_error(board_loading_error: BoardLoadingError) {
     match board_loading_error {
         BoardLoadingError::WallListDoesntMatchWallCount(board_name) => {
             error!(
-                "the specified wall count doesn't match the amount of specified board locations for board {}",
+                "the specified wall count doesn't match the amount of
+                specified board locations for board {}, so it wasn't loaded",
                 board_name
             );
         },

@@ -22,12 +22,12 @@ impl Plugin for GraphicsPlugin {
                     .in_set(StateChangeSystemSets::HandleStateChange),
                 set_visibility_for_entity
             )
-
         );
     }
 }
 
-fn show_only_if_has_specified_screen_tag(
+/// pub so others may be placed relatively
+pub fn show_only_if_has_specified_screen_tag(
     app_state: Res<State<AppState>>,
     data_base_manager: Res<DataBaseManager>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
@@ -41,6 +41,9 @@ fn show_only_if_has_specified_screen_tag(
             if *app_state == screen_tag.screen {
                 if let Some(own_screen_vis) = screen_tag.on_own_screen_visibility {
                     *visibility = own_screen_vis;
+
+                    // println!("visibility update ran");
+                    
                 }else{
                     *visibility = Visibility::Visible;
                 }
