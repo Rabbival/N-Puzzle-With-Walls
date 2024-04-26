@@ -2,14 +2,12 @@ use crate::output::graphics::ui::NORMAL_BUTTON_COLOR;
 use crate::prelude::*;
 
 const LAYOUT_MARGINS_RECT: UiRect = UiRect {
-    top: Val::Px(20.0),
+    top: Val::Px(0.0),
     right: Val::Px(20.0),
-    bottom: Val::Px(40.0),
+    bottom: Val::Px(50.0),
     left: Val::Px(20.0)
 };
 
-//TODO: show in the bottom of the screen "delete" [chosen layout if there's any here] "load"
-// spawn the layout entity with the spawn_layout_entity fn
 #[derive(Component)]
 pub struct ChosenLayoutTag;
 
