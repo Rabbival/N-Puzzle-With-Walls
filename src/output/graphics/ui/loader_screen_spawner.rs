@@ -2,10 +2,10 @@ use crate::output::graphics::ui::NORMAL_BUTTON_COLOR;
 use crate::prelude::*;
 
 const LAYOUT_MARGINS_RECT: UiRect = UiRect {
-    top: Val::Px(50.0),
-    right: Val::Px(30.0),
-    bottom: Val::Px(50.0),
-    left: Val::Px(30.0)
+    top: Val::Px(20.0),
+    right: Val::Px(20.0),
+    bottom: Val::Px(40.0),
+    left: Val::Px(20.0)
 };
 
 //TODO: show in the bottom of the screen "delete" [chosen layout if there's any here] "load"
@@ -38,60 +38,81 @@ fn spawn_bottom_line(
 ){
     for spawn_request in spawn_event_reader.read() {
         let text_style = &spawn_request.medium_text_style;
-        let button_style = &spawn_request.big_button_style;
-        //chosen slot
+        let button_style = &spawn_request.common_button_style;
+        let chosen_slot_button_style = &spawn_request.space_bar_looking_button_style;
+        
         commands
-            .spawn(
+            .spawn((
                 build_node_bundle_with_full_percentage_style(
-                    AlignItems::End,
+                    AlignItems::Center,
                     JustifyContent::End,
-                    Visibility::Visible,
+                    Visibility::Hidden,
                     Some(FlexDirection::Column)
-                )
-            ).with_children(|parent| {
+                ),
+                CustomOnScreenTag{
+                    screen: AppState::Loader,
+                    on_own_screen_visibility: Some(Visibility::Visible)
+                },
+            )).with_children(|parent| {
             parent.spawn(NodeBundle {
                 style: Style {
-                    flex_direction: FlexDirection::Row,
+                    flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     ..default()
                 },
+                background_color: Color::INDIGO.into(),
                 ..default()
             }).with_children(|parent| {
+                //chosen
                 parent
                     .spawn((
                         ButtonBundle {
-                            style: button_style.clone(),
+                            style: chosen_slot_button_style.clone(),
                             background_color: NORMAL_BUTTON_COLOR.into(),
                             ..default()
                         },
-                        LoaderScreenAction::GenerateBoard(None)
-                    ))
-                    .with_children(|parent| {
-                        parent.spawn(TextBundle::from_section(
-                            "Generate",
-                            text_style.clone(),
-                        ));
-                    });
-                spawn_layout_entity(
-                    parent,
-                    spawn_request,
-                    LoaderScreenSlot::Chosen
-                );
-                parent
-                    .spawn((
-                        ButtonBundle {
-                            style: button_style.clone(),
-                            background_color: NORMAL_BUTTON_COLOR.into(),
+                    ));
+                parent.spawn((
+                    NodeBundle {
+                        style: Style {
+                            flex_direction: FlexDirection::Row,
+                            align_items: AlignItems::Start,
                             ..default()
                         },
-                        LoaderScreenAction::WarnBeforeDeletion(AreYouSureMessageType::DeleteBoard(None))
-                    ))
-                    .with_children(|parent| {
-                        parent.spawn(TextBundle::from_section(
-                            "Delete Board",
-                            text_style.clone(),
-                        ));
-                    });
+                        ..default()
+                    },
+                )).with_children(|parent| {
+                    parent
+                        .spawn((
+                            ButtonBundle {
+                                style: button_style.clone(),
+                                background_color: NORMAL_BUTTON_COLOR.into(),
+                                ..default()
+                            },
+                            LoaderScreenAction::GenerateBoard(None)
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                "Load",
+                                text_style.clone(),
+                            ));
+                        });
+                    parent
+                        .spawn((
+                            ButtonBundle {
+                                style: button_style.clone(),
+                                background_color: NORMAL_BUTTON_COLOR.into(),
+                                ..default()
+                            },
+                            LoaderScreenAction::WarnBeforeDeletion(AreYouSureMessageType::DeleteBoard(None))
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                "Delete",
+                                text_style.clone(),
+                            ));
+                        });
+                });
             });
         });
     }
@@ -108,7 +129,7 @@ fn spawn_layout_slots_to_choose_from(
                     AlignItems::Center,
                     JustifyContent::Center,
                     Visibility::Hidden,
-                    Some(FlexDirection::Row)
+                    Some(FlexDirection::Column)
                 )
             ).with_children(|parent| {
             //first row
@@ -121,7 +142,6 @@ fn spawn_layout_slots_to_choose_from(
                     },
                     ..default()
                 },
-                simple_on_screen_tag(AppState::Loader)
             )).with_children(|parent| {
                 spawn_layout_entity(
                     parent,

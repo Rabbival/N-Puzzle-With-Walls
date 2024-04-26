@@ -8,8 +8,7 @@ pub enum LoaderScreenSlot {
     TopLeft,
     TopRight,
     BottomLeft,
-    BottomRight,
-    Chosen
+    BottomRight
 }
 
 #[derive(Component)]
@@ -26,13 +25,12 @@ impl LoaderScreenSlot{
         }
     }
     
-    pub fn to_layout_offset(&self) -> Option<usize> {
+    pub fn to_layout_offset(&self) -> usize {
         match self{
-            LoaderScreenSlot::TopLeft => Some(0),
-            LoaderScreenSlot::TopRight => Some(1),
-            LoaderScreenSlot::BottomLeft => Some(2),
-            LoaderScreenSlot::BottomRight => Some(3),
-            LoaderScreenSlot::Chosen => None
+            LoaderScreenSlot::TopLeft => 0,
+            LoaderScreenSlot::TopRight => 1,
+            LoaderScreenSlot::BottomLeft => 2,
+            LoaderScreenSlot::BottomRight => 3,
         }
     }
 }
