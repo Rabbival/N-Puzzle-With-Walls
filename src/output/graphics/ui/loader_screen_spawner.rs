@@ -9,7 +9,7 @@ const LAYOUT_MARGINS_RECT: UiRect = UiRect {
 };
 
 #[derive(Component)]
-pub struct ChosenLayoutTag;
+pub struct ChosenLayoutTextTag;
 
 #[derive(Component)]
 pub struct ScreenChangeArrowTag;
@@ -69,7 +69,16 @@ fn spawn_bottom_line(
                             background_color: NORMAL_BUTTON_COLOR.into(),
                             ..default()
                         },
-                    ));
+                        LoaderScreenAction::JumpToChosenLayout(None)
+                    ))
+                    .with_children(|parent| {
+                        parent.spawn((TextBundle::from_section(
+                                "",
+                                text_style.clone(),
+                            ),
+                            ChosenLayoutTextTag
+                         ));
+                    });
                 parent.spawn((
                     NodeBundle {
                         style: Style {

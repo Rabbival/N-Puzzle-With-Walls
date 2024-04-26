@@ -4,8 +4,8 @@ use crate::prelude::{LayoutLoaderScreenAndSlot, LoaderScreenSlot, SAVED_LAYOUTS_
 pub struct SavedLayoutIndex(pub usize);
 
 impl SavedLayoutIndex{
-    pub fn try_from_screen_and_slot(screen: usize, slot: LoaderScreenSlot) -> Self {
-        SavedLayoutIndex(screen*SAVED_LAYOUTS_PER_SCREEN + slot.to_layout_offset())
+    pub fn from_screen_and_slot(screen_and_slot: LayoutLoaderScreenAndSlot) -> Self {
+        SavedLayoutIndex(screen_and_slot.screen*SAVED_LAYOUTS_PER_SCREEN + screen_and_slot.slot.to_layout_offset())
     }
 
     pub fn try_to_layout_screen_and_slot(&self) -> Option<LayoutLoaderScreenAndSlot> {

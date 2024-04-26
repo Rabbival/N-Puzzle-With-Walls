@@ -89,6 +89,7 @@ pub mod prelude {
         loader_screen_logic::{
             displayed_loader_screen::*, layout_loader_screen_and_slot::*,
             loader_screen_layout_text_tag::*, LoaderScreenLogicPlugin,
+            chosen_layout_screen_and_slot::*,
         },
         states::{app_state::*, game_state::*, StatePlugin},
         tile::*,

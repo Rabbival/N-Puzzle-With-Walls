@@ -6,12 +6,13 @@ pub struct LoaderUiLogicPlugin;
 
 impl Plugin for LoaderUiLogicPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            OnEnter(AppState::Loader), (
-                show_currently_displayed_saved_layouts_screen,
-                only_show_arrows_if_theres_more_than_one_available_screen,
-                ).before(crate::output::graphics::show_only_if_has_specified_screen_tag),
-        )
+        app
+            .add_systems(
+                OnEnter(AppState::Loader), (
+                    show_currently_displayed_saved_layouts_screen,
+                    only_show_arrows_if_theres_more_than_one_available_screen,
+                    ).before(crate::output::graphics::show_only_if_has_specified_screen_tag),
+            )
             .add_systems(
                 Update,(
                     (
@@ -19,7 +20,39 @@ impl Plugin for LoaderUiLogicPlugin {
                         update_arrows_after_change
                     ).before(crate::output::graphics::show_only_if_has_specified_screen_tag),
                 )
+            )
+            .add_systems(
+                Update,(
+                    (
+                        update_chosen_visuals_and_bottom_line_functionality
+                    ).run_if(resource_changed::<ChosenLayoutScreenAndSlot>),
+                )
             );
+    }
+}
+
+fn update_chosen_visuals_and_bottom_line_functionality(
+    chosen_layout_screen_and_slot: Res<ChosenLayoutScreenAndSlot>,
+    loader_screen_action_query: Query<&LoaderScreenAction>,
+    data_base_manager: Res<DataBaseManager>,
+){
+    for action_carrier in loader_screen_action_query.iter(){
+        if chosen_layout_screen_and_slot.0.is_none() { continue; }
+        let calculate_db_index =
+            SavedLayoutIndex::from_screen_and_slot(chosen_layout_screen_and_slot.0.unwrap());
+        let new_chosen_ref_value = data_base_manager.try_get_layout_ref(&calculate_db_index);
+        match action_carrier{
+            LoaderScreenAction::GenerateBoard() => {
+
+            },
+            LoaderScreenAction::WarnBeforeDeletion() => {
+
+            },
+            LoaderScreenAction::JumpToChosenLayout() => {
+
+            },
+            _ => {}
+        }
     }
 }
 
@@ -31,10 +64,10 @@ fn show_currently_displayed_saved_layouts_screen(
 ){
     for screen_slot in all::<LoaderScreenSlot>(){
         let index_from_slot = 
-            SavedLayoutIndex::try_from_screen_and_slot(
-                displayed_loader_screen_number.0,
-                screen_slot
-            );
+            SavedLayoutIndex::from_screen_and_slot(LayoutLoaderScreenAndSlot{
+                screen: displayed_loader_screen_number.0,
+                slot: screen_slot
+            });
         let optional_layout_to_display =
             data_base_manager.try_get_layout_ref(&index_from_slot);
         if let Err(entity_error) = handle_screen_slot_content_and_visibility(
