@@ -17,7 +17,7 @@ impl Plugin for DataBaseManagerPlugin{
 				save_to_data_base_and_system,
 				remove_from_data_base_and_system,
 				listen_to_db_clearing_request
-			));
+			).in_set(InputSystemSets::InputHandling));
 	}
 }
 

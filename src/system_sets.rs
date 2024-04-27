@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::prelude::AppState;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub enum InputSystemSets {
@@ -35,6 +36,15 @@ impl Plugin for SystemSetsPlugin {
         )
         .configure_sets(
             Update,
+            (
+                StateChangeSystemSets::StateChangeListening,
+                StateChangeSystemSets::PrepareToHandleStateChange,
+                StateChangeSystemSets::HandleStateChange,
+            )
+                .chain(),
+        )
+        .configure_sets(
+            OnEnter(AppState::Loader),
             (
                 StateChangeSystemSets::StateChangeListening,
                 StateChangeSystemSets::PrepareToHandleStateChange,

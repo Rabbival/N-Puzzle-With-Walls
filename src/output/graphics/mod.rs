@@ -19,7 +19,15 @@ impl Plugin for GraphicsPlugin {
             Update,
             (
                 show_only_if_has_specified_screen_tag
+                    .run_if(not(resource_changed::<DataBaseManager>)
+                        .and_then(not(resource_changed::<DisplayedLoaderScreenNumber>)))
                     .in_set(StateChangeSystemSets::HandleStateChange),
+                show_only_if_has_specified_screen_tag
+                    .run_if(
+                        resource_changed::<DataBaseManager>
+                            .or_else(resource_changed::<DisplayedLoaderScreenNumber>)
+                    )
+                    .in_set(InputSystemSets::PostMainChanges),
                 set_visibility_for_entity
             )
         );

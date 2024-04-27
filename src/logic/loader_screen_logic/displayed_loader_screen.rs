@@ -10,6 +10,7 @@ impl Plugin for DisplayedLoaderScreenPlugin {
         app.init_resource::<DisplayedLoaderScreenNumber>()
             .add_systems(Update,
                 listen_to_screen_change_arrows_presses
+                    .in_set(InputSystemSets::InputHandling)
             );
     }
 }

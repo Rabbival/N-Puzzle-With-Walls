@@ -11,14 +11,18 @@ impl Plugin for LoaderUiLogicPlugin {
                 OnEnter(AppState::Loader), (
                     show_currently_displayed_saved_layouts_screen,
                     only_show_arrows_if_theres_more_than_one_available_screen,
-                    ).before(crate::output::graphics::show_only_if_has_specified_screen_tag),
+                    ).in_set(StateChangeSystemSets::PrepareToHandleStateChange),
             )
             .add_systems(
                 Update,(
                     (
                         update_slots_info_after_change,
                         update_arrows_after_change
-                    ).before(crate::output::graphics::show_only_if_has_specified_screen_tag),
+                    ).run_if(
+                        resource_changed::<DataBaseManager>
+                        .or_else(resource_changed::<DisplayedLoaderScreenNumber>)
+                    )
+                        .in_set(InputSystemSets::MainChanges),
                 )
             )
             .add_systems(
@@ -152,14 +156,12 @@ fn update_slots_info_after_change(
     layout_slots_query: Query<(&LoaderScreenSlotTag, &mut CustomOnScreenTag, &Children)>,
     layout_slot_text_query: Query<&mut Text>,
 ){
-    if displayed_loader_screen_number.is_changed() || data_base_manager.is_changed(){
-        show_currently_displayed_saved_layouts_screen(
-            data_base_manager,
-            displayed_loader_screen_number,
-            layout_slots_query,
-            layout_slot_text_query,
-        );
-    }
+    show_currently_displayed_saved_layouts_screen(
+        data_base_manager,
+        displayed_loader_screen_number,
+        layout_slots_query,
+        layout_slot_text_query,
+    );
 }
 
 fn only_show_arrows_if_theres_more_than_one_available_screen(
@@ -180,10 +182,8 @@ fn update_arrows_after_change(
     data_base_manager: Res<DataBaseManager>,
     arrows_visibility_tags_query: Query<&mut CustomOnScreenTag, With<ScreenChangeArrowTag>>
 ){
-    if data_base_manager.is_changed(){
-        only_show_arrows_if_theres_more_than_one_available_screen(
-            data_base_manager,
-            arrows_visibility_tags_query
-        );
-    }
+    only_show_arrows_if_theres_more_than_one_available_screen(
+        data_base_manager,
+        arrows_visibility_tags_query
+    );
 }
