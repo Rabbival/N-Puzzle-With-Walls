@@ -11,27 +11,72 @@ impl Plugin for LoaderUiLogicPlugin {
                 OnEnter(AppState::Loader), (
                     show_currently_displayed_saved_layouts_screen,
                     only_show_arrows_if_theres_more_than_one_available_screen,
+                    mark_chosen_slot_if_visible
                     ).in_set(StateChangeSystemSets::PrepareToHandleStateChange),
             )
             .add_systems(
                 Update,(
                     (
-                        update_slots_info_after_change,
-                        update_arrows_after_change
-                    ).run_if(
-                        resource_changed::<DataBaseManager>
-                        .or_else(resource_changed::<DisplayedLoaderScreenNumber>)
+                        update_slots_info_after_change.run_if(resource_changed::<DataBaseManager>
+                                .or_else(resource_changed::<DisplayedLoaderScreenNumber>)),
+                        update_arrows_after_change.run_if(resource_changed::<DataBaseManager>),
                     )
                         .in_set(InputSystemSets::MainChanges),
-                )
-            )
-            .add_systems(
-                Update,(
                     update_bottom_line_to_fit_new_chosen
-                    .run_if(resource_changed::<ChosenLayoutScreenAndSlot>),
+                        .run_if(resource_changed::<ChosenLayoutScreenAndSlot>),
+                    update_chosen_mark_after_change.run_if(resource_changed::<ChosenLayoutScreenAndSlot>
+                        .or_else(resource_changed::<DisplayedLoaderScreenNumber>))
                 )
             );
     }
+}
+
+fn mark_chosen_slot_if_visible(
+    mut loader_screen_actions_query: Query<(Entity, &LoaderScreenAction, &mut BackgroundColor)>,
+    displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
+    chosen_layout_screen_and_slot: Res<ChosenLayoutScreenAndSlot>,
+    mut commands: Commands
+){
+    let layout_slots_iter =
+        loader_screen_actions_query.iter_mut().filter_map(
+            |(entity, action, button)|
+                if let LoaderScreenAction::ChooseLayoutInSlot(slot) = *action {
+                    Some((entity, slot, button))
+                } else {
+                    None
+                }
+        );
+    for (entity, layout_slot, mut slot_background_color) in layout_slots_iter{
+        if let Some(chosen_screen_and_slot) = chosen_layout_screen_and_slot.0{
+            if chosen_screen_and_slot.screen == displayed_loader_screen_number.0{
+                if layout_slot == chosen_screen_and_slot.slot{
+                    set_color_to_pressed(&mut slot_background_color);
+                    commands
+                        .entity(entity)
+                        .insert(SelectedOptionTag);
+                    continue;
+                }
+            }
+        }
+        set_color_to_normal(&mut slot_background_color);
+        commands
+            .entity(entity)
+            .remove::<SelectedOptionTag>();
+    }
+}
+
+fn update_chosen_mark_after_change(
+    loader_screen_actions_query: Query<(Entity, &LoaderScreenAction, &mut BackgroundColor)>,
+    displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
+    chosen_layout_screen_and_slot: Res<ChosenLayoutScreenAndSlot>,
+    commands: Commands
+){
+    mark_chosen_slot_if_visible(
+        loader_screen_actions_query,
+        displayed_loader_screen_number,
+        chosen_layout_screen_and_slot,
+        commands
+    )
 }
 
 fn update_bottom_line_to_fit_new_chosen(
@@ -44,8 +89,8 @@ fn update_bottom_line_to_fit_new_chosen(
     let mut updated_optional_index = None;
     let mut updated_layout_name = DomainBoardName(String::new());
     let mut updated_page_number = None;
-    
-    if let Some(chosen_layout_screen_and_slot) = 
+
+    if let Some(chosen_layout_screen_and_slot) =
         optional_chosen_layout_screen_and_slot.0
     {
         let calculate_db_index =
