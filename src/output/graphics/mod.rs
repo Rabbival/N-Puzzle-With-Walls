@@ -49,9 +49,6 @@ pub fn show_only_if_has_specified_screen_tag(
             if *app_state == screen_tag.screen {
                 if let Some(own_screen_vis) = screen_tag.on_own_screen_visibility {
                     *visibility = own_screen_vis;
-
-                    // println!("visibility update ran");
-                    
                 }else{
                     *visibility = Visibility::Visible;
                 }
@@ -78,10 +75,10 @@ pub fn show_only_if_has_specified_screen_tag(
 }
 
 fn set_visibility_for_entity(
-    mut event_listener: EventReader<SetEntityVisibility>,
+    mut event_reader: EventReader<SetEntityVisibility>,
     mut query: Query<&mut Visibility>,
 ) {
-    for visibility_set_request in event_listener.read() {
+    for visibility_set_request in event_reader.read() {
         let entity_to_toggle = visibility_set_request.entity;
         if let Ok(mut entity_visibility) = query.get_mut(entity_to_toggle) {
             *entity_visibility = visibility_set_request.visibility;

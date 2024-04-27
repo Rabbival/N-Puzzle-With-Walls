@@ -74,10 +74,10 @@ fn determine_board_quality(parsed_domain_board: &DomainBoard) -> BoardQuality{
 
 fn save_to_data_base_and_system(
 	mut event_writer: EventWriter<SuccessSavingToDB>,
-	mut event_listener: EventReader<SaveToDB>,
+	mut event_reader: EventReader<SaveToDB>,
 	mut db_manager: ResMut<DataBaseManager>
 ){
-	for save_request in event_listener.read(){
+	for save_request in event_reader.read(){
 		let layout_content_string = ron::ser::to_string_pretty(
 			&save_request.0, ron::ser::PrettyConfig::default()).unwrap();
 		let layout_name_string = db_manager.generate_default_name_for_board();
@@ -94,10 +94,10 @@ fn save_to_data_base_and_system(
 
 fn remove_from_data_base_and_system(
 	mut event_writer: EventWriter<SuccessRemovingFromDB>,
-	mut event_listener: EventReader<RemoveFromDB>,
+	mut event_reader: EventReader<RemoveFromDB>,
 	mut db_manager: ResMut<DataBaseManager>
 ){
-	for removal_request in event_listener.read(){
+	for removal_request in event_reader.read(){
 		match remove_from_data_base_and_system_inner(&removal_request.0, db_manager.as_mut()){
 			Err(system_access_error) => {
 				print_system_access_error(system_access_error);
@@ -132,40 +132,39 @@ fn remove_from_data_base_and_system_inner(
 
 fn listen_to_db_clearing_request(
 	mut event_writer: EventWriter<SuccessClearingDB>,
-	mut event_listener: EventReader<ClearDB>,
-	db_manager: ResMut<DataBaseManager>
+	mut event_reader: EventReader<ClearDB>,
+	mut db_manager: ResMut<DataBaseManager>
 ){
-	match listen_to_db_clearing_request_inner(&mut event_listener, db_manager){
-		Err(system_access_error) => {
-			print_system_access_error(system_access_error);
-		},
-		Ok(_) => {
-			event_writer.send(SuccessClearingDB);
+	for _clear_request in event_reader.read() {
+		match clear_db(&mut db_manager){
+			Err(system_access_error) => {
+				print_system_access_error(system_access_error);
+			},
+			Ok(_) => {
+				event_writer.send(SuccessClearingDB);
+			}
 		}
 	}
 }
 
-fn listen_to_db_clearing_request_inner(
-	event_listener: &mut EventReader<ClearDB>,
-	mut db_manager: ResMut<DataBaseManager>
+fn clear_db(
+	db_manager: &mut DataBaseManager
 ) -> Result<(), SystemAccessError>
 {
-	for _clear_request in event_listener.read(){
-		db_manager.saved_layouts = vec!();
-		create_folder_if_none_exists_yet(FolderToAccess::SavedLayouts);
-		let valid_text_file_names =
-			get_all_valid_text_file_names_in_folder(FolderToAccess::SavedLayouts);
+	db_manager.saved_layouts = vec!();
+	create_folder_if_none_exists_yet(FolderToAccess::SavedLayouts);
+	let valid_text_file_names =
+		get_all_valid_text_file_names_in_folder(FolderToAccess::SavedLayouts);
 
-		for valid_text_file_name in valid_text_file_names{
-			let valid_text_file_name_excluding_postfix =
-				&valid_text_file_name[..valid_text_file_name.len()-4];
-			let file_deletion_result = delete_text_file(
-				FolderToAccess::SavedLayouts,
-				String::from(valid_text_file_name_excluding_postfix)
-			);
-			if file_deletion_result.is_err(){
-				return Err(SystemAccessError::CouldntFindFile(FileName(valid_text_file_name)));
-			}
+	for valid_text_file_name in valid_text_file_names{
+		let valid_text_file_name_excluding_postfix =
+			&valid_text_file_name[..valid_text_file_name.len()-4];
+		let file_deletion_result = delete_text_file(
+			FolderToAccess::SavedLayouts,
+			String::from(valid_text_file_name_excluding_postfix)
+		);
+		if file_deletion_result.is_err(){
+			return Err(SystemAccessError::CouldntFindFile(FileName(valid_text_file_name)));
 		}
 	}
 	Ok(())

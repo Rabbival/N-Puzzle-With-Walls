@@ -35,7 +35,7 @@ fn update_wall_tiles_count_visuals(
 }
 
 fn set_chosen_options_to_fit_current_props(
-    mut event_listener: EventReader<SetMenuElementsToFitCurrent>,
+    mut event_reader: EventReader<SetMenuElementsToFitCurrent>,
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction),
         (With<SelectedOptionTag>, Without<AppliedOptionTag>),
@@ -46,7 +46,7 @@ fn set_chosen_options_to_fit_current_props(
     >,
     mut commands: Commands,
 ) {
-    for _event in event_listener.read() {
+    for _event in event_reader.read() {
         // remove from previously chosen and not applied
         for (chosen_not_applied, mut not_applied_button_color, _) in currently_chosen.iter_mut() {
             set_color_to_normal(&mut not_applied_button_color);
@@ -69,14 +69,14 @@ fn set_chosen_options_to_fit_current_props(
 
 /// for the planned board properties updates that don't require special treatment
 fn update_menu_ui_after_press_general(
-    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut button_event_reader: EventReader<MenuButtonPressed>,
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction),
         (With<SelectedOptionTag>, Without<ApplyButtonTag>),
     >,
     mut commands: Commands,
 ) {
-    for button_event in button_event_listener.read() {
+    for button_event in button_event_reader.read() {
         let menu_button_action = button_event.action;
         let pressed_button_color_entity = button_event.entity;
         let button_action_discriminant = match menu_button_action {
@@ -106,11 +106,11 @@ fn update_menu_ui_after_press_general(
 }
 
 fn increase_or_decrease_wall_count_menu_ui_update(
-    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut button_event_reader: EventReader<MenuButtonPressed>,
     mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
     mut commands: Commands,
 ) {
-    for button_event in button_event_listener.read() {
+    for button_event in button_event_reader.read() {
         if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action {
             let (apply_button, mut apply_button_color) = apply_button_query.single_mut();
             match wall_count_action {
@@ -125,11 +125,11 @@ fn increase_or_decrease_wall_count_menu_ui_update(
 }
 
 fn apply_wall_count_menu_ui_update(
-    mut apply_button_event_listener: EventReader<ApplyButtonPressed>,
+    mut apply_button_event_reader: EventReader<ApplyButtonPressed>,
     mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
     mut commands: Commands,
 ) {
-    for button_event in apply_button_event_listener.read() {
+    for button_event in apply_button_event_reader.read() {
         if let MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply) = button_event.action
         {
             let (apply_button_entity, mut apply_button_color) = apply_button_query.single_mut();
@@ -164,7 +164,7 @@ fn set_tree_generation_options_visibility(
 }
 
 fn set_applied_props(
-    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut button_event_reader: EventReader<MenuButtonPressed>,
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction),
         (With<SelectedOptionTag>, Without<ApplyButtonTag>),
@@ -172,7 +172,7 @@ fn set_applied_props(
     mut currently_applied: Query<Entity, (With<AppliedOptionTag>, Without<SelectedOptionTag>)>,
     mut commands: Commands,
 ) {
-    for button_event in button_event_listener.read() {
+    for button_event in button_event_reader.read() {
         if let MenuButtonAction::MainButtonPressed = button_event.action {
             // remove applied from previous settings
             for previously_applied in currently_applied.iter_mut() {

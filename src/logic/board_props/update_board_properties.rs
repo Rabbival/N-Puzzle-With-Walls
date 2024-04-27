@@ -25,7 +25,7 @@ impl Plugin for UpdateBoardPropertiesPlugin {
 
 /// for the planned board properties updates that don't require special treatment
 fn general_update_planned_board_properties(
-    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut button_event_reader: EventReader<MenuButtonPressed>,
     mut button_event_writer_for_apply: EventWriter<ApplyButtonPressed>,
     mut planned_board_prop_query: Query<
         &mut BoardProperties,
@@ -36,7 +36,7 @@ fn general_update_planned_board_properties(
     >,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
 ) {
-    for button_event in button_event_listener.read() {
+    for button_event in button_event_reader.read() {
         general_update_planned_board_properties_inner(
             &mut button_event_writer_for_apply,
             &button_event.action,
@@ -77,7 +77,7 @@ fn general_update_planned_board_properties_inner(
 }
 
 pub fn update_wall_count_unapplied(
-    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut button_event_reader: EventReader<MenuButtonPressed>,
     planned_board_prop_query: Query<
         &BoardProperties,
         (
@@ -87,7 +87,7 @@ pub fn update_wall_count_unapplied(
     >,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
 ) {
-    for button_event in button_event_listener.read() {
+    for button_event in button_event_reader.read() {
         if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action {
             update_wall_count_unapplied_inner(
                 &wall_count_action,
@@ -126,7 +126,7 @@ fn update_wall_count_unapplied_inner(
 }
 
 fn apply_wall_count_to_planned_props(
-    mut apply_button_event_listener: EventReader<ApplyButtonPressed>,
+    mut apply_button_event_reader: EventReader<ApplyButtonPressed>,
     mut planned_board_prop_query: Query<
         &mut BoardProperties,
         (
@@ -136,7 +136,7 @@ fn apply_wall_count_to_planned_props(
     >,
     unapplied_menu_wall_count: Res<UnappliedMenuWallCount>,
 ) {
-    for apply_button_event in apply_button_event_listener.read() {
+    for apply_button_event in apply_button_event_reader.read() {
         if let MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply) =
             apply_button_event.action
         {
@@ -148,7 +148,7 @@ fn apply_wall_count_to_planned_props(
 }
 
 pub fn set_applied_props_and_exit_menu(
-    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut button_event_reader: EventReader<MenuButtonPressed>,
     mut menu_toggle_event_writer: EventWriter<ToggleMenu>,
     mut spawn_board_event_writer: EventWriter<BuildNewBoard>,
     mut applied_board_prop_query: Query<
@@ -166,7 +166,7 @@ pub fn set_applied_props_and_exit_menu(
         ),
     >,
 ) {
-    for button_event in button_event_listener.read() {
+    for button_event in button_event_reader.read() {
         if let MenuButtonAction::MainButtonPressed = button_event.action {
             let planned_board_prop = planned_board_prop_query.single_mut();
             let mut applied_props = applied_board_prop_query.single_mut();
@@ -190,7 +190,7 @@ pub fn set_applied_props_and_exit_menu(
 /// sets the one that appears in the menu to fit the current configuration
 fn set_planned_props_to_fit_current(
     mut event_writer: EventWriter<SetMenuElementsToFitCurrent>,
-    mut event_listener: EventReader<SetPlannedPropertiesToFitCurrent>,
+    mut event_reader: EventReader<SetPlannedPropertiesToFitCurrent>,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
     applied_board_prop_query: Query<
         &BoardProperties,
@@ -207,7 +207,7 @@ fn set_planned_props_to_fit_current(
         ),
     >,
 ) {
-    for _event in event_listener.read() {
+    for _event in event_reader.read() {
         let current_props = applied_board_prop_query.single();
         let mut planned_props = planned_board_prop_query.single_mut();
         unapplied_menu_wall_count.0 = current_props.wall_count;

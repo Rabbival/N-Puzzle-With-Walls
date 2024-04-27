@@ -25,11 +25,11 @@ impl Plugin for UiLogicPlugin {
 }
 
 fn toggle_button(
-    mut event_listener: EventReader<ToggleButton>,
+    mut event_reader: EventReader<ToggleButton>,
     mut query: Query<(&mut BackgroundColor, Option<&SelectedOptionTag>), With<Button>>,
     mut commands: Commands,
 ) {
-    for toggle_request in event_listener.read() {
+    for toggle_request in event_reader.read() {
         let entity_to_toggle = toggle_request.entity;
         if let Ok((mut button_color, optional_selected_tag)) = query.get_mut(entity_to_toggle) {
             if optional_selected_tag.is_none() {

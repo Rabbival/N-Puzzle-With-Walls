@@ -1,4 +1,3 @@
-use bevy::prelude::Component;
 use enum_iterator::Sequence;
 
 pub const SAVED_LAYOUTS_PER_SCREEN: usize = 4;
@@ -10,9 +9,6 @@ pub enum LoaderScreenSlot {
     BottomLeft,
     BottomRight
 }
-
-#[derive(Component)]
-pub struct LoaderScreenSlotTag(pub LoaderScreenSlot);
 
 impl LoaderScreenSlot{
     pub fn try_from_layout_offset(offset: usize) -> Option<Self>{

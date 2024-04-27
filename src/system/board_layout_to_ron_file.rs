@@ -12,13 +12,13 @@ impl Plugin for BoardLayoutToRonFilePlugin{
 
 fn listen_for_save_requests(
     mut event_writer: EventWriter<LayoutSaveAttemptOutcomeEvent>,
-    mut event_listener: EventReader<SaveWallsLayoutButtonPressed>,
+    mut event_reader: EventReader<SaveWallsLayoutButtonPressed>,
     mut write_to_db_event_writer: EventWriter<SaveToDB>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     current_board_wall_locations: Res<CurrentBoardWallLocations>,
     db_manager: Res<DataBaseManager>
 ){
-    for _save_request in event_listener.read(){
+    for _save_request in event_reader.read(){
         let saved_layout_reference = 
             db_manager.get_saved_layouts_ref();
         if saved_layout_reference.len() >= BOARD_LAYOUT_CAPACITY as usize {

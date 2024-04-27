@@ -29,11 +29,11 @@ fn set_are_you_sure_message_type_and_text(
 
 fn listen_for_loader_screen_actions(
     mut visibility_toggle_event_writer: EventWriter<SetEntityVisibility>,
-    mut event_listener: EventReader<LoaderScreenActionInitiated>,
+    mut event_reader: EventReader<LoaderScreenActionInitiated>,
     mut are_you_sure_message_query: Query<(Entity, &mut AreYouSureMessageType)>,
     mut are_you_sure_text_query: Query<&mut Text, With<AreYouSureMessageTextTag>>,
 ){
-    for loader_screen_action in event_listener.read(){
+    for loader_screen_action in event_reader.read(){
         if let LoaderScreenAction::WarnBeforeDeletion(are_you_sure_message_requested_type) =
             loader_screen_action.action.clone()
         {
@@ -60,10 +60,10 @@ fn listen_for_button_events(
     mut entity_visibility_event_writer: EventWriter<SetEntityVisibility>,
     mut clear_db_event_writer: EventWriter<ClearDB>,
     mut remove_from_db_event_writer: EventWriter<RemoveFromDB>,
-    mut event_listener: EventReader<AreYouSureMessageButtonEvent>,
+    mut event_reader: EventReader<AreYouSureMessageButtonEvent>,
     are_you_sure_message_query: Query<(Entity, &AreYouSureMessageType)>,
 ){
-    for action_request in event_listener.read(){
+    for action_request in event_reader.read(){
         let (
             are_you_sure_message_entity, 
             are_you_sure_message_type

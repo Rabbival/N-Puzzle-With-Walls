@@ -46,10 +46,10 @@ fn reset_texts_above_start_button(
 }
 
 fn listen_for_apply_button_press(
-    mut event_listener: EventReader<ApplyButtonPressed>,
+    mut event_reader: EventReader<ApplyButtonPressed>,
     mut lower_text_above_start_button_query: Query<&mut Text, With<LowerTextAboveStartButton>>
 ){
-    for _apply_button_press in event_listener.read() {
+    for _apply_button_press in event_reader.read() {
         set_text_section_value_and_color(
             &mut lower_text_above_start_button_query.single_mut().sections[0],
             None,
@@ -59,12 +59,12 @@ fn listen_for_apply_button_press(
 }
 
 fn alert_player_of_unsaved_changes(
-    mut event_listener: EventReader<MenuButtonPressed>,
+    mut event_reader: EventReader<MenuButtonPressed>,
     mut lower_text_above_start_button_query: Query<&mut Text, With<LowerTextAboveStartButton>>,
     planned_board_properties_query: Query<&BoardProperties, With<PlannedBoardProperties>>,
     unapplied_menu_wall_count: Res<UnappliedMenuWallCount>
 ) {
-    for menu_button_press in event_listener.read() {
+    for menu_button_press in event_reader.read() {
         if let MenuButtonAction::ChangeWallTilesCount(_) = menu_button_press.action{
             let applied_to_plan_wall_count = planned_board_properties_query.single().wall_count;
             let new_lower_text_above_start_button_value =
@@ -83,10 +83,10 @@ fn alert_player_of_unsaved_changes(
 }
 
 fn listen_for_alert_dismissal(
-    mut event_listener: EventReader<DismissIrrelevantAlerts>,
+    mut event_reader: EventReader<DismissIrrelevantAlerts>,
     mut upper_text_above_start_button_query: Query<&mut Text, With<UpperTextAboveStartButton>>,
 ){
-    for _ in event_listener.read() {
+    for _ in event_reader.read() {
         let mut upper_text_above_start_button = upper_text_above_start_button_query.single_mut();
         if *upper_text_above_start_button.sections[0].value != TextAboveStartButtonType::NoText.to_string()
             && ! upper_text_above_start_button.is_changed()
@@ -101,7 +101,7 @@ fn listen_for_alert_dismissal(
 }
 
 pub fn alert_player_of_reached_bounds(
-    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut button_event_reader: EventReader<MenuButtonPressed>,
     planned_board_prop_query: Query<
         &BoardProperties,
         (
@@ -112,7 +112,7 @@ pub fn alert_player_of_reached_bounds(
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
     mut upper_text_above_start_button_query: Query<&mut Text, With<UpperTextAboveStartButton>>,
 ) {
-    for button_event in button_event_listener.read() {
+    for button_event in button_event_reader.read() {
         if let MenuButtonAction::ChangeWallTilesCount(wall_count_action) = button_event.action {
             alert_player_of_reached_bounds_inner(
                 &wall_count_action,
@@ -154,10 +154,10 @@ fn alert_player_of_reached_bounds_inner(
 
 
 fn update_main_button_text_to_show_functionality(
-    mut button_event_listener: EventReader<MenuButtonPressed>,
+    mut button_event_reader: EventReader<MenuButtonPressed>,
     mut generation_text_query: Query<&mut Text, With<BoardGenerationTextTag>>,
 ) {
-    for button_event in button_event_listener.read() {
+    for button_event in button_event_reader.read() {
         if let MenuButtonAction::ChangeGenerationMethod(generation_method)
             = button_event.action
         {
@@ -171,7 +171,7 @@ fn update_main_button_text_to_show_functionality(
 }
 
 fn show_board_couldnt_be_generated(
-    mut event_listener: EventReader<ShowGenerationError>,
+    mut event_reader: EventReader<ShowGenerationError>,
     mut main_button_text_query: Query<
         &mut Text, 
         (With<BoardGenerationTextTag>, Without<UpperTextAboveStartButton>)
@@ -181,7 +181,7 @@ fn show_board_couldnt_be_generated(
         (With<UpperTextAboveStartButton>, Without<BoardGenerationTextTag>)
     >,
 ) {
-    for _ in event_listener.read() {
+    for _ in event_reader.read() {
         set_text_section_value_and_color(
             &mut upper_text_above_start_button_query.single_mut().sections[0],
             None,

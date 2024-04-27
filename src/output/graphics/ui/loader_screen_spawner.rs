@@ -205,7 +205,7 @@ fn spawn_layout_entity(
                 background_color: super::NORMAL_BUTTON_COLOR.into(),
                 ..default()
             },
-            LoaderScreenSlotTag(loader_screen_slot),
+            LoaderScreenAction::ChooseLayoutInSlot(loader_screen_slot),
             CustomOnScreenTag{
                 screen: AppState::Loader,
                 on_own_screen_visibility: Some(Visibility::Hidden)

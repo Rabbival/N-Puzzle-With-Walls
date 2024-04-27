@@ -14,10 +14,10 @@ impl Plugin for VictoryUiLogicPlugin {
 }
 
 fn listen_for_victory_button_press(
-	mut button_event_listener: EventReader<VictoryButtonPressed>,
+	mut button_event_reader: EventReader<VictoryButtonPressed>,
 	mut spawn_board_event_writer: EventWriter<BuildNewBoard>,
 ){
-	for button_event in button_event_listener.read(){
+	for button_event in button_event_reader.read(){
 		match button_event.action{
 			VictoryButtonAction::ResetBoard => {
 				spawn_board_event_writer.send(BuildNewBoard {

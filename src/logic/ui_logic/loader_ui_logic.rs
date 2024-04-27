@@ -27,59 +27,56 @@ impl Plugin for LoaderUiLogicPlugin {
             )
             .add_systems(
                 Update,(
-                    update_chosen_visuals_and_bottom_line_functionality
+                    update_bottom_line_to_fit_new_chosen
                     .run_if(resource_changed::<ChosenLayoutScreenAndSlot>),
                 )
             );
     }
 }
 
-fn update_chosen_visuals_and_bottom_line_functionality(
+fn update_bottom_line_to_fit_new_chosen(
     optional_chosen_layout_screen_and_slot: Res<ChosenLayoutScreenAndSlot>,
     mut loader_screen_action_query: Query<&mut LoaderScreenAction>,
     mut chosen_layout_text_query: Query<&mut Text, With<ChosenLayoutTextTag>>,
     data_base_manager: Res<DataBaseManager>,
 ){
+    let mut updated_chosen_layout_text = String::from("no chosen board");
+    let mut updated_optional_index = None;
+    let mut updated_layout_name = DomainBoardName(String::new());
+    let mut updated_page_number = None;
+    
     if let Some(chosen_layout_screen_and_slot) = 
         optional_chosen_layout_screen_and_slot.0
     {
         let calculate_db_index =
             SavedLayoutIndex::from_screen_and_slot(chosen_layout_screen_and_slot);
         let new_chosen_ref_value = data_base_manager.try_get_layout_ref(&calculate_db_index);
-        let mut chosen_layout_text = chosen_layout_text_query.single_mut();
-        let updated_optional_index;
-        let updated_layout_name;
-        let updated_page_number;
+
         if let Some(board_ref) = new_chosen_ref_value{
-            chosen_layout_text.sections[0].value = String::from("chosen: ") + &board_ref.board_name;
+            updated_chosen_layout_text = String::from("chosen: ") + &board_ref.board_name;
             updated_optional_index = Some(calculate_db_index);
             updated_layout_name = DomainBoardName(board_ref.board_name.clone());
             updated_page_number = Some(chosen_layout_screen_and_slot.screen)
-        }else{
-            chosen_layout_text.sections[0].value = String::from("no chosen board");
-            updated_optional_index = None;
-            updated_layout_name = DomainBoardName(String::new());
-            updated_page_number = None;
         }
-        
-        
-        for mut action_carrier in loader_screen_action_query.iter_mut(){
-            match action_carrier.as_mut(){
-                LoaderScreenAction::GenerateBoard(optional_index) => {
-                    *optional_index = updated_optional_index;
-                },
-                LoaderScreenAction::WarnBeforeDeletion(AreYouSureMessageType::DeleteBoard(optional_tuple)) => {
-                    if updated_optional_index.is_none() {
-                        *optional_tuple = None;
-                    }else{
-                        *optional_tuple = Some((updated_layout_name.clone(), updated_optional_index.unwrap()));
-                    }
-                },
-                LoaderScreenAction::JumpToChosenLayoutPage(optional_index) => {
-                    *optional_index = updated_page_number;
-                },
-                _ => {}
-            }
+    }
+
+    chosen_layout_text_query.single_mut().sections[0].value = updated_chosen_layout_text;
+    for mut action_carrier in loader_screen_action_query.iter_mut(){
+        match action_carrier.as_mut(){
+            LoaderScreenAction::GenerateBoard(optional_index) => {
+                *optional_index = updated_optional_index;
+            },
+            LoaderScreenAction::WarnBeforeDeletion(AreYouSureMessageType::DeleteBoard(optional_tuple)) => {
+                if updated_optional_index.is_none() {
+                    *optional_tuple = None;
+                }else{
+                    *optional_tuple = Some((updated_layout_name.clone(), updated_optional_index.unwrap()));
+                }
+            },
+            LoaderScreenAction::JumpToChosenLayoutPage(optional_index) => {
+                *optional_index = updated_page_number;
+            },
+            _ => {}
         }
     }
 }
@@ -87,21 +84,21 @@ fn update_chosen_visuals_and_bottom_line_functionality(
 fn show_currently_displayed_saved_layouts_screen(
     data_base_manager: Res<DataBaseManager>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
-    mut layout_slots_query: Query<(&LoaderScreenSlotTag, &mut CustomOnScreenTag, &Children)>,
+    mut loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag, &Children)>,
     mut layout_slot_text_query: Query<&mut Text>,
 ){
-    for screen_slot in all::<LoaderScreenSlot>(){
+    for currently_checked_screen_slot in all::<LoaderScreenSlot>(){
         let index_from_slot = 
             SavedLayoutIndex::from_screen_and_slot(LayoutLoaderScreenAndSlot{
                 screen: displayed_loader_screen_number.0,
-                slot: screen_slot
+                slot: currently_checked_screen_slot
             });
         let optional_layout_to_display =
             data_base_manager.try_get_layout_ref(&index_from_slot);
         if let Err(entity_error) = handle_screen_slot_content_and_visibility(
-            screen_slot,
+            currently_checked_screen_slot,
             optional_layout_to_display,
-            &mut layout_slots_query,
+            &mut loader_screen_actions_query,
             &mut layout_slot_text_query
         ){
             print_entity_related_error(entity_error);
@@ -110,21 +107,30 @@ fn show_currently_displayed_saved_layouts_screen(
 }
 
 fn handle_screen_slot_content_and_visibility(
-    slot: LoaderScreenSlot,
+    currently_checked_screen_slot: LoaderScreenSlot,
     optional_layout_to_display: Option<&DomainBoard>,
-    layout_slots_query: &mut Query<(&LoaderScreenSlotTag, &mut CustomOnScreenTag, &Children)>,
+    loader_screen_actions_query: &mut Query<(&LoaderScreenAction, &mut CustomOnScreenTag, &Children)>,
     layout_slot_text_query: &mut Query<&mut Text>
 ) -> Result<(), EntityRelatedCostumeError>
 {
+    let layout_slots_iter =
+        loader_screen_actions_query.iter_mut().filter_map(
+            |(action, visibility_tag, children)|
+            if let LoaderScreenAction::ChooseLayoutInSlot(slot) = *action {
+                Some((slot, visibility_tag, children))
+            } else {
+                None
+            }
+        );
     if let Some(layout) = optional_layout_to_display{
         for (
-            layout_slot_tag,
+            loader_screen_slot,
             mut layout_slot_on_screen_tag,
             children
         )
-        in layout_slots_query.iter_mut()
+        in layout_slots_iter
         {
-            if layout_slot_tag.0 == slot{
+            if loader_screen_slot == currently_checked_screen_slot{
                 layout_slot_on_screen_tag.on_own_screen_visibility = Some(Visibility::Visible);
                 for child_entity in children.iter(){
                     let layout_slot_text_result =
@@ -140,13 +146,10 @@ fn handle_screen_slot_content_and_visibility(
         Ok(())
     }else{
         for (layout_slot_tag, mut layout_slot_on_screen_tag, _)
-        in layout_slots_query.iter_mut()
+        in layout_slots_iter
         {
-            if layout_slot_tag.0 == slot{
+            if layout_slot_tag == currently_checked_screen_slot{
                 layout_slot_on_screen_tag.on_own_screen_visibility = Some(Visibility::Hidden);
-
-                // println!("visibility tag update ran");
-                
             }
         }
         Ok(())
@@ -156,13 +159,13 @@ fn handle_screen_slot_content_and_visibility(
 fn update_slots_info_after_change(
     data_base_manager: Res<DataBaseManager>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
-    layout_slots_query: Query<(&LoaderScreenSlotTag, &mut CustomOnScreenTag, &Children)>,
+    loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag, &Children)>,
     layout_slot_text_query: Query<&mut Text>,
 ){
     show_currently_displayed_saved_layouts_screen(
         data_base_manager,
         displayed_loader_screen_number,
-        layout_slots_query,
+        loader_screen_actions_query,
         layout_slot_text_query,
     );
 }

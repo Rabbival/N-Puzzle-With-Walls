@@ -111,7 +111,7 @@ fn despawn_unused_tiles_and_clear_tag(
 }
 
 fn spawn_tiles(
-    mut event_listener: EventReader<SpawnTileInLocation>,
+    mut event_reader: EventReader<SpawnTileInLocation>,
     mut commands: Commands,
     sprite_atlas: Res<SpriteAtlas>,
     font: Res<TileTextFont>,
@@ -120,12 +120,12 @@ fn spawn_tiles(
         With<TileDictionaryTag>,
     >,
 ) {
-    if event_listener.is_empty() {
+    if event_reader.is_empty() {
         return;
     }
 
     let mut tile_dictionary_instance = tile_dictionary.single_mut();
-    for spawn_request in event_listener.read() {
+    for spawn_request in event_reader.read() {
         let tile_to_spawn = spawn_request.tile;
         let spawn_location = Vec3::new(spawn_request.location.x, spawn_request.location.y, 0.0);
         let text_spawn_loc_relative = Vec3::Z;

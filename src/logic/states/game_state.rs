@@ -41,10 +41,10 @@ fn toggle_victory(
 }
 
 fn set_game_state_according_to_board_gen_request(
-	mut event_listener: EventReader<BuildNewBoard>,
+	mut event_reader: EventReader<BuildNewBoard>,
 	mut game_state: ResMut<NextState<GameState>>,
 ){
-	for board_gen_request in event_listener.read(){
+	for board_gen_request in event_reader.read(){
 		if board_gen_request.reroll_solved{
 			game_state.set(GameState::PendingSolvedBoardGen);
 		}else{

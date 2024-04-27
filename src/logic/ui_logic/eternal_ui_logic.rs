@@ -15,12 +15,12 @@ impl Plugin for EternalUiLogicPlugin {
 }
 
 fn toggle_menu(
-    mut event_listener: EventReader<ToggleMenu>,
+    mut event_reader: EventReader<ToggleMenu>,
     game_state: Res<State<AppState>>,
     mut next_state: ResMut<NextState<AppState>>,
     applied_board_prop_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
 ) {
-    for _ in event_listener.read() {
+    for _ in event_reader.read() {
         let current_not_menu_state = 
             applied_board_prop_query.single().generation_method.to_app_state();
         match game_state.get() {

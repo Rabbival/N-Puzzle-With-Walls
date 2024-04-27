@@ -16,11 +16,11 @@ impl Plugin for DisplayedLoaderScreenPlugin {
 }
 
 fn listen_to_screen_change_arrows_presses(
-    mut event_listener: EventReader<LoaderScreenActionInitiated>,
+    mut event_reader: EventReader<LoaderScreenActionInitiated>,
     mut displayed_loader_screen_number: ResMut<DisplayedLoaderScreenNumber>,
     data_base_manager: Res<DataBaseManager>,
 ){
-    for loader_screen_action in event_listener.read(){
+    for loader_screen_action in event_reader.read(){
         if let LoaderScreenAction::ChangeScreen(change_request) = 
             loader_screen_action.action
         {

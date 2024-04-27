@@ -9,9 +9,9 @@ impl Plugin for ErrorHandlerPlugin {
 }
 
 pub fn board_generation_error_handler(
-    mut event_listener: EventReader<ShowGenerationError>,
+    mut event_reader: EventReader<ShowGenerationError>,
 ) {
-    for generation_error in event_listener.read() {
+    for generation_error in event_reader.read() {
         print_board_generation_error(generation_error.0);
     }
 }

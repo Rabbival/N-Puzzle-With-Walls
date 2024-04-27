@@ -41,11 +41,11 @@ fn reset_text_above_save_button_when_exiting_game_screen(
 }
 
 fn reset_text_above_save_button_when_timer_is_done(
-    mut text_reset_event_listener: EventReader<ResetTextAboveSaveButton>,
+    mut text_reset_event_reader: EventReader<ResetTextAboveSaveButton>,
     mut text_above_save_button_query: Query<&mut Text, (With<TextAboveSaveButton>, Without<SaveWallsLayoutTextTag>)>,
     mut save_button_text_query: Query<&mut Text, (With<SaveWallsLayoutTextTag>, Without<TextAboveSaveButton>)>,
 ){
-    for _timer_reset in text_reset_event_listener.read(){
+    for _timer_reset in text_reset_event_reader.read(){
         reset_text_above_save_button_inner(
             &mut text_above_save_button_query.single_mut().sections[0],
             &mut save_button_text_query.single_mut().sections[0],
@@ -70,12 +70,12 @@ fn reset_text_above_save_button_inner(
 }
 
 fn show_walls_layout_save_attempt_outcome(
-    mut event_listener: EventReader<LayoutSaveAttemptOutcomeEvent>,
+    mut event_reader: EventReader<LayoutSaveAttemptOutcomeEvent>,
     mut text_above_save_button_query: Query<&mut Text, (With<TextAboveSaveButton>, Without<SaveWallsLayoutTextTag>)>,
     mut save_button_text_query: Query<&mut Text, (With<SaveWallsLayoutTextTag>, Without<TextAboveSaveButton>)>,
     mut commands: Commands,
 ){
-    for layout_attempt_outcome in event_listener.read(){
+    for layout_attempt_outcome in event_reader.read(){
         let save_button_text_new_color;
         let text_above_button_new_color;
         let save_button_reset_timer;

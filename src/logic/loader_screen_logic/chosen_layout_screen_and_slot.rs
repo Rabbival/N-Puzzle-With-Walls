@@ -8,12 +8,28 @@ pub struct ChosenLayoutScreenAndSlotPlugin;
 impl Plugin for ChosenLayoutScreenAndSlotPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ChosenLayoutScreenAndSlot>()
-            .add_systems(Update, (
+            .add_systems(Update, ((
                     listen_for_successful_save_to_db,
                     listen_for_successful_removal_from_db,
                     listen_for_successful_db_clear
-                ).in_set(InputSystemSets::InitialChanges)
-            );
+                ).in_set(InputSystemSets::InitialChanges),
+                listen_for_new_layout_picks.in_set(InputSystemSets::InputHandling)
+            ));
+    }
+}
+
+fn listen_for_new_layout_picks(
+    mut event_reader: EventReader<LoaderScreenActionInitiated>,
+    currently_displayed_loader_screen: Res<DisplayedLoaderScreenNumber>,
+    mut chosen_layout_screen_and_slot: ResMut<ChosenLayoutScreenAndSlot>
+){
+    for loader_action in event_reader.read(){
+        if let LoaderScreenAction::ChooseLayoutInSlot(loader_slot) = loader_action.action{
+            chosen_layout_screen_and_slot.0 = Some(LayoutLoaderScreenAndSlot{
+                screen: currently_displayed_loader_screen.0,
+                slot: loader_slot
+            });
+        }
     }
 }
 

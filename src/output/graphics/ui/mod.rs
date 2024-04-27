@@ -82,10 +82,10 @@ fn update_button_color(
 }
 
 fn reset_color_for_button_text(
-    mut event_listener: EventReader<DismissIrrelevantAlerts>,
+    mut event_reader: EventReader<DismissIrrelevantAlerts>,
     mut button_text_query: Query<&mut Text, With<ButtonText>>,
 ) {
-    for _ in event_listener.read() {
+    for _ in event_reader.read() {
         for mut button_text in button_text_query.iter_mut() {
             let button_text_color = &mut button_text.sections[0].style.color;
             if *button_text_color != NORMAL_TEXT_COLOR {
