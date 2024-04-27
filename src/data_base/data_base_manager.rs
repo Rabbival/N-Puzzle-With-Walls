@@ -73,6 +73,7 @@ fn determine_board_quality(parsed_domain_board: &DomainBoard) -> BoardQuality{
 }
 
 fn save_to_data_base_and_system(
+	mut event_writer: EventWriter<SuccessSavingToDB>,
 	mut event_listener: EventReader<SaveToDB>,
 	mut db_manager: ResMut<DataBaseManager>
 ){
@@ -86,19 +87,24 @@ fn save_to_data_base_and_system(
 			layout_content_string
 		).unwrap();
 
-		db_manager.as_mut().insert_layout(&save_request.0);
+		let index_saved_to = db_manager.as_mut().insert_layout(&save_request.0);
+		event_writer.send(SuccessSavingToDB(index_saved_to));
 	}
 }
 
 fn remove_from_data_base_and_system(
+	mut event_writer: EventWriter<SuccessRemovingFromDB>,
 	mut event_listener: EventReader<RemoveFromDB>,
 	mut db_manager: ResMut<DataBaseManager>
 ){
 	for removal_request in event_listener.read(){
-		if let Err(system_access_error) =
-			remove_from_data_base_and_system_inner(&removal_request.0, db_manager.as_mut())
-		{
-			print_system_access_error(system_access_error);
+		match remove_from_data_base_and_system_inner(&removal_request.0, db_manager.as_mut()){
+			Err(system_access_error) => {
+				print_system_access_error(system_access_error);
+			},
+			Ok(_) => {
+				event_writer.send(SuccessRemovingFromDB(removal_request.0));
+			}
 		}
 	}
 }
@@ -125,15 +131,17 @@ fn remove_from_data_base_and_system_inner(
 }
 
 fn listen_to_db_clearing_request(
+	mut event_writer: EventWriter<SuccessClearingDB>,
 	mut event_listener: EventReader<ClearDB>,
 	db_manager: ResMut<DataBaseManager>
 ){
-	if let Err(system_access_error) =
-		listen_to_db_clearing_request_inner(
-			&mut event_listener,
-			db_manager
-		){
-		print_system_access_error(system_access_error);
+	match listen_to_db_clearing_request_inner(&mut event_listener, db_manager){
+		Err(system_access_error) => {
+			print_system_access_error(system_access_error);
+		},
+		Ok(_) => {
+			event_writer.send(SuccessClearingDB);
+		}
 	}
 }
 
@@ -164,11 +172,12 @@ fn listen_to_db_clearing_request_inner(
 }
 
 impl DataBaseManager{
-	pub fn insert_layout(&mut self, layout: &DomainBoard){
+	pub fn insert_layout(&mut self, layout: &DomainBoard) -> SavedLayoutIndex{
 		let index = self.saved_layouts.partition_point(|saved_layout| 
 			saved_layout.board_name < layout.board_name
 		);
 		self.saved_layouts.insert(index, layout.clone());
+		SavedLayoutIndex(index)
 	}
 
 	pub fn remove_layout_by_index(&mut self, index: &SavedLayoutIndex) -> Option<DomainBoard>{

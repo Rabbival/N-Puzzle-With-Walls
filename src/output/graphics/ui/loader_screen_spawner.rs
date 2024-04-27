@@ -69,7 +69,7 @@ fn spawn_bottom_line(
                             background_color: NORMAL_BUTTON_COLOR.into(),
                             ..default()
                         },
-                        LoaderScreenAction::JumpToChosenLayout(None)
+                        LoaderScreenAction::JumpToChosenLayoutPage(None)
                     ))
                     .with_children(|parent| {
                         parent.spawn((TextBundle::from_section(

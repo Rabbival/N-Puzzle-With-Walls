@@ -49,14 +49,17 @@ fn update_chosen_visuals_and_bottom_line_functionality(
         let mut chosen_layout_text = chosen_layout_text_query.single_mut();
         let updated_optional_index;
         let updated_layout_name;
+        let updated_page_number;
         if let Some(board_ref) = new_chosen_ref_value{
             chosen_layout_text.sections[0].value = String::from("chosen: ") + &board_ref.board_name;
             updated_optional_index = Some(calculate_db_index);
             updated_layout_name = DomainBoardName(board_ref.board_name.clone());
+            updated_page_number = Some(chosen_layout_screen_and_slot.screen)
         }else{
             chosen_layout_text.sections[0].value = String::from("no chosen board");
             updated_optional_index = None;
             updated_layout_name = DomainBoardName(String::new());
+            updated_page_number = None;
         }
         
         
@@ -72,8 +75,8 @@ fn update_chosen_visuals_and_bottom_line_functionality(
                         *optional_tuple = Some((updated_layout_name.clone(), updated_optional_index.unwrap()));
                     }
                 },
-                LoaderScreenAction::JumpToChosenLayout(optional_index) => {
-                    *optional_index = updated_optional_index;
+                LoaderScreenAction::JumpToChosenLayoutPage(optional_index) => {
+                    *optional_index = updated_page_number;
                 },
                 _ => {}
             }
