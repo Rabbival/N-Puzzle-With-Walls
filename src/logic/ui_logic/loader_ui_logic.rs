@@ -16,6 +16,7 @@ impl Plugin for LoaderUiLogicPlugin {
             )
             .add_systems(
                 Update,(
+                    listen_to_jump_to_page_requests.in_set(InputSystemSets::InputHandling),
                     (
                         update_slots_info_after_change.run_if(resource_changed::<DataBaseManager>
                                 .or_else(resource_changed::<DisplayedLoaderScreenNumber>)),
@@ -28,6 +29,19 @@ impl Plugin for LoaderUiLogicPlugin {
                         .or_else(resource_changed::<DisplayedLoaderScreenNumber>))
                 )
             );
+    }
+}
+
+fn listen_to_jump_to_page_requests(
+    mut event_reader: EventReader<LoaderScreenActionInitiated>,
+    mut displayed_loader_screen_number: ResMut<DisplayedLoaderScreenNumber>,
+){
+    for event in event_reader.read(){
+        if let LoaderScreenAction::JumpToChosenLayoutScreen(optional_screen) = event.action{
+            if let Some(screen_number) = optional_screen{
+                displayed_loader_screen_number.0 = screen_number;
+            }
+        }
     }
 }
 
@@ -118,7 +132,7 @@ fn update_bottom_line_to_fit_new_chosen(
                     *optional_tuple = Some((updated_layout_name.clone(), updated_optional_index.unwrap()));
                 }
             },
-            LoaderScreenAction::JumpToChosenLayoutPage(optional_index) => {
+            LoaderScreenAction::JumpToChosenLayoutScreen(optional_index) => {
                 *optional_index = updated_page_number;
             },
             _ => {}

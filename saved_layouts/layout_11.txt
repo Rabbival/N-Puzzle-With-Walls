@@ -1,0 +1,32 @@
+(
+    board_name: "layout_11",
+    board_props: (
+        size: Giant,
+        wall_count: 5,
+        empty_count: 1,
+        generation_method: Auto,
+        tree_traveller_type: BFS,
+    ),
+    wall_locations: [
+        (
+            row: 0,
+            col: 0,
+        ),
+        (
+            row: 9,
+            col: 0,
+        ),
+        (
+            row: 3,
+            col: 0,
+        ),
+        (
+            row: 9,
+            col: 3,
+        ),
+        (
+            row: 6,
+            col: 4,
+        ),
+    ],
+)

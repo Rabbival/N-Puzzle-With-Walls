@@ -5,6 +5,6 @@ pub enum LoaderScreenAction {
     ChangeScreen(ScreenChangeRequestType),
     WarnBeforeDeletion(AreYouSureMessageType),
     GenerateBoard(Option<SavedLayoutIndex>),
-    JumpToChosenLayoutPage(Option<usize>),
+    JumpToChosenLayoutScreen(Option<usize>),
     ChooseLayoutInSlot(LoaderScreenSlot)
 }
