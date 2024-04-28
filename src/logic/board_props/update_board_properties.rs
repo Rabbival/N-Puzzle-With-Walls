@@ -175,7 +175,7 @@ pub fn set_applied_props_and_exit_menu(
             match applied_props.generation_method{
                 BoardGenerationMethod::Auto => {
                     spawn_board_event_writer.send(BuildNewBoard {
-                        reroll_solved: true,
+                        build_new_solved_board: true,
                     });
                 },
                 // only board generation can fail (and force us to stay in the menu screen)

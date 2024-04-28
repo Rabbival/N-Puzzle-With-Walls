@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-pub struct BoardEntitiesSpawnerPlugin;
+pub struct SolvedAndGameBoardSpawnerPlugin;
 
-impl Plugin for BoardEntitiesSpawnerPlugin {
+impl Plugin for SolvedAndGameBoardSpawnerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PreStartup, spawn_deafult_boards);
     }

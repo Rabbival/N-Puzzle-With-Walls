@@ -8,10 +8,12 @@ impl Plugin for KeyboardInputHandlerPlugin {
             Update,
             (
                 (
-                    move_tiles_with_keyboard.run_if(in_state(AppState::Game)),
+                    (
+                        move_tiles_with_keyboard,
+                        listen_for_board_reset,
+                    ).run_if(in_state(AppState::Game)),
                     move_between_loader_screens.run_if(in_state(AppState::Loader)),
                     close_are_you_sure_message,
-                    listen_for_reset,
                     open_menu,
 
 
@@ -90,14 +92,13 @@ fn close_are_you_sure_message(
     }
 }
 
-/// resets the solved board if shift is pressed too
-fn listen_for_reset(
+fn listen_for_board_reset(
     mut input_event_writer: EventWriter<BuildNewBoard>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyR) {
-        let reroll_solved = keyboard_input.pressed(KeyCode::ShiftLeft);
-        input_event_writer.send(BuildNewBoard { reroll_solved });
+        let build_new_solved_board = keyboard_input.pressed(KeyCode::ShiftLeft);
+        input_event_writer.send(BuildNewBoard { build_new_solved_board });
     }
 }
 

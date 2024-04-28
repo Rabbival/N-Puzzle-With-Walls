@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// mustn't be more than 2 as there will always be a corner
-/// shouldn't be less than 1 or we might get useless spaces
+/// shouldn't be less than 1, or we might get useless spaces
 const MIN_NEIGHBORS: u8 = 2;
 
 const SOLVED_BOARD_WITH_WALLS_MAX_GENERATION_ATTEMPTS: u8 = 20;
@@ -49,15 +49,20 @@ pub fn generate_solved_board_inner(
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut solved_board = TileBoard::new(grid_side_length);
     let grid_side_length_u32 = grid_side_length as u32;
-    let mut wall_locations = vec![];
-
-    if applied_props.wall_count > 0 {
-        determine_wall_locations(
-            applied_props,
-            &mut wall_locations,
-            &mut solved_board
-        )?;
+    
+    if applied_props.generation_method == BoardGenerationMethod::Auto {
+        let mut new_wall_locations= vec![];
+        if applied_props.wall_count > 0 {
+            determine_wall_locations(
+                applied_props,
+                &mut new_wall_locations
+            )?;
+        }
+        current_board_wall_locations_ref.0 = new_wall_locations;
     }
+
+    wrap_if_error
+        (&spawn_walls_in_locations(&current_board_wall_locations_ref.0, &mut solved_board))?;
 
     spawn_empty_tiles(
         applied_props,
@@ -73,7 +78,6 @@ pub fn generate_solved_board_inner(
     solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;
     solved_board.index_all_tile_types();
     solved_board.ignore_player_input = true;
-    current_board_wall_locations_ref.0 = wall_locations;
     Ok(solved_board)
 }
 
@@ -120,7 +124,6 @@ fn spawn_numbered_uninitialized_tiles(
 fn determine_wall_locations(
     applied_props: &BoardProperties,
     wall_locations: &mut Vec<GridLocation>,
-    solved_board: &mut TileBoard
 ) -> Result<(), BoardGenerationError>
 {
     let mut wall_location_determination_attempt = 1;
@@ -138,8 +141,6 @@ fn determine_wall_locations(
         },
         Err(wall_location_finding_error) => return Err(wall_location_finding_error)
     }
-    wrap_if_error
-        (&spawn_walls_in_locations(wall_locations, solved_board))?;
     Ok(())
 }
 
@@ -210,7 +211,7 @@ fn determine_wall_location(
             *neighbor_value -= 1;
 
             // if a neighbor of the chosen location got to the threshold
-            // we can't put walls near it or it'll go below threshold
+            // we can't put walls near it, or it'll go below threshold
             if *neighbor_value == MIN_NEIGHBORS {
                 forbid_spawn_in_neighbors_of_location(
                     &neighbor_location,

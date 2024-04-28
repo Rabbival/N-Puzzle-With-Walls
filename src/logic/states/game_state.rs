@@ -45,7 +45,7 @@ fn set_game_state_according_to_board_gen_request(
 	mut game_state: ResMut<NextState<GameState>>,
 ){
 	for board_gen_request in event_reader.read(){
-		if board_gen_request.reroll_solved{
+		if board_gen_request.build_new_solved_board{
 			game_state.set(GameState::PendingSolvedBoardGen);
 		}else{
 			game_state.set(GameState::SolvedBoardGenerated);

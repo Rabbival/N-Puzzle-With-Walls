@@ -21,7 +21,7 @@ fn listen_for_victory_button_press(
 		match button_event.action{
 			VictoryButtonAction::ResetBoard => {
 				spawn_board_event_writer.send(BuildNewBoard {
-					reroll_solved: false,
+					build_new_solved_board: false,
 				});
 			}
 		}

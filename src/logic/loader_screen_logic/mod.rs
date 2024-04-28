@@ -2,6 +2,7 @@ pub mod displayed_loader_screen;
 pub mod loader_screen_layout_text_tag;
 pub mod layout_loader_screen_and_slot;
 pub mod chosen_layout_screen_and_slot;
+pub mod game_starter_from_loader;
 
 use crate::prelude::*;
 
@@ -11,7 +12,8 @@ impl Plugin for LoaderScreenLogicPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
             DisplayedLoaderScreenPlugin,
-            ChosenLayoutScreenAndSlotPlugin
+            ChosenLayoutScreenAndSlotPlugin,
+            GameStarterFromLoaderPlugin
         ));
     }
 }

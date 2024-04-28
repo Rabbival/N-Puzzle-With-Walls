@@ -44,7 +44,7 @@ pub mod prelude {
     };
     pub use crate::logic::{
         board_building::{
-            board_builder::*, board_entities_spawner::*, BoardBuildingPlugin,
+            board_builder::*, solved_and_game_boards_spawner::*, BoardBuildingPlugin,
             brute_force_builder::*, permutation_builder::*, solved_board_builder::*,
             wall_placement_validator::*,
         },
@@ -89,7 +89,7 @@ pub mod prelude {
         loader_screen_logic::{
             displayed_loader_screen::*, layout_loader_screen_and_slot::*,
             loader_screen_layout_text_tag::*, LoaderScreenLogicPlugin,
-            chosen_layout_screen_and_slot::*,
+            chosen_layout_screen_and_slot::*, game_starter_from_loader::*,
         },
         states::{app_state::*, game_state::*, StatePlugin},
         tile::*,

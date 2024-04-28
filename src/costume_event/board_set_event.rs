@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Event, Default)]
 pub struct BuildNewBoard {
-    pub reroll_solved: bool,
+    pub build_new_solved_board: bool,
 }
 
 #[derive(Event, Default)]
