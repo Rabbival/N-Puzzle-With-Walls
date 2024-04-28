@@ -127,6 +127,7 @@ fn spawn_bottom_line(
 
 fn spawn_layout_slots_to_choose_from(
     mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
+    sprite_atlas: Res<SpriteAtlas>, //TODO: replace with real images Vec
     mut commands: Commands,
 ){
     for spawn_request in spawn_event_reader.read() {
@@ -153,12 +154,14 @@ fn spawn_layout_slots_to_choose_from(
                 spawn_layout_entity(
                     parent,
                     spawn_request,
-                    LoaderScreenSlot::TopLeft
+                    LoaderScreenSlot::TopLeft,
+                    sprite_atlas.image_handle.clone()
                 );
                 spawn_layout_entity(
                     parent,
                     spawn_request,
-                    LoaderScreenSlot::TopRight
+                    LoaderScreenSlot::TopRight,
+                    sprite_atlas.image_handle.clone()
                 );
             });
             //second row
@@ -173,12 +176,14 @@ fn spawn_layout_slots_to_choose_from(
                 spawn_layout_entity(
                     parent,
                     spawn_request,
-                    LoaderScreenSlot::BottomLeft
+                    LoaderScreenSlot::BottomLeft,
+                    sprite_atlas.image_handle.clone()
                 );
                 spawn_layout_entity(
                     parent,
                     spawn_request,
-                    LoaderScreenSlot::BottomRight
+                    LoaderScreenSlot::BottomRight,
+                    sprite_atlas.image_handle.clone()
                 );
             });
         });
@@ -188,30 +193,31 @@ fn spawn_layout_slots_to_choose_from(
 fn spawn_layout_entity(
     parent: &mut ChildBuilder,
     spawn_request: &SpawnTextsAndButtons,
-    loader_screen_slot: LoaderScreenSlot
+    loader_screen_slot: LoaderScreenSlot,
+    image_handle: Handle<Image>
 ){
     parent.spawn(NodeBundle {
         style: Style {
-            flex_direction: FlexDirection::Row,
             align_items: AlignItems::Center,
             margin: LAYOUT_MARGINS_RECT,
             ..default()
         },
         ..default()
     }).with_children(|parent| {
-        let mut layout_entity = parent.spawn((
+        let mut layout_button_entity = parent.spawn((
             ButtonBundle {
                 style: spawn_request.board_props_button_style.clone(),
                 background_color: super::NORMAL_BUTTON_COLOR.into(),
                 ..default()
             },
+            //ImagedButtonTag,
             LoaderScreenAction::ChooseLayoutInSlot(loader_screen_slot),
             CustomOnScreenTag{
                 screen: AppState::Loader,
                 on_own_screen_visibility: Some(Visibility::Hidden)
             }
         ));
-        layout_entity.with_children(|parent| {
+        layout_button_entity.with_children(|parent| {
             parent.spawn((
                 TextBundle::from_section(
                     DomainBoard::default().to_string_for_button(),
@@ -220,7 +226,22 @@ fn spawn_layout_entity(
                 ButtonText,
             ));
         });
-        //TODO: .with_children for the layout preview
+        layout_button_entity.with_children(|parent|{
+           parent.spawn((
+                NodeBundle{
+                    style: Style {
+                        width: Val::Percent(90.0),
+                        height: Val::Percent(90.0),
+                        flex_direction: FlexDirection::Row,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    background_color: Color::WHITE.into(),
+                    ..default()
+                },
+               UiImage::new(image_handle)
+            )); 
+        });
     });
 }
 

@@ -144,10 +144,13 @@ pub mod prelude {
                     victory_message::*,
                 },
                 save_walls_layout_button_spawner::*,
+                set_color_to_imaged_normal,
+                set_color_to_imaged_pressed,
                 set_color_to_normal,
                 set_color_to_pressed,
                 set_text_section_value_and_color,
-                UiGraphicsPlugin
+                UiGraphicsPlugin,
+                ImagedButtonTag
             },
             visibility_tags::{
                 custom_on_screen_tag::*,

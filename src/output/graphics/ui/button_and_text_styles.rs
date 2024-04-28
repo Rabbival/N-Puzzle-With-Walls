@@ -18,7 +18,8 @@ pub fn button_and_text_styles_emitter(
         width: Val::Px(240.0),
         height: Val::Px(240.0),
         justify_content: JustifyContent::Center,
-        align_items: AlignItems::Start,
+        align_items: AlignItems::Center,
+        flex_direction: FlexDirection::Column,
         ..default()
     };
     let big_button_style = Style {

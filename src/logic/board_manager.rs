@@ -112,7 +112,7 @@ fn check_if_solved(
 }
 
 /// I don't use it automatically inside the get set etc functions
-/// since it they might have nothing to do with moving tiles
+/// since they might have nothing to do with moving tiles
 fn wrap_if_error<T>(result: Result<T, GridError>)
 -> Result<T, TileMoveError>{
     match result {

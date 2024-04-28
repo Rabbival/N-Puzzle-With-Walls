@@ -9,12 +9,20 @@ pub mod loader_screen_spawner;
 
 pub const NORMAL_BUTTON_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const HOVERED_BUTTON_COLOR: Color = Color::rgb(0.2, 0.2, 0.2);
-pub const HOVERED_PRESSED_BUTTON_COLOR_COLOR: Color = Color::rgb(0.3, 0.3, 0.3);
+pub const HOVERED_PRESSED_BUTTON_COLOR: Color = Color::rgb(0.3, 0.3, 0.3);
 pub const PRESSED_BUTTON_COLOR: Color = Color::rgb(0.3, 0.3, 0.3);
 
 pub const NORMAL_TEXT_COLOR: Color = Color::WHITE;
 pub const RED_TEXT_COLOR: Color = Color::ORANGE_RED;
 pub const GREEN_TEXT_COLOR: Color = Color::LIME_GREEN;
+
+#[derive(Component)]
+pub struct ImagedButtonTag;
+pub const NORMAL_IMAGED_BUTTON_COLOR: Color = Color::rgb(0.6, 0.6, 0.6);
+pub const HOVERED_IMAGED_BUTTON_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
+pub const HOVERED_PRESSED_IMAGED_BUTTON_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
+pub const PRESSED_IMAGED_BUTTON_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
+
 
 
 #[derive(Component)]
@@ -67,16 +75,41 @@ fn update_button_color(
             &Interaction,
             &mut BackgroundColor,
             Option<&SelectedOptionTag>,
+            Option<&ImagedButtonTag>,
         ),
         (Changed<Interaction>, With<Button>),
     >,
 ) {
-    for (interaction, mut color, selected) in &mut interaction_query {
+    for (interaction, mut color, selected, imaged) in &mut interaction_query {
         *color = match (*interaction, selected) {
-            (Interaction::Pressed, _) | (Interaction::None, Some(_)) => PRESSED_BUTTON_COLOR.into(),
-            (Interaction::Hovered, Some(_)) => HOVERED_PRESSED_BUTTON_COLOR_COLOR.into(),
-            (Interaction::Hovered, None) => HOVERED_BUTTON_COLOR.into(),
-            (Interaction::None, None) => NORMAL_BUTTON_COLOR.into(),
+            (Interaction::Pressed, _) | (Interaction::None, Some(_)) => {
+                if imaged.is_some(){
+                    PRESSED_IMAGED_BUTTON_COLOR.into()
+                }else{
+                    PRESSED_BUTTON_COLOR.into()
+                }
+            },
+            (Interaction::Hovered, Some(_)) => {
+                if imaged.is_some(){
+                    HOVERED_PRESSED_IMAGED_BUTTON_COLOR.into()
+                }else{
+                    HOVERED_PRESSED_BUTTON_COLOR.into()
+                }
+            },
+            (Interaction::Hovered, None) => {
+                if imaged.is_some(){
+                    HOVERED_IMAGED_BUTTON_COLOR.into()
+                }else{
+                    HOVERED_BUTTON_COLOR.into()
+                }
+            },
+            (Interaction::None, None) => {
+                if imaged.is_some(){
+                    NORMAL_IMAGED_BUTTON_COLOR.into()
+                }else{
+                    NORMAL_BUTTON_COLOR.into()
+                }
+            },
         }
     }
 }
@@ -93,6 +126,14 @@ fn reset_color_for_button_text(
             }
         }
     }
+}
+
+pub fn set_color_to_imaged_normal(background_color: &mut BackgroundColor) {
+    *background_color = NORMAL_IMAGED_BUTTON_COLOR.into();
+}
+
+pub fn set_color_to_imaged_pressed(background_color: &mut BackgroundColor) {
+    *background_color = PRESSED_IMAGED_BUTTON_COLOR.into();
 }
 
 pub fn set_color_to_normal(background_color: &mut BackgroundColor) {
