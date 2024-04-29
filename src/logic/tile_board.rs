@@ -23,7 +23,7 @@ impl TileBoard {
         }
     }
 
-    /// declares empty tiles' locations as last avaliable from the end
+    /// declares empty tiles' locations as last available from the end
     pub fn from_grid(
         grid: &Grid<Tile>,
         empty_tiles_count: u8,
@@ -36,6 +36,12 @@ impl TileBoard {
         newborn_self.empty_locations_to_solved_default(empty_tiles_count)?;
         Ok(newborn_self)
     }
+    
+    pub fn try_from_domain_board(domain_board: &DomainBoard) -> Result<Self, GridError>{
+        let mut newborn_self = Self::new(domain_board.board_props.size.to_grid_side_length());
+        newborn_self.spawn_walls_in_locations(&domain_board.wall_locations)?;
+        Ok(newborn_self)
+    }
 
     /// looks for the empty tiles in the grid
     pub fn new(grid_side_length: u8) -> Self {
@@ -45,6 +51,10 @@ impl TileBoard {
             ignore_player_input: true,
         }
     }
+}
+
+//creation helpers
+impl TileBoard{
 
     /// inserts empties without indexing them in the available (meaning not wall) locations from the end
     pub fn empty_locations_to_solved_default(
@@ -63,8 +73,8 @@ impl TileBoard {
         let mut empty_tile_locations = vec![];
         let mut reversed_iter = self.iter_filtered().rev();
         for _empty_tile in 0..empty_tiles_count {
-            let next_from_last_avaliable = reversed_iter.next();
-            match next_from_last_avaliable {
+            let next_from_last_available = reversed_iter.next();
+            match next_from_last_available {
                 Some((tile_location, _tile)) => empty_tile_locations.push(tile_location),
                 None => return Err(BoardGenerationError::NotEnoughAvailableSpots),
             };
@@ -72,6 +82,53 @@ impl TileBoard {
         // we want them to appear in the same order they're indexed
         empty_tile_locations.reverse();
         Ok(empty_tile_locations)
+    }
+    
+    pub fn spawn_walls_in_locations(&mut self, locations: &Vec<GridLocation>) 
+        -> Result<(), GridError>
+    {
+        for location in locations {
+            self.set(location, Tile::new(TileType::Wall))?;
+        }
+        Ok(())
+    }
+
+    pub fn spawn_empty_tiles(
+        &mut self,
+        applied_props: &BoardProperties,
+        grid_side_length_u32: &u32,
+    ) -> Result<(), GridError>
+    {
+        let mut empty_tile_counter = applied_props.empty_count;
+        'outer_for: for i in (0..*grid_side_length_u32).rev() {
+            for j in (0..*grid_side_length_u32).rev() {
+                let location = GridLocation::new(i as i32, j as i32);
+                if self.tiletype_in_location(&location)?.is_none() {
+                    self.set(&location, Tile::new(TileType::Empty))?;
+                    empty_tile_counter -= 1;
+                    if empty_tile_counter == 0 {
+                        break 'outer_for;
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub fn spawn_numbered_uninitialized_tiles(
+        &mut self,
+        grid_side_length_u32: &u32,
+    ) -> Result<(), GridError>
+    {
+        for i in 0..*grid_side_length_u32 {
+            for j in 0..*grid_side_length_u32 {
+                let location = GridLocation::new(i as i32, j as i32);
+                if self.tiletype_in_location(&location)?.is_none() {
+                    self.set(&location, Tile::new(TileType::Numbered))?
+                }
+            }
+        }
+        Ok(())
     }
 }
 
@@ -133,7 +190,7 @@ impl TileBoard {
         }
     }
 
-    pub fn tiletype_in_location(&self, location: &GridLocation) 
+    fn tiletype_in_location(&self, location: &GridLocation) 
     -> Result<Option<TileType>, GridError>
     {
         match self.get(location)?{

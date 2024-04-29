@@ -15,6 +15,7 @@ fn listen_for_save_requests(
     mut event_reader: EventReader<SaveWallsLayoutButtonPressed>,
     mut write_to_db_event_writer: EventWriter<SaveToDB>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
+    domain_boards_query: Query<&DomainBoard>,
     current_board_wall_locations: Res<CurrentBoardWallLocations>,
     db_manager: Res<DataBaseManager>
 ){
@@ -26,8 +27,8 @@ fn listen_for_save_requests(
         }
         else{
             let wall_locations = current_board_wall_locations.0.clone();
-            if let Some(existing_board_name) = board_exists_in_db(
-                saved_layout_reference,
+            if let Some(existing_board_name) = domain_board_exists_in_db(
+                &domain_boards_query,
                 &applied_board_props_query.single().size,
                 &wall_locations
             ){
@@ -44,15 +45,15 @@ fn listen_for_save_requests(
     }
 }
 
-fn board_exists_in_db(
-    saved_layouts: &Vec<DomainBoard>,
+fn domain_board_exists_in_db(
+    domain_boards_query: &Query<&DomainBoard>,
     new_board_size: &BoardSize,
     new_wall_locations: &Vec<GridLocation>
 ) -> Option<ExistingWallLayoutName> {
-    for saved_layout in saved_layouts{
-        if saved_layout.board_props.size == *new_board_size
-            && *new_wall_locations == saved_layout.wall_locations {
-            return Some(ExistingWallLayoutName(saved_layout.board_name.clone()));
+    for domain_board in domain_boards_query.iter(){
+        if domain_board.board_props.size == *new_board_size
+            && *new_wall_locations == domain_board.wall_locations {
+            return Some(ExistingWallLayoutName(domain_board.board_name.0.clone()));
         }
     }
     None

@@ -15,7 +15,7 @@ pub mod prelude {
     pub use bevy::{prelude::*, utils::HashMap};
 
     pub use crate::app::*;
-    pub use crate::bundles::tile_bundle::*;
+    pub use crate::bundles::{tile_bundle::*, saved_layout_bundle::*};
     pub use crate::costume_event::{
         app_event::*, board_set_event::*, db_event::*, EventPlugin,
         game_event::*, move_tile_event::*, screen_changing_event::*, system_event::*,
@@ -119,7 +119,7 @@ pub mod prelude {
                 MismatchError,
                 system_access_error::*,
                 tile_move_error::*,
-                board_loading_error::*,
+                data_base_error::*,
             },
             costume_print::{
                 BevyPrintType,

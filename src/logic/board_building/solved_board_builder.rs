@@ -61,64 +61,14 @@ pub fn generate_solved_board_inner(
         current_board_wall_locations_ref.0 = new_wall_locations;
     }
 
-    wrap_if_error
-        (&spawn_walls_in_locations(&current_board_wall_locations_ref.0, &mut solved_board))?;
-
-    spawn_empty_tiles(
-        applied_props,
-        &grid_side_length_u32,
-        &mut solved_board,
-    )?;
-
-    spawn_numbered_uninitialized_tiles(
-        &grid_side_length_u32,
-        &mut solved_board,
-    )?;
+    wrap_if_error(&solved_board.spawn_walls_in_locations(&current_board_wall_locations_ref.0))?;
+    wrap_if_error(&solved_board.spawn_empty_tiles(applied_props, &grid_side_length_u32))?;
+    wrap_if_error(&solved_board.spawn_numbered_uninitialized_tiles(&grid_side_length_u32))?;
 
     solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;
     solved_board.index_all_tile_types();
     solved_board.ignore_player_input = true;
     Ok(solved_board)
-}
-
-fn spawn_empty_tiles(
-    applied_props: &BoardProperties,
-    grid_side_length_u32: &u32,
-    solved_board: &mut TileBoard
-) -> Result<(), BoardGenerationError>
-{
-    let mut empty_tile_counter = applied_props.empty_count;
-    'outer_for: for i in (0..*grid_side_length_u32).rev() {
-        for j in (0..*grid_side_length_u32).rev() {
-            let location = GridLocation::new(i as i32, j as i32);
-            if wrap_if_error(&solved_board.tiletype_in_location(&location))?.is_none() {
-                wrap_if_error
-                    (&solved_board.set(&location, Tile::new(TileType::Empty)))?;
-                empty_tile_counter -= 1;
-                if empty_tile_counter == 0 {
-                    break 'outer_for;
-                }
-            }
-        }
-    }
-    Ok(())
-}
-
-fn spawn_numbered_uninitialized_tiles(
-    grid_side_length_u32: &u32,
-    solved_board: &mut TileBoard
-) -> Result<(), BoardGenerationError>
-{
-    for i in 0..*grid_side_length_u32 {
-        for j in 0..*grid_side_length_u32 {
-            let location = GridLocation::new(i as i32, j as i32);
-            if wrap_if_error(&solved_board.tiletype_in_location(&location))?.is_none() {
-                wrap_if_error
-                    (&solved_board.set(&location, Tile::new(TileType::Numbered)))?
-            }
-        }
-    }
-    Ok(())
 }
 
 fn determine_wall_locations(
@@ -341,15 +291,6 @@ fn forbid_spawn_in_neighbors_of_location(
             possible_spawn_locations,
         );
     }
-}
-
-fn spawn_walls_in_locations(locations: &Vec<GridLocation>, board: &mut TileBoard)
--> Result<(), GridError>
-{
-    for location in locations {
-        board.set(location, Tile::new(TileType::Wall))?;
-    }
-    Ok(())
 }
 
 fn wrap_if_error<T: Copy>(result: &Result<T, GridError>)

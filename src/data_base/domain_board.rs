@@ -3,11 +3,11 @@ use std::fmt::Formatter;
 use serde::{Deserialize, Serialize};
 use crate::prelude::*;
 
-#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[derive(Component, Debug, Clone, Default, Deserialize, Serialize)]
 pub struct DomainBoard{
 	/// note that this is not necessarily the name of the file, 
 	/// but it is the name that'll be given to the file by default
-	pub board_name: String,
+	pub board_name: DomainBoardName,
 	pub board_props: BoardProperties,
 	pub wall_locations: Vec<GridLocation>
 }
@@ -17,7 +17,7 @@ impl DomainBoard{
 		let props = self.board_props;
 		
 		let mut string_for_button = String::from("'");
-		string_for_button += &self.board_name.clone();
+		string_for_button += &self.board_name.to_string();
 		string_for_button += "'\n";
 		string_for_button += &props.size.to_string();
 		string_for_button += ", Gen: ";
@@ -39,7 +39,7 @@ impl DomainBoard{
 impl fmt::Display for DomainBoard{
 	fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
 		fmt.write_str("DomainBoard(board_name: ")?;
-		fmt.write_str(&self.board_name)?;
+		fmt.write_str(&self.board_name.to_string())?;
 		fmt.write_str(", board_props: ")?;
 		fmt.write_str(&self.board_props.to_string())?;
 		fmt.write_str(", wall_locations:")?;

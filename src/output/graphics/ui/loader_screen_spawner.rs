@@ -210,7 +210,6 @@ fn spawn_layout_entity(
                 background_color: super::NORMAL_BUTTON_COLOR.into(),
                 ..default()
             },
-            //ImagedButtonTag,
             LoaderScreenAction::ChooseLayoutInSlot(loader_screen_slot),
             CustomOnScreenTag{
                 screen: AppState::Loader,
