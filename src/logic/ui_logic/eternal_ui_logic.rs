@@ -6,12 +6,32 @@ pub struct EternalUiLogicPlugin;
 
 impl Plugin for EternalUiLogicPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
+        app
+            .add_systems(
+                OnExit(AppState::Menu),
+                toggle_menu_button
+            )
+            .add_systems(
+                OnEnter(AppState::Menu),
+                (
+                    toggle_menu_button,
+                )
+            )
+            .add_systems(
             Update,
             (toggle_menu, listen_for_app_close_request)
                 .in_set(InputSystemSets::InitialChanges),
         );
     }
+}
+
+fn toggle_menu_button(
+    mut button_toggle_event_writer: EventWriter<ToggleButton>,
+    menu_toggle_button_entity: Query<Entity, With<MenuToggleButton>>,
+){
+    button_toggle_event_writer.send(ToggleButton {
+        entity: menu_toggle_button_entity.single(),
+    });
 }
 
 fn toggle_menu(

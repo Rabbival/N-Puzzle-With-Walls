@@ -1,9 +1,8 @@
+use crate::logic::enums::board_building_request::BoardBuildingRequest;
 use crate::prelude::*;
 
-#[derive(Event, Default)]
-pub struct BuildNewBoard {
-    pub build_new_solved_board: bool,
-}
+#[derive(Event)]
+pub struct BuildNewBoard(pub BoardBuildingRequest);
 
 #[derive(Event, Default)]
 pub struct SpawnTileInLocation {

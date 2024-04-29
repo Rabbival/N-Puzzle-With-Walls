@@ -18,7 +18,7 @@ pub mod prelude {
     pub use crate::bundles::{tile_bundle::*, saved_layout_bundle::*};
     pub use crate::costume_event::{
         app_event::*, board_set_event::*, db_event::*, EventPlugin,
-        game_event::*, move_tile_event::*, screen_changing_event::*, system_event::*,
+        move_tile_event::*, screen_changing_event::*, system_event::*,
         ui_event::{
             game_ui_event::*,
             loader_ui_event::*,
@@ -44,7 +44,7 @@ pub mod prelude {
     };
     pub use crate::logic::{
         board_building::{
-            board_builder::*, solved_and_game_boards_spawner::*, BoardBuildingPlugin,
+            board_builder::*, board_entities_spawner::*, BoardBuildingPlugin,
             brute_force_builder::*, permutation_builder::*, solved_board_builder::*,
             wall_placement_validator::*,
         },

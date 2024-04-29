@@ -4,7 +4,16 @@ pub struct BoardManagerPlugin;
 
 impl Plugin for BoardManagerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
+        app
+            .add_systems(
+                OnExit(AppState::Game),
+                toggle_board_lock,
+            )
+            .add_systems(
+                OnEnter(AppState::Game),
+                toggle_board_lock
+            )
+            .add_systems(
             Update,
             (
                     move_tile_logic,
@@ -14,6 +23,11 @@ impl Plugin for BoardManagerPlugin {
                 .in_set(InputSystemSets::InputHandling),
         );
     }
+}
+
+fn toggle_board_lock(mut game_board_query: Query<&mut TileBoard, With<GameBoard>>) {
+    let current_lock_state = &mut game_board_query.single_mut().ignore_player_input;
+    *current_lock_state = !*current_lock_state;
 }
 
 /// graphics switched before logic for the sake of graphics function readability

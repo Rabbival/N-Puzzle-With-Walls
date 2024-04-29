@@ -1,3 +1,4 @@
+use crate::logic::enums::board_building_request::BoardBuildingRequest;
 use crate::prelude::*;
 
 pub struct KeyboardInputHandlerPlugin;
@@ -97,8 +98,13 @@ fn listen_for_board_reset(
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyR) {
-        let build_new_solved_board = keyboard_input.pressed(KeyCode::ShiftLeft);
-        input_event_writer.send(BuildNewBoard { build_new_solved_board });
+        input_event_writer.send(BuildNewBoard(
+            if keyboard_input.pressed(KeyCode::ShiftLeft){
+                BoardBuildingRequest::CreateANewBoardFromNothing
+            }else{
+                BoardBuildingRequest::ShuffleExistingBoard
+            }
+        ));
     }
 }
 

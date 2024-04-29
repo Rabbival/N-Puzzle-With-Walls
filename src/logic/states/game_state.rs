@@ -1,8 +1,10 @@
+use crate::logic::enums::board_building_request::BoardBuildingRequest;
 use crate::prelude::*;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum GameState {
-	PendingSolvedBoardGen,
+	PendingSolvedBoardWallsGeneration,
+	SolvedBoardWallsGenerated,
 	SolvedBoardGenerated,
 	GameBoardGenerated,
 	PostGameBoardGenerationChangesDone,
@@ -17,27 +19,12 @@ impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<GameState>()
 			.add_systems(
-				OnEnter(GameState::Victory),
-					toggle_victory,
-			)
-            .add_systems(
-                OnExit(GameState::Victory),
-					toggle_victory,
-            )
-			.add_systems(
 				Update,
 					set_game_state_according_to_board_gen_request
 						.in_set(InputSystemSets::InputHandling)
 						.after(set_applied_props_and_exit_menu)
-			)
-			;
+			);
 	}
-}
-
-fn toggle_victory(
-	mut victory_message_toggle_writer: EventWriter<ToggleVictoryMessage>
-){
-	victory_message_toggle_writer.send(ToggleVictoryMessage);
 }
 
 fn set_game_state_according_to_board_gen_request(
@@ -45,10 +32,16 @@ fn set_game_state_according_to_board_gen_request(
 	mut game_state: ResMut<NextState<GameState>>,
 ){
 	for board_gen_request in event_reader.read(){
-		if board_gen_request.build_new_solved_board{
-			game_state.set(GameState::PendingSolvedBoardGen);
-		}else{
-			game_state.set(GameState::SolvedBoardGenerated);
+		match board_gen_request.0{
+			BoardBuildingRequest::CreateANewBoardFromNothing => {
+				game_state.set(GameState::PendingSolvedBoardWallsGeneration)
+			},
+			BoardBuildingRequest::CreateANewBoardFromTileBoardWithWalls(_) => {
+				game_state.set(GameState::SolvedBoardWallsGenerated)
+			},
+			BoardBuildingRequest::ShuffleExistingBoard => {
+				game_state.set(GameState::SolvedBoardGenerated)
+			},
 		}
 	}
 }

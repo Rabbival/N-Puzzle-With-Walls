@@ -5,3 +5,4 @@ pub mod system_enum;
 pub mod ui_enum;
 pub mod loader_screen_slot;
 pub mod board_quality;
+pub mod board_building_request;

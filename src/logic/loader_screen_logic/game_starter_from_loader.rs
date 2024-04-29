@@ -1,3 +1,4 @@
+use crate::logic::enums::board_building_request::BoardBuildingRequest;
 use crate::prelude::*;
 
 pub struct GameStarterFromLoaderPlugin;
@@ -34,8 +35,9 @@ fn listen_to_game_start_from_loader_requests(
                     &mut current_board_wall_locations,
                     &mut applied_board_props_query,
                 ){
-                    Ok(_saved_layout_tile_board) => {
-                        spawn_board_event_writer.send(BuildNewBoard{ build_new_solved_board: true });
+                    Ok(saved_layout_tile_board) => {
+                        spawn_board_event_writer.send(BuildNewBoard
+                            (BoardBuildingRequest::CreateANewBoardFromTileBoardWithWalls(saved_layout_tile_board)));
                     },
                     Err(entity_error) => {
                         print_entity_related_error(entity_error);

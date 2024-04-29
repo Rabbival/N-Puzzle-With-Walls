@@ -1,17 +1,12 @@
 use crate::prelude::*;
 
 #[derive(Event, Default)]
-pub struct SetPlannedPropertiesToFitCurrent;
-
-#[derive(Event, Default)]
 pub struct SetMenuElementsToFitCurrent;
 
 pub struct ScreenChangingEventPlugin;
 
 impl Plugin for ScreenChangingEventPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_event::<SetPlannedPropertiesToFitCurrent>()
-            .add_event::<SetMenuElementsToFitCurrent>();
+        app.add_event::<SetMenuElementsToFitCurrent>();
     }
 }

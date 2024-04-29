@@ -1,3 +1,4 @@
+use crate::logic::enums::board_building_request::BoardBuildingRequest;
 use crate::prelude::*;
 
 /// mustn't be more than 2 as there will always be a corner
@@ -14,42 +15,47 @@ impl Plugin for SolvedBoardPlugin{
     fn build(&self, app: &mut App) {
         app
             .add_systems(
-                OnEnter(GameState::PendingSolvedBoardGen),
-                generate_solved_board
+                OnEnter(GameState::PendingSolvedBoardWallsGeneration),
+                generate_solved_board_walls
+            )
+            .add_systems(
+                OnEnter(GameState::SolvedBoardWallsGenerated),
+                generate_solved_board_from_tile_board_with_walls
             );
     }
 }
 
-fn generate_solved_board(
+fn generate_solved_board_walls(
+    mut spawn_board_event_writer: EventWriter<BuildNewBoard>,
     mut generation_error_event_writer: EventWriter<ShowGenerationError>,
-    mut solved_board_query: Query<&mut TileBoard, With<SolvedBoard>>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<GameState>>,
     mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>
 ){
-    match generate_solved_board_inner(
+    match generate_solved_board_walls_inner(
         applied_board_props_query.single(),
         &mut current_board_wall_locations
     ) {
-        Ok(board) => {
-            *solved_board_query.single_mut() = board;
-            game_state.set(GameState::SolvedBoardGenerated);
+        Ok(saved_layout_tile_board) => {
+            game_state.set(GameState::SolvedBoardWallsGenerated);
+            spawn_board_event_writer.send(BuildNewBoard
+                (BoardBuildingRequest::CreateANewBoardFromTileBoardWithWalls(saved_layout_tile_board)));
         },
-        Err(error) => {
-            generation_error_event_writer.send(ShowGenerationError(error));
+        Err(board_gen_error) => {
+            generation_error_event_writer.send(ShowGenerationError(board_gen_error));
             game_state.set(GameState::Regular);
         }
     }
 }
 
-pub fn generate_solved_board_inner(
+fn generate_solved_board_walls_inner(
     applied_props: &BoardProperties,
-    current_board_wall_locations_ref: &mut ResMut<CurrentBoardWallLocations>
-) -> Result<TileBoard, BoardGenerationError> {
+    mut current_board_wall_locations: &mut CurrentBoardWallLocations
+) -> Result<TileBoard, BoardGenerationError>
+{
     let grid_side_length = applied_props.size.to_grid_side_length();
     let mut solved_board = TileBoard::new(grid_side_length);
-    let grid_side_length_u32 = grid_side_length as u32;
-    
+
     if applied_props.generation_method == BoardGenerationMethod::Auto {
         let mut new_wall_locations= vec![];
         if applied_props.wall_count > 0 {
@@ -58,17 +64,54 @@ pub fn generate_solved_board_inner(
                 &mut new_wall_locations
             )?;
         }
-        current_board_wall_locations_ref.0 = new_wall_locations;
+        current_board_wall_locations.0 = new_wall_locations;
     }
 
-    wrap_if_error(&solved_board.spawn_walls_in_locations(&current_board_wall_locations_ref.0))?;
+    wrap_if_error(&solved_board.spawn_walls_in_locations(&current_board_wall_locations.0))?;
+    Ok(solved_board)
+}
+
+fn generate_solved_board_from_tile_board_with_walls(
+    mut generation_error_event_writer: EventWriter<ShowGenerationError>,
+    mut spawn_board_event_reader: EventReader<BuildNewBoard>,
+    mut solved_board_query: Query<&mut TileBoard, With<SolvedBoard>>,
+    applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
+    mut game_state: ResMut<NextState<GameState>>,
+){
+    for build_board_request in spawn_board_event_reader.read(){
+        if let BoardBuildingRequest::CreateANewBoardFromTileBoardWithWalls(mut tile_board) =
+            build_board_request.0.clone()
+        {
+            match generate_solved_board_from_tile_board_with_walls_inner(
+                applied_board_props_query.single(),
+                &mut tile_board
+            ) {
+                Ok(_) => {
+                    *solved_board_query.single_mut() = tile_board;
+                    game_state.set(GameState::SolvedBoardGenerated);
+                },
+                Err(error) => {
+                    generation_error_event_writer.send(ShowGenerationError(error));
+                    game_state.set(GameState::Regular);
+                }
+            }
+        }
+    }
+}
+
+pub fn generate_solved_board_from_tile_board_with_walls_inner(
+    applied_props: &BoardProperties,
+    solved_board: &mut TileBoard
+) -> Result<(), BoardGenerationError> {
+    let grid_side_length_u32 = applied_props.size.to_grid_side_length() as u32;
+    
     wrap_if_error(&solved_board.spawn_empty_tiles(applied_props, &grid_side_length_u32))?;
     wrap_if_error(&solved_board.spawn_numbered_uninitialized_tiles(&grid_side_length_u32))?;
 
     solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;
     solved_board.index_all_tile_types();
     solved_board.ignore_player_input = true;
-    Ok(solved_board)
+    Ok(())
 }
 
 fn determine_wall_locations(

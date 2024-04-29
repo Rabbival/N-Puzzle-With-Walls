@@ -1,10 +1,15 @@
+use crate::logic::enums::board_building_request::BoardBuildingRequest;
 use crate::prelude::*;
 
 pub struct UpdateBoardPropertiesPlugin;
 
 impl Plugin for UpdateBoardPropertiesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
+        app
+            .add_systems(OnEnter(AppState::Menu),
+                 set_planned_props_to_fit_current
+            )
+            .add_systems(
             Update,
             (
                 (
@@ -15,8 +20,6 @@ impl Plugin for UpdateBoardPropertiesPlugin {
                     .chain()
                     .in_set(InputSystemSets::InputHandling),
                 apply_wall_count_to_planned_props.in_set(InputSystemSets::PostMainChanges),
-                set_planned_props_to_fit_current
-                    .in_set(StateChangeSystemSets::PrepareToHandleStateChange),
             )
                 .run_if(in_state(AppState::Menu)),
         );
@@ -174,9 +177,7 @@ pub fn set_applied_props_and_exit_menu(
             
             match applied_props.generation_method{
                 BoardGenerationMethod::Auto => {
-                    spawn_board_event_writer.send(BuildNewBoard {
-                        build_new_solved_board: true,
-                    });
+                    spawn_board_event_writer.send(BuildNewBoard(BoardBuildingRequest::CreateANewBoardFromNothing));
                 },
                 // only board generation can fail (and force us to stay in the menu screen)
                 _ => {
@@ -190,7 +191,6 @@ pub fn set_applied_props_and_exit_menu(
 /// sets the one that appears in the menu to fit the current configuration
 fn set_planned_props_to_fit_current(
     mut event_writer: EventWriter<SetMenuElementsToFitCurrent>,
-    mut event_reader: EventReader<SetPlannedPropertiesToFitCurrent>,
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
     applied_board_prop_query: Query<
         &BoardProperties,
@@ -207,13 +207,11 @@ fn set_planned_props_to_fit_current(
         ),
     >,
 ) {
-    for _event in event_reader.read() {
-        let current_props = applied_board_prop_query.single();
-        let mut planned_props = planned_board_prop_query.single_mut();
-        unapplied_menu_wall_count.0 = current_props.wall_count;
-        *planned_props = *current_props;
-        event_writer.send(SetMenuElementsToFitCurrent);
-    }
+    let current_props = applied_board_prop_query.single();
+    let mut planned_props = planned_board_prop_query.single_mut();
+    unapplied_menu_wall_count.0 = current_props.wall_count;
+    *planned_props = *current_props;
+    event_writer.send(SetMenuElementsToFitCurrent);
 }
 
 #[cfg(test)]
