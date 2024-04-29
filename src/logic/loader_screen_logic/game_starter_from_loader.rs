@@ -18,30 +18,24 @@ fn listen_to_game_start_from_loader_requests(
     mut event_reader: EventReader<LoaderScreenActionInitiated>,
     saved_layout_query: Query<(&DomainBoard, &TileBoard)>,
     mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>,
-    data_base_manager: Res<DataBaseManager>,
     mut applied_board_props_query: Query<&mut BoardProperties, With<AppliedBoardProperties>>,
 ){
     for loader_action in event_reader.read(){
-        if let LoaderScreenAction::GenerateBoard(Some(chosen_layout_screen_and_slot)) =
+        if let LoaderScreenAction::GenerateBoard(Some(chosen_layout_entity)) =
             loader_action.action
         {
-            let optional_saved_layout_entity = data_base_manager.try_get_layout_ref(
-                &chosen_layout_screen_and_slot
-            );
-            if let Some(entity) = optional_saved_layout_entity {
-                match start_game_from_loader(
-                    entity,
-                    &saved_layout_query,
-                    &mut current_board_wall_locations,
-                    &mut applied_board_props_query,
-                ){
-                    Ok(saved_layout_tile_board) => {
-                        spawn_board_event_writer.send(BuildNewBoard
-                            (BoardBuildingRequest::CreateANewBoardFromTileBoardWithWalls(saved_layout_tile_board)));
-                    },
-                    Err(entity_error) => {
-                        print_entity_related_error(entity_error);
-                    }
+            match start_game_from_loader(
+                &chosen_layout_entity,
+                &saved_layout_query,
+                &mut current_board_wall_locations,
+                &mut applied_board_props_query,
+            ){
+                Ok(saved_layout_tile_board) => {
+                    spawn_board_event_writer.send(BuildNewBoard
+                        (BoardBuildingRequest::CreateANewBoardFromTileBoardWithWalls(saved_layout_tile_board)));
+                },
+                Err(entity_error) => {
+                    print_entity_related_error(entity_error);
                 }
             }
         }

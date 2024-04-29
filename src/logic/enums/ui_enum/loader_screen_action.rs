@@ -4,7 +4,7 @@ use crate::prelude::*;
 pub enum LoaderScreenAction {
     ChangeScreen(ScreenChangeRequestType),
     WarnBeforeDeletion(AreYouSureMessageType),
-    GenerateBoard(Option<SavedLayoutIndex>),
+    GenerateBoard(Option<Entity>),
     JumpToChosenLayoutScreen(Option<usize>),
     ChooseLayoutInSlot(LoaderScreenSlot)
 }
