@@ -16,7 +16,8 @@ impl Plugin for UiLogicPlugin {
             EternalUiLogicPlugin, 
             VictoryUiLogicPlugin, 
             LoaderUiLogicPlugin,
-            MessagesGraphicsPlugin
+            MessagesGraphicsPlugin,
+            ActiveLoaderSlotUpdaterPlugin
         ))
             .add_systems(
                 Update,

@@ -117,7 +117,7 @@ fn show_currently_displayed_saved_layouts_screen_inner(
             Some(layout_entity) => {
                 event_writer.send(LoaderSlotSetEvent{
                     layout_entity: layout_entity.to_owned(), 
-                    slot_to_show_in: currently_checked_screen_slot
+                    slot_to_set: currently_checked_screen_slot
                 });
             },
             None => hide_loader_slot(currently_checked_screen_slot, &mut loader_screen_actions_query)

@@ -8,7 +8,7 @@ pub struct LoaderScreenActionEvent {
 #[derive(Event)]
 pub struct LoaderSlotSetEvent{
     pub layout_entity: Entity,
-    pub slot_to_show_in: LoaderScreenSlot
+    pub slot_to_set: LoaderScreenSlot
 }
 
 pub struct LoaderUiEventPlugin;

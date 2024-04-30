@@ -13,7 +13,11 @@ pub struct DataBaseManagerPlugin;
 impl Plugin for DataBaseManagerPlugin{
 	fn build(&self, app: &mut App) {
 		app.init_resource::<DataBaseManager>()
-			.add_systems(Startup, read_system_text_files_into_db)
+			.add_systems(Startup, (
+					read_saved_layout_from_system,
+					insert_saved_layout_entities_to_data_base
+				).chain()
+			)
 			.add_systems(Update, (
 				save_to_data_base_and_system,
 				remove_from_data_base_and_system,
@@ -22,28 +26,13 @@ impl Plugin for DataBaseManagerPlugin{
 	}
 }
 
-fn read_system_text_files_into_db(
-	mut db_manager: ResMut<DataBaseManager>,
-	domain_board_query: Query<&DomainBoard>,
-	mut commands: Commands
-){
-	if let Err(data_base_error) =
-		read_system_text_files_into_db_inner(
-			db_manager.as_mut(),
-			&domain_board_query,
-			&mut commands
-		)
-	{
+fn read_saved_layout_from_system(mut commands: Commands){
+	if let Err(data_base_error) = read_saved_layout_from_system_inner(&mut commands) {
 		print_data_base_error(data_base_error);
 	}
 }
 
-fn read_system_text_files_into_db_inner(
-	db_manager: &mut DataBaseManager,
-	domain_board_query: &Query<&DomainBoard>,
-	commands: &mut Commands
-) -> Result<(), DataBaseError>
-{
+fn read_saved_layout_from_system_inner(commands: &mut Commands) -> Result<(), DataBaseError> {
 	create_folder_if_none_exists_yet(FolderToAccess::SavedLayouts);
 	let valid_text_file_names =
 		get_all_valid_text_file_names_in_folder(FolderToAccess::SavedLayouts);
@@ -68,11 +57,7 @@ fn read_system_text_files_into_db_inner(
 					}
 				};
 				
-				wrap_to_data_base_error(db_manager.insert_layout_and_spawn_entity(
-					&parsed_domain_board,
-					domain_board_query,
-					commands
-				))?;
+				wrap_to_data_base_error(DataBaseManager::spawn_layout_entity(&parsed_domain_board, commands))?;
 			}
 		}
 	}
@@ -88,11 +73,25 @@ fn determine_board_quality(parsed_domain_board: &DomainBoard) -> BoardQuality{
 	}
 }
 
+fn insert_saved_layout_entities_to_data_base(
+	mut db_manager: ResMut<DataBaseManager>,
+	domain_board_query: Query<(Entity, &DomainBoard)>,
+){
+	for (entity, domain_board) in domain_board_query.iter(){
+		db_manager.insert_layout(
+			&domain_board,
+			&domain_board_query,
+			entity
+		);
+	}
+}
+
+
 fn save_to_data_base_and_system(
 	mut event_writer: EventWriter<SuccessSavingToDB>,
 	mut event_reader: EventReader<SaveToDB>,
 	mut db_manager: ResMut<DataBaseManager>,
-	domain_board_query: Query<&DomainBoard>,
+	domain_board_query: Query<(Entity, &DomainBoard)>,
 	mut commands: Commands
 ){
 	for save_request in event_reader.read(){
@@ -115,7 +114,7 @@ fn save_to_data_base_and_system(
 fn save_to_data_base_and_system_inner(
 	save_request: &SaveToDB,
 	db_manager: &mut DataBaseManager,
-	domain_board_query: &Query<&DomainBoard>,
+	domain_board_query: &Query<(Entity, &DomainBoard)>,
 	commands: &mut Commands
 ) -> Result<SavedLayoutIndex, DataBaseError>
 {
@@ -238,7 +237,7 @@ impl DataBaseManager{
 	pub fn insert_layout_and_spawn_entity(
 		&mut self,
 		domain_board: &DomainBoard,
-		domain_board_query: &Query<&DomainBoard>,
+		domain_board_query: &Query<(Entity, &DomainBoard)>,
 		commands: &mut Commands
 	) -> Result<SavedLayoutIndex, GridError>
 	{
@@ -246,22 +245,22 @@ impl DataBaseManager{
 		Ok(self.insert_layout(domain_board, domain_board_query, newborn_entity))
 	}
 
-	fn spawn_layout_entity(domain_board: &DomainBoard, commands: &mut Commands) -> Result<Entity, GridError>{
+	pub fn spawn_layout_entity(domain_board: &DomainBoard, commands: &mut Commands) -> Result<Entity, GridError>{
 		Ok(commands.spawn(SavedLayoutBundle{
 			domain_board: domain_board.clone(),
 			tile_board: TileBoard::try_from_domain_board(domain_board)?
 		}).id())
 	}
 
-	fn insert_layout(
+	pub fn insert_layout(
 		&mut self,
 		domain_board: &DomainBoard,
-		domain_board_query: &Query<&DomainBoard>,
+		domain_board_query: &Query<(Entity, &DomainBoard)>,
 		entity: Entity
 	) -> SavedLayoutIndex
 	{
 		let index = self.saved_layouts.partition_point(|saved_layout| {
-			domain_board_query.get(*saved_layout).unwrap().board_name < domain_board.board_name
+			domain_board_query.get(*saved_layout).unwrap().1.board_name < domain_board.board_name
 		});
 		self.saved_layouts.insert(index, entity);
 		SavedLayoutIndex(index)
