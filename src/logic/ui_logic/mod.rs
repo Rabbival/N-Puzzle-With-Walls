@@ -5,6 +5,7 @@ pub mod menu_ui_logic;
 pub mod victory_ui_logic;
 pub mod loader_ui_logic;
 pub mod messages_logic;
+pub mod active_loader_slot_updater;
 
 pub struct UiLogicPlugin;
 

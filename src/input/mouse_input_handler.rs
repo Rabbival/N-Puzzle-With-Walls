@@ -170,18 +170,16 @@ mod tests {
     fn test_valid_location() {
         let mut app = App::new();
         app.add_event::<SwitchTilesLogic>()
-            .init_resource::<CurrentBoardWallLocations>()
             .add_systems(Update, test_valid_location_inner);
         app.update();
     }
 
     fn test_valid_location_inner(
         mut switch_tiles_logic_writer: EventWriter<SwitchTilesLogic>,
-        mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>
     ) {
         assert!(test_no_tile_in_cell(&mut switch_tiles_logic_writer));
         assert!(test_empty_slot(&mut switch_tiles_logic_writer));
-        assert!(test_no_empty_neighbor(&mut switch_tiles_logic_writer, &mut current_board_wall_locations));
+        assert!(test_no_empty_neighbor(&mut switch_tiles_logic_writer));
     }
 
     fn test_no_tile_in_cell(
@@ -216,21 +214,19 @@ mod tests {
         }
     }
 
-    fn test_no_empty_neighbor(
-        event_writer: &mut EventWriter<SwitchTilesLogic>,
-        current_board_wall_locations: &mut ResMut<CurrentBoardWallLocations>
-    ) -> bool
+    fn test_no_empty_neighbor(event_writer: &mut EventWriter<SwitchTilesLogic>, ) -> bool
     {
-        let mut board: TileBoard = generate_solved_board_inner(
+        let mut tile_board = TileBoard::default();
+        generate_solved_board_from_tile_board_with_walls_inner(
             &BoardProperties::default(),
-            current_board_wall_locations
+            &mut tile_board
         ).unwrap();
-        board.ignore_player_input = false;
+        tile_board.ignore_player_input = false;
 
         //fill all empties
-        let empty_tile_locations = board.empty_tile_locations.clone();
+        let empty_tile_locations = tile_board.empty_tile_locations.clone();
         for empty_tile_location in &empty_tile_locations {
-            board.set(
+            tile_board.set(
                 empty_tile_location,
                 Tile {
                     index: 0,
@@ -239,7 +235,7 @@ mod tests {
             ).unwrap();
         }
 
-        let location_validation_outcome = handle_mouse_click(event_writer, Vec2::default(), &board);
+        let location_validation_outcome = handle_mouse_click(event_writer, Vec2::default(), &tile_board);
         match location_validation_outcome {
             Err(TileMoveError::NoEmptyNeighbor) => true,
             _ => false,

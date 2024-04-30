@@ -29,7 +29,7 @@ fn set_are_you_sure_message_type_and_text(
 
 fn listen_for_loader_screen_actions(
     mut visibility_toggle_event_writer: EventWriter<SetEntityVisibility>,
-    mut event_reader: EventReader<LoaderScreenActionInitiated>,
+    mut event_reader: EventReader<LoaderScreenActionEvent>,
     mut are_you_sure_message_query: Query<(Entity, &mut AreYouSureMessageType)>,
     mut are_you_sure_text_query: Query<&mut Text, With<AreYouSureMessageTextTag>>,
 ){

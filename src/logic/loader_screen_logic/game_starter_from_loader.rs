@@ -15,7 +15,7 @@ impl Plugin for GameStarterFromLoaderPlugin {
 
 fn listen_to_game_start_from_loader_requests(
     mut spawn_board_event_writer: EventWriter<BuildNewBoard>,
-    mut event_reader: EventReader<LoaderScreenActionInitiated>,
+    mut event_reader: EventReader<LoaderScreenActionEvent>,
     saved_layout_query: Query<(&DomainBoard, &TileBoard)>,
     mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>,
     mut applied_board_props_query: Query<&mut BoardProperties, With<AppliedBoardProperties>>,

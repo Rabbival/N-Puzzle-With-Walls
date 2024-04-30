@@ -16,7 +16,7 @@ impl Plugin for DisplayedLoaderScreenPlugin {
 }
 
 fn listen_to_screen_change_arrows_presses(
-    mut event_reader: EventReader<LoaderScreenActionInitiated>,
+    mut event_reader: EventReader<LoaderScreenActionEvent>,
     mut displayed_loader_screen_number: ResMut<DisplayedLoaderScreenNumber>,
     data_base_manager: Res<DataBaseManager>,
 ){

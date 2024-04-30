@@ -31,7 +31,7 @@ impl Plugin for LoaderUiLogicPlugin {
 }
 
 fn listen_to_jump_to_page_requests(
-    mut event_reader: EventReader<LoaderScreenActionInitiated>,
+    mut event_reader: EventReader<LoaderScreenActionEvent>,
     mut displayed_loader_screen_number: ResMut<DisplayedLoaderScreenNumber>,
 ){
     for event in event_reader.read(){
@@ -82,30 +82,27 @@ fn update_chosen_mark_after_change(
     )
 }
 
-fn show_currently_displayed_saved_layouts_screen(
+pub fn show_currently_displayed_saved_layouts_screen(
+    event_writer: EventWriter<LoaderSlotSetEvent>,
     data_base_manager: Res<DataBaseManager>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
-    domain_boards_query: Query<&DomainBoard>,
-    loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag, &Children)>,
-    layout_slot_text_query: Query<&mut Text>,
+    loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag)>,
 ){
     if let Err(entity_error) = show_currently_displayed_saved_layouts_screen_inner(
+        event_writer,
         data_base_manager,
         displayed_loader_screen_number,
-        domain_boards_query,
-        loader_screen_actions_query,
-        layout_slot_text_query,
+        loader_screen_actions_query
     ) {
         print_entity_related_error(entity_error);
     }
 }
 
 fn show_currently_displayed_saved_layouts_screen_inner(
+    mut event_writer: EventWriter<LoaderSlotSetEvent>,
     data_base_manager: Res<DataBaseManager>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
-    domain_boards_query: Query<&DomainBoard>,
-    mut loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag, &Children)>,
-    mut layout_slot_text_query: Query<&mut Text>,
+    mut loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag)>,
 ) -> Result<(), EntityRelatedCostumeError>
 {
     for currently_checked_screen_slot in all::<LoaderScreenSlot>(){
@@ -118,17 +115,10 @@ fn show_currently_displayed_saved_layouts_screen_inner(
             data_base_manager.try_get_layout_ref(&index_from_slot);
         match optional_layout_to_display{
             Some(layout_entity) => {
-                match domain_boards_query.get(*layout_entity){
-                    Ok(domain_board) => {
-                        show_loader_slot_and_update_its_content(
-                            currently_checked_screen_slot,
-                            domain_board,
-                            &mut loader_screen_actions_query,
-                            &mut layout_slot_text_query
-                        )?
-                    },
-                    Err(_entity_error) => return Err(EntityRelatedCostumeError::EntityNotInQuery)
-                }
+                event_writer.send(LoaderSlotSetEvent{
+                    layout_entity: layout_entity.to_owned(), 
+                    slot_to_show_in: currently_checked_screen_slot
+                });
             },
             None => hide_loader_slot(currently_checked_screen_slot, &mut loader_screen_actions_query)
         }
@@ -138,9 +128,9 @@ fn show_currently_displayed_saved_layouts_screen_inner(
 
 fn hide_loader_slot(
     currently_checked_screen_slot: LoaderScreenSlot,
-    loader_screen_actions_query: &mut Query<(&LoaderScreenAction, &mut CustomOnScreenTag, &Children)>,
+    loader_screen_actions_query: &mut Query<(&LoaderScreenAction, &mut CustomOnScreenTag)>,
 ){
-    for (loader_action, mut layout_slot_on_screen_tag, _) 
+    for (loader_action, mut layout_slot_on_screen_tag) 
         in loader_screen_actions_query
     {
         if let LoaderScreenAction::ChooseLayoutInSlot(layout_slot) = *loader_action{
@@ -151,47 +141,17 @@ fn hide_loader_slot(
     }
 }
 
-fn show_loader_slot_and_update_its_content(
-    currently_checked_screen_slot: LoaderScreenSlot,
-    domain_board_to_display: &DomainBoard,
-    loader_screen_actions_query: &mut Query<(&LoaderScreenAction, &mut CustomOnScreenTag, &Children)>,
-    layout_slot_text_query: &mut Query<&mut Text>
-) -> Result<(), EntityRelatedCostumeError>
-{
-    for (loader_action, mut layout_slot_on_screen_tag, children)
-        in loader_screen_actions_query
-    {
-        if let LoaderScreenAction::ChooseLayoutInSlot(layout_slot) = *loader_action {
-            if layout_slot == currently_checked_screen_slot {
-                layout_slot_on_screen_tag.on_own_screen_visibility = Some(Visibility::Visible);
-                for child_entity in children.iter() {
-                    let layout_slot_text_result =
-                        layout_slot_text_query.get_mut(*child_entity);
-                    if let Ok(mut slot_text) = layout_slot_text_result {
-                        slot_text.sections[0].value = domain_board_to_display.to_string_for_button();
-                        return Ok(());
-                    }
-                }
-                return Err(EntityRelatedCostumeError::EntityNotInQuery)
-            }
-        }
-    }
-    Ok(())
-}
-
 fn update_slots_info_after_change(
+    event_writer: EventWriter<LoaderSlotSetEvent>,
     data_base_manager: Res<DataBaseManager>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
-    domain_boards_query: Query<&DomainBoard>,
-    loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag, &Children)>,
-    layout_slot_text_query: Query<&mut Text>,
+    loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag)>,
 ){
     show_currently_displayed_saved_layouts_screen(
+        event_writer,
         data_base_manager,
         displayed_loader_screen_number,
-        domain_boards_query,
-        loader_screen_actions_query,
-        layout_slot_text_query,
+        loader_screen_actions_query
     );
 }
 

@@ -183,22 +183,20 @@ mod tests {
     #[test]
     fn several_attempts_at_generating_unsolved_boards() {
         let mut app = App::new();
-        app.init_resource::<CurrentBoardWallLocations>()
-            .add_systems(Update, several_attempts_at_generating_unsolved_boards_inner);
+        app.add_systems(Update, several_attempts_at_generating_unsolved_boards_inner);
         app.update();
     }
 
-    fn several_attempts_at_generating_unsolved_boards_inner(
-        mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>
-    ){
+    fn several_attempts_at_generating_unsolved_boards_inner(){
         const ATTEMPT_COUNT: u8 = 10;
-        let solved_board =generate_solved_board_inner(
+        let mut tile_board = TileBoard::default();
+        generate_solved_board_from_tile_board_with_walls_inner(
             &BoardProperties::default(),
-            &mut current_board_wall_locations
+            &mut tile_board
         ).unwrap();
         for _ in 0..ATTEMPT_COUNT{
-            assert_ne!(solved_board.grid, 
-                match generate_game_board(solved_board.clone(), RANDOM_RANGE_FOR_TESTING){
+            assert_ne!(tile_board.grid, 
+                match generate_game_board(tile_board.clone(), RANDOM_RANGE_FOR_TESTING){
                     Ok(board)=> board,
                     Err(_)=> panic!()
                 }.grid

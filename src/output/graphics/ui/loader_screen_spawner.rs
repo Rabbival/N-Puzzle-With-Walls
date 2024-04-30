@@ -14,6 +14,9 @@ pub struct ChosenLayoutTextTag;
 #[derive(Component)]
 pub struct ScreenChangeArrowTag;
 
+#[derive(Component)]
+pub struct LayoutPreviewParentNode(pub LoaderScreenSlot);
+
 pub struct LoaderScreenSpawnerPlugin;
 
 impl Plugin for LoaderScreenSpawnerPlugin{
@@ -238,7 +241,8 @@ fn spawn_layout_entity(
                     background_color: Color::WHITE.into(),
                     ..default()
                 },
-               UiImage::new(image_handle)
+                LayoutPreviewParentNode(loader_screen_slot),
+               UiImage::new(image_handle) //TODO: remove eventually, it's a placeholder
             )); 
         });
     });

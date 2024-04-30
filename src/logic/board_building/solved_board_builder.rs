@@ -50,7 +50,7 @@ fn generate_solved_board_walls(
 
 fn generate_solved_board_walls_inner(
     applied_props: &BoardProperties,
-    mut current_board_wall_locations: &mut CurrentBoardWallLocations
+    current_board_wall_locations: &mut CurrentBoardWallLocations
 ) -> Result<TileBoard, BoardGenerationError>
 {
     let grid_side_length = applied_props.size.to_grid_side_length();
@@ -364,13 +364,11 @@ mod tests {
     #[test]
     fn test_connectivity_bfs_tree() {
         let mut app = App::new();
-        app
-            .init_resource::<CurrentBoardWallLocations>()
-            .add_systems(Update, test_connectivity_bfs_tree_inner);
+        app.add_systems(Update, test_connectivity_bfs_tree_inner);
         app.update();
     }
 
-    fn test_connectivity_bfs_tree_inner(mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>) {
+    fn test_connectivity_bfs_tree_inner() {
         const ATTEMPT_COUNT: usize = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
         let board_props: BoardProperties = BoardProperties {
@@ -379,23 +377,24 @@ mod tests {
             tree_traveller_type: GridTravellerType::BFS,
             ..Default::default()
         };
+        let mut tile_board = TileBoard::new(board_props.size.to_grid_side_length());
         for _ in 0..ATTEMPT_COUNT {
-            let solved_board =
-                generate_solved_board_inner(&board_props, &mut current_board_wall_locations).unwrap();
-            assert!(solved_board.grid.is_connected_graph());
+            let _ = generate_solved_board_from_tile_board_with_walls_inner(
+                &board_props, 
+                &mut tile_board
+            );
+            assert!(tile_board.grid.is_connected_graph());
         }
     }
 
     #[test]
     fn test_connectivity_dfs_tree() {
         let mut app = App::new();
-        app
-            .init_resource::<CurrentBoardWallLocations>()
-            .add_systems(Update, test_connectivity_dfs_tree_inner);
+        app.add_systems(Update, test_connectivity_dfs_tree_inner);
         app.update();
     }
 
-    fn test_connectivity_dfs_tree_inner(mut current_board_wall_locations: ResMut<CurrentBoardWallLocations>) {
+    fn test_connectivity_dfs_tree_inner() {
         const ATTEMPT_COUNT: usize = 42;
         const WALL_COUNT_FOR_TEST: u8 = 2;
         let board_props: BoardProperties = BoardProperties {
@@ -404,9 +403,13 @@ mod tests {
             tree_traveller_type: GridTravellerType::DFS,
             ..Default::default()
         };
+        let mut tile_board = TileBoard::new(board_props.size.to_grid_side_length());
         for _ in 0..ATTEMPT_COUNT {
-            let solved_board = generate_solved_board_inner(&board_props, &mut current_board_wall_locations).unwrap();
-            assert!(solved_board.grid.is_connected_graph());
+            let _ = generate_solved_board_from_tile_board_with_walls_inner(
+                &board_props,
+                &mut tile_board
+            );
+            assert!(tile_board.grid.is_connected_graph());
         }
     }
 }

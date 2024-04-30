@@ -119,13 +119,13 @@ fn handle_save_walls_layout_button(
 }
 
 fn handle_loader_buttons(
-    mut button_event_writer: EventWriter<LoaderScreenActionInitiated>,
+    mut button_event_writer: EventWriter<LoaderScreenActionEvent>,
     initiated_loader_actions_query: Query<(&Interaction, &LoaderScreenAction), Changed<Interaction>>,
 ) {
     for (interaction, loader_action) in initiated_loader_actions_query.iter()
     {
         if *interaction == Interaction::Pressed {
-            button_event_writer.send(LoaderScreenActionInitiated{
+            button_event_writer.send(LoaderScreenActionEvent{
                 action: loader_action.clone()
             });
         }

@@ -95,7 +95,7 @@ pub mod prelude {
         tile::*,
         tile_board::*,
         tile_dictionary::*,
-        ui_logic::{eternal_ui_logic::*, loader_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*, 
+        ui_logic::{eternal_ui_logic::*, loader_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*, active_loader_slot_updater::*,
         messages_logic::{
             MessagesGraphicsPlugin,
             are_you_sure_message_logic::*,

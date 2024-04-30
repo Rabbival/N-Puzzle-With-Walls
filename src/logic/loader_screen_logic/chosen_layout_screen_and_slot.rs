@@ -75,7 +75,7 @@ fn update_bottom_line_to_fit_new_chosen(
 }
 
 fn listen_for_new_layout_picks(
-    mut event_reader: EventReader<LoaderScreenActionInitiated>,
+    mut event_reader: EventReader<LoaderScreenActionEvent>,
     currently_displayed_loader_screen: Res<DisplayedLoaderScreenNumber>,
     mut chosen_layout_screen_and_slot: ResMut<ChosenLayoutScreenAndSlot>
 ){
