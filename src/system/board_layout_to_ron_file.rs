@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub const BOARD_LAYOUT_CAPACITY : u8 = 255;
+pub const MAX_SAVED_LAYOUTS : u8 = 255;
 
 pub struct BoardLayoutToRonFilePlugin;
 
@@ -22,7 +22,7 @@ fn listen_for_save_requests(
     for _save_request in event_reader.read(){
         let saved_layout_reference = 
             db_manager.get_saved_layouts_ref();
-        if saved_layout_reference.len() >= BOARD_LAYOUT_CAPACITY as usize {
+        if saved_layout_reference.len() >= MAX_SAVED_LAYOUTS as usize {
             event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::WallsLayoutsAtCapacity));
         }
         else{

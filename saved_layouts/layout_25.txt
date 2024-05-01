@@ -1,0 +1,92 @@
+(
+    board_name: ("layout_25"),
+    board_props: (
+        size: Giant,
+        wall_count: 20,
+        empty_count: 1,
+        generation_method: Auto,
+        tree_traveller_type: BFS,
+    ),
+    wall_locations: [
+        (
+            row: 9,
+            col: 0,
+        ),
+        (
+            row: 4,
+            col: 0,
+        ),
+        (
+            row: 5,
+            col: 0,
+        ),
+        (
+            row: 3,
+            col: 0,
+        ),
+        (
+            row: 8,
+            col: 2,
+        ),
+        (
+            row: 4,
+            col: 5,
+        ),
+        (
+            row: 3,
+            col: 2,
+        ),
+        (
+            row: 6,
+            col: 8,
+        ),
+        (
+            row: 1,
+            col: 8,
+        ),
+        (
+            row: 5,
+            col: 5,
+        ),
+        (
+            row: 7,
+            col: 6,
+        ),
+        (
+            row: 8,
+            col: 3,
+        ),
+        (
+            row: 9,
+            col: 6,
+        ),
+        (
+            row: 0,
+            col: 3,
+        ),
+        (
+            row: 3,
+            col: 3,
+        ),
+        (
+            row: 9,
+            col: 5,
+        ),
+        (
+            row: 9,
+            col: 9,
+        ),
+        (
+            row: 1,
+            col: 1,
+        ),
+        (
+            row: 2,
+            col: 4,
+        ),
+        (
+            row: 0,
+            col: 4,
+        ),
+    ],
+)

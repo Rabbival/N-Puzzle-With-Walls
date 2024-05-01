@@ -1,5 +1,5 @@
 (
-    board_name: ("layout_2"),
+    board_name: ("layout_6"),
     board_props: (
         size: Giant,
         wall_count: 9,
@@ -10,39 +10,39 @@
     wall_locations: [
         (
             row: 0,
-            col: 9,
-        ),
-        (
-            row: 0,
-            col: 0,
+            col: 3,
         ),
         (
             row: 9,
             col: 2,
         ),
         (
-            row: 9,
-            col: 3,
-        ),
-        (
-            row: 9,
+            row: 0,
             col: 9,
-        ),
-        (
-            row: 7,
-            col: 0,
-        ),
-        (
-            row: 1,
-            col: 7,
         ),
         (
             row: 0,
             col: 4,
         ),
         (
-            row: 3,
+            row: 7,
             col: 6,
+        ),
+        (
+            row: 5,
+            col: 4,
+        ),
+        (
+            row: 4,
+            col: 4,
+        ),
+        (
+            row: 7,
+            col: 5,
+        ),
+        (
+            row: 2,
+            col: 4,
         ),
     ],
 )

@@ -83,7 +83,7 @@ fn set_slot_layout_preview(
     mut event_reader: EventReader<LoaderSlotSetEvent>,
     loader_screen_actions_query: Query<(&LoaderScreenAction, &Children)>,
     tile_board_query: Query<&TileBoard>,
-    layout_preview_parent_node_query: Query<Entity, With<LayoutPreviewParentNode>>,
+    layout_preview_parent_node_query: Query<(Entity, Option<&Children>), With<LayoutPreviewParentNode>>,
     mut commands: Commands
 ){
     for loader_slot_set_request in event_reader.read(){
@@ -108,7 +108,7 @@ fn set_slot_layout_preview_inner(
     tile_board_to_preview: &TileBoard,
     slot_to_set: LoaderScreenSlot,
     loader_screen_actions_query: &Query<(&LoaderScreenAction, &Children)>,
-    layout_preview_parent_node_query: &Query<Entity, With<LayoutPreviewParentNode>>,
+    layout_preview_parent_node_query: &Query<(Entity, Option<&Children>), With<LayoutPreviewParentNode>>,
     commands: &mut Commands
 ) -> Result<(), EntityRelatedCostumeError>
 {
@@ -118,8 +118,17 @@ fn set_slot_layout_preview_inner(
                 for child_entity in children.iter() {
                     let layout_slot_preview_node_result =
                         layout_preview_parent_node_query.get(*child_entity);
-                    if let Ok(preview_parent_node) = layout_slot_preview_node_result {
-                        construct_ui_layout_preview(
+                    if let Ok((
+                                  preview_parent_node, 
+                                  optional_layout_preview_rows
+                              )) 
+                        = layout_slot_preview_node_result 
+                    {
+                        despawn_previous_layout_preview(
+                            optional_layout_preview_rows,
+                            commands
+                        );
+                        spawn_new_layout_preview(
                             tile_board_to_preview,
                             preview_parent_node,
                             commands
@@ -134,13 +143,23 @@ fn set_slot_layout_preview_inner(
     Ok(())
 }
 
-fn construct_ui_layout_preview(
+fn despawn_previous_layout_preview(
+    optional_layout_preview_rows: Option<&Children>,
+    commands: &mut Commands
+){
+    if let Some(layout_preview_rows) = optional_layout_preview_rows{
+        for row in layout_preview_rows{
+            commands.entity(*row).despawn_recursive();
+        }
+    }
+}
+
+fn spawn_new_layout_preview(
     tile_board_to_preview: &TileBoard,
     preview_parent_node: Entity,
     commands: &mut Commands
 ){
     let mut preview_parent_entity = commands.get_entity(preview_parent_node).unwrap();
-    preview_parent_entity.clear_children();
     let tile_board_grid = &tile_board_to_preview.grid;
     let grid_side_length = *tile_board_grid.get_side_length();
     for r in 0..grid_side_length{
