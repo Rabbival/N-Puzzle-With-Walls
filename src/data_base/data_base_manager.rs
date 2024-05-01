@@ -120,10 +120,10 @@ fn save_to_data_base_and_system_inner(
 {
 	let layout_content_string = ron::ser::to_string_pretty(
 		&save_request.0, ron::ser::PrettyConfig::default()).unwrap();
-	let layout_name_string = db_manager.generate_default_name_for_board();
+	let layout_name_string = save_request.0.board_name.0.clone();
 	write_to_file(
 		FolderToAccess::SavedLayouts,
-		layout_name_string.0,
+		layout_name_string,
 		layout_content_string
 	).unwrap();
 

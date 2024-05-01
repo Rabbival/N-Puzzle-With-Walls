@@ -130,7 +130,6 @@ fn spawn_bottom_line(
 
 fn spawn_layout_slots_to_choose_from(
     mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
-    sprite_atlas: Res<SpriteAtlas>, //TODO: replace with real images Vec
     mut commands: Commands,
 ){
     for spawn_request in spawn_event_reader.read() {
@@ -158,13 +157,11 @@ fn spawn_layout_slots_to_choose_from(
                     parent,
                     spawn_request,
                     LoaderScreenSlot::TopLeft,
-                    sprite_atlas.image_handle.clone()
                 );
                 spawn_layout_entity(
                     parent,
                     spawn_request,
                     LoaderScreenSlot::TopRight,
-                    sprite_atlas.image_handle.clone()
                 );
             });
             //second row
@@ -180,13 +177,11 @@ fn spawn_layout_slots_to_choose_from(
                     parent,
                     spawn_request,
                     LoaderScreenSlot::BottomLeft,
-                    sprite_atlas.image_handle.clone()
                 );
                 spawn_layout_entity(
                     parent,
                     spawn_request,
                     LoaderScreenSlot::BottomRight,
-                    sprite_atlas.image_handle.clone()
                 );
             });
         });
@@ -197,7 +192,6 @@ fn spawn_layout_entity(
     parent: &mut ChildBuilder,
     spawn_request: &SpawnTextsAndButtons,
     loader_screen_slot: LoaderScreenSlot,
-    image_handle: Handle<Image>
 ){
     parent.spawn(NodeBundle {
         style: Style {
@@ -232,18 +226,30 @@ fn spawn_layout_entity(
            parent.spawn((
                 NodeBundle{
                     style: Style {
-                        width: Val::Percent(90.0),
-                        height: Val::Percent(90.0),
-                        flex_direction: FlexDirection::Row,
+                        width: Val::Percent(85.0),
+                        height: Val::Percent(85.0),
+                        flex_direction: FlexDirection::Column,
                         align_items: AlignItems::Center,
                         ..default()
                     },
-                    background_color: Color::WHITE.into(),
+                    background_color: Color::BLACK.into(),
                     ..default()
                 },
                 LayoutPreviewParentNode(loader_screen_slot),
-               UiImage::new(image_handle) //TODO: remove eventually, it's a placeholder
             )); 
+        });
+        //tiny gap node
+        layout_button_entity.with_children(|parent|{
+            parent.spawn((
+                NodeBundle{
+                    style: Style {
+                        width: Val::Percent(85.0),
+                        height: Val::Percent(2.0),
+                        ..default()
+                    },
+                    ..default()
+                },
+            ));
         });
     });
 }

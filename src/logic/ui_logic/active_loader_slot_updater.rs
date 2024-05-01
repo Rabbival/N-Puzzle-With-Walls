@@ -139,5 +139,46 @@ fn construct_ui_layout_preview(
     preview_parent_node: Entity,
     commands: &mut Commands
 ){
-    
+    let mut preview_parent_entity = commands.get_entity(preview_parent_node).unwrap();
+    preview_parent_entity.clear_children();
+    let tile_board_grid = &tile_board_to_preview.grid;
+    let grid_side_length = *tile_board_grid.get_side_length();
+    for r in 0..grid_side_length{
+        preview_parent_entity.with_children(|parent| {
+            let mut row_node = parent.spawn(NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    flex_direction: FlexDirection::Row,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                ..default()
+            });
+            for c in 0..grid_side_length{
+                let cell_get_result =
+                    tile_board_grid.get(&GridLocation::new(r as i32, c as i32));
+                let mut background_color : BackgroundColor = Color::NONE.into();
+                if let Ok(optional_tile_in_cell) = cell_get_result{
+                    if optional_tile_in_cell.is_some(){
+                        background_color = Color::INDIGO.into();
+                    }
+                };
+                row_node.with_children(|parent|{
+                    parent.spawn((
+                        NodeBundle{
+                            style: Style {
+                                width: Val::Percent(100.0),
+                                height: Val::Percent(100.0),
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color,
+                            ..default()
+                        },
+                    ));
+                });
+            }
+        });
+    }
 }

@@ -12,8 +12,8 @@ impl Plugin for BoardLayoutToRonFilePlugin{
 
 fn listen_for_save_requests(
     mut event_writer: EventWriter<LayoutSaveAttemptOutcomeEvent>,
-    mut event_reader: EventReader<SaveWallsLayoutButtonPressed>,
     mut write_to_db_event_writer: EventWriter<SaveToDB>,
+    mut event_reader: EventReader<SaveWallsLayoutButtonPressed>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     domain_boards_query: Query<&DomainBoard>,
     current_board_wall_locations: Res<CurrentBoardWallLocations>,
