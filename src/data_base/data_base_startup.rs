@@ -28,16 +28,18 @@ fn read_saved_layout_from_system_inner(commands: &mut Commands) -> Result<(), Da
 	for valid_text_file_name in valid_text_file_names{
 		match domain_board_from_file(
 			FolderToAccess::SavedLayouts,
-			valid_text_file_name
+			valid_text_file_name.clone()
 		){
 			Err(system_access_error) => {
 				return Err(DataBaseError::SystemAccessError(system_access_error));
 			},
 			Ok(parsed_domain_board) => {
+				let file_name_without_postfix =
+					String::from(&valid_text_file_name[..(valid_text_file_name.len()-4)]);
 				match determine_board_quality(&parsed_domain_board){
 					BoardQuality::Invalid => {
 						return Err(DataBaseError::WallListDoesntMatchWallCount(
-							parsed_domain_board.board_name.clone()
+							DomainBoardName(file_name_without_postfix)
 						));
 					},
 					_ => {
@@ -45,7 +47,13 @@ fn read_saved_layout_from_system_inner(commands: &mut Commands) -> Result<(), Da
 					}
 				};
 				
-				super::wrap_to_data_base_error(DataBaseManager::spawn_layout_entity(&parsed_domain_board, commands))?;
+				super::wrap_to_data_base_error(
+					DataBaseManager::spawn_layout_entity(
+						&DomainBoardName(file_name_without_postfix),
+						&parsed_domain_board,
+						commands
+					)
+				)?;
 			}
 		}
 	}
@@ -63,11 +71,13 @@ fn determine_board_quality(parsed_domain_board: &DomainBoard) -> BoardQuality{
 
 fn insert_saved_layout_entities_to_data_base(
 	mut db_manager: ResMut<DataBaseManager>,
-	domain_board_query: Query<(Entity, &DomainBoard)>,
+	domain_board_query: Query<(Entity, &DomainBoardName), With<DomainBoard>>,
 ){
-	for (entity, domain_board) in domain_board_query.iter(){
+	for (entity, domain_board_name)
+	in domain_board_query.iter()
+	{
 		db_manager.insert_layout(
-			&domain_board,
+			&domain_board_name,
 			&domain_board_query,
 			entity
 		);

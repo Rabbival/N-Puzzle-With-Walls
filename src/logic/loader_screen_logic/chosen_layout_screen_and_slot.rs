@@ -25,7 +25,7 @@ fn update_bottom_line_to_fit_new_chosen(
     optional_chosen_layout_screen_and_slot: Res<ChosenLayoutScreenAndSlot>,
     mut loader_screen_action_query: Query<&mut LoaderScreenAction>,
     mut chosen_layout_text_query: Query<&mut Text, With<ChosenLayoutTextTag>>,
-    domain_boards_query: Query<(Entity, &DomainBoard)>,
+    domain_board_name_query: Query<(Entity, &DomainBoardName)>,
     data_base_manager: Res<DataBaseManager>,
 ){
     let mut updated_chosen_layout_text = String::from("no chosen board");
@@ -42,12 +42,12 @@ fn update_bottom_line_to_fit_new_chosen(
         let new_chosen_ref_value = data_base_manager.try_get_layout_ref(&calculated_db_index);
 
         if let Some(entity) = new_chosen_ref_value{
-            let board_query_result = domain_boards_query.get(*entity);
-            if let Ok((layout_entity, board_ref)) = board_query_result{
-                updated_chosen_layout_text = String::from("chosen: ") + &board_ref.board_name.to_string();
+            let board_name_query_result = domain_board_name_query.get(*entity);
+            if let Ok((layout_entity, board_name)) = board_name_query_result{
+                updated_chosen_layout_text = String::from("chosen: ") + &board_name.to_string();
                 updated_optional_entity = Some(layout_entity);
                 updated_optional_index = Some(calculated_db_index);
-                updated_layout_name = DomainBoardName(board_ref.board_name.0.clone());
+                updated_layout_name = DomainBoardName(board_name.0.clone());
                 updated_page_number = Some(chosen_layout_screen_and_slot.screen)
             }
         }
