@@ -15,7 +15,7 @@ pub struct ChosenLayoutTextTag;
 pub struct ScreenChangeArrowTag;
 
 #[derive(Component)]
-pub struct LayoutPreviewParentNode(pub LoaderScreenSlot);
+pub struct LayoutPreviewNode(pub LoaderScreenSlot);
 
 pub struct LoaderScreenSpawnerPlugin;
 
@@ -235,7 +235,7 @@ fn spawn_layout_entity(
                     background_color: Color::BLACK.into(),
                     ..default()
                 },
-                LayoutPreviewParentNode(loader_screen_slot),
+                LayoutPreviewNode(loader_screen_slot),
             )); 
         });
         //tiny gap node

@@ -93,7 +93,6 @@ fn despawn_unused_tiles_and_clear_tag(
     >,
     mut commands: Commands,
 ) {
-    // should only execute if a solved board rerolled
     if tagged_tiles.is_empty() {
         return;
     }
