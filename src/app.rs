@@ -23,7 +23,6 @@ pub fn main() {
             BoardPlugin,
             GraphicsPlugin,
             TileDictionaryPlugin,
-            BoardLayoutToRonFilePlugin
         ));
 
     app.run();
