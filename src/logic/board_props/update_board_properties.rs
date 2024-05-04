@@ -75,6 +75,9 @@ fn general_update_planned_board_properties_inner(
         MenuButtonAction::ChangeGenerationMethod(generation_method) => {
             planned_board_prop.generation_method = *generation_method;
         }
+        MenuButtonAction::ChangeBoardDifficulty(board_difficulty) => {
+            planned_board_prop.board_difficulty = *board_difficulty;
+        }
         _ => {}
     }
 }

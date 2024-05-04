@@ -1,0 +1,32 @@
+(
+    board_props: (
+        board_difficulty: Medium,
+        size: Giant,
+        wall_count: 5,
+        empty_count: 1,
+        generation_method: Auto,
+        tree_traveller_type: BFS,
+    ),
+    wall_locations: [
+        (
+            row: 7,
+            col: 9,
+        ),
+        (
+            row: 0,
+            col: 0,
+        ),
+        (
+            row: 6,
+            col: 6,
+        ),
+        (
+            row: 3,
+            col: 7,
+        ),
+        (
+            row: 9,
+            col: 4,
+        ),
+    ],
+)

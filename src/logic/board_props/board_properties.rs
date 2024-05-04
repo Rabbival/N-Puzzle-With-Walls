@@ -13,6 +13,7 @@ pub struct PlannedBoardProperties;
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 pub struct BoardProperties {
+    pub board_difficulty: BoardDifficulty,
     pub size: BoardSize,
     pub wall_count: u8,
     pub empty_count: u8,
@@ -43,6 +44,7 @@ fn create_current_and_planned_board_properties(mut commands: Commands) {
 impl Default for BoardProperties {
     fn default() -> Self {
         Self {
+            board_difficulty: BoardDifficulty::default(),
             size: BoardSize::default(),
             wall_count: DEFAULT_WALL_COUNT,
             empty_count: DEFAULT_EMPTY_COUNT,
@@ -54,7 +56,9 @@ impl Default for BoardProperties {
 
 impl fmt::Display for BoardProperties{
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
-        fmt.write_str("BoardProperties(size: ")?;
+        fmt.write_str("BoardProperties(board_difficulty: ")?;
+        fmt.write_str(&self.board_difficulty.to_string())?;
+        fmt.write_str(", size: ")?;
         fmt.write_str(&self.size.to_string())?;
         fmt.write_str(", wall_count: ")?;
         fmt.write_str(&self.wall_count.to_string())?;

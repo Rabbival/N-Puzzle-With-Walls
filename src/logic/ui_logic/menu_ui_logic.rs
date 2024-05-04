@@ -83,7 +83,8 @@ fn update_menu_ui_after_press_general(
             MenuButtonAction::ChangeSize(_)
             | MenuButtonAction::ChangeEmptyTilesCount(_)
             | MenuButtonAction::ChangeGenerationMethod(_)
-            | MenuButtonAction::ChangeSpanningTreeGeneration(_) => {
+            | MenuButtonAction::ChangeSpanningTreeGeneration(_) 
+            | MenuButtonAction::ChangeBoardDifficulty(_) => {
                 mem::discriminant(&menu_button_action)
             }
             _ => continue,

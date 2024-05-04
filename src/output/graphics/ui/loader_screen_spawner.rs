@@ -3,9 +3,9 @@ use crate::prelude::*;
 
 const LAYOUT_MARGINS_RECT: UiRect = UiRect {
     top: Val::Px(0.0),
-    right: Val::Px(20.0),
-    bottom: Val::Px(50.0),
-    left: Val::Px(20.0)
+    right: Val::Px(10.0),
+    bottom: Val::Px(20.0),
+    left: Val::Px(10.0)
 };
 
 #[derive(Component)]
@@ -184,6 +184,16 @@ fn spawn_layout_slots_to_choose_from(
                     LoaderScreenSlot::BottomRight,
                 );
             });
+            //gap
+            parent.spawn(
+                 NodeBundle {
+                     style: Style {
+                         width: Val::Percent(100.0),
+                         height: Val::Percent(8.0),
+                         ..default()
+                     },
+                     ..default()
+                 });
         });
     }
 }
@@ -234,6 +244,7 @@ fn spawn_layout_entity(
                     },
                     ..default()
                 },
+               //TODO: uiimage
                 LayoutPreviewNode(loader_screen_slot),
             )); 
         });

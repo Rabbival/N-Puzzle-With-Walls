@@ -15,8 +15,8 @@ pub fn button_and_text_styles_emitter(
     mut spawn_texts_and_buttons_writer: EventWriter<SpawnTextsAndButtons>,
 ) {
     let board_props_button_style = Style {
-        width: Val::Px(240.0),
-        height: Val::Px(240.0),
+        width: Val::Px(270.0),
+        height: Val::Px(270.0),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         flex_direction: FlexDirection::Column,
