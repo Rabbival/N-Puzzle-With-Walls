@@ -1,6 +1,7 @@
 use enum_iterator::{all, Sequence};
 use std::fmt;
 use serde::{Deserialize, Serialize};
+use crate::collect_all;
 
 #[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub enum BoardSize {
@@ -13,9 +14,7 @@ pub enum BoardSize {
 }
 
 impl BoardSize {
-    pub fn as_list() -> Vec<BoardSize> {
-        all::<BoardSize>().collect::<Vec<BoardSize>>()
-    }
+    pub fn collect_all() -> Vec<Self> { collect_all!() }
 
     pub fn to_grid_side_length(&self) -> u8 {
         match *self {

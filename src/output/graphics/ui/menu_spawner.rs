@@ -123,6 +123,7 @@ fn spawn_generation_options(
     for spawn_request in spawn_event_reader.read() {
         let button_style = &spawn_request.common_button_style;
         let button_text_style = &spawn_request.medium_text_style;
+        let small_text_style = &spawn_request.small_text_style;
 
         commands
             .spawn((
@@ -145,15 +146,10 @@ fn spawn_generation_options(
                                 justify_content: JustifyContent::Start,
                                 ..default()
                             },
-                            background_color: Color::INDIGO.into(),
                             ..default()
                         },
                     ))
                     .with_children(|parent| {
-                        parent.spawn(TextBundle::from_section(
-                            String::from("Generation Method"),
-                            button_text_style.clone(),
-                        ));
                         parent
                             .spawn(NodeBundle {
                                 style: Style {
@@ -161,11 +157,12 @@ fn spawn_generation_options(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
+                                background_color: Color::INDIGO.into(),
                                 ..default()
                             })
                             .with_children(|parent| {
                                 //buttons
-                                for generation_method in BoardGenerationMethod::as_list() {
+                                for generation_method in BoardGenerationMethod::collect_all() {
                                     let mut button_entity = parent.spawn((
                                         ButtonBundle {
                                             style: button_style.clone(),
@@ -184,6 +181,47 @@ fn spawn_generation_options(
                                         ));
                                     });
                                     if generation_method == BoardGenerationMethod::default() {
+                                        button_entity.insert(SelectedOptionTag);
+                                        button_entity.insert(AppliedOptionTag);
+                                    }
+                                }
+                            });
+                        parent
+                            .spawn(NodeBundle {
+                                style: Style {
+                                    flex_direction: FlexDirection::Column,
+                                    align_items: AlignItems::Center,
+                                    ..default()
+                                },
+                                background_color: Color::INDIGO.into(),
+                                ..default()
+                            })
+                            .with_children(|parent| {
+                                parent.spawn(TextBundle::from_section(
+                                    String::from("Board Difficulty"),
+                                    small_text_style.clone(),
+                                ));
+
+                                //buttons
+                                for board_difficulty in BoardDifficulty::collect_all() {
+                                    let mut button_entity = parent.spawn((
+                                        ButtonBundle {
+                                            style: button_style.clone(),
+                                            background_color: super::NORMAL_BUTTON_COLOR.into(),
+                                            ..default()
+                                        },
+                                        MenuButtonAction::ChangeBoardDifficulty(board_difficulty),
+                                    ));
+                                    button_entity.with_children(|parent| {
+                                        parent.spawn((
+                                            TextBundle::from_section(
+                                                board_difficulty.to_string(),
+                                                small_text_style.clone(),
+                                            ),
+                                            ButtonText,
+                                        ));
+                                    });
+                                    if board_difficulty == BoardDifficulty::default() {
                                         button_entity.insert(SelectedOptionTag);
                                         button_entity.insert(AppliedOptionTag);
                                     }
@@ -230,7 +268,7 @@ fn spawn_size_options(
                             button_text_style.clone(),
                         ));
                         //buttons
-                        for board_size in BoardSize::as_list() {
+                        for board_size in BoardSize::collect_all() {
                             let mut button_entity = parent.spawn((
                                 ButtonBundle {
                                     style: button_style.clone(),
@@ -280,109 +318,60 @@ fn spawn_tile_counter(
             ))
             .with_children(|parent| {
                 parent
-                    // tree generation options
-                    .spawn((
-                        NodeBundle {
-                            style: Style {
-                                flex_direction: FlexDirection::Column,
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::End,
-                                ..default()
-                            },
-                            background_color: Color::INDIGO.into(),
-                            visibility: Visibility::Hidden,
-                            ..default()
-                        },
-                        CustomOnScreenTag{
-                            screen: AppState::Menu,
-                            on_own_screen_visibility: Some(Visibility::Hidden)
-                        },
-                        TreeGenerationOptionsTag,
-                    ))
-                    .with_children(|parent| {
-                        //title
-                        parent.spawn(TextBundle::from_section(
-                            " Default Wall \n   Placing ",
-                            small_text_style.clone(),
-                        ));
-                        //buttons
-                        for traveller_type in GridTravellerType::as_list() {
-                            let mut button_entity = parent.spawn((
-                                ButtonBundle {
-                                    style: regular_button_style.clone(),
-                                    background_color: super::NORMAL_BUTTON_COLOR.into(),
-                                    ..default()
-                                },
-                                MenuButtonAction::ChangeSpanningTreeGeneration(traveller_type),
-                            ));
-                            button_entity.with_children(|parent| {
-                                parent.spawn((
-                                    TextBundle::from_section(
-                                        traveller_type.to_button_option_text(),
-                                        small_text_style.clone(),
-                                    ),
-                                    ButtonText,
-                                ));
-                            });
-                            if traveller_type == GridTravellerType::default() {
-                                button_entity.insert(SelectedOptionTag);
-                                button_entity.insert(AppliedOptionTag);
-                            }
-                        }
-                    });
-
-                //actual tile counters
-                parent
                     .spawn(NodeBundle {
                         style: Style {
                             flex_direction: FlexDirection::Column,
-                            align_items: AlignItems::Center,
+                            align_items: AlignItems::End,
                             ..default()
                         },
-                        background_color: Color::INDIGO.into(),
                         ..default()
                     })
                     .with_children(|parent| {
-                        //title - empty
-                        parent.spawn(TextBundle::from_section(
-                            String::from("Empty Tiles"),
-                            button_text_style.clone(),
-                        ));
-                        //buttons - empty
-                        for (action, text) in [
-                            (MenuButtonAction::ChangeEmptyTilesCount(1), "1"),
-                            (MenuButtonAction::ChangeEmptyTilesCount(2), "2"),
-                        ] {
-                            let mut empty_tiles_count = 0;
-                            if let MenuButtonAction::ChangeEmptyTilesCount(number) = action {
-                                empty_tiles_count = number;
-                            }
-                            let mut button_entity = parent.spawn((
-                                ButtonBundle {
-                                    style: thin_button_style.clone(),
-                                    background_color: super::NORMAL_BUTTON_COLOR.into(),
-                                    ..default()
-                                },
-                                action,
-                            ));
-                            button_entity.with_children(|parent| {
-                                parent.spawn((
-                                    TextBundle::from_section(text, button_text_style.clone()),
-                                    ButtonText,
+                        parent.spawn(NodeBundle {
+                            style: Style {
+                                flex_direction: FlexDirection::Column,
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            background_color: Color::INDIGO.into(),
+                            ..default()
+                        })
+                            .with_children(|parent| {
+                                //title - empty
+                                parent.spawn(TextBundle::from_section(
+                                    String::from("Empty Tiles"),
+                                    button_text_style.clone(),
                                 ));
+                                //buttons - empty
+                                for (action, text) in [
+                                    (MenuButtonAction::ChangeEmptyTilesCount(1), "1"),
+                                    (MenuButtonAction::ChangeEmptyTilesCount(2), "2"),
+                                ] {
+                                    let mut empty_tiles_count = 0;
+                                    if let MenuButtonAction::ChangeEmptyTilesCount(number) = action {
+                                        empty_tiles_count = number;
+                                    }
+                                    let mut button_entity = parent.spawn((
+                                        ButtonBundle {
+                                            style: thin_button_style.clone(),
+                                            background_color: super::NORMAL_BUTTON_COLOR.into(),
+                                            ..default()
+                                        },
+                                        action,
+                                    ));
+                                    button_entity.with_children(|parent| {
+                                        parent.spawn((
+                                            TextBundle::from_section(text, button_text_style.clone()),
+                                            ButtonText,
+                                        ));
+                                    });
+                                    if empty_tiles_count == DEFAULT_EMPTY_COUNT {
+                                        button_entity.insert(SelectedOptionTag);
+                                        button_entity.insert(AppliedOptionTag);
+                                    }
+                                }
                             });
-                            if empty_tiles_count == DEFAULT_EMPTY_COUNT {
-                                button_entity.insert(SelectedOptionTag);
-                                button_entity.insert(AppliedOptionTag);
-                            }
-                        }
 
-                        //title - walls
-                        parent.spawn(TextBundle::from_section(
-                            String::from("Wall Tiles"),
-                            button_text_style.clone(),
-                        ));
-                        //buttons - walls
                         parent
                             .spawn(NodeBundle {
                                 style: Style {
@@ -393,67 +382,148 @@ fn spawn_tile_counter(
                                 ..default()
                             })
                             .with_children(|parent| {
-                                for (action, text) in [
-                                    (
-                                        Some(MenuButtonAction::ChangeWallTilesCount(
-                                            WallTilesChange::Decrease,
-                                        )),
-                                        "<",
-                                    ),
-                                    (None, " _ "),
-                                    (
-                                        Some(MenuButtonAction::ChangeWallTilesCount(
-                                            WallTilesChange::Increase,
-                                        )),
-                                        ">",
-                                    ),
-                                ] {
-                                    if action.is_none() {
-                                        parent.spawn((
-                                            TextBundle::from_section(
-                                                text,
-                                                button_text_style.clone(),
-                                            ),
-                                            WallCountTextTag,
+                                parent
+                                    // tree generation options
+                                    .spawn((
+                                        NodeBundle {
+                                            style: Style {
+                                                flex_direction: FlexDirection::Column,
+                                                align_items: AlignItems::Center,
+                                                justify_content: JustifyContent::Center,
+                                                ..default()
+                                            },
+                                            background_color: Color::INDIGO.into(),
+                                            visibility: Visibility::Hidden,
+                                            ..default()
+                                        },
+                                        CustomOnScreenTag{
+                                            screen: AppState::Menu,
+                                            on_own_screen_visibility: Some(Visibility::Hidden)
+                                        },
+                                        TreeGenerationOptionsTag,
+                                    ))
+                                    .with_children(|parent| {
+                                        //title
+                                        parent.spawn(TextBundle::from_section(
+                                            " Default Wall \n   Placing ",
+                                            small_text_style.clone(),
                                         ));
-                                    } else {
-                                        let mut arrow_button_entity = parent.spawn((
+                                        //buttons
+                                        for traveller_type in GridTravellerType::collect_all() {
+                                            let mut button_entity = parent.spawn((
+                                                ButtonBundle {
+                                                    style: regular_button_style.clone(),
+                                                    background_color: super::NORMAL_BUTTON_COLOR.into(),
+                                                    ..default()
+                                                },
+                                                MenuButtonAction::ChangeSpanningTreeGeneration(traveller_type),
+                                            ));
+                                            button_entity.with_children(|parent| {
+                                                parent.spawn((
+                                                    TextBundle::from_section(
+                                                        traveller_type.to_button_option_text(),
+                                                        small_text_style.clone(),
+                                                    ),
+                                                    ButtonText,
+                                                ));
+                                            });
+                                            if traveller_type == GridTravellerType::default() {
+                                                button_entity.insert(SelectedOptionTag);
+                                                button_entity.insert(AppliedOptionTag);
+                                            }
+                                        }
+                                    });
+
+                                parent
+                                    .spawn(NodeBundle {
+                                        style: Style {
+                                            flex_direction: FlexDirection::Column,
+                                            align_items: AlignItems::Center,
+                                            ..default()
+                                        },
+                                        background_color: Color::INDIGO.into(),
+                                        ..default()
+                                    })
+                                    .with_children(|parent| {
+                                        //title - walls
+                                        parent.spawn(TextBundle::from_section(
+                                            String::from(" Wall Tiles "),
+                                            button_text_style.clone(),
+                                        ));
+                                        //buttons - walls
+                                        parent
+                                            .spawn(NodeBundle {
+                                                style: Style {
+                                                    flex_direction: FlexDirection::Row,
+                                                    align_items: AlignItems::Center,
+                                                    ..default()
+                                                },
+                                                ..default()
+                                            })
+                                            .with_children(|parent| {
+                                                for (action, text) in [
+                                                    (
+                                                        Some(MenuButtonAction::ChangeWallTilesCount(
+                                                            WallTilesChange::Decrease,
+                                                        )),
+                                                        "<",
+                                                    ),
+                                                    (None, " _ "),
+                                                    (
+                                                        Some(MenuButtonAction::ChangeWallTilesCount(
+                                                            WallTilesChange::Increase,
+                                                        )),
+                                                        ">",
+                                                    ),
+                                                ] {
+                                                    if action.is_none() {
+                                                        parent.spawn((
+                                                            TextBundle::from_section(
+                                                                text,
+                                                                button_text_style.clone(),
+                                                            ),
+                                                            WallCountTextTag,
+                                                        ));
+                                                    } else {
+                                                        let mut arrow_button_entity = parent.spawn((
+                                                            ButtonBundle {
+                                                                style: thin_button_style.clone(),
+                                                                background_color: super::NORMAL_BUTTON_COLOR.into(),
+                                                                ..default()
+                                                            },
+                                                            action.unwrap(),
+                                                        ));
+                                                        arrow_button_entity.with_children(|parent| {
+                                                            parent.spawn((
+                                                                TextBundle::from_section(
+                                                                    text,
+                                                                    button_text_style.clone(),
+                                                                ),
+                                                                ButtonText,
+                                                            ));
+                                                        });
+                                                    }
+                                                }
+                                            });
+                                        //apply button
+                                        let mut apply_button_entity = parent.spawn((
                                             ButtonBundle {
-                                                style: thin_button_style.clone(),
+                                                style: regular_button_style.clone(),
                                                 background_color: super::NORMAL_BUTTON_COLOR.into(),
                                                 ..default()
                                             },
-                                            action.unwrap(),
+                                            MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),
+                                            SelectedOptionTag,
+                                            ApplyButtonTag,
                                         ));
-                                        arrow_button_entity.with_children(|parent| {
+                                        apply_button_entity.with_children(|parent| {
                                             parent.spawn((
-                                                TextBundle::from_section(
-                                                    text,
-                                                    button_text_style.clone(),
-                                                ),
+                                                TextBundle::from_section("Apply", button_text_style.clone()),
                                                 ButtonText,
                                             ));
                                         });
-                                    }
-                                }
-                            });
-                        //apply button
-                        let mut apply_button_entity = parent.spawn((
-                            ButtonBundle {
-                                style: regular_button_style.clone(),
-                                background_color: super::NORMAL_BUTTON_COLOR.into(),
-                                ..default()
-                            },
-                            MenuButtonAction::ChangeWallTilesCount(WallTilesChange::Apply),
-                            SelectedOptionTag,
-                            ApplyButtonTag,
-                        ));
-                        apply_button_entity.with_children(|parent| {
-                            parent.spawn((
-                                TextBundle::from_section("Apply", button_text_style.clone()),
-                                ButtonText,
-                            ));
-                        });
+                                    });
+                                });
                     });
             });
     }

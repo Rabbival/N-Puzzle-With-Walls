@@ -1,6 +1,7 @@
 use enum_iterator::{all, Sequence};
 use std::fmt;
 use serde::{Deserialize, Serialize};
+use crate::collect_all;
 use crate::prelude::AppState;
 
 #[derive(Sequence, Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
@@ -12,9 +13,7 @@ pub enum BoardGenerationMethod {
 }
 
 impl BoardGenerationMethod {
-    pub fn as_list() -> Vec<BoardGenerationMethod> {
-        all::<BoardGenerationMethod>().collect::<Vec<BoardGenerationMethod>>()
-    }
+    pub fn collect_all() -> Vec<Self> {collect_all!()}
     
     pub fn to_generation_button_text(&self) -> String {
         match self{

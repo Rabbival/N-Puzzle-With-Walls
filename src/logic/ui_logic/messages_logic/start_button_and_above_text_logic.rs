@@ -13,8 +13,9 @@ impl Plugin for TextAboveStartButtonLogicPlugin {
                     listen_for_apply_button_press,
                     (
                         listen_for_alert_dismissal,
-                        alert_player_of_reached_bounds.before(update_wall_count_unapplied),
-                        alert_player_of_unsaved_changes.after(update_wall_count_unapplied),
+                        // not really an input listener, but should happen before input handling
+                        alert_player_of_reached_bounds.in_set(InputSystemSets::InputListening),
+                        alert_player_of_unsaved_changes.in_set(InputSystemSets::InitialChanges),
                     ).chain(),
                     show_board_couldnt_be_generated,
                     update_main_button_text_to_show_functionality

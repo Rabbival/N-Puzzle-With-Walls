@@ -10,6 +10,9 @@ mod system_sets;
 mod data_base;
 mod system;
 
+#[macro_use]
+mod my_macros;
+
 
 pub mod prelude {
     pub use bevy::{prelude::*, utils::HashMap};
@@ -67,7 +70,7 @@ pub mod prelude {
             board_quality::*,
             board_property_enums::{
                 board_size::*, generation_method::*, grid_traveller_type::*, menu_button_action::*,
-                wall_tiles_change::*,
+                wall_tiles_change::*, board_difficulty::*,
             },
             loader_screen_slot::*,
             system_enum::{
