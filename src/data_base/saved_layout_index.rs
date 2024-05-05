@@ -1,17 +1,21 @@
-use crate::prelude::{LayoutLoaderScreenAndSlot, LoaderScreenSlot, SAVED_LAYOUTS_PER_SCREEN};
+use crate::prelude::*;
 
 #[derive(Default, Debug, PartialEq, Eq, Hash, PartialOrd, Clone, Copy)]
-pub struct SavedLayoutIndex(pub usize);
+pub struct SavedLayoutIndexInDifficultyVec {
+    pub difficulty: BoardDifficulty,
+    pub index_in_own_dif: usize
+}
 
-impl SavedLayoutIndex{
-    pub fn from_screen_and_slot(screen_and_slot: LayoutLoaderScreenAndSlot) -> Self {
-        SavedLayoutIndex(screen_and_slot.screen*SAVED_LAYOUTS_PER_SCREEN + screen_and_slot.slot.to_layout_offset())
-    }
-
-    pub fn try_to_layout_screen_and_slot(&self) -> Option<LayoutLoaderScreenAndSlot> {
-        Some(LayoutLoaderScreenAndSlot{
-            screen: self.0 / SAVED_LAYOUTS_PER_SCREEN,
-            slot: LoaderScreenSlot::try_from_layout_offset(self.0 % SAVED_LAYOUTS_PER_SCREEN)?
-        })
+impl SavedLayoutIndexInDifficultyVec{
+    pub fn from_screen_and_slot(
+        board_difficulty: &BoardDifficulty,
+        screen_and_slot: &LayoutLoaderScreenAndSlot
+    ) -> Self
+    {
+        SavedLayoutIndexInDifficultyVec {
+            difficulty: *board_difficulty,
+            index_in_own_dif: screen_and_slot.screen*SAVED_LAYOUTS_PER_SCREEN
+                + screen_and_slot.slot.to_layout_offset()
+        }
     }
 }

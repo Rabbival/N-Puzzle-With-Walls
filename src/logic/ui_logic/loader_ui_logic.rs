@@ -85,12 +85,14 @@ fn update_chosen_mark_after_change(
 pub fn show_currently_displayed_saved_layouts_screen(
     event_writer: EventWriter<LoaderSlotSetEvent>,
     data_base_manager: Res<DataBaseManager>,
+    applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
     loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag)>,
 ){
     if let Err(entity_error) = show_currently_displayed_saved_layouts_screen_inner(
         event_writer,
         data_base_manager,
+        applied_board_properties_query,
         displayed_loader_screen_number,
         loader_screen_actions_query
     ) {
@@ -101,16 +103,21 @@ pub fn show_currently_displayed_saved_layouts_screen(
 fn show_currently_displayed_saved_layouts_screen_inner(
     mut event_writer: EventWriter<LoaderSlotSetEvent>,
     data_base_manager: Res<DataBaseManager>,
+    applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
     mut loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag)>,
 ) -> Result<(), EntityRelatedCostumeError>
 {
     for currently_checked_screen_slot in all::<LoaderScreenSlot>(){
+        let applied_board_properties = applied_board_properties_query.single();
         let index_from_slot = 
-            SavedLayoutIndex::from_screen_and_slot(LayoutLoaderScreenAndSlot{
-                screen: displayed_loader_screen_number.0,
-                slot: currently_checked_screen_slot
-            });
+            SavedLayoutIndexInDifficultyVec::from_screen_and_slot(
+                &applied_board_properties.board_difficulty,
+    &LayoutLoaderScreenAndSlot{
+                    screen: displayed_loader_screen_number.0,
+                    slot: currently_checked_screen_slot
+                }
+            );
         let optional_layout_to_display =
             data_base_manager.try_get_layout_ref(&index_from_slot);
         match optional_layout_to_display{
@@ -144,12 +151,14 @@ fn hide_loader_slot(
 fn update_slots_info_after_change(
     event_writer: EventWriter<LoaderSlotSetEvent>,
     data_base_manager: Res<DataBaseManager>,
+    applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
     loader_screen_actions_query: Query<(&LoaderScreenAction, &mut CustomOnScreenTag)>,
 ){
     show_currently_displayed_saved_layouts_screen(
         event_writer,
         data_base_manager,
+        applied_board_properties_query,
         displayed_loader_screen_number,
         loader_screen_actions_query
     );
@@ -157,24 +166,36 @@ fn update_slots_info_after_change(
 
 fn only_show_arrows_if_theres_more_than_one_available_screen(
     data_base_manager: Res<DataBaseManager>,
+    applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut arrows_visibility_tags_query: Query<&mut CustomOnScreenTag, With<ScreenChangeArrowTag>>
 ){
-    let saved_layouts_count = data_base_manager.get_saved_layouts_ref().len();
+    let mut show_arrows = false;
+    let applied_board_properties = applied_board_properties_query.single();
+    let optional_current_dif_layouts_count =
+        data_base_manager.get_layouts_count_by_difficulty(&applied_board_properties.board_difficulty);
+    if let Some(current_dif_layouts_count) = optional_current_dif_layouts_count{
+        if current_dif_layouts_count > SAVED_LAYOUTS_PER_SCREEN{
+            show_arrows = true;
+        }
+    }
+
     for mut visibility_tag in arrows_visibility_tags_query.iter_mut(){
-        if saved_layouts_count <= SAVED_LAYOUTS_PER_SCREEN {
-            visibility_tag.on_own_screen_visibility = Some(Visibility::Hidden);
-        }else{
+        if show_arrows {
             visibility_tag.on_own_screen_visibility = Some(Visibility::Visible);
+        }else{
+            visibility_tag.on_own_screen_visibility = Some(Visibility::Hidden);
         }
     }
 }
 
 fn update_arrows_after_change(
     data_base_manager: Res<DataBaseManager>,
+    applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     arrows_visibility_tags_query: Query<&mut CustomOnScreenTag, With<ScreenChangeArrowTag>>
 ){
     only_show_arrows_if_theres_more_than_one_available_screen(
         data_base_manager,
+        applied_board_properties_query,
         arrows_visibility_tags_query
     );
 }

@@ -38,7 +38,7 @@ fn update_bottom_line_to_fit_new_chosen(
         optional_chosen_layout_screen_and_slot.0
     {
         let calculated_db_index =
-            SavedLayoutIndex::from_screen_and_slot(chosen_layout_screen_and_slot);
+            SavedLayoutIndexInDifficultyVec::from_screen_and_slot(chosen_layout_screen_and_slot);
         let new_chosen_ref_value = data_base_manager.try_get_layout_ref(&calculated_db_index);
 
         if let Some(entity) = new_chosen_ref_value{
@@ -96,7 +96,7 @@ fn listen_for_successful_save_to_db(
     for saving_to_db in event_reader.read(){
         if let Some(chosen_screen_and_slot) = &mut chosen_layout_screen_and_slot.0{
             let current_chosen_index =
-                SavedLayoutIndex::from_screen_and_slot(*chosen_screen_and_slot);
+                SavedLayoutIndexInDifficultyVec::from_screen_and_slot(*chosen_screen_and_slot);
             if saving_to_db.0 <= current_chosen_index{
                 chosen_screen_and_slot.increment();
             }
@@ -111,7 +111,7 @@ fn listen_for_successful_removal_from_db(
     for removal_from_db in event_reader.read(){
         if let Some(chosen_screen_and_slot) = &mut chosen_layout_screen_and_slot.0{
             let current_chosen_index =
-                SavedLayoutIndex::from_screen_and_slot(*chosen_screen_and_slot);
+                SavedLayoutIndexInDifficultyVec::from_screen_and_slot(*chosen_screen_and_slot);
             if removal_from_db.0 == current_chosen_index{
                 chosen_layout_screen_and_slot.0 = None;
             }else if removal_from_db.0 < current_chosen_index{

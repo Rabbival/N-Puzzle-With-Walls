@@ -23,16 +23,11 @@ pub struct BoardProperties {
     pub tree_traveller_type: GridTravellerType,
 }
 
-/// intended to keep track of the numbers not yet applied
-#[derive(Resource, Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub struct UnappliedMenuWallCount(pub u8);
-
 pub struct BoardPropertiesPlugin;
 
 impl Plugin for BoardPropertiesPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<UnappliedMenuWallCount>()
-            .add_systems(PreStartup, create_current_and_planned_board_properties);
+        app.add_systems(PreStartup, create_current_and_planned_board_properties);
     }
 }
 
@@ -40,6 +35,15 @@ fn create_current_and_planned_board_properties(mut commands: Commands) {
     commands.spawn((BoardProperties::default(), AppliedBoardProperties));
     commands.spawn((BoardProperties::default(), PlannedBoardProperties));
 }
+
+impl BoardProperties{
+    pub fn get_random_turns_range(&self) -> (u8, u8){
+        let (base_low, base_high) = self.size.to_random_turns_range();
+        let multiplier = self.board_difficulty.to_random_turns_multiplier();
+        ((base_low as f32 * multiplier) as u8, (base_high as f32 * multiplier) as u8)
+    }
+}
+
 
 impl Default for BoardProperties {
     fn default() -> Self {

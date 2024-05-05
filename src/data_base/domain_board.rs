@@ -13,9 +13,7 @@ impl DomainBoard{
 	pub fn to_string_for_button(&self) -> String {
 		let props = self.board_props;
 		
-		let mut string_for_button = String::from("Dif: ");
-		string_for_button += &props.board_difficulty.to_string();
-		string_for_button += ", Gen: ";
+		let mut string_for_button = String::from("Generated: ");
 		string_for_button += &props.generation_method.to_string();
 
 		string_for_button

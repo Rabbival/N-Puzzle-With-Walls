@@ -56,7 +56,7 @@ pub mod prelude {
         board_manager::*,
         board_props::{
             board_properties::*, BoardPropsPlugin, current_board_wall_locations::*,
-            update_board_properties::*,
+            update_board_properties::*, unapllied_menu_wall_count::*,
         },
         BoardPlugin,
         data_structure::{

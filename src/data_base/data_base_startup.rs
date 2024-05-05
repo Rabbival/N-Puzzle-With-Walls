@@ -71,15 +71,16 @@ fn determine_board_quality(parsed_domain_board: &DomainBoard) -> BoardQuality{
 
 fn insert_saved_layout_entities_to_data_base(
 	mut db_manager: ResMut<DataBaseManager>,
-	domain_board_query: Query<(Entity, &DomainBoardName), With<DomainBoard>>,
+	domain_board_query: Query<(Entity, &DomainBoardName, &DomainBoard)>,
 ){
-	for (entity, domain_board_name)
-	in domain_board_query.iter()
+	for (entity, domain_board_name, domain_board)
+		in domain_board_query.iter()
 	{
 		db_manager.insert_layout(
+			entity,
 			&domain_board_name,
+			&domain_board.board_props.board_difficulty,
 			&domain_board_query,
-			entity
 		);
 	}
 }

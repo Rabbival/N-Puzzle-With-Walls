@@ -4,16 +4,16 @@ use crate::prelude::*;
 pub struct SaveToDB(pub DomainBoard);
 
 #[derive(Event)]
-pub struct RemoveFromDB(pub SavedLayoutIndex);
+pub struct RemoveFromDB(pub SavedLayoutIndexInDifficultyVec);
 
 #[derive(Event)]
 pub struct ClearDB;
 
 #[derive(Event)]
-pub struct SuccessSavingToDB(pub SavedLayoutIndex);
+pub struct SuccessSavingToDB(pub SavedLayoutIndexInDifficultyVec);
 
 #[derive(Event)]
-pub struct SuccessRemovingFromDB(pub SavedLayoutIndex);
+pub struct SuccessRemovingFromDB(pub SavedLayoutIndexInDifficultyVec);
 
 #[derive(Event)]
 pub struct SuccessClearingDB;

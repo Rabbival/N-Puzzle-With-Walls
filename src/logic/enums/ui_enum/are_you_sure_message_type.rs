@@ -4,7 +4,7 @@ use crate::prelude::*;
 #[derive(Component, Debug, PartialEq, Eq, Hash, PartialOrd, Clone)]
 pub enum AreYouSureMessageType {
     DeleteAllBoards,
-    DeleteBoard(Option<(DomainBoardName, SavedLayoutIndex)>)
+    DeleteBoard(Option<(DomainBoardName, SavedLayoutIndexInDifficultyVec)>)
 }
 
 impl Display for AreYouSureMessageType{

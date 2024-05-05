@@ -41,8 +41,10 @@ fn build_a_new_board(
         }
         Ok(newborn_board) => {
             let attempt_result =
-                generate_game_board(newborn_board, applied_props.size.to_random_turns_range());
-            //generation successful
+                generate_game_board(
+                    newborn_board, 
+                    applied_props.get_random_turns_range()
+                );
             match attempt_result {
                 Ok(board) => {
                     game_state.set(GameState::GameBoardGenerated);

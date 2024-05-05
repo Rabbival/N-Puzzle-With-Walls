@@ -24,9 +24,7 @@ fn listen_for_save_requests(
     db_manager: Res<DataBaseManager>
 ){
     for _save_request in event_reader.read(){
-        let saved_layout_reference =
-            db_manager.get_saved_layouts_ref();
-        if saved_layout_reference.len() >= super::MAX_SAVED_LAYOUTS as usize {
+        if db_manager.get_saved_layouts_of_all_difficulties_count() >= super::MAX_SAVED_LAYOUTS as usize {
             event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::WallsLayoutsAtCapacity));
         }
         else{
@@ -66,14 +64,14 @@ fn save_to_data_base_and_system(
     mut event_writer: EventWriter<SuccessSavingToDB>,
     mut event_reader: EventReader<SaveToDB>,
     mut db_manager: ResMut<DataBaseManager>,
-    domain_board_name_query: Query<(Entity, &DomainBoardName), With<DomainBoard>>,
+    domain_board_query: Query<(Entity, &DomainBoardName, &DomainBoard)>,
     mut commands: Commands
 ){
     for save_request in event_reader.read(){
         match save_to_data_base_and_system_inner(
             save_request,
             &mut db_manager,
-            &domain_board_name_query,
+            &domain_board_query,
             &mut commands
         ){
             Err(data_base_error) => {
@@ -89,9 +87,9 @@ fn save_to_data_base_and_system(
 fn save_to_data_base_and_system_inner(
     save_request: &SaveToDB,
     db_manager: &mut DataBaseManager,
-    domain_board_name_query: &Query<(Entity, &DomainBoardName), With<DomainBoard>>,
+    domain_board_query: &Query<(Entity, &DomainBoardName, &DomainBoard)>,
     commands: &mut Commands
-) -> Result<SavedLayoutIndex, DataBaseError>
+) -> Result<SavedLayoutIndexInDifficultyVec, DataBaseError>
 {
     let layout_content_string = ron::ser::to_string_pretty(
         &save_request.0, ron::ser::PrettyConfig::default()).unwrap();
@@ -106,7 +104,7 @@ fn save_to_data_base_and_system_inner(
         db_manager.insert_layout_and_spawn_entity(
             &DomainBoardName(layout_name_string),
             &save_request.0,
-            domain_board_name_query,
+            domain_board_query,
             commands
         )
     )
@@ -137,7 +135,7 @@ fn remove_from_data_base_and_system(
 }
 
 fn remove_from_data_base_and_system_inner(
-    layout_index: &SavedLayoutIndex,
+    layout_index: &SavedLayoutIndexInDifficultyVec,
     db_manager: &mut DataBaseManager,
     domain_board_name_query: &Query<&DomainBoardName>,
     commands: &mut Commands
@@ -181,7 +179,7 @@ fn clear_db(
     db_manager: &mut DataBaseManager
 ) -> Result<(), DataBaseError>
 {
-    db_manager.saved_layouts = vec!();
+    db_manager.saved_layouts = HashMap::new();
     create_folder_if_none_exists_yet(FolderToAccess::SavedLayouts);
     let valid_text_file_names =
         get_all_valid_text_file_names_in_folder(FolderToAccess::SavedLayouts);

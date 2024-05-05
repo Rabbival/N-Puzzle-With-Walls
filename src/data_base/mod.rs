@@ -23,7 +23,7 @@ pub const MAX_SAVED_LAYOUTS : u8 = 255;
 
 #[derive(Resource, Default)]
 pub struct DataBaseManager{
-	saved_layouts: Vec<Entity>,
+	saved_layouts: HashMap<BoardDifficulty, Vec<Entity>>,
 }
 
 fn wrap_to_data_base_error<T>(result: Result<T, GridError>) -> Result<T, DataBaseError> {
