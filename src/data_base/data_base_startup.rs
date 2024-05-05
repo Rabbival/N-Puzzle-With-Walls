@@ -78,7 +78,7 @@ fn insert_saved_layout_entities_to_data_base(
 	{
 		db_manager.insert_layout(
 			entity,
-			&domain_board_name,
+			domain_board_name,
 			&domain_board.board_props.board_difficulty,
 			&domain_board_query,
 		);

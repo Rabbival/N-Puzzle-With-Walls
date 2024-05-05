@@ -276,6 +276,10 @@ fn spawn_size_options(
                                     ..default()
                                 },
                                 MenuButtonAction::ChangeSize(board_size),
+                                CustomOnScreenTag{
+                                    screen: AppState::Menu,
+                                    on_own_screen_visibility: Some(Visibility::Visible)
+                                }
                             ));
                             button_entity.with_children(|parent| {
                                 parent.spawn((
@@ -358,6 +362,10 @@ fn spawn_tile_counter(
                                             ..default()
                                         },
                                         action,
+                                        CustomOnScreenTag{
+                                            screen: AppState::Menu,
+                                            on_own_screen_visibility: Some(Visibility::Visible)
+                                        }
                                     ));
                                     button_entity.with_children(|parent| {
                                         parent.spawn((
@@ -492,6 +500,10 @@ fn spawn_tile_counter(
                                                                 ..default()
                                                             },
                                                             action.unwrap(),
+                                                            CustomOnScreenTag{
+                                                                screen: AppState::Menu,
+                                                                on_own_screen_visibility: Some(Visibility::Visible)
+                                                            }
                                                         ));
                                                         arrow_button_entity.with_children(|parent| {
                                                             parent.spawn((

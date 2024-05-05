@@ -5,7 +5,11 @@ pub struct MenuUiLogicPlugin;
 
 impl Plugin for MenuUiLogicPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
+        app
+            .add_systems(OnEnter(AppState::Menu),
+                show_options_that_hide_when_loading_if_not_loading
+            )
+            .add_systems(
             Update,
             (
                 update_wall_tiles_count_visuals
@@ -15,8 +19,9 @@ impl Plugin for MenuUiLogicPlugin {
                 (
                     update_menu_ui_after_press_general,
                     increase_or_decrease_wall_count_menu_ui_update,
-                    set_applied_props,
+                    show_applied_props,
                     set_tree_generation_options_visibility,
+                    toggle_options_relevant_to_loader
                 )
                     .in_set(InputSystemSets::InputHandling),
                 apply_wall_count_menu_ui_update.in_set(InputSystemSets::PostMainChanges),
@@ -106,6 +111,74 @@ fn update_menu_ui_after_press_general(
     }
 }
 
+fn toggle_options_relevant_to_loader(
+    mut visibility_change_event_writer: EventWriter<SetEntityVisibility>,
+    mut button_event_reader: EventReader<MenuButtonPressed>,
+    mut menu_buttons: Query<(Entity, &MenuButtonAction, &mut CustomOnScreenTag)>,
+){
+    for button_event in button_event_reader.read() {
+        if let MenuButtonAction::ChangeGenerationMethod(new_generation_method) =
+            button_event.action
+        {
+            let new_visibility = if new_generation_method == BoardGenerationMethod::Load {
+                Visibility::Hidden
+            }else{
+                Visibility::Visible
+            };
+
+            set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
+                new_visibility,
+                &mut visibility_change_event_writer,
+                &mut menu_buttons
+            );
+        }
+    }
+}
+
+fn show_options_that_hide_when_loading_if_not_loading(
+    applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
+    mut visibility_change_event_writer: EventWriter<SetEntityVisibility>,
+    mut menu_buttons: Query<(Entity, &MenuButtonAction, &mut CustomOnScreenTag)>,
+){
+    let applied_board_properties = applied_board_properties_query.single();
+    if applied_board_properties.generation_method != BoardGenerationMethod::Load{
+        set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
+            Visibility::Visible,
+            &mut visibility_change_event_writer,
+            &mut menu_buttons
+        );
+    }
+}
+
+fn set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
+    new_visibility: Visibility,
+    visibility_change_event_writer: &mut EventWriter<SetEntityVisibility>,
+    menu_buttons: &mut Query<(Entity, &MenuButtonAction, &mut CustomOnScreenTag)>,
+){
+    for (
+        menu_button,
+        button_action,
+        mut on_screen_tag
+    ) in menu_buttons.iter_mut()
+    {
+        match button_action {
+            MenuButtonAction::ChangeSize(_)
+            | MenuButtonAction::ChangeWallTilesCount(_)
+            | MenuButtonAction::ChangeEmptyTilesCount(_)
+            | MenuButtonAction::ChangeSpanningTreeGeneration(_)
+            =>
+                {
+                    on_screen_tag.on_own_screen_visibility = Some(new_visibility);
+                    visibility_change_event_writer.send(SetEntityVisibility{
+                        entity: menu_button,
+                        visibility: new_visibility
+                    });
+                }
+            _ => continue,
+        };
+    }
+}
+
 fn increase_or_decrease_wall_count_menu_ui_update(
     mut button_event_reader: EventReader<MenuButtonPressed>,
     mut apply_button_query: Query<(Entity, &mut BackgroundColor), With<ApplyButtonTag>>,
@@ -164,7 +237,7 @@ fn set_tree_generation_options_visibility(
     }
 }
 
-fn set_applied_props(
+fn show_applied_props(
     mut button_event_reader: EventReader<MenuButtonPressed>,
     mut currently_chosen: Query<
         (Entity, &mut BackgroundColor, &MenuButtonAction),

@@ -53,9 +53,9 @@ impl DataBaseManager {
             0
         };
 
-        let mut layouts_of_same_difficult_mut =
+        let layouts_of_same_difficulty_mut =
             self.saved_layouts.get_mut(new_domain_board_difficulty).unwrap();
-        layouts_of_same_difficult_mut.insert(index_in_dif_vec, new_board_entity);
+        layouts_of_same_difficulty_mut.insert(index_in_dif_vec, new_board_entity);
 
         SavedLayoutIndexInDifficultyVec {
             difficulty: *new_domain_board_difficulty,
@@ -111,7 +111,7 @@ impl DataBaseManager {
         }
         combined_length
     }
-    
+
     pub fn get_layouts_count_by_difficulty(&self, board_difficulty: &BoardDifficulty) -> Option<usize> {
         Some(self.saved_layouts.get(board_difficulty)?.len())
     }
