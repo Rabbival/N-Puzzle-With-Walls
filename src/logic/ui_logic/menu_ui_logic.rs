@@ -114,7 +114,7 @@ fn update_menu_ui_after_press_general(
 fn toggle_options_relevant_to_loader(
     mut visibility_change_event_writer: EventWriter<SetEntityVisibility>,
     mut button_event_reader: EventReader<MenuButtonPressed>,
-    mut menu_buttons: Query<(Entity, &MenuButtonAction, &mut CustomOnScreenTag)>,
+    mut menu_nodes: Query<(Entity, &mut CustomOnScreenTag), With<HideOnWhenChoosingLoader>>,
 ){
     for button_event in button_event_reader.read() {
         if let MenuButtonAction::ChangeGenerationMethod(new_generation_method) =
@@ -129,7 +129,7 @@ fn toggle_options_relevant_to_loader(
             set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
                 new_visibility,
                 &mut visibility_change_event_writer,
-                &mut menu_buttons
+                &mut menu_nodes
             );
         }
     }
@@ -138,14 +138,14 @@ fn toggle_options_relevant_to_loader(
 fn show_options_that_hide_when_loading_if_not_loading(
     applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut visibility_change_event_writer: EventWriter<SetEntityVisibility>,
-    mut menu_buttons: Query<(Entity, &MenuButtonAction, &mut CustomOnScreenTag)>,
+    mut menu_nodes: Query<(Entity, &mut CustomOnScreenTag), With<HideOnWhenChoosingLoader>>,
 ){
     let applied_board_properties = applied_board_properties_query.single();
     if applied_board_properties.generation_method != BoardGenerationMethod::Load{
         set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
             Visibility::Visible,
             &mut visibility_change_event_writer,
-            &mut menu_buttons
+            &mut menu_nodes
         );
     }
 }
@@ -153,29 +153,14 @@ fn show_options_that_hide_when_loading_if_not_loading(
 fn set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
     new_visibility: Visibility,
     visibility_change_event_writer: &mut EventWriter<SetEntityVisibility>,
-    menu_buttons: &mut Query<(Entity, &MenuButtonAction, &mut CustomOnScreenTag)>,
+    menu_nodes: &mut Query<(Entity, &mut CustomOnScreenTag), With<HideOnWhenChoosingLoader>>,
 ){
-    for (
-        menu_button,
-        button_action,
-        mut on_screen_tag
-    ) in menu_buttons.iter_mut()
-    {
-        match button_action {
-            MenuButtonAction::ChangeSize(_)
-            | MenuButtonAction::ChangeWallTilesCount(_)
-            | MenuButtonAction::ChangeEmptyTilesCount(_)
-            | MenuButtonAction::ChangeSpanningTreeGeneration(_)
-            =>
-                {
-                    on_screen_tag.on_own_screen_visibility = Some(new_visibility);
-                    visibility_change_event_writer.send(SetEntityVisibility{
-                        entity: menu_button,
-                        visibility: new_visibility
-                    });
-                }
-            _ => continue,
-        };
+    for (node_entity, mut on_screen_tag) in menu_nodes.iter_mut() {
+        on_screen_tag.on_own_screen_visibility = Some(new_visibility);
+        visibility_change_event_writer.send(SetEntityVisibility {
+            entity: node_entity,
+            visibility: new_visibility
+        });
     }
 }
 

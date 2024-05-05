@@ -79,7 +79,7 @@ fn calculate_last_screen_number(
         data_base_manager.get_layouts_count_by_difficulty(&applied_board_properties.board_difficulty);
     let layouts_with_dif_count = optional_layouts_with_dif_count.unwrap_or_default();
     let mut last_screen = layouts_with_dif_count / SAVED_LAYOUTS_PER_SCREEN;
-    if layouts_with_dif_count % SAVED_LAYOUTS_PER_SCREEN == 0 {
+    if layouts_with_dif_count != 0 && layouts_with_dif_count % SAVED_LAYOUTS_PER_SCREEN == 0 {
         last_screen -= 1;
     }
     last_screen

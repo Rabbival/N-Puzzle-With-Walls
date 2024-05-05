@@ -22,6 +22,9 @@ pub struct BoardGenerationTextTag;
 pub struct TreeGenerationOptionsTag;
 
 #[derive(Component)]
+pub struct HideOnWhenChoosingLoader;
+
+#[derive(Component)]
 pub struct UpperTextAboveStartButton;
 #[derive(Component)]
 pub struct LowerTextAboveStartButton;
@@ -248,7 +251,11 @@ fn spawn_size_options(
                    Visibility::Hidden,
                    None
                ),
-               simple_on_screen_tag(AppState::Menu),
+               HideOnWhenChoosingLoader,
+               CustomOnScreenTag{
+                   screen: AppState::Menu,
+                   on_own_screen_visibility: Some(Visibility::Visible)
+               }
             ))
             .with_children(|parent| {
                 parent
@@ -276,10 +283,6 @@ fn spawn_size_options(
                                     ..default()
                                 },
                                 MenuButtonAction::ChangeSize(board_size),
-                                CustomOnScreenTag{
-                                    screen: AppState::Menu,
-                                    on_own_screen_visibility: Some(Visibility::Visible)
-                                }
                             ));
                             button_entity.with_children(|parent| {
                                 parent.spawn((
@@ -318,7 +321,11 @@ fn spawn_tile_counter(
                    Visibility::Hidden,
                    None
                ),
-               simple_on_screen_tag(AppState::Menu),
+               HideOnWhenChoosingLoader,
+               CustomOnScreenTag{
+                   screen: AppState::Menu,
+                   on_own_screen_visibility: Some(Visibility::Visible)
+               }
             ))
             .with_children(|parent| {
                 parent
@@ -362,10 +369,6 @@ fn spawn_tile_counter(
                                             ..default()
                                         },
                                         action,
-                                        CustomOnScreenTag{
-                                            screen: AppState::Menu,
-                                            on_own_screen_visibility: Some(Visibility::Visible)
-                                        }
                                     ));
                                     button_entity.with_children(|parent| {
                                         parent.spawn((
@@ -500,10 +503,6 @@ fn spawn_tile_counter(
                                                                 ..default()
                                                             },
                                                             action.unwrap(),
-                                                            CustomOnScreenTag{
-                                                                screen: AppState::Menu,
-                                                                on_own_screen_visibility: Some(Visibility::Visible)
-                                                            }
                                                         ));
                                                         arrow_button_entity.with_children(|parent| {
                                                             parent.spawn((
