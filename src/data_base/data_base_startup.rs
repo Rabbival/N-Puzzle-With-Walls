@@ -24,7 +24,7 @@ fn read_saved_layout_from_system_inner(commands: &mut Commands) -> Result<(), Da
 	create_folder_if_none_exists_yet(FolderToAccess::SavedLayouts);
 	let valid_text_file_names =
 		get_all_valid_text_file_names_in_folder(FolderToAccess::SavedLayouts);
-
+	
 	for valid_text_file_name in valid_text_file_names{
 		match domain_board_from_file(
 			FolderToAccess::SavedLayouts,
@@ -34,8 +34,7 @@ fn read_saved_layout_from_system_inner(commands: &mut Commands) -> Result<(), Da
 				return Err(DataBaseError::SystemAccessError(system_access_error));
 			},
 			Ok(parsed_domain_board) => {
-				let file_name_without_postfix =
-					String::from(&valid_text_file_name[..(valid_text_file_name.len()-4)]);
+				let file_name_without_postfix = valid_text_file_name.to_name();
 				match determine_board_quality(&parsed_domain_board){
 					BoardQuality::Invalid => {
 						return Err(DataBaseError::WallListDoesntMatchWallCount(

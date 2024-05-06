@@ -76,6 +76,7 @@ pub mod prelude {
             system_enum::{
                 folder_to_access::*,
                 save_attempt_outcome::*,
+                system_file_type::*,
             },
             tile_type::*,
             ui_enum::{
@@ -169,6 +170,7 @@ pub mod prelude {
         ron_loader::*,
         system_access::*,
         text_file_system_access::*,
+        system_file_name::*,
     };
     pub use crate::screen_setup::*;
     pub use crate::system_sets::*;

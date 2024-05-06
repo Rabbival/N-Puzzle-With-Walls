@@ -32,11 +32,19 @@ impl Plugin for LoaderUiLogicPlugin {
 
 fn listen_to_jump_to_page_requests(
     mut event_reader: EventReader<LoaderScreenActionEvent>,
+    mut applied_board_properties: Query<&mut BoardProperties, With<AppliedBoardProperties>>,
     mut displayed_loader_screen_number: ResMut<DisplayedLoaderScreenNumber>,
 ){
     for event in event_reader.read(){
-        if let LoaderScreenAction::JumpToChosenLayoutScreen(Some(screen_number)) = event.action{
+        if let LoaderScreenAction::JumpToChosenLayoutScreen(
+            Some(screen_number), 
+            chosen_board_difficulty
+        ) = 
+            event.action
+        {
             displayed_loader_screen_number.0 = screen_number;
+            let applied_props_difficulty = &mut applied_board_properties.single_mut().board_difficulty;
+            *applied_props_difficulty = chosen_board_difficulty;
         }
     }
 }

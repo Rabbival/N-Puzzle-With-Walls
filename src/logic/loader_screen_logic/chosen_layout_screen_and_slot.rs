@@ -29,6 +29,9 @@ fn update_bottom_line_to_fit_new_chosen(
     domain_board_name_query: Query<(Entity, &DomainBoardName)>,
     data_base_manager: Res<DataBaseManager>,
 ){
+    let applied_board_properties = applied_board_properties_query.single();
+    let currently_shown_difficulty = applied_board_properties.board_difficulty;
+    
     let mut updated_chosen_layout_text = String::from("no chosen board");
     let mut updated_optional_entity = None;
     let mut updated_optional_index = None;
@@ -38,10 +41,10 @@ fn update_bottom_line_to_fit_new_chosen(
     if let Some(chosen_layout_screen_and_slot) =
         optional_chosen_layout_screen_and_slot.0
     {
-        let applied_board_properties = applied_board_properties_query.single();
+        
         let calculated_db_index =
             SavedLayoutIndexInDifficultyVec::from_screen_and_slot(
-                &applied_board_properties.board_difficulty,
+                &currently_shown_difficulty,
                 &chosen_layout_screen_and_slot
             );
         let new_chosen_ref_value = data_base_manager.try_get_layout_ref(&calculated_db_index);
@@ -71,9 +74,14 @@ fn update_bottom_line_to_fit_new_chosen(
                     *optional_tuple = Some((updated_layout_name.clone(), updated_optional_index.unwrap()));
                 }
             },
-            LoaderScreenAction::JumpToChosenLayoutScreen(optional_page_to_jump_to) => {
-                *optional_page_to_jump_to = updated_page_number;
-            },
+            LoaderScreenAction::JumpToChosenLayoutScreen(
+                optional_page_to_jump_to, 
+                board_difficulty
+            ) => 
+                {
+                    *optional_page_to_jump_to = updated_page_number;
+                    *board_difficulty = currently_shown_difficulty;
+                },
             _ => {}
         }
     }

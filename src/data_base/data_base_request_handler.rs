@@ -149,7 +149,12 @@ fn remove_from_data_base_and_system_inner(
             ).is_err()
             {
                 Err(DataBaseError::SystemAccessError
-                    (SystemAccessError::CouldntFindFile(FileName(removed_domain_board_name.0.clone()))))
+                    (SystemAccessError::CouldntFindFile(
+                        SystemFileName::from_name(
+                            removed_domain_board_name.0, 
+                            SystemFileType::TextFile
+                        )
+                    )))
             }else{
                 Ok(())
             }
@@ -186,14 +191,14 @@ fn clear_db(
 
     for valid_text_file_name in valid_text_file_names{
         let valid_text_file_name_excluding_postfix =
-            &valid_text_file_name[..valid_text_file_name.len()-4];
+            valid_text_file_name.to_name();
         let file_deletion_result = delete_text_file(
             FolderToAccess::SavedLayouts,
             String::from(valid_text_file_name_excluding_postfix)
         );
         if file_deletion_result.is_err(){
             return Err(DataBaseError::SystemAccessError
-                (SystemAccessError::CouldntFindFile(FileName(valid_text_file_name))));
+                (SystemAccessError::CouldntFindFile(valid_text_file_name)));
         }
     }
     Ok(())
