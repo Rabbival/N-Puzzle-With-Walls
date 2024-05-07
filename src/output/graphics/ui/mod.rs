@@ -7,6 +7,7 @@ pub mod messages_spawners;
 pub mod save_walls_layout_button_spawner;
 pub mod loader_screen_spawner;
 pub mod layout_preview_handler;
+pub mod hide_by_chosen_generation_method;
 
 pub const NORMAL_BUTTON_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
 pub const HOVERED_BUTTON_COLOR: Color = Color::rgb(0.2, 0.2, 0.2);
@@ -28,9 +29,6 @@ pub const PRESSED_IMAGED_BUTTON_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
 
 #[derive(Component)]
 pub struct ButtonText;
-
-#[derive(Component)]
-pub struct HideWhenChoosingGenerationMethod(pub Vec<BoardGenerationMethod>);
 
 pub struct UiGraphicsPlugin;
 

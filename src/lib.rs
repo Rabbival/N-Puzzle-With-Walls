@@ -151,6 +151,7 @@ pub mod prelude {
                 },
                 save_walls_layout_button_spawner::*,
                 layout_preview_handler::*,
+                hide_by_chosen_generation_method::*,
                 set_color_to_imaged_normal,
                 set_color_to_imaged_pressed,
                 set_color_to_normal,
@@ -158,7 +159,6 @@ pub mod prelude {
                 set_text_section_value_and_color,
                 UiGraphicsPlugin,
                 ImagedButtonTag,
-                HideWhenChoosingGenerationMethod
             },
             visibility_tags::{
                 custom_on_screen_tag::*,

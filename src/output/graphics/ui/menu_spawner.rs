@@ -103,7 +103,8 @@ fn spawn_generate_button(
                            "",
                            tiny_red_text_style.clone()
                        ),
-                       HideWhenChoosingGenerationMethod(vec!(BoardGenerationMethod::Load)),
+                       HideByChosenGenerationMethod::
+                            new(vec!(BoardGenerationMethod::Load)),
                        CustomOnScreenTag{
                            screen: AppState::Menu,
                            on_own_screen_visibility: Some(Hidden)
@@ -116,7 +117,8 @@ fn spawn_generate_button(
                             "",
                             tiny_red_text_style.clone()
                         ),
-                        HideWhenChoosingGenerationMethod(vec!(BoardGenerationMethod::Load)),
+                        HideByChosenGenerationMethod::
+                            new(vec!(BoardGenerationMethod::Load)),
                         CustomOnScreenTag{
                           screen: AppState::Menu,
                             on_own_screen_visibility: Some(Hidden)
@@ -259,7 +261,8 @@ fn spawn_size_options(
                    Visibility::Hidden,
                    None
                ),
-               HideWhenChoosingGenerationMethod(vec!(BoardGenerationMethod::Load)),
+               HideByChosenGenerationMethod::
+                    new(vec!(BoardGenerationMethod::Load)),
                CustomOnScreenTag{
                    screen: AppState::Menu,
                    on_own_screen_visibility: Some(Visibility::Visible)
@@ -329,7 +332,8 @@ fn spawn_tile_counter(
                    Visibility::Hidden,
                    None
                ),
-               HideWhenChoosingGenerationMethod(vec!(BoardGenerationMethod::Load)),
+               HideByChosenGenerationMethod::
+                    new(vec!(BoardGenerationMethod::Load)),
                CustomOnScreenTag{
                    screen: AppState::Menu,
                    on_own_screen_visibility: Some(Visibility::Visible)
@@ -419,7 +423,8 @@ fn spawn_tile_counter(
                                             screen: AppState::Menu,
                                             on_own_screen_visibility: Some(Visibility::Hidden)
                                         },
-                                        HideWhenChoosingGenerationMethod(vec!(BoardGenerationMethod::Load)),
+                                        HideByChosenGenerationMethod::
+                                            new(vec!(BoardGenerationMethod::Load)),
                                         TreeGenerationOptionsTag,
                                     ))
                                     .with_children(|parent| {
