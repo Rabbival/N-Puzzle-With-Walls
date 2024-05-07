@@ -120,7 +120,7 @@ fn tick_text_reset_timer(
     mut commands: Commands
 ){
     let query_length = save_button_timer_query.iter().len();
-    for (mut timer_ref, timer_entity) in save_button_timer_query.iter_mut(){
+    for (mut timer_ref, timer_entity) in &mut save_button_timer_query{
         timer_ref.0.tick(time.delta());
         if timer_ref.0.just_finished(){
             commands.entity(timer_entity).despawn();

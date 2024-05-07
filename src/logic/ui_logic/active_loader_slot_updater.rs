@@ -20,7 +20,7 @@ fn show_slot(
 ){
     for slot_set_request in event_reader.read(){
         for (loader_action, mut layout_slot_on_screen_tag)
-            in loader_screen_actions_query.iter_mut()
+            in &mut loader_screen_actions_query
         {
             if let LoaderScreenAction::ChooseLayoutInSlot(layout_slot) = *loader_action {
                 if layout_slot == slot_set_request.slot_to_set {

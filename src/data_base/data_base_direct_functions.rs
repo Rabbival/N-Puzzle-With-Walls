@@ -106,7 +106,7 @@ impl DataBaseManager {
 
     pub fn get_saved_layouts_of_all_difficulties_count(&self) -> usize {
         let mut combined_length = 0;
-        for (_dif, vec) in self.saved_layouts.iter(){
+        for (_dif, vec) in &self.saved_layouts{
             combined_length += vec.len();
         }
         combined_length

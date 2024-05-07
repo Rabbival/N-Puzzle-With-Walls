@@ -12,6 +12,11 @@ pub struct ApplyButtonPressed {
 }
 
 #[derive(Event)]
+pub struct SetAppliedTagForProperty{
+    pub give_tag_to_variant: MenuButtonAction
+}
+
+#[derive(Event)]
 pub struct ShowGenerationError(pub BoardGenerationError);
 
 pub struct MenuUiEventPlugin;
@@ -21,6 +26,7 @@ impl Plugin for MenuUiEventPlugin {
         app
             .add_event::<MenuButtonPressed>()
             .add_event::<ApplyButtonPressed>()
-            .add_event::<ShowGenerationError>();
+            .add_event::<ShowGenerationError>()
+            .add_event::<SetAppliedTagForProperty>();
     }
 }

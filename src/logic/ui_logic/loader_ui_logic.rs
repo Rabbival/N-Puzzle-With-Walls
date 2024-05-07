@@ -23,7 +23,7 @@ impl Plugin for LoaderUiLogicPlugin {
                         update_arrows_after_change.run_if(resource_changed::<DataBaseManager>),
                     )
                         .in_set(InputSystemSets::MainChanges),
-                    update_chosen_mark_after_change.run_if(resource_changed::<ChosenLayoutScreenAndSlot>
+                    update_chosen_mark_after_change.run_if(resource_changed::<ChosenLayoutProperties>
                         .or_else(resource_changed::<DisplayedLoaderScreenNumber>))
                 )
             );
@@ -31,6 +31,7 @@ impl Plugin for LoaderUiLogicPlugin {
 }
 
 fn listen_to_jump_to_page_requests(
+    mut event_writer: EventWriter<SetAppliedTagForProperty>,
     mut event_reader: EventReader<LoaderScreenActionEvent>,
     mut applied_board_properties: Query<&mut BoardProperties, With<AppliedBoardProperties>>,
     mut displayed_loader_screen_number: ResMut<DisplayedLoaderScreenNumber>,
@@ -43,8 +44,15 @@ fn listen_to_jump_to_page_requests(
             event.action
         {
             displayed_loader_screen_number.0 = screen_number;
-            let applied_props_difficulty = &mut applied_board_properties.single_mut().board_difficulty;
+            let applied_props_difficulty = 
+                &mut applied_board_properties.single_mut().board_difficulty;
             *applied_props_difficulty = chosen_board_difficulty;
+            game_log(GameLog::BoardSettingsChanged(
+                &MenuButtonAction::ChangeBoardDifficulty(chosen_board_difficulty)
+            ));
+            event_writer.send(SetAppliedTagForProperty{
+                give_tag_to_variant: MenuButtonAction::ChangeBoardDifficulty(chosen_board_difficulty)
+            });
         }
     }
 }
@@ -52,15 +60,19 @@ fn listen_to_jump_to_page_requests(
 fn mark_chosen_slot_if_visible(
     mut loader_screen_actions_query: Query<(Entity, &LoaderScreenAction, &mut BackgroundColor)>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
-    chosen_layout_screen_and_slot: Res<ChosenLayoutScreenAndSlot>,
+    chosen_layout_screen_and_slot: Res<ChosenLayoutProperties>,
     mut commands: Commands
 ){
     for (entity, action, mut slot_background_color)
-        in loader_screen_actions_query.iter_mut()
+        in &mut loader_screen_actions_query
     {
         if let LoaderScreenAction::ChooseLayoutInSlot(layout_slot) = *action {
             if let Some(chosen_screen_and_slot) = chosen_layout_screen_and_slot.0{
-                if chosen_screen_and_slot.screen == displayed_loader_screen_number.0 && layout_slot == chosen_screen_and_slot.slot {
+                if
+                    chosen_screen_and_slot.screen == displayed_loader_screen_number.0 &&
+                        layout_slot == chosen_screen_and_slot.slot &&
+
+                {
                     set_color_to_pressed(&mut slot_background_color);
                     commands
                         .entity(entity)
@@ -79,7 +91,7 @@ fn mark_chosen_slot_if_visible(
 fn update_chosen_mark_after_change(
     loader_screen_actions_query: Query<(Entity, &LoaderScreenAction, &mut BackgroundColor)>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
-    chosen_layout_screen_and_slot: Res<ChosenLayoutScreenAndSlot>,
+    chosen_layout_screen_and_slot: Res<ChosenLayoutProperties>,
     commands: Commands
 ){
     mark_chosen_slot_if_visible(
@@ -187,7 +199,7 @@ fn only_show_arrows_if_theres_more_than_one_available_screen(
         }
     }
 
-    for mut visibility_tag in arrows_visibility_tags_query.iter_mut(){
+    for mut visibility_tag in &mut arrows_visibility_tags_query{
         if show_arrows {
             visibility_tag.on_own_screen_visibility = Some(Visibility::Visible);
         }else{

@@ -44,7 +44,7 @@ pub fn show_only_if_has_specified_screen_tag(
 ) {
     if app_state.is_changed() || displayed_loader_screen_number.is_changed() || data_base_manager.is_changed(){
         for (mut visibility, screen_tag) in
-            single_screen_entities.iter_mut()
+            &mut single_screen_entities
         {
             if *app_state == screen_tag.screen {
                 if let Some(own_screen_vis) = screen_tag.on_own_screen_visibility {
@@ -57,7 +57,7 @@ pub fn show_only_if_has_specified_screen_tag(
             }
         }
         'entity_for: for (mut visibility, screen_tags) in
-        multiple_screen_entities.iter_mut()
+        &mut multiple_screen_entities
         {
             for screen_tag in screen_tags.0.iter() {
                 if *app_state == screen_tag.screen {

@@ -73,7 +73,7 @@ fn insert_saved_layout_entities_to_data_base(
 	domain_board_query: Query<(Entity, &DomainBoardName, &DomainBoard)>,
 ){
 	for (entity, domain_board_name, domain_board)
-		in domain_board_query.iter()
+		in &domain_board_query
 	{
 		db_manager.insert_layout(
 			entity,

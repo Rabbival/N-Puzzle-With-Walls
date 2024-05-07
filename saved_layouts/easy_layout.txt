@@ -1,0 +1,16 @@
+(
+    board_props: (
+        board_difficulty: Easy,
+        size: Medium,
+        wall_count: 1,
+        empty_count: 1,
+        generation_method: Auto,
+        tree_traveller_type: BFS,
+    ),
+    wall_locations: [
+        (
+            row: 4,
+            col: 2,
+        ),
+    ],
+)

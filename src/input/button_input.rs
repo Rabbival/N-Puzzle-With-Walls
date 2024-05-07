@@ -27,7 +27,7 @@ fn handle_eternal_buttons(
         (Changed<Interaction>, With<EternalButton>),
     >,
 ) {
-    for (interaction, eternal_button_action) in interaction_query.iter() {
+    for (interaction, eternal_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match eternal_button_action {
                 EternalButtonAction::EndGame => {
@@ -56,7 +56,7 @@ fn handle_menu_buttons(
     >,
 ) {
     for (interaction, menu_button_action, entity, optional_apply_button_tag) in
-        interaction_query.iter()
+        &interaction_query
     {
         if *interaction == Interaction::Pressed {
             if optional_apply_button_tag.is_some() {
@@ -93,8 +93,7 @@ fn handle_victory_buttons(
         (Changed<Interaction>, With<Button>),
     >,
 ) {
-    for (interaction, game_button_action) in
-        interaction_query.iter()
+    for (interaction, game_button_action) in &interaction_query
     {
         if *interaction == Interaction::Pressed {
             button_event_writer.send(VictoryButtonPressed {
@@ -110,7 +109,7 @@ fn handle_save_walls_layout_button(
     mut button_event_writer: EventWriter<SaveWallsLayoutButtonPressed>,
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<SaveWallsLayoutButton>)>,
 ) {
-    for interaction in interaction_query.iter()
+    for interaction in &interaction_query
     {
         if *interaction == Interaction::Pressed {
             button_event_writer.send(SaveWallsLayoutButtonPressed);
@@ -122,7 +121,7 @@ fn handle_loader_buttons(
     mut button_event_writer: EventWriter<LoaderScreenActionEvent>,
     initiated_loader_actions_query: Query<(&Interaction, &LoaderScreenAction), Changed<Interaction>>,
 ) {
-    for (interaction, loader_action) in initiated_loader_actions_query.iter()
+    for (interaction, loader_action) in &initiated_loader_actions_query
     {
         if *interaction == Interaction::Pressed {
             button_event_writer.send(LoaderScreenActionEvent{
@@ -136,7 +135,7 @@ fn handle_are_you_sure_message_buttons(
     mut are_you_sure_action_event_writer: EventWriter<AreYouSureMessageButtonEvent>,
     are_you_sure_message_actions_query: Query<(&Interaction, &AreYouSureMessageButtonAction), Changed<Interaction>>,
 ){
-    for (interaction, are_you_sure_action) in are_you_sure_message_actions_query.iter()
+    for (interaction, are_you_sure_action) in &are_you_sure_message_actions_query
     {
         if *interaction == Interaction::Pressed {
             are_you_sure_action_event_writer.send(AreYouSureMessageButtonEvent{

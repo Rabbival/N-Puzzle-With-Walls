@@ -11,11 +11,9 @@ impl Plugin for MenuUiLogicPlugin {
             )
             .add_systems(
             Update,
-            (
+            ((
                 update_wall_tiles_count_visuals
                     .run_if(resource_changed::<UnappliedMenuWallCount>),
-                set_chosen_options_to_fit_current_props
-                    .in_set(StateChangeSystemSets::HandleStateChange),
                 (
                     update_menu_ui_after_press_general,
                     increase_or_decrease_wall_count_menu_ui_update,
@@ -27,6 +25,12 @@ impl Plugin for MenuUiLogicPlugin {
                 apply_wall_count_menu_ui_update.in_set(InputSystemSets::PostMainChanges),
             )
                 .run_if(in_state(AppState::Menu)),
+             (
+                 listen_for_applied_tag_change_requests,
+                 set_chosen_options_to_fit_current_props
+             ).chain()
+                .in_set(StateChangeSystemSets::HandleStateChange),
+            )
         );
     }
 }
@@ -37,6 +41,30 @@ fn update_wall_tiles_count_visuals(
 ) {
     let mut text = wall_count_text_query.single_mut();
     text.sections[0].value = unapplied_menu_wall_count.0.to_string();
+}
+
+fn listen_for_applied_tag_change_requests(
+    mut event_reader: EventReader<SetAppliedTagForProperty>,
+    selected_options_query: Query<(Entity, &MenuButtonAction), With<AppliedOptionTag>>,
+    not_selected_options_query: Query<(Entity, &MenuButtonAction), Without<AppliedOptionTag>>,
+    mut commands: Commands
+){
+    for applied_tag_set_event in event_reader.read(){
+        let variant_to_select = applied_tag_set_event.give_tag_to_variant;
+        let discriminant_to_select = mem::discriminant(&variant_to_select);
+        for (menu_button_entity, button_action) in &selected_options_query{
+            if mem::discriminant(button_action) == discriminant_to_select{
+                commands
+                    .entity(menu_button_entity)
+                    .remove::<AppliedOptionTag>();
+            }
+        }
+        for (menu_button_entity, button_action) in &not_selected_options_query{
+            if variant_to_select == *button_action{
+                commands.entity(menu_button_entity).insert(AppliedOptionTag);
+            }
+        }
+    }
 }
 
 fn set_chosen_options_to_fit_current_props(
@@ -53,7 +81,7 @@ fn set_chosen_options_to_fit_current_props(
 ) {
     for _event in event_reader.read() {
         // remove from previously chosen and not applied
-        for (chosen_not_applied, mut not_applied_button_color, _) in currently_chosen.iter_mut() {
+        for (chosen_not_applied, mut not_applied_button_color, _) in &mut currently_chosen {
             set_color_to_normal(&mut not_applied_button_color);
             commands
                 .entity(chosen_not_applied)
@@ -62,7 +90,7 @@ fn set_chosen_options_to_fit_current_props(
 
         // put the chosen mark in the currently applied ones
         for (should_be_marked_chosen, mut should_be_marked_button_color) in
-            currently_applied.iter_mut()
+            &mut currently_applied
         {
             set_color_to_pressed(&mut should_be_marked_button_color);
             commands
@@ -71,6 +99,7 @@ fn set_chosen_options_to_fit_current_props(
         }
     }
 }
+
 
 /// for the planned board properties updates that don't require special treatment
 fn update_menu_ui_after_press_general(
@@ -96,7 +125,7 @@ fn update_menu_ui_after_press_general(
         };
 
         for (previous_button, mut previous_color, menu_button_action_of_chosen) in
-            currently_chosen.iter_mut()
+            &mut currently_chosen
         {
             if button_action_discriminant == mem::discriminant(menu_button_action_of_chosen) {
                 set_color_to_normal(&mut previous_color);
@@ -155,7 +184,7 @@ fn set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
     visibility_change_event_writer: &mut EventWriter<SetEntityVisibility>,
     menu_nodes: &mut Query<(Entity, &mut CustomOnScreenTag), With<HideOnWhenChoosingLoader>>,
 ){
-    for (node_entity, mut on_screen_tag) in menu_nodes.iter_mut() {
+    for (node_entity, mut on_screen_tag) in menu_nodes {
         on_screen_tag.on_own_screen_visibility = Some(new_visibility);
         visibility_change_event_writer.send(SetEntityVisibility {
             entity: node_entity,
@@ -234,13 +263,13 @@ fn show_applied_props(
     for button_event in button_event_reader.read() {
         if let MenuButtonAction::MainButtonPressed = button_event.action {
             // remove applied from previous settings
-            for previously_applied in currently_applied.iter_mut() {
+            for previously_applied in &mut currently_applied {
                 commands
                     .entity(previously_applied)
                     .remove::<AppliedOptionTag>();
             }
             // insert applied to the new settings
-            for (previous_button, _, _) in currently_chosen.iter_mut() {
+            for (previous_button, _, _) in &mut currently_chosen {
                 commands.entity(previous_button).insert(AppliedOptionTag);
             }
         }

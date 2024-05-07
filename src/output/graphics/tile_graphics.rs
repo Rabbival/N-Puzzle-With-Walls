@@ -97,14 +97,14 @@ fn despawn_unused_tiles_and_clear_tag(
         return;
     }
 
-    for (tile_entity, tile) in untagged_tiles.iter() {
+    for (tile_entity, tile) in &untagged_tiles {
         tile_dictionary_query
             .single_mut()
             .entity_by_tile
             .remove(tile);
         commands.entity(tile_entity).despawn_recursive();
     }
-    for tile_entity in tagged_tiles.iter() {
+    for tile_entity in &tagged_tiles {
         commands.entity(tile_entity).remove::<StayForNextBoardTag>();
     }
 }

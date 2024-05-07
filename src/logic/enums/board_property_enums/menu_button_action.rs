@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Component, Debug, Clone, Copy)]
+#[derive(Component, Debug, Clone, Copy, Eq, PartialEq)]
 pub enum MenuButtonAction {
     ChangeSize(BoardSize),
     ChangeWallTilesCount(WallTilesChange),

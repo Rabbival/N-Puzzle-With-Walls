@@ -51,7 +51,7 @@ fn domain_board_already_exists(
     new_board_size: &BoardSize,
     new_wall_locations: &Vec<GridLocation>
 ) -> Option<ExistingWallLayoutName> {
-    for (domain_board, domain_board_name) in domain_boards_query.iter(){
+    for (domain_board, domain_board_name) in domain_boards_query{
         if domain_board.board_props.size == *new_board_size
             && *new_wall_locations == domain_board.wall_locations {
             return Some(ExistingWallLayoutName(domain_board_name.0.clone()));
