@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
 #[derive(Resource, Debug, Default, Eq, PartialEq, Copy, Clone)]
-pub struct ChosenLayoutProperties(pub Option<ScreenSlotAndDifficulty>);
+pub struct ChosenLayoutLocation(pub Option<ScreenSlotAndDifficulty>);
 
-pub struct ChosenLayoutPropertiesPlugin;
+pub struct ChosenLayoutLocationPlugin;
 
-impl Plugin for ChosenLayoutPropertiesPlugin {
+impl Plugin for ChosenLayoutLocationPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<ChosenLayoutProperties>()
+        app.init_resource::<ChosenLayoutLocation>()
             .add_systems(Update, ((
                     listen_for_successful_save_to_db,
                     listen_for_successful_removal_from_db,
@@ -15,14 +15,14 @@ impl Plugin for ChosenLayoutPropertiesPlugin {
                 ).in_set(InputSystemSets::InitialChanges),
                 listen_for_new_layout_picks.in_set(InputSystemSets::InputHandling), 
               update_bottom_line_to_fit_new_chosen
-                      .run_if(resource_changed::<ChosenLayoutProperties>)
+                      .run_if(resource_changed::<ChosenLayoutLocation>)
                       .in_set(InputSystemSets::MainChanges),
             ));
     }
 }
 
 fn update_bottom_line_to_fit_new_chosen(
-    optional_chosen_layout_screen_and_slot: Res<ChosenLayoutProperties>,
+    optional_chosen_layout_location: Res<ChosenLayoutLocation>,
     mut loader_screen_action_query: Query<&mut LoaderScreenAction>,
     applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut chosen_layout_text_query: Query<&mut Text, With<ChosenLayoutTextTag>>,
@@ -38,13 +38,13 @@ fn update_bottom_line_to_fit_new_chosen(
     let mut updated_layout_name = DomainBoardName(String::new());
     let mut updated_page_number = None;
 
-    if let Some(chosen_layout_screen_and_slot) =
-        optional_chosen_layout_screen_and_slot.0
+    if let Some(chosen_layout_location) =
+        optional_chosen_layout_location.0
     {
         let calculated_db_index =
             SavedLayoutIndexInDifficultyVec::from_screen_and_slot(
                 &currently_shown_difficulty,
-                &chosen_layout_screen_and_slot
+                &chosen_layout_location.screen_and_slot
             );
         let new_chosen_ref_value = data_base_manager.try_get_layout_ref(&calculated_db_index);
 
@@ -55,7 +55,7 @@ fn update_bottom_line_to_fit_new_chosen(
                 updated_optional_entity = Some(layout_entity);
                 updated_optional_index = Some(calculated_db_index);
                 updated_layout_name = DomainBoardName(board_name.0.clone());
-                updated_page_number = Some(chosen_layout_screen_and_slot.screen)
+                updated_page_number = Some(chosen_layout_location.screen_and_slot.screen)
             }
         }
     }
@@ -90,7 +90,7 @@ fn listen_for_new_layout_picks(
     mut event_reader: EventReader<LoaderScreenActionEvent>,
     currently_displayed_loader_screen: Res<DisplayedLoaderScreenNumber>,
     applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
-    mut chosen_layout_screen_and_slot: ResMut<ChosenLayoutProperties>
+    mut chosen_layout_screen_and_slot: ResMut<ChosenLayoutLocation>
 ){
     for loader_action in event_reader.read(){
         if let LoaderScreenAction::ChooseLayoutInSlot(loader_slot) = loader_action.action{
@@ -108,17 +108,17 @@ fn listen_for_new_layout_picks(
 
 fn listen_for_successful_save_to_db(
     mut event_reader: EventReader<SuccessSavingToDB>,
-    mut chosen_layout_properties: ResMut<ChosenLayoutProperties>
+    mut optional_chosen_layout_location: ResMut<ChosenLayoutLocation>
 ){
     for saving_to_db in event_reader.read(){
-        if let Some(chosen_screen_slot_and_difficulty) = &mut chosen_layout_properties.0{
+        if let Some(chosen_layout_location) = &mut optional_chosen_layout_location.0{
             let current_chosen_index =
                 SavedLayoutIndexInDifficultyVec::from_screen_and_slot(
-                    &chosen_screen_slot_and_difficulty.difficulty,
-                    &chosen_screen_slot_and_difficulty.screen_and_slot
+                    &chosen_layout_location.difficulty,
+                    &chosen_layout_location.screen_and_slot
                 );
             if saving_to_db.0 <= current_chosen_index{
-                chosen_screen_slot_and_difficulty.screen_and_slot.increment();
+                chosen_layout_location.screen_and_slot.increment();
             }
         }
     }
@@ -126,11 +126,11 @@ fn listen_for_successful_save_to_db(
 
 fn listen_for_successful_removal_from_db(
     mut event_reader: EventReader<SuccessRemovingFromDB>,
-    mut chosen_layout_properties: ResMut<ChosenLayoutProperties>
+    mut chosen_layout_location: ResMut<ChosenLayoutLocation>
 ){
     for removal_from_db in event_reader.read(){
         if let Some(chosen_screen_slot_and_difficulty) = 
-            &mut chosen_layout_properties.0
+            &mut chosen_layout_location.0
         {
             let current_chosen_index =
                 SavedLayoutIndexInDifficultyVec::from_screen_and_slot(
@@ -138,7 +138,7 @@ fn listen_for_successful_removal_from_db(
                     &chosen_screen_slot_and_difficulty.screen_and_slot
                 );
             if removal_from_db.0 == current_chosen_index{
-                chosen_layout_properties.0 = None;
+                chosen_layout_location.0 = None;
             }else if removal_from_db.0 < current_chosen_index{
                 chosen_screen_slot_and_difficulty.screen_and_slot.decrement_if_possible();
             }
@@ -148,7 +148,7 @@ fn listen_for_successful_removal_from_db(
 
 fn listen_for_successful_db_clear(
     mut event_reader: EventReader<SuccessClearingDB>,
-    mut chosen_layout_screen_and_slot: ResMut<ChosenLayoutProperties>
+    mut chosen_layout_screen_and_slot: ResMut<ChosenLayoutLocation>
 ){
     for _db_clearing in event_reader.read(){
         chosen_layout_screen_and_slot.0 = None;

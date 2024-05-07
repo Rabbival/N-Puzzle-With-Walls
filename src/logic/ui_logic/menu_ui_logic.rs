@@ -143,7 +143,7 @@ fn update_menu_ui_after_press_general(
 fn toggle_options_relevant_to_loader(
     mut visibility_change_event_writer: EventWriter<SetEntityVisibility>,
     mut button_event_reader: EventReader<MenuButtonPressed>,
-    mut menu_nodes: Query<(Entity, &mut CustomOnScreenTag), With<HideOnWhenChoosingLoader>>,
+    mut menu_nodes: Query<(Entity, &mut CustomOnScreenTag, &HideWhenChoosingGenerationMethod)>,
 ){
     for button_event in button_event_reader.read() {
         if let MenuButtonAction::ChangeGenerationMethod(new_generation_method) =
@@ -167,7 +167,7 @@ fn toggle_options_relevant_to_loader(
 fn show_options_that_hide_when_loading_if_not_loading(
     applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut visibility_change_event_writer: EventWriter<SetEntityVisibility>,
-    mut menu_nodes: Query<(Entity, &mut CustomOnScreenTag), With<HideOnWhenChoosingLoader>>,
+    mut menu_nodes: Query<(Entity, &mut CustomOnScreenTag, &HideWhenChoosingGenerationMethod)>,
 ){
     let applied_board_properties = applied_board_properties_query.single();
     if applied_board_properties.generation_method != BoardGenerationMethod::Load{
@@ -182,14 +182,25 @@ fn show_options_that_hide_when_loading_if_not_loading(
 fn set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
     new_visibility: Visibility,
     visibility_change_event_writer: &mut EventWriter<SetEntityVisibility>,
-    menu_nodes: &mut Query<(Entity, &mut CustomOnScreenTag), With<HideOnWhenChoosingLoader>>,
+    menu_nodes: &mut Query<(Entity, &mut CustomOnScreenTag, &HideWhenChoosingGenerationMethod)>,
 ){
-    for (node_entity, mut on_screen_tag) in menu_nodes {
-        on_screen_tag.on_own_screen_visibility = Some(new_visibility);
-        visibility_change_event_writer.send(SetEntityVisibility {
-            entity: node_entity,
-            visibility: new_visibility
-        });
+    for (
+        node_entity, 
+        mut on_screen_tag, 
+        hide_when_choosing_gen_method
+    ) in menu_nodes 
+    {
+        let gen_methods_to_hide_in = hide_when_choosing_gen_method.0.clone();
+        for gen_method in gen_methods_to_hide_in{
+            if gen_method == BoardGenerationMethod::Load {
+                on_screen_tag.on_own_screen_visibility = Some(new_visibility);
+                visibility_change_event_writer.send(SetEntityVisibility {
+                    entity: node_entity,
+                    visibility: new_visibility
+                });
+                break;
+            }
+        }
     }
 }
 

@@ -95,7 +95,7 @@ pub mod prelude {
         loader_screen_logic::{
             displayed_loader_screen::*, layout_loader_screen_and_slot::*, screen_slot_and_difficulty::*,
             loader_screen_layout_text_tag::*, LoaderScreenLogicPlugin,
-            chosen_layout_properties::*, game_starter_from_loader::*,
+            chosen_layout_location::*, game_starter_from_loader::*,
         },
         states::{app_state::*, game_state::*, StatePlugin},
         tile::*,
@@ -157,7 +157,8 @@ pub mod prelude {
                 set_color_to_pressed,
                 set_text_section_value_and_color,
                 UiGraphicsPlugin,
-                ImagedButtonTag
+                ImagedButtonTag,
+                HideWhenChoosingGenerationMethod
             },
             visibility_tags::{
                 custom_on_screen_tag::*,

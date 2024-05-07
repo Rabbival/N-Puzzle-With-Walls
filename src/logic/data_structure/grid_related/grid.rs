@@ -1,7 +1,8 @@
 use enum_iterator::all;
+use serde::{Deserialize, Serialize};
 use crate::prelude::*;
 
-#[derive(Component, Clone, Debug)]
+#[derive(Component, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Grid<T: Clone> {
     grid_side_length: u8,
     grid: Vec<Option<T>>,

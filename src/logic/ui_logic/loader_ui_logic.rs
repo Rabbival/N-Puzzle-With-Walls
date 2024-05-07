@@ -23,7 +23,7 @@ impl Plugin for LoaderUiLogicPlugin {
                         update_arrows_after_change.run_if(resource_changed::<DataBaseManager>),
                     )
                         .in_set(InputSystemSets::MainChanges),
-                    update_chosen_mark_after_change.run_if(resource_changed::<ChosenLayoutProperties>
+                    update_chosen_mark_after_change.run_if(resource_changed::<ChosenLayoutLocation>
                         .or_else(resource_changed::<DisplayedLoaderScreenNumber>))
                 )
             );
@@ -59,19 +59,22 @@ fn listen_to_jump_to_page_requests(
 
 fn mark_chosen_slot_if_visible(
     mut loader_screen_actions_query: Query<(Entity, &LoaderScreenAction, &mut BackgroundColor)>,
+    applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
-    chosen_layout_screen_and_slot: Res<ChosenLayoutProperties>,
+    optional_chosen_layout_location: Res<ChosenLayoutLocation>,
     mut commands: Commands
 ){
     for (entity, action, mut slot_background_color)
         in &mut loader_screen_actions_query
     {
         if let LoaderScreenAction::ChooseLayoutInSlot(layout_slot) = *action {
-            if let Some(chosen_screen_and_slot) = chosen_layout_screen_and_slot.0{
+            if let Some(chosen_layout_location) = optional_chosen_layout_location.0{
+                let currently_displayed_difficulty =
+                    applied_board_properties_query.single().board_difficulty;
                 if
-                    chosen_screen_and_slot.screen == displayed_loader_screen_number.0 &&
-                        layout_slot == chosen_screen_and_slot.slot &&
-
+                    chosen_layout_location.screen_and_slot.screen == displayed_loader_screen_number.0 &&
+                        layout_slot == chosen_layout_location.screen_and_slot.slot &&
+                        currently_displayed_difficulty == chosen_layout_location.difficulty
                 {
                     set_color_to_pressed(&mut slot_background_color);
                     commands
@@ -90,12 +93,14 @@ fn mark_chosen_slot_if_visible(
 
 fn update_chosen_mark_after_change(
     loader_screen_actions_query: Query<(Entity, &LoaderScreenAction, &mut BackgroundColor)>,
+    applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     displayed_loader_screen_number: Res<DisplayedLoaderScreenNumber>,
-    chosen_layout_screen_and_slot: Res<ChosenLayoutProperties>,
+    chosen_layout_screen_and_slot: Res<ChosenLayoutLocation>,
     commands: Commands
 ){
     mark_chosen_slot_if_visible(
         loader_screen_actions_query,
+        applied_board_properties_query,
         displayed_loader_screen_number,
         chosen_layout_screen_and_slot,
         commands

@@ -29,6 +29,9 @@ pub const PRESSED_IMAGED_BUTTON_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
 #[derive(Component)]
 pub struct ButtonText;
 
+#[derive(Component)]
+pub struct HideWhenChoosingGenerationMethod(pub Vec<BoardGenerationMethod>);
+
 pub struct UiGraphicsPlugin;
 
 impl Plugin for UiGraphicsPlugin {
