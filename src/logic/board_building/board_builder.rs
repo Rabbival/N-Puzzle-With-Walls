@@ -33,7 +33,7 @@ fn build_a_new_board(
     let solved_grid = &solved_board_query.single().grid;
 
     let optional_newborn_tiletype_board =
-        TileBoard::from_grid(solved_grid, applied_props.empty_count);
+        TileBoard::from_solved_grid(solved_grid, applied_props.empty_count);
     match optional_newborn_tiletype_board {
         Err(error) => {
             generation_error_event_writer.send(ShowGenerationError(error));

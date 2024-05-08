@@ -23,8 +23,8 @@ impl TileBoard {
         }
     }
 
-    /// declares empty tiles' locations as last available from the end
-    pub fn from_grid(
+    /// declares empty tiles' locations as last non-walls from the end
+    pub fn from_solved_grid(
         grid: &Grid<Tile>,
         empty_tiles_count: u8,
     ) -> Result<Self, BoardGenerationError> {
