@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use std::fmt;
+use serde::{Deserialize, Serialize};
 
-#[derive(Component, Clone, Copy, PartialEq, Eq, Hash, Default)]
+#[derive(Component, Clone, Copy, PartialEq, Eq, Hash, Default, Deserialize, Serialize)]
 pub struct Tile {
     pub index: usize,
     pub tile_type: TileType,

@@ -217,7 +217,7 @@ mod tests {
     fn test_no_empty_neighbor(event_writer: &mut EventWriter<SwitchTilesLogic>, ) -> bool
     {
         let mut tile_board = TileBoard::default();
-        generate_solved_board_from_tile_board_with_walls_inner(
+        generate_solved_board_inner(
             &BoardProperties::default(),
             &mut tile_board
         ).unwrap();

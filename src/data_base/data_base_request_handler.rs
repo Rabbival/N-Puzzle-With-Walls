@@ -20,7 +20,7 @@ fn listen_for_save_requests(
     mut event_reader: EventReader<SaveWallsLayoutButtonPressed>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     domain_boards_query: Query<(&DomainBoard, &DomainBoardName)>,
-    current_board_wall_locations: Res<CurrentBoardWallLocations>,
+    game_board_query: Query<&TileBoard, With<GameBoard>>,
     db_manager: Res<DataBaseManager>
 ){
     for _save_request in event_reader.read(){
@@ -28,17 +28,18 @@ fn listen_for_save_requests(
             event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::WallsLayoutsAtCapacity));
         }
         else{
-            let wall_locations = current_board_wall_locations.0.clone();
+            let game_board_grid = game_board_query.single().grid.clone();
             if let Some(existing_board_name) = domain_board_already_exists(
                 &domain_boards_query,
-                &applied_board_props_query.single().size,
-                &wall_locations
+                &game_board_grid
             ){
-                event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::WallLayoutAlreadyExistsInMemory(existing_board_name)));
+                event_writer.send(LayoutSaveAttemptOutcomeEvent(
+                    SaveAttemptOutcome::WallLayoutAlreadyExistsInMemory(existing_board_name)
+                ));
             }else{
                 write_to_db_event_writer.send(SaveToDB(DomainBoard{
                     board_props: *applied_board_props_query.single(),
-                    wall_locations
+                    grid: game_board_grid
                 }));
                 event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::LayoutSavedSuccessfully));
             }
@@ -48,12 +49,10 @@ fn listen_for_save_requests(
 
 fn domain_board_already_exists(
     domain_boards_query: &Query<(&DomainBoard, &DomainBoardName)>,
-    new_board_size: &BoardSize,
-    new_wall_locations: &Vec<GridLocation>
+    game_board_grid: &Grid<Tile>
 ) -> Option<ExistingWallLayoutName> {
     for (domain_board, domain_board_name) in domain_boards_query{
-        if domain_board.board_props.size == *new_board_size
-            && *new_wall_locations == domain_board.wall_locations {
+        if domain_board.grid == *game_board_grid {
             return Some(ExistingWallLayoutName(domain_board_name.0.clone()));
         }
     }
@@ -194,7 +193,7 @@ fn clear_db(
             valid_text_file_name.to_name();
         let file_deletion_result = delete_text_file(
             FolderToAccess::SavedLayouts,
-            String::from(valid_text_file_name_excluding_postfix)
+            valid_text_file_name_excluding_postfix
         );
         if file_deletion_result.is_err(){
             return Err(DataBaseError::SystemAccessError

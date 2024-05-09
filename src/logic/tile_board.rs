@@ -23,8 +23,18 @@ impl TileBoard {
         }
     }
 
+    pub fn from_grid(grid: &Grid<Tile>) -> Self{
+        let mut newborn_self = Self {
+            grid: grid.clone(),
+            empty_tile_locations: vec![],
+            ignore_player_input: true,
+        };
+        newborn_self.determine_empty_tile_locations_from_give_grid(grid);
+        newborn_self
+    }
+
     /// declares empty tiles' locations as last non-walls from the end
-    pub fn from_solved_grid(
+    pub fn try_from_solved_grid(
         grid: &Grid<Tile>,
         empty_tiles_count: u8,
     ) -> Result<Self, BoardGenerationError> {
@@ -34,12 +44,6 @@ impl TileBoard {
             ignore_player_input: true,
         };
         newborn_self.empty_locations_to_solved_default(empty_tiles_count)?;
-        Ok(newborn_self)
-    }
-    
-    pub fn try_from_domain_board(domain_board: &DomainBoard) -> Result<Self, GridError>{
-        let mut newborn_self = Self::new(domain_board.board_props.size.to_grid_side_length());
-        newborn_self.spawn_walls_in_locations(&domain_board.wall_locations)?;
         Ok(newborn_self)
     }
 
@@ -55,6 +59,23 @@ impl TileBoard {
 
 //creation helpers
 impl TileBoard{
+    pub fn determine_empty_tile_locations_from_give_grid(&mut self, grid: &Grid<Tile>){
+        for (tile_location, new_empty_tile) in grid.iter(){
+            if new_empty_tile.tile_type == TileType::Empty{
+                let new_tile_index = new_empty_tile.index;
+                let new_tile_index = self.empty_tile_locations.partition_point(
+                    |empty_tile_location| {
+                        if let Ok(Some(existing_tile)) = grid.get(empty_tile_location){
+                            existing_tile.index < new_tile_index
+                        }else{
+                            false
+                        }
+                    }
+                );
+                self.empty_tile_locations.insert(new_tile_index, tile_location);
+            }
+        }
+    }
 
     /// inserts empties without indexing them in the available (meaning not wall) locations from the end
     pub fn empty_locations_to_solved_default(

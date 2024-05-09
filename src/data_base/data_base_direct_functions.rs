@@ -29,7 +29,7 @@ impl DataBaseManager {
         Ok(commands.spawn(SavedLayoutBundle {
             domain_board_name: domain_board_name.clone(),
             domain_board: domain_board.clone(),
-            tile_board: TileBoard::try_from_domain_board(domain_board)?
+            tile_board: TileBoard::from_grid(&domain_board.grid)
         }).id())
     }
 

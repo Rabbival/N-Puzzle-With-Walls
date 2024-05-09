@@ -6,7 +6,7 @@ use crate::prelude::*;
 #[derive(Component, Debug, Clone, Default, Deserialize, Serialize)]
 pub struct DomainBoard{
 	pub board_props: BoardProperties,
-	pub wall_locations: Vec<GridLocation>
+	pub grid: Grid<Tile>
 }
 
 impl DomainBoard{
@@ -18,23 +18,13 @@ impl DomainBoard{
 
 		string_for_button
 	}
-
-	fn stringify_wall_locations(&self) -> String {
-		let mut wall_locations_string = String::from("[");
-		for item in &self.wall_locations {
-			wall_locations_string += &(String::from(" ") + &item.to_string());
-		}
-		wall_locations_string += " ]";
-		wall_locations_string
-	}
 }
 
 impl fmt::Display for DomainBoard{
 	fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
 		fmt.write_str("board_props: ")?;
 		fmt.write_str(&self.board_props.to_string())?;
-		fmt.write_str(", wall_locations:")?;
-		fmt.write_str(&self.stringify_wall_locations())?;
+		fmt.write_str(&format!(", grid: {:?}", self.grid.clone()))?;
 		fmt.write_str(")")?;
 		Ok(())
 	}

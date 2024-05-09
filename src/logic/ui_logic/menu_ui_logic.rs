@@ -195,13 +195,11 @@ fn set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
                     hide_when_choosing_gen_method.visibility_otherwise =
                         on_screen_tag.on_own_screen_visibility;
                     optional_new_visibility = Some(Visibility::Hidden);
+                }else if let Some(previous_visibility) = hide_when_choosing_gen_method.visibility_otherwise {
+                    optional_new_visibility = Some(previous_visibility);
+                    hide_when_choosing_gen_method.visibility_otherwise = None;
                 }else{
-                    if let Some(previous_visibility) = hide_when_choosing_gen_method.visibility_otherwise{
-                        optional_new_visibility = Some(previous_visibility);
-                        hide_when_choosing_gen_method.visibility_otherwise = None;
-                    }else{
-                        optional_new_visibility = None;
-                    }
+                    optional_new_visibility = None;
                 }
                 if let Some(new_visibility) = optional_new_visibility{
                     on_screen_tag.on_own_screen_visibility = Some(new_visibility);

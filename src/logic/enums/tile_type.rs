@@ -1,6 +1,7 @@
 use enum_iterator::Sequence;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, Default, Sequence)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, Default, Sequence, Deserialize, Serialize)]
 pub enum TileType {
     #[default]
     Empty,

@@ -3,8 +3,7 @@ use crate::prelude::*;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum GameState {
-	PendingSolvedBoardWallsGeneration,
-	SolvedBoardWallsGenerated,
+	PendingSolvedBoardGeneration,
 	SolvedBoardGenerated,
 	GameBoardGenerated,
 	PostGameBoardGenerationChangesDone,
@@ -34,10 +33,7 @@ fn set_game_state_according_to_board_gen_request(
 	for board_gen_request in event_reader.read(){
 		match board_gen_request.0{
 			BoardBuildingRequest::CreateANewBoardFromNothing => {
-				game_state.set(GameState::PendingSolvedBoardWallsGeneration)
-			},
-			BoardBuildingRequest::CreateANewBoardFromTileBoardWithWalls(_) => {
-				game_state.set(GameState::SolvedBoardWallsGenerated)
+				game_state.set(GameState::PendingSolvedBoardGeneration)
 			},
 			BoardBuildingRequest::ShuffleExistingBoard => {
 				game_state.set(GameState::SolvedBoardGenerated)

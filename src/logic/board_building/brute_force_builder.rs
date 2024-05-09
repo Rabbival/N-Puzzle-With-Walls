@@ -190,7 +190,7 @@ mod tests {
     fn several_attempts_at_generating_unsolved_boards_inner(){
         const ATTEMPT_COUNT: u8 = 10;
         let mut tile_board = TileBoard::default();
-        generate_solved_board_from_tile_board_with_walls_inner(
+        generate_solved_board_inner(
             &BoardProperties::default(),
             &mut tile_board
         ).unwrap();

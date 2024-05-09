@@ -35,16 +35,6 @@ fn read_saved_layout_from_system_inner(commands: &mut Commands) -> Result<(), Da
 			},
 			Ok(parsed_domain_board) => {
 				let file_name_without_postfix = valid_text_file_name.to_name();
-				match determine_board_quality(&parsed_domain_board){
-					BoardQuality::Invalid => {
-						return Err(DataBaseError::WallListDoesntMatchWallCount(
-							DomainBoardName(file_name_without_postfix)
-						));
-					},
-					_ => {
-						//TODO: expand in the future
-					}
-				};
 				
 				super::wrap_to_data_base_error(
 					DataBaseManager::spawn_layout_entity(
@@ -57,15 +47,6 @@ fn read_saved_layout_from_system_inner(commands: &mut Commands) -> Result<(), Da
 		}
 	}
 	Ok(())
-}
-
-//TODO: expand in the future
-fn determine_board_quality(parsed_domain_board: &DomainBoard) -> BoardQuality{
-	if parsed_domain_board.wall_locations.len() != parsed_domain_board.board_props.wall_count as usize{
-		BoardQuality::Invalid
-	}else{
-		BoardQuality::BestQuality
-	}
 }
 
 fn insert_saved_layout_entities_to_data_base(
