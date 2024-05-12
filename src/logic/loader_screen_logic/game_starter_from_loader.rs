@@ -14,8 +14,8 @@ impl Plugin for GameStarterFromLoaderPlugin {
 
 fn listen_to_game_start_from_loader_requests(
     mut event_reader: EventReader<LoaderScreenActionEvent>,
-    saved_layout_query: Query<(&DomainBoard, &TileBoard), Without<SolvedBoard>>,
-    mut game_board_query: Query<&mut TileBoard, With<SolvedBoard>>,
+    saved_layout_query: Query<(&DomainBoard, &TileBoard), Without<GameBoard>>,
+    mut game_board_query: Query<&mut TileBoard, With<GameBoard>>,
     mut applied_board_props_query: Query<&mut BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<GameState>>,
 ){
@@ -43,7 +43,7 @@ fn listen_to_game_start_from_loader_requests(
 
 fn start_game_from_loader(
     entity: &Entity,
-    saved_layout_query: &Query<(&DomainBoard, &TileBoard), Without<SolvedBoard>>,
+    saved_layout_query: &Query<(&DomainBoard, &TileBoard), Without<GameBoard>>,
     applied_board_props_query: &mut Query<&mut BoardProperties, With<AppliedBoardProperties>>,
 ) -> Result<TileBoard, EntityRelatedCostumeError>
 {
