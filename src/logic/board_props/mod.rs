@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 pub mod board_properties;
 pub mod update_board_properties;
-pub mod unapllied_menu_wall_count;
+pub mod unapplied_menu_wall_count;
 
 pub struct BoardPropsPlugin;
 

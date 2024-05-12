@@ -1,4 +1,3 @@
-use bevy::prelude::Visibility::Hidden;
 use crate::prelude::*;
 
 /// which option is applied to the current board,
@@ -107,7 +106,7 @@ fn spawn_generate_button(
                             new(vec!(BoardGenerationMethod::Load)),
                        CustomOnScreenTag{
                            screen: AppState::Menu,
-                           on_own_screen_visibility: Some(Hidden)
+                           on_own_screen_visibility: Some(Visibility::Hidden)
                        },
                        LowerTextAboveStartButton
                     ));
@@ -121,7 +120,7 @@ fn spawn_generate_button(
                             new(vec!(BoardGenerationMethod::Load)),
                         CustomOnScreenTag{
                           screen: AppState::Menu,
-                            on_own_screen_visibility: Some(Hidden)
+                            on_own_screen_visibility: Some(Visibility::Hidden)
                         },
                         UpperTextAboveStartButton
                     ));
@@ -211,7 +210,7 @@ fn spawn_generation_options(
                             })
                             .with_children(|parent| {
                                 parent.spawn(TextBundle::from_section(
-                                    String::from("Board Difficulty"),
+                                    String::from(" Board Difficulty "),
                                     small_text_style.clone(),
                                 ));
 
@@ -282,7 +281,7 @@ fn spawn_size_options(
                     .with_children(|parent| {
                         //title
                         parent.spawn(TextBundle::from_section(
-                            String::from("Board Size"),
+                            String::from(" Board Size "),
                             button_text_style.clone(),
                         ));
                         //buttons
@@ -362,7 +361,7 @@ fn spawn_tile_counter(
                             .with_children(|parent| {
                                 //title - empty
                                 parent.spawn(TextBundle::from_section(
-                                    String::from("Empty Tiles"),
+                                    String::from(" Empty Tile "),
                                     button_text_style.clone(),
                                 ));
                                 //buttons - empty
