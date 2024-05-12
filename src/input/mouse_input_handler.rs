@@ -61,6 +61,7 @@ fn handle_mouse_click(
     game_board: &TileBoard,
 ) -> Result<(), TileMoveError> {
     if game_board.ignore_player_input {
+        println!("ignore player input: {:?}", game_board.ignore_player_input);
         return Err(TileMoveError::BoardFrozenToPlayer);
     }
     let grid_location_from_click = 

@@ -60,13 +60,29 @@ pub fn generate_solved_board_inner(
         )?;
     }
 
-    wrap_if_error(&solved_board.spawn_walls_in_locations(&new_board_wall_locations))?;
-    wrap_if_error(&solved_board.spawn_empty_tiles(&applied_props, &grid_side_length_u32))?;
-    wrap_if_error(&solved_board.spawn_numbered_uninitialized_tiles(&grid_side_length_u32))?;
+    empty_tile_board_to_solved(
+        solved_board,
+        new_board_wall_locations,
+        applied_props,
+        grid_side_length_u32
+    )
+}
+
+pub fn empty_tile_board_to_solved(
+    solved_board: &mut TileBoard,
+    wall_locations: Vec<GridLocation>,
+    applied_props: &BoardProperties,
+    grid_side_length: u32
+)
+-> Result<(), BoardGenerationError>
+{
+    wrap_if_error(&solved_board.spawn_walls_in_locations(&wall_locations))?;
+    wrap_if_error(&solved_board.spawn_empty_tiles(&applied_props, &grid_side_length))?;
+    wrap_if_error(&solved_board.spawn_numbered_uninitialized_tiles(&grid_side_length))?;
 
     solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;
     solved_board.index_all_tile_types();
-
+    
     Ok(())
 }
 

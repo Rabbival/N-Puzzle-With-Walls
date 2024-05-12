@@ -80,13 +80,13 @@ fn declare_board_generation_done(
     current_app_state: Res<State<AppState>>,
     mut game_state: ResMut<NextState<GameState>>,
 ){
-    let mut game_board = game_board_query.single_mut();
-
+    println!("unlock called");
+    
+    game_board_query.single_mut().ignore_player_input = false;
+    
     // if we're resetting when in game screen,
     // the board's input ignorance won't be toggled
-    if let AppState::Game = current_app_state.get() {
-        game_board.ignore_player_input = false;
-    } else {
+    if AppState::Game != *current_app_state.get() {
         app_state.set(AppState::Game);
     }
     

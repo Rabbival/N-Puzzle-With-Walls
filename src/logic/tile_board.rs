@@ -85,10 +85,9 @@ impl TileBoard{
         self.empty_tile_locations = self.available_locations_from_the_end(empty_tiles_count)?;
         Ok(())
     }
-
-    /// returns a vector with available places from the end
+    
     fn available_locations_from_the_end(
-        &mut self,
+        &self,
         empty_tiles_count: u8,
     ) -> Result<Vec<GridLocation>, BoardGenerationError> {
         let mut empty_tile_locations = vec![];
@@ -295,6 +294,12 @@ impl TileBoard {
             .iter()
             .filter(|(_, tile_reference)| tile_reference.tile_type != TileType::Wall)
     }
+    
+    pub fn walls_iter(&self) -> impl DoubleEndedIterator<Item = (GridLocation, &Tile)> + '_ {
+        self.grid
+            .iter()
+            .filter(|(_, tile_reference)| tile_reference.tile_type == TileType::Wall)
+    }
 }
 
 //from grid functions
@@ -349,15 +354,6 @@ impl TileBoard {
             Some(tile_ref) => Ok(tile_ref),
         }
     }
-
-    // fn none_check_get_mut(&mut self, location: &GridLocation) 
-    // -> Result<&Tile, TileBoardError>
-    // {
-    //     match wrap_to_tile_board_error(self.get_mut(location))? {
-    //         None => Err(TileBoardError::NoTileInCell(*location)),
-    //         Some(mut_tile_ref) => Ok(mut_tile_ref),
-    //     }
-    // }
 }
 
 impl Default for TileBoard {
