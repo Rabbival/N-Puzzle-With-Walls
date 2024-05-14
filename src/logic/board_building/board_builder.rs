@@ -75,19 +75,17 @@ pub fn generate_game_board(
 }
 
 fn declare_board_generation_done(
-    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    mut game_board_query: Query<&mut TileBoard, With<GameBoard>>,
     mut app_state: ResMut<NextState<AppState>>,
     current_app_state: Res<State<AppState>>,
     mut game_state: ResMut<NextState<GameState>>,
 ){
-    println!("unlock called");
-    
-    game_board_query.single_mut().ignore_player_input = false;
-    
     // if we're resetting when in game screen,
     // the board's input ignorance won't be toggled
     if AppState::Game != *current_app_state.get() {
         app_state.set(AppState::Game);
+    }else{
+        game_board_query.single_mut().ignore_player_input = false;
     }
     
     game_log(GameLog::NewBoardGenerated);

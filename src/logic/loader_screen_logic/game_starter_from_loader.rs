@@ -32,13 +32,12 @@ fn listen_to_game_start_from_loader_requests(
                 &saved_layout_query,
                 applied_board_properties,
             ){
-                Ok(mut saved_layout_tile_board) => {
+                Ok(saved_layout_tile_board) => {
                     match try_making_solved_tile_board_from_tile_board(
                         &saved_layout_tile_board,
                         applied_board_properties
                     ) {
                         Ok(solved_board) => {
-                            saved_layout_tile_board.ignore_player_input = false;
                             *game_board_query.single_mut() = saved_layout_tile_board;
                             *solved_board_query.single_mut() = solved_board;
                             game_state.set(GameState::GameBoardGenerated)

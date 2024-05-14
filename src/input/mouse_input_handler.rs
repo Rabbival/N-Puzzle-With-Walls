@@ -42,7 +42,7 @@ fn listen_for_mouse_click_in_game(
     mut logic_event_writer: EventWriter<SwitchTilesLogic>,
     mouse: Res<ButtonInput<MouseButton>>,
     cursor_position: Res<CursorPosition>,
-    game_board_query: Query<&TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    game_board_query: Query<&TileBoard, With<GameBoard>>,
 ) {
     if mouse.just_pressed(MouseButton::Left) {
         if let Err(input_error) = handle_mouse_click(
