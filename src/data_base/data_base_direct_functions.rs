@@ -43,7 +43,7 @@ impl DataBaseManager {
     {
         let layouts_of_same_difficulty = self.saved_layouts.get(new_domain_board_difficulty);
         let index_in_dif_vec = if let Some(layouts_of_difficulty) = layouts_of_same_difficulty{
-            DataBaseManager::get_partition_board_in_vec_by_name(
+            DataBaseManager::get_partition_point_in_vec_by_name(
                 layouts_of_difficulty,
                 new_domain_board_name,
                 domain_board_query
@@ -63,7 +63,7 @@ impl DataBaseManager {
         }
     }
 
-    fn get_partition_board_in_vec_by_name(
+    fn get_partition_point_in_vec_by_name(
         layouts_of_difficulty: &Vec<Entity>,
         new_domain_board_name: &DomainBoardName,
         domain_board_query: &Query<(Entity, &DomainBoardName, &DomainBoard)>,
@@ -116,7 +116,40 @@ impl DataBaseManager {
         Some(self.saved_layouts.get(board_difficulty)?.len())
     }
 
-    pub fn generate_default_name_for_board(&self) -> DomainBoardName {
-        DomainBoardName(format!("layout_{:?}", self.saved_layouts.len()))
+    pub fn generate_unique_default_name_for_board(&self, domain_board_names_query: &Query<&DomainBoardName>) -> DomainBoardName {
+        let mut new_layout_number = self.get_saved_layouts_of_all_difficulties_count();
+        let mut new_board_name = DomainBoardName(format!("layout_{:?}", new_layout_number));
+        while DataBaseManager::domain_board_name_already_exists(&new_board_name, domain_board_names_query){
+            new_layout_number += 1;
+            new_board_name = DomainBoardName(format!("layout_{:?}", new_layout_number));
+        }
+        new_board_name
+    }
+}
+
+//already exists check functions
+impl DataBaseManager{
+    pub fn domain_board_already_exists(
+        domain_boards_query: &Query<(&DomainBoard, &DomainBoardName)>,
+        game_board_grid: &Grid<Tile>
+    ) -> Option<ExistingWallLayoutName> {
+        for (domain_board, domain_board_name) in domain_boards_query{
+            if domain_board.grid == *game_board_grid {
+                return Some(ExistingWallLayoutName(domain_board_name.0.clone()));
+            }
+        }
+        None
+    }
+
+    pub fn domain_board_name_already_exists(
+        domain_board_name_to_check: &DomainBoardName,
+        domain_boards_query: &Query<&DomainBoardName>
+    ) -> bool {
+        for domain_board_name in domain_boards_query{
+            if *domain_board_name_to_check == *domain_board_name {
+                return true;
+            }
+        }
+        false
     }
 }

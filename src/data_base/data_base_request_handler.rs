@@ -15,8 +15,8 @@ impl Plugin for DataBaseRequestHandlerPlugin {
 }
 
 fn listen_for_save_requests(
-    mut event_writer: EventWriter<LayoutSaveAttemptOutcomeEvent>,
-    mut write_to_db_event_writer: EventWriter<SaveToDB>,
+    mut save_outcome_event_writer: EventWriter<LayoutSaveAttemptOutcomeEvent>,
+    mut save_to_db_event_writer: EventWriter<SaveToDB>,
     mut event_reader: EventReader<SaveWallsLayoutButtonPressed>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     domain_boards_query: Query<(&DomainBoard, &DomainBoardName)>,
@@ -25,52 +25,46 @@ fn listen_for_save_requests(
 ){
     for _save_request in event_reader.read(){
         if db_manager.get_saved_layouts_of_all_difficulties_count() >= super::MAX_SAVED_LAYOUTS as usize {
-            event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::WallsLayoutsAtCapacity));
+            save_outcome_event_writer.send(
+                LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::WallsLayoutsAtCapacity)
+            );
         }
         else{
             let game_board_grid = game_board_query.single().grid.clone();
-            if let Some(existing_board_name) = domain_board_already_exists(
-                &domain_boards_query,
-                &game_board_grid
-            ){
-                event_writer.send(LayoutSaveAttemptOutcomeEvent(
+            if let Some(existing_board_name) = 
+                DataBaseManager::domain_board_already_exists(
+                    &domain_boards_query,
+                    &game_board_grid
+                )
+            {
+                save_outcome_event_writer.send(LayoutSaveAttemptOutcomeEvent(
                     SaveAttemptOutcome::WallLayoutAlreadyExistsInMemory(existing_board_name)
                 ));
             }else{
-                write_to_db_event_writer.send(SaveToDB(DomainBoard{
+                save_to_db_event_writer.send(SaveToDB(DomainBoard{
                     board_props: *applied_board_props_query.single(),
                     grid: game_board_grid
                 }));
-                event_writer.send(LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::LayoutSavedSuccessfully));
+                save_outcome_event_writer.send(
+                    LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::LayoutSavedSuccessfully)
+                );
             }
         }
     }
 }
 
-fn domain_board_already_exists(
-    domain_boards_query: &Query<(&DomainBoard, &DomainBoardName)>,
-    game_board_grid: &Grid<Tile>
-) -> Option<ExistingWallLayoutName> {
-    for (domain_board, domain_board_name) in domain_boards_query{
-        if domain_board.grid == *game_board_grid {
-            return Some(ExistingWallLayoutName(domain_board_name.0.clone()));
-        }
-    }
-    None
-}
-
 fn save_to_data_base_and_system(
     mut event_writer: EventWriter<SuccessSavingToDB>,
-    mut event_reader: EventReader<SaveToDB>,
+    mut save_to_db_event_reader: EventReader<SaveToDB>,
     mut db_manager: ResMut<DataBaseManager>,
-    domain_board_query: Query<(Entity, &DomainBoardName, &DomainBoard)>,
+    mut domain_board_query: Query<(Entity, &DomainBoardName, &DomainBoard)>,
     mut commands: Commands
 ){
-    for save_request in event_reader.read(){
+    for save_request in save_to_db_event_reader.read(){
         match save_to_data_base_and_system_inner(
             save_request,
             &mut db_manager,
-            &domain_board_query,
+            &mut domain_board_query,
             &mut commands
         ){
             Err(data_base_error) => {
@@ -86,13 +80,15 @@ fn save_to_data_base_and_system(
 fn save_to_data_base_and_system_inner(
     save_request: &SaveToDB,
     db_manager: &mut DataBaseManager,
-    domain_board_query: &Query<(Entity, &DomainBoardName, &DomainBoard)>,
+    domain_board_query: &mut Query<(Entity, &DomainBoardName, &DomainBoard)>,
     commands: &mut Commands
 ) -> Result<SavedLayoutIndexInDifficultyVec, DataBaseError>
 {
     let layout_content_string = ron::ser::to_string_pretty(
         &save_request.0, ron::ser::PrettyConfig::default()).unwrap();
-    let layout_name_string = db_manager.generate_default_name_for_board().0;
+    let layout_name_string = db_manager.generate_unique_default_name_for_board(
+            &domain_board_query.transmute_lens::<&DomainBoardName>().query()
+        ).0;
     write_to_file(
         FolderToAccess::SavedLayouts,
         layout_name_string.clone(),
