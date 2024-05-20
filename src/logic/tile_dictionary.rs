@@ -1,9 +1,7 @@
+use enum_iterator::all;
 use crate::prelude::*;
 
-#[derive(Component)]
-pub struct TileDictionaryTag;
-
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct TileDictionary {
     pub entity_by_tile: HashMap<Tile, Option<Entity>>,
 }
@@ -17,10 +15,11 @@ impl Plugin for TileDictionaryPlugin {
 }
 
 fn spawn_tile_dictionary(mut commands: Commands) {
-    commands.spawn((
-        TileDictionary {
-            entity_by_tile: HashMap::<Tile, Option<Entity>>::new(),
-        },
-        TileDictionaryTag,
-    ));
+    commands.spawn(TileDictionary::default());
+    for loader_screen_slot in all::<LoaderScreenSlot>(){
+        commands.spawn((
+           loader_screen_slot,
+           TileDictionary::default()
+        ));
+    }
 }

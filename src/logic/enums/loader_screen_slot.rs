@@ -1,8 +1,9 @@
+use bevy::prelude::Component;
 use enum_iterator::Sequence;
 
 pub const SAVED_LAYOUTS_PER_SCREEN: usize = 4;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, Sequence)]
+#[derive(Component, Clone, Copy, PartialEq, Eq, Debug, Hash, Sequence)]
 pub enum LoaderScreenSlot {
     TopLeft,
     TopRight,
