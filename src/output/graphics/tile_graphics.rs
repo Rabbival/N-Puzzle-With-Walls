@@ -15,8 +15,8 @@ impl Plugin for TileGraphicsPlugin {
                     update_tile_entity_positions.in_set(InputSystemSets::PostInitialChanges),
                     (
                         move_loader_slot_existing_tiles,
-                        loader_slot_board_despawn_unused_tiles_and_clear_tag
-                        //TODO: spawn new tiles
+                        despawn_loader_slot_unused_tiles_and_clear_tag,
+                        spawn_loader_slot_new_tiles
                     ).chain().after(show_currently_displayed_saved_layouts_screen)
                 ),
             )
@@ -24,8 +24,8 @@ impl Plugin for TileGraphicsPlugin {
                 OnEnter(GameState::GameBoardGenerated),
                 (
                     move_game_board_existing_tiles,
-                    game_board_despawn_unused_tiles_and_clear_tag,
-                    spawn_new_tiles,
+                    despawn_game_board_unused_tiles_and_clear_tag,
+                    spawn_game_board_new_tiles,
                     declare_post_game_board_gen_changes_done
                 )
                     .chain()
@@ -37,10 +37,7 @@ impl Plugin for TileGraphicsPlugin {
 fn move_game_board_existing_tiles(
     mut event_writer: EventWriter<SpawnTileInLocation>,
     board_query: Query<&TileBoard, With<GameBoard>>,
-    tile_dictionary: Query<
-        &TileDictionary,
-        Without<LoaderScreenSlot>
-    >,
+    tile_dictionary: Query<&TileDictionary, Without<LoaderScreenSlot>>,
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
     mut commands: Commands,
 ) {
@@ -48,6 +45,7 @@ fn move_game_board_existing_tiles(
         &mut event_writer,
         &board_query.single().grid,
         &tile_dictionary.single().entity_by_tile,
+        None,
         &mut tile_transforms,
         &mut commands,
     ) {
@@ -72,6 +70,7 @@ fn move_loader_slot_existing_tiles(
                             &mut tile_spawn_event_writer,
                             &domain_tile_board.grid,
                             &tile_dictionary.entity_by_tile,
+                            Some(*loader_slot),
                             &mut tile_transforms,
                             &mut commands,
                         ){
@@ -89,16 +88,18 @@ fn move_existing_tiles_inner(
     event_writer: &mut EventWriter<SpawnTileInLocation>,
     grid: &Grid<Tile>,
     tile_dictionary: &HashMap<Tile, Option<Entity>>,
+    optional_loader_slot: Option<LoaderScreenSlot>,
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
     commands: &mut Commands,
 ) -> Result<(), EntityRelatedCostumeError> {
     for (grid_location, tile_from_cell) in grid.iter() {
-        let spawn_location = grid_location.to_world();
+        let updated_tile_location = grid_location.to_world();
         match tile_dictionary.get(tile_from_cell) {
             None => {
                 event_writer.send(SpawnTileInLocation {
+                    optional_loader_slot,
                     tile: *tile_from_cell,
-                    location: spawn_location,
+                    location: updated_tile_location,
                 });
             }
             Some(optional_entity) => match optional_entity {
@@ -107,7 +108,7 @@ fn move_existing_tiles_inner(
                 }
                 Some(entity) => {
                     if let Ok(mut tile_transform) = tile_transforms.get_mut(*entity) {
-                        tile_transform.translation = spawn_location;
+                        tile_transform.translation = updated_tile_location;
                         commands.entity(*entity).insert(StayForNextBoardTag);
                     } else {
                         return Err(EntityRelatedCostumeError::EntityNotInQuery);
@@ -119,10 +120,10 @@ fn move_existing_tiles_inner(
     Ok(())
 }
 
-fn game_board_despawn_unused_tiles_and_clear_tag(
+fn despawn_game_board_unused_tiles_and_clear_tag(
     mut tile_dictionary_query: Query<&mut TileDictionary, Without<LoaderScreenSlot>>,
     tagged_tiles: Query<Entity, (With<Tile>, With<StayForNextBoardTag>)>,
-    untagged_tiles: Query<(Entity, &Tile), Without<StayForNextBoardTag>>,
+    untagged_tiles: Query<(Entity, &Tile, &LoaderSlotOwnershipTag), Without<StayForNextBoardTag>>,
     mut commands: Commands,
 ) {
     if tagged_tiles.is_empty() {
@@ -131,87 +132,109 @@ fn game_board_despawn_unused_tiles_and_clear_tag(
 
     despawn_unused_tiles_and_clear_tag_inner(
         &mut tile_dictionary_query.single_mut().entity_by_tile,
+        None,
         &tagged_tiles,
         &untagged_tiles,
         &mut commands,
     );
 }
 
-//TODO: fn loader_slot_board_despawn_unused_tiles_and_clear_tag
-fn loader_slot_board_despawn_unused_tiles_and_clear_tag(
-    // mut tile_spawn_event_writer: EventWriter<SpawnTileInLocation>,
-    // mut event_reader: EventReader<LoaderSlotSetEvent>,
-    // tile_dictionary_query: Query<(&TileDictionary, &LoaderScreenSlot)>,
-    // domain_tile_board_query: Query<&TileBoard, With<DomainBoard>>,
-    // mut tile_transforms: Query<&mut Transform, With<Tile>>,
-    // mut commands: Commands
+fn despawn_loader_slot_unused_tiles_and_clear_tag(
+    mut event_reader: EventReader<LoaderSlotSetEvent>,
+    mut tile_dictionary_query: Query<(&mut TileDictionary, &LoaderScreenSlot)>,
+    tagged_tiles: Query<Entity, (With<Tile>, With<StayForNextBoardTag>)>,
+    untagged_tiles: Query<(Entity, &Tile, &LoaderSlotOwnershipTag), Without<StayForNextBoardTag>>,
+    mut commands: Commands
 ){
-    // for loader_slot_set_request in event_reader.read(){
-    //     for (tile_dictionary, loader_slot) in &tile_dictionary_query{
-    //         if *loader_slot == loader_slot_set_request.slot_to_set{
-    //             match domain_tile_board_query.get(loader_slot_set_request.layout_entity){
-    //                 Ok(domain_tile_board) => {
-    //                     if let Err(entity_error) = move_existing_tiles_inner(
-    //                         &mut tile_spawn_event_writer,
-    //                         &domain_tile_board.grid,
-    //                         &tile_dictionary.entity_by_tile,
-    //                         &mut tile_transforms,
-    //                         &mut commands,
-    //                     ){
-    //                         print_entity_related_error(entity_error);
-    //                     }
-    //                 },
-    //                 Err(_query_entity_error) => print_entity_related_error(EntityRelatedCostumeError::EntityNotInQuery)
-    //             };
-    //         }
-    //     }
-    // }
+    if tagged_tiles.is_empty() {
+        return;
+    }
+    
+    for loader_slot_set_request in event_reader.read(){
+        for (mut tile_dictionary, loader_slot) in &mut tile_dictionary_query{
+            if *loader_slot == loader_slot_set_request.slot_to_set{
+                despawn_unused_tiles_and_clear_tag_inner(
+                    &mut tile_dictionary.entity_by_tile,
+                    Some(*loader_slot),
+                    &tagged_tiles,
+                    &untagged_tiles,
+                    &mut commands,
+                );
+            }
+        }
+    }
 }
 
 fn despawn_unused_tiles_and_clear_tag_inner(
     tile_dictionary: &mut HashMap<Tile, Option<Entity>>,
+    optional_loader_slot: Option<LoaderScreenSlot>, 
     tagged_tiles: &Query<Entity, (With<Tile>, With<StayForNextBoardTag>)>,
-    untagged_tiles: &Query<(Entity, &Tile), Without<StayForNextBoardTag>>,
+    untagged_tiles: &Query<(Entity, &Tile, &LoaderSlotOwnershipTag), Without<StayForNextBoardTag>>,
     commands: &mut Commands,
 ) {
-    for (tile_entity, tile) in untagged_tiles {
-        tile_dictionary.remove(tile);
-        commands.entity(tile_entity).despawn_recursive();
+    for (tile_entity, tile, loader_slot_tag) in untagged_tiles {
+        if loader_slot_tag.0 == optional_loader_slot{
+            tile_dictionary.remove(tile);
+            commands.entity(tile_entity).despawn_recursive();
+        }
     }
     for tile_entity in tagged_tiles {
         commands.entity(tile_entity).remove::<StayForNextBoardTag>();
     }
 }
 
-fn spawn_new_tiles(
+fn spawn_game_board_new_tiles(
     mut event_reader: EventReader<SpawnTileInLocation>,
-    mut commands: Commands,
+    mut tile_dictionary_query: Query<&mut TileDictionary, Without<LoaderScreenSlot>>,
     sprite_atlas: Res<SpriteAtlas>,
     tile_text_font: Res<TileTextFont>,
-    mut tile_dictionary_query: Query<
-        &mut TileDictionary,
-        Without<LoaderScreenSlot>
-    >,
+    mut commands: Commands,
 ) {
-    if event_reader.is_empty() {
-        return;
-    }
-
     let mut tile_dictionary = &mut tile_dictionary_query.single_mut().entity_by_tile;
     for spawn_request in event_reader.read() {
-        spawn_tile_in_location(
-            &spawn_request,
-            &mut tile_dictionary,
-            &sprite_atlas,
-            &tile_text_font,
-            &mut commands
-        )
+        if spawn_request.optional_loader_slot.is_none(){
+            spawn_tile_in_location(
+                &spawn_request,
+                &mut tile_dictionary,
+                None,
+                &sprite_atlas,
+                &tile_text_font,
+                &mut commands
+            )
+        }
     }
 }
+
+fn spawn_loader_slot_new_tiles(
+    mut event_reader: EventReader<SpawnTileInLocation>,
+    mut tile_dictionary_query: Query<(&mut TileDictionary, &LoaderScreenSlot)>,
+   sprite_atlas: Res<SpriteAtlas>,
+   tile_text_font: Res<TileTextFont>,
+    mut commands: Commands,
+) {
+    for spawn_request in event_reader.read() {
+        for (mut tile_dictionary, loader_slot) in &mut tile_dictionary_query{
+            if let Some(request_loader_slot) = spawn_request.optional_loader_slot{
+                if request_loader_slot == *loader_slot{
+                    spawn_tile_in_location(
+                        &spawn_request,
+                        &mut tile_dictionary.entity_by_tile,
+                        Some(*loader_slot),
+                        &sprite_atlas,
+                        &tile_text_font,
+                        &mut commands
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 fn spawn_tile_in_location(
     spawn_request: &SpawnTileInLocation,
     tile_dictionary: &mut HashMap<Tile, Option<Entity>>,
+    optional_loader_slot: Option<LoaderScreenSlot>,
     sprite_atlas: &SpriteAtlas,
     tile_text_font: &TileTextFont,
     commands: &mut Commands
@@ -228,12 +251,22 @@ fn spawn_tile_in_location(
                 },
                 texture: sprite_atlas.image_handle.clone(),
                 transform: Transform::from_translation(spawn_location),
-                visibility: Visibility::Hidden,
                 ..default()
             },
             TileBundle {
                 tile: tile_to_spawn,
-                tag: simple_on_screen_tag(AppState::Game),
+                //TODO: fix later to only being visible for certain camera
+                // food for thought: could switch cameras and locks when loading
+                on_screen_tag:
+                    if optional_loader_slot.is_none(){
+                        simple_on_screen_tag(AppState::Game)
+                    }else{
+                        CustomOnScreenTag{
+                            screen: AppState::Game,
+                            on_own_screen_visibility: Some(Visibility::Hidden)
+                        }
+                    },
+                loader_slot_ownership_tag: LoaderSlotOwnershipTag(optional_loader_slot)
             },
         ))
         .id();
@@ -293,10 +326,7 @@ fn declare_post_game_board_gen_changes_done(
 
 fn update_tile_entity_positions(
     mut graphics_switch_tiles_listener: EventReader<UpdateTileLocationGraphics>,
-    tile_dictionary: Query<
-        &TileDictionary,
-        Without<LoaderScreenSlot>
-    >,
+    tile_dictionary: Query<&TileDictionary, Without<LoaderScreenSlot>>,
     mut tile_transforms: Query<&mut Transform, With<Tile>>,
 ) {
     for tile_location_graphic_update_request in graphics_switch_tiles_listener.read() {
@@ -315,6 +345,7 @@ fn update_tile_entity_positions(
         }
     }
 }
+
 
 fn update_tile_entity_positions_inner(
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,

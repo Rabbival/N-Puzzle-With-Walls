@@ -6,6 +6,7 @@ pub struct BuildNewBoard(pub BoardBuildingRequest);
 
 #[derive(Event, Default)]
 pub struct SpawnTileInLocation {
+    pub optional_loader_slot: Option<LoaderScreenSlot>,
     pub tile: Tile,
     pub location: Vec3,
 }
