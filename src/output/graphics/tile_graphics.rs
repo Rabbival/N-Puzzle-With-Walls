@@ -1,3 +1,4 @@
+use bevy::render::view::RenderLayers;
 use crate::prelude::*;
 use bevy::utils::HashMap;
 
@@ -241,6 +242,7 @@ fn spawn_tile_in_location(
 ){
     let tile_to_spawn = spawn_request.tile;
     let spawn_location = Vec3::new(spawn_request.location.x, spawn_request.location.y, 0.0);
+    let loader_slot_ownership_tag = LoaderSlotOwnershipTag(optional_loader_slot);
 
     let tile_entity_id = commands
         .spawn((
@@ -255,24 +257,21 @@ fn spawn_tile_in_location(
             },
             TileBundle {
                 tile: tile_to_spawn,
-                //TODO: fix later to only being visible for certain camera
-                // food for thought: could switch cameras and locks when loading
-                on_screen_tag:
-                    if optional_loader_slot.is_none(){
-                        simple_on_screen_tag(AppState::Game)
-                    }else{
-                        CustomOnScreenTag{
-                            screen: AppState::Game,
-                            on_own_screen_visibility: Some(Visibility::Hidden)
-                        }
-                    },
-                loader_slot_ownership_tag: LoaderSlotOwnershipTag(optional_loader_slot)
+                on_screen_tag: simple_on_screen_tag(AppState::Game),
+                loader_slot_ownership_tag,
+                render_layers: RenderLayers::layer(loader_slot_ownership_tag.to_render_layer())
             },
         ))
         .id();
 
     if tile_to_spawn.tile_type != TileType::Wall {
-        spawn_text_for_tile(&tile_text_font, &tile_to_spawn, &tile_entity_id, commands);
+        spawn_text_for_tile(
+            &tile_text_font, 
+            &tile_to_spawn, 
+            &tile_entity_id,
+            &loader_slot_ownership_tag,
+            commands
+        );
     }
 
     tile_dictionary.insert(tile_to_spawn, Some(tile_entity_id));
@@ -282,6 +281,7 @@ fn spawn_text_for_tile(
     tile_text_font: &TileTextFont,
     tile_to_spawn: &Tile,
     tile_entity_id: &Entity,
+    loader_slot_ownership_tag: &LoaderSlotOwnershipTag,
     commands: &mut Commands
 ){
     let text_spawn_loc_relative = Vec3::Z;
@@ -296,22 +296,25 @@ fn spawn_text_for_tile(
     }
 
     let tile_text_entity_id = commands
-        .spawn(Text2dBundle {
-            text: Text {
-                sections: vec![TextSection::new(
-                    number_to_display.to_string(),
-                    TextStyle {
-                        font: tile_text_font.0.clone(),
-                        font_size: ATLAS_CELL_SQUARE_SIZE*0.88,
-                        color: text_color,
-                    },
-                )],
-                justify: JustifyText::Center,
-                linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
+        .spawn((
+            Text2dBundle {
+                text: Text {
+                    sections: vec![TextSection::new(
+                        number_to_display.to_string(),
+                        TextStyle {
+                            font: tile_text_font.0.clone(),
+                            font_size: ATLAS_CELL_SQUARE_SIZE*0.88,
+                            color: text_color,
+                        },
+                    )],
+                    justify: JustifyText::Center,
+                    linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
+                },
+                transform: Transform::from_translation(text_spawn_loc_relative),
+                ..default()
             },
-            transform: Transform::from_translation(text_spawn_loc_relative),
-            ..default()
-        })
+            RenderLayers::layer(loader_slot_ownership_tag.to_render_layer())
+        ))
         .id();
     commands
         .entity(*tile_entity_id)

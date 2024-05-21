@@ -23,7 +23,7 @@ impl Plugin for MouseInputHandlerPlugin {
 fn update_cursor_in_game_world(
     mut cursor: ResMut<CursorPosition>,
     windows: Query<&Window>,
-    camera: Query<(&Camera, &GlobalTransform)>,
+    camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let window = windows.single();
     let (camera, transform) = camera.single();

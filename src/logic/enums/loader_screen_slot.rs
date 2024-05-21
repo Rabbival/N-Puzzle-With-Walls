@@ -22,12 +22,6 @@ impl LoaderScreenSlot{
         }
     }
     
-    pub fn to_layout_offset(&self) -> usize {
-        match self{
-            LoaderScreenSlot::TopLeft => 0,
-            LoaderScreenSlot::TopRight => 1,
-            LoaderScreenSlot::BottomLeft => 2,
-            LoaderScreenSlot::BottomRight => 3,
-        }
-    }
+    pub fn to_layout_offset(&self) -> usize { *self as usize }
+    
 }
