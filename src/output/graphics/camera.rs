@@ -1,4 +1,3 @@
-use bevy::render::camera::Viewport;
 use bevy::render::view::RenderLayers;
 use enum_iterator::all;
 use crate::prelude::*;
@@ -40,9 +39,8 @@ fn spawn_loader_slot_preview_camera(loader_slot: LoaderScreenSlot, commands: &mu
     commands.spawn((
         Camera2dBundle {
             camera: Camera{
-                //TODO: set viewport to slot's ui image
+                //TODO: set target to slot's ui image
                 order: loader_slot_ownership_tag.to_camera_order(),
-                // is_active: false, //TODO: remove once they're in the images
                 ..default()
             },
             ..default()
