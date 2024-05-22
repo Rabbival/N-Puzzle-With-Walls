@@ -9,8 +9,8 @@ pub fn main() {
     let mut app = App::new();
     app
         
-        .add_systems(PostStartup, expirimentation)
-        .add_systems(Update, (rotator_system, cube_rotator_system))
+        // .add_systems(PostStartup, expirimentation)
+        // .add_systems(Update, (rotator_system, cube_rotator_system))
         
         
         //bevy basics

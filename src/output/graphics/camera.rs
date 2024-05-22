@@ -52,26 +52,22 @@ fn spawn_loader_slot_preview_camera(loader_slot: LoaderScreenSlot, commands: &mu
 
 fn adjust_main_camera_zoom_to_new_settings(
     mut camera_query: Query<
-        (&mut Transform, &mut OrthographicProjection, &LoaderSlotOwnershipTag), 
-        With<Camera2d>
+        (&mut Transform, &mut OrthographicProjection), 
+        (With<Camera2d>, Without<LoaderSlotOwnershipTag>)
     >,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
 ) {
     for (
         mut camera_transform,
-        mut camera_projection,
-        loader_slot_tag
+        mut camera_projection
     )
         in &mut camera_query
     {
-        if loader_slot_tag.0.is_none(){
-            set_camera_zoom_by_grid_side_length(
-                applied_board_props_query.single().size.to_grid_side_length(),
-                camera_transform.as_mut(),
-                camera_projection.as_mut(),
-            );
-            break;
-        }
+        set_camera_zoom_by_grid_side_length(
+            applied_board_props_query.single().size.to_grid_side_length(),
+            camera_transform.as_mut(),
+            camera_projection.as_mut(),
+        );
     }
 }
 
