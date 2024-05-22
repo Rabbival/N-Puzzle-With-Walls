@@ -26,7 +26,7 @@ fn listen_for_save_requests(
     for _save_request in event_reader.read(){
         if db_manager.get_saved_layouts_of_all_difficulties_count() >= super::MAX_SAVED_LAYOUTS as usize {
             save_outcome_event_writer.send(
-                LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::WallsLayoutsAtCapacity)
+                LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::DataBaseAtCapacity)
             );
         }
         else{
@@ -38,33 +38,33 @@ fn listen_for_save_requests(
                 )
             {
                 save_outcome_event_writer.send(LayoutSaveAttemptOutcomeEvent(
-                    SaveAttemptOutcome::WallLayoutAlreadyExistsInMemory(existing_board_name)
+                    SaveAttemptOutcome::BoardAlreadyExistsInMemory(existing_board_name)
                 ));
             }else{
                 save_to_db_event_writer.send(SaveToDB(DomainBoard{
                     board_props: *applied_board_props_query.single(),
                     grid: game_board_grid
                 }));
-                save_outcome_event_writer.send(
-                    LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::LayoutSavedSuccessfully)
-                );
             }
         }
     }
 }
 
 fn save_to_data_base_and_system(
+    mut save_outcome_event_writer: EventWriter<LayoutSaveAttemptOutcomeEvent>,
     mut event_writer: EventWriter<SuccessSavingToDB>,
     mut save_to_db_event_reader: EventReader<SaveToDB>,
     mut db_manager: ResMut<DataBaseManager>,
     mut domain_board_query: Query<(Entity, &DomainBoardName, &DomainBoard)>,
     mut commands: Commands
 ){
+    let mut new_domain_board_name = DomainBoardName::default();
     for save_request in save_to_db_event_reader.read(){
         match save_to_data_base_and_system_inner(
             save_request,
             &mut db_manager,
             &mut domain_board_query,
+            &mut new_domain_board_name,
             &mut commands
         ){
             Err(data_base_error) => {
@@ -72,6 +72,13 @@ fn save_to_data_base_and_system(
             },
             Ok(index_saved_to) => {
                 event_writer.send(SuccessSavingToDB(index_saved_to));
+                save_outcome_event_writer.send(
+                    LayoutSaveAttemptOutcomeEvent(
+                        SaveAttemptOutcome::LayoutSavedSuccessfully(
+                            new_domain_board_name.clone()
+                        )
+                    )
+                );
             }
         }
     }
@@ -81,6 +88,7 @@ fn save_to_data_base_and_system_inner(
     save_request: &SaveToDB,
     db_manager: &mut DataBaseManager,
     domain_board_query: &mut Query<(Entity, &DomainBoardName, &DomainBoard)>,
+    new_domain_board_name: &mut DomainBoardName,
     commands: &mut Commands
 ) -> Result<SavedLayoutIndexInDifficultyVec, DataBaseError>
 {
@@ -94,10 +102,11 @@ fn save_to_data_base_and_system_inner(
         layout_name_string.clone(),
         layout_content_string
     ).unwrap();
+    new_domain_board_name.0 = layout_name_string.clone();
 
     super::wrap_to_data_base_error(
         db_manager.insert_layout_and_spawn_entity(
-            &DomainBoardName(layout_name_string),
+            &new_domain_board_name,
             &save_request.0,
             domain_board_query,
             commands

@@ -88,7 +88,7 @@ fn show_walls_layout_save_attempt_outcome(
             &mut save_button_text_query.single_mut().sections[0];
         let save_button_text_new_value = None;
         
-        if let SaveAttemptOutcome::LayoutSavedSuccessfully = layout_attempt_outcome.0 {
+        if let SaveAttemptOutcome::LayoutSavedSuccessfully(_) = layout_attempt_outcome.0 {
             text_above_button_new_color = Some(GREEN_TEXT_COLOR);
             save_button_text_new_color = Some(GREEN_TEXT_COLOR);
             save_button_reset_timer = 

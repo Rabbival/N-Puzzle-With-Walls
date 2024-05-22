@@ -1,12 +1,12 @@
 use std::fmt::{Display, Formatter};
-use crate::prelude::{SaveAttemptOutcome};
+use crate::{logic::DomainBoardName, prelude::SaveAttemptOutcome};
 
 #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Clone)]
 pub enum TextAboveSaveButtonType {
     NoText,
-    WallLayoutAlreadyExistsInMemory(ExistingWallLayoutName),
-    WallsLayoutsAtCapacity,
-    LayoutSavedSuccessfully
+    BoardAlreadyExistsInMemory(ExistingWallLayoutName),
+    DataBaseAtCapacity,
+    LayoutSavedSuccessfully(DomainBoardName)
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Clone)]
@@ -15,14 +15,14 @@ pub struct ExistingWallLayoutName(pub String);
 impl TextAboveSaveButtonType{
     pub fn from_save_attempt_outcome(save_attempt_outcome: SaveAttemptOutcome) -> Self {
         match save_attempt_outcome{
-            SaveAttemptOutcome::LayoutSavedSuccessfully => {
-                TextAboveSaveButtonType::LayoutSavedSuccessfully
+            SaveAttemptOutcome::LayoutSavedSuccessfully(domain_board_name) => {
+                TextAboveSaveButtonType::LayoutSavedSuccessfully(domain_board_name)
             },
-            SaveAttemptOutcome::WallLayoutAlreadyExistsInMemory(existing_wall_layout_name) => {
-                TextAboveSaveButtonType::WallLayoutAlreadyExistsInMemory(existing_wall_layout_name)
+            SaveAttemptOutcome::BoardAlreadyExistsInMemory(existing_wall_layout_name) => {
+                TextAboveSaveButtonType::BoardAlreadyExistsInMemory(existing_wall_layout_name)
             },
-            SaveAttemptOutcome::WallsLayoutsAtCapacity => {
-                TextAboveSaveButtonType::WallsLayoutsAtCapacity
+            SaveAttemptOutcome::DataBaseAtCapacity => {
+                TextAboveSaveButtonType::DataBaseAtCapacity
             }
         }
     }
@@ -34,14 +34,14 @@ impl Display for TextAboveSaveButtonType{
             TextAboveSaveButtonType::NoText => {
                 String::from("")
             },
-            TextAboveSaveButtonType::WallLayoutAlreadyExistsInMemory(ExistingWallLayoutName(existing_layout_name)) => {
+            TextAboveSaveButtonType::BoardAlreadyExistsInMemory(ExistingWallLayoutName(existing_layout_name)) => {
                 String::from("This walls layout is already saved under the name ") + existing_layout_name
             },
-            TextAboveSaveButtonType::WallsLayoutsAtCapacity => {
+            TextAboveSaveButtonType::DataBaseAtCapacity => {
                 String::from("Layouts memory at capacity, Delete some to save new ones.")
             },
-            TextAboveSaveButtonType::LayoutSavedSuccessfully => {
-                String::from("Walls layout saved successfully!")
+            TextAboveSaveButtonType::LayoutSavedSuccessfully(domain_board_name) => {
+                String::from("Walls layout saved successfully as ")+&domain_board_name.0
             },
         };
         fmt.write_str(&message_string)?;
