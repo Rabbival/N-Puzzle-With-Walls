@@ -24,4 +24,5 @@ impl LoaderScreenSlot{
     
     pub fn to_layout_offset(&self) -> usize { *self as usize }
     
+    pub fn to_camera_order(&self) -> isize { *self as isize }
 }

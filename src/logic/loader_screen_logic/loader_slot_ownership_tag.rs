@@ -12,13 +12,4 @@ impl LoaderSlotOwnershipTag{
             None => 0
         }
     }
-
-    pub fn to_camera_order(&self) -> isize {
-        match self.0{
-            Some(loader_slot) => {
-                (loader_slot as isize) + 1
-            },
-            None => 0
-        }
-    }
 }

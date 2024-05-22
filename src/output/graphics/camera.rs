@@ -21,7 +21,7 @@ fn spawn_cameras(mut commands: Commands) {
        MainCamera,
        Camera2dBundle{
             camera: Camera{
-                order: 0,
+                order: (all::<LoaderScreenSlot>().count()+1) as isize,
                 ..default()
             },
            ..default()
@@ -40,7 +40,7 @@ fn spawn_loader_slot_preview_camera(loader_slot: LoaderScreenSlot, commands: &mu
         Camera2dBundle {
             camera: Camera{
                 //TODO: set target to slot's ui image
-                order: loader_slot_ownership_tag.to_camera_order(),
+                order: loader_slot.to_camera_order(),
                 ..default()
             },
             ..default()
