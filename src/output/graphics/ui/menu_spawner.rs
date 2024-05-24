@@ -61,7 +61,7 @@ fn spawn_generate_button(
                 ),
                 MultipleOnScreenTags(vec![
                     simple_on_screen_tag(AppState::Menu),
-                    simple_on_screen_tag(AppState::Manual),
+                    simple_on_screen_tag(AppState::ManualBuild),
                 ]),
             ))
             .with_children(|parent| {

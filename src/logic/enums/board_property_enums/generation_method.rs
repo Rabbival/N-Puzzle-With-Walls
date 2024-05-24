@@ -8,7 +8,7 @@ use crate::prelude::AppState;
 pub enum BoardGenerationMethod {
     #[default]
     Auto,
-    ManualBuild,
+    Build,
     Load,
 }
 
@@ -18,7 +18,7 @@ impl BoardGenerationMethod {
     pub fn to_generation_button_text(&self) -> String {
         match self{
             BoardGenerationMethod::Auto => String::from("Generate"),
-            BoardGenerationMethod::ManualBuild => String::from("Build"),
+            BoardGenerationMethod::Build => String::from("Build"),
             BoardGenerationMethod::Load => String::from("Load"),
         }
     }
@@ -26,7 +26,7 @@ impl BoardGenerationMethod {
     pub fn to_app_state(&self) -> AppState {
         match self{
             BoardGenerationMethod::Auto => AppState::Game,
-            BoardGenerationMethod::ManualBuild => AppState::ManualBuild,
+            BoardGenerationMethod::Build => AppState::ManualBuild,
             BoardGenerationMethod::Load => AppState::Loader,
         }
     }
