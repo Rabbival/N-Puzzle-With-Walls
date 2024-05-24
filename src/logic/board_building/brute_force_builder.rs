@@ -196,7 +196,7 @@ mod tests {
         ).unwrap();
         for _ in 0..ATTEMPT_COUNT{
             assert_ne!(tile_board.grid, 
-                match generate_game_board(tile_board.clone(), RANDOM_RANGE_FOR_TESTING){
+                match brute_force_generate_game_board(&tile_board.clone(), RANDOM_RANGE_FOR_TESTING){
                     Ok(board)=> board,
                     Err(_)=> panic!()
                 }.grid

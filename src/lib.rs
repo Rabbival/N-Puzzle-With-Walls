@@ -50,7 +50,7 @@ pub mod prelude {
     pub use crate::logic::{
         board_building::{
             board_builder::*, board_entities_spawner::*, BoardBuildingPlugin,
-            brute_force_builder::*, permutation_builder::*, solved_board_builder::*,
+            brute_force_builder::*, solved_board_builder::*,
             wall_placement_validator::*,
         },
         board_manager::*,

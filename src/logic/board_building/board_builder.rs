@@ -41,10 +41,7 @@ fn build_a_new_board(
         }
         Ok(newborn_board) => {
             let attempt_result =
-                generate_game_board(
-                    newborn_board, 
-                    applied_props.get_random_turns_range()
-                );
+                brute_force_generate_game_board(&newborn_board, applied_props.get_random_turns_range());
             match attempt_result {
                 Ok(board) => {
                     game_state.set(GameState::GameBoardGenerated);
@@ -58,20 +55,6 @@ fn build_a_new_board(
             }
         }
     }
-}
-
-pub fn generate_game_board(
-    solved_board: TileBoard,
-    generation_range: (u8, u8),
-) -> Result<TileBoard, BoardGenerationError> {
-    // let attempt_result
-    //     =generate_board_by_vector_permutation(&solved_board);
-    //  //generation successful
-    // if let Ok(board) = attempt_result {
-    //     return Ok(board);
-    // }
-
-    brute_force_generate_game_board(&solved_board, generation_range)
 }
 
 fn declare_board_generation_done(

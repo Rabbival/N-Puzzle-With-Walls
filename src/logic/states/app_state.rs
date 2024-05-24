@@ -5,7 +5,7 @@ pub enum AppState {
     #[default]
     Menu,
     Game,
-    Builder,
+    Manual,
     Loader
 }
 

@@ -26,7 +26,7 @@ impl BoardGenerationMethod {
     pub fn to_app_state(&self) -> AppState {
         match self{
             BoardGenerationMethod::Auto => AppState::Game,
-            BoardGenerationMethod::Manual => AppState::Builder,
+            BoardGenerationMethod::Manual => AppState::Manual,
             BoardGenerationMethod::Load => AppState::Loader,
         }
     }
