@@ -2,11 +2,15 @@ use bevy::app::AppExit;
 
 use crate::prelude::*;
 
+#[derive(Resource, Default)]
+pub struct StateBeforeMenuOpened(pub Option<AppState>);
+
 pub struct EternalUiLogicPlugin;
 
 impl Plugin for EternalUiLogicPlugin {
     fn build(&self, app: &mut App) {
         app
+            .init_resource::<StateBeforeMenuOpened>()
             .add_systems(
                 OnExit(AppState::Menu),
                 toggle_menu_button
@@ -36,18 +40,22 @@ fn toggle_menu_button(
 
 fn toggle_menu(
     mut event_reader: EventReader<ToggleMenu>,
-    game_state: Res<State<AppState>>,
+    mut state_before_menu_opened: ResMut<StateBeforeMenuOpened>,
+    app_state: Res<State<AppState>>,
     mut next_state: ResMut<NextState<AppState>>,
-    applied_board_prop_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
 ) {
-    for _ in event_reader.read() {
-        let current_not_menu_state = 
-            applied_board_prop_query.single().generation_method.to_app_state();
-        match game_state.get() {
+    for menu_toggle_event in event_reader.read() {
+        let current_app_state = app_state.get();
+        match current_app_state {
             AppState::Menu => {
-                next_state.set(current_not_menu_state);
+                if let Some(pre_set_next_state) = menu_toggle_event.out_of_menu_into{
+                    next_state.set(pre_set_next_state);
+                }else if let Some(previous_app_state) = state_before_menu_opened.0{
+                    next_state.set(previous_app_state);
+                }
             }
             _ => {
+                state_before_menu_opened.0 = Some(*current_app_state);
                 next_state.set(AppState::Menu);
             }
         }

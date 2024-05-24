@@ -184,7 +184,9 @@ pub fn set_applied_props_and_exit_menu(
                 },
                 // only board generation can fail (and force us to stay in the menu screen)
                 _ => {
-                    menu_toggle_event_writer.send(ToggleMenu);
+                    menu_toggle_event_writer.send(ToggleMenu{
+                        out_of_menu_into: Some(applied_props.generation_method.to_app_state())
+                    });
                 }
             }
         }

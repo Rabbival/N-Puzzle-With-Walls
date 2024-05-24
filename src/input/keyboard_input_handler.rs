@@ -78,7 +78,7 @@ fn open_menu(
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
-        menu_toggle_event_writer.send(ToggleMenu);
+        menu_toggle_event_writer.send(ToggleMenu::default());
     }
 }
 

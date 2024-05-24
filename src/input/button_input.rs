@@ -34,7 +34,7 @@ fn handle_eternal_buttons(
                     end_game_event_writer.send(EndGame);
                 },
                 EternalButtonAction::ToggleMenu => {
-                    menu_toggle_event_writer.send(ToggleMenu);
+                    menu_toggle_event_writer.send(ToggleMenu::default());
                 }
             }
         }

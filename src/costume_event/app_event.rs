@@ -3,8 +3,10 @@ use crate::prelude::*;
 #[derive(Event)]
 pub struct EndGame;
 
-#[derive(Event)]
-pub struct ToggleMenu;
+#[derive(Event, Default)]
+pub struct ToggleMenu{
+    pub out_of_menu_into: Option<AppState>   
+}
 
 pub struct AppEventPlugin;
 

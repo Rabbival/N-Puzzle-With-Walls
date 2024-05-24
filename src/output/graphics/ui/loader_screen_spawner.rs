@@ -1,3 +1,4 @@
+use bevy::render::render_resource::{Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages};
 use crate::output::graphics::ui::NORMAL_BUTTON_COLOR;
 use crate::prelude::*;
 
@@ -130,6 +131,7 @@ fn spawn_bottom_line(
 
 fn spawn_layout_slots_to_choose_from(
     mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
+    mut images: ResMut<Assets<Image>>,
     mut commands: Commands,
 ){
     for spawn_request in spawn_event_reader.read() {
@@ -155,11 +157,13 @@ fn spawn_layout_slots_to_choose_from(
             )).with_children(|parent| {
                 spawn_layout_entity(
                     parent,
+                    image_handle_to_render_to(&mut images),
                     spawn_request,
                     LoaderScreenSlot::TopLeft,
                 );
                 spawn_layout_entity(
                     parent,
+                    image_handle_to_render_to(&mut images),
                     spawn_request,
                     LoaderScreenSlot::TopRight,
                 );
@@ -175,11 +179,13 @@ fn spawn_layout_slots_to_choose_from(
             }).with_children(|parent| {
                 spawn_layout_entity(
                     parent,
+                    image_handle_to_render_to(&mut images),
                     spawn_request,
                     LoaderScreenSlot::BottomLeft,
                 );
                 spawn_layout_entity(
                     parent,
+                    image_handle_to_render_to(&mut images),
                     spawn_request,
                     LoaderScreenSlot::BottomRight,
                 );
@@ -200,6 +206,7 @@ fn spawn_layout_slots_to_choose_from(
 
 fn spawn_layout_entity(
     parent: &mut ChildBuilder,
+    image_handle: Handle<Image>,
     spawn_request: &SpawnTextsAndButtons,
     loader_screen_slot: LoaderScreenSlot,
 ){
@@ -244,7 +251,7 @@ fn spawn_layout_entity(
                     },
                     ..default()
                 },
-               //TODO: uiimage
+                UiImage::new(image_handle),
                 LayoutPreviewNode(loader_screen_slot),
             )); 
         });
@@ -262,6 +269,35 @@ fn spawn_layout_entity(
             ));
         });
     });
+}
+
+fn image_handle_to_render_to(images: &mut Assets<Image>)-> Handle<Image> {
+    let size = Extent3d {
+        width: 512,
+        height: 512,
+        ..default()
+    };
+    
+    let mut image = Image {
+        texture_descriptor: TextureDescriptor {
+            label: None,
+            size,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Bgra8UnormSrgb,
+            mip_level_count: 1,
+            sample_count: 1,
+            usage: TextureUsages::TEXTURE_BINDING
+                | TextureUsages::COPY_DST
+                | TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        },
+        ..default()
+    };
+
+    // fill image.data with zeroes
+    image.resize(size);
+
+    images.add(image)
 }
 
 fn spawn_delete_all_layouts_button(

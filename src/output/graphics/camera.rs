@@ -1,3 +1,4 @@
+use bevy::render::camera::RenderTarget;
 use bevy::render::view::RenderLayers;
 use enum_iterator::all;
 use crate::prelude::*;
@@ -16,7 +17,7 @@ impl Plugin for CameraPlugin {
     }
 }
 
-fn spawn_cameras(mut commands: Commands) {
+fn spawn_cameras(mut commands: Commands, loader_slot_query: Query<(&UiImage, &LayoutPreviewNode)>) {
     commands.spawn((
        MainCamera,
        Camera2dBundle{
@@ -29,17 +30,21 @@ fn spawn_cameras(mut commands: Commands) {
        RenderLayers::layer(0),
     ));
 
-    for loader_slot in all::<LoaderScreenSlot>(){
-        spawn_loader_slot_preview_camera(loader_slot, &mut commands)
+    for (ui_image, preview_node) in &loader_slot_query{
+        spawn_loader_slot_preview_camera(preview_node.0, ui_image.texture.clone(), &mut commands);
     }
 }
 
-fn spawn_loader_slot_preview_camera(loader_slot: LoaderScreenSlot, commands: &mut Commands){
+fn spawn_loader_slot_preview_camera(
+    loader_slot: LoaderScreenSlot, 
+    image_handle: Handle<Image>, 
+    commands: &mut Commands
+){
     let loader_slot_ownership_tag = LoaderSlotOwnershipTag(Some(loader_slot));
     commands.spawn((
         Camera2dBundle {
             camera: Camera{
-                //TODO: set target to slot's ui image
+                target: RenderTarget::Image(image_handle),
                 order: loader_slot.to_camera_order(),
                 ..default()
             },
