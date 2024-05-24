@@ -102,11 +102,11 @@ fn save_to_data_base_and_system_inner(
         layout_name_string.clone(),
         layout_content_string
     ).unwrap();
-    new_domain_board_name.0 = layout_name_string.clone();
+    new_domain_board_name.0.clone_from(&layout_name_string);
 
     super::wrap_to_data_base_error(
         db_manager.insert_layout_and_spawn_entity(
-            &new_domain_board_name,
+            new_domain_board_name,
             &save_request.0,
             domain_board_query,
             commands

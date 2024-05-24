@@ -1,0 +1,415 @@
+(
+    board_props: (
+        board_difficulty: Medium,
+        size: Giant,
+        wall_count: 17,
+        empty_count: 1,
+        generation_method: Auto,
+        tree_traveller_type: BFS,
+    ),
+    grid: (
+        grid_side_length: 10,
+        grid: [
+            Some((
+                index: 1,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 0,
+                tile_type: Empty,
+            )),
+            Some((
+                index: 2,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 0,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 3,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 4,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 5,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 6,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 15,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 7,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 0,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 9,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 11,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 1,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 12,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 13,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 14,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 2,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 23,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 8,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 3,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 10,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 42,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 17,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 4,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 20,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 5,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 22,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 31,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 16,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 33,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 51,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 18,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 19,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 6,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 28,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 29,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 30,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 21,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 32,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 34,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 58,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 7,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 24,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 8,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 36,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 39,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 47,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 50,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 49,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 41,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 59,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 43,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 25,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 53,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 45,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 46,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 37,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 38,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 40,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 9,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 68,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 10,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 26,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 35,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 11,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 55,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 48,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 57,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 65,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 12,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 60,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 52,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 70,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 27,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 61,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 62,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 54,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 63,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 64,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 67,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 76,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 13,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 71,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 44,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 72,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 79,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 73,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 14,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 56,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 75,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 77,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 78,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 69,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 15,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 16,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 80,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 81,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 74,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 66,
+                tile_type: Numbered,
+            )),
+        ],
+    ),
+)

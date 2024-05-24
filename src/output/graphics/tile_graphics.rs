@@ -191,12 +191,12 @@ fn spawn_game_board_new_tiles(
     tile_text_font: Res<TileTextFont>,
     mut commands: Commands,
 ) {
-    let mut tile_dictionary = &mut tile_dictionary_query.single_mut().entity_by_tile;
+    let tile_dictionary = &mut tile_dictionary_query.single_mut().entity_by_tile;
     for spawn_request in event_reader.read() {
         if spawn_request.optional_loader_slot.is_none(){
             spawn_tile_in_location(
-                &spawn_request,
-                &mut tile_dictionary,
+                spawn_request,
+                tile_dictionary,
                 None,
                 &sprite_atlas,
                 &tile_text_font,
@@ -218,7 +218,7 @@ fn spawn_loader_slot_new_tiles(
             if let Some(request_loader_slot) = spawn_request.optional_loader_slot{
                 if request_loader_slot == *loader_slot{
                     spawn_tile_in_location(
-                        &spawn_request,
+                        spawn_request,
                         &mut tile_dictionary.entity_by_tile,
                         Some(*loader_slot),
                         &sprite_atlas,
@@ -274,7 +274,7 @@ fn spawn_tile_in_location(
 
     if tile_to_spawn.tile_type != TileType::Wall {
         spawn_text_for_tile(
-            &tile_text_font, 
+            tile_text_font, 
             &tile_to_spawn, 
             &tile_entity_id,
             &loader_slot_ownership_tag,

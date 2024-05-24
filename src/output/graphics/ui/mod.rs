@@ -6,7 +6,6 @@ pub mod button_and_text_styles;
 pub mod messages_spawners;
 pub mod save_walls_layout_button_spawner;
 pub mod loader_screen_spawner;
-pub mod layout_preview_handler;
 pub mod hide_by_chosen_generation_method;
 
 pub const NORMAL_BUTTON_COLOR: Color = Color::rgb(0.1, 0.1, 0.1);
@@ -41,7 +40,6 @@ impl Plugin for UiGraphicsPlugin {
             ButtonAndTextStylesPlugin,
             GameScreenButtonSpawnerPlugin,
             LoaderScreenSpawnerPlugin,
-            LayoutPreviewHandlerPlugin
         ))
         .add_systems(Update, (
             update_button_color,

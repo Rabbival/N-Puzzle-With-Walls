@@ -150,7 +150,6 @@ pub mod prelude {
                     victory_message::*,
                 },
                 save_walls_layout_button_spawner::*,
-                layout_preview_handler::*,
                 hide_by_chosen_generation_method::*,
                 set_color_to_imaged_normal,
                 set_color_to_imaged_pressed,
