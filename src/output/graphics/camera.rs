@@ -36,8 +36,8 @@ fn spawn_cameras(mut commands: Commands, loader_slot_query: Query<(&UiImage, &La
 }
 
 fn spawn_loader_slot_preview_camera(
-    loader_slot: LoaderScreenSlot, 
-    image_handle: Handle<Image>, 
+    loader_slot: LoaderScreenSlot,
+    image_handle: Handle<Image>,
     commands: &mut Commands
 ){
     let loader_slot_ownership_tag = LoaderSlotOwnershipTag(Some(loader_slot));

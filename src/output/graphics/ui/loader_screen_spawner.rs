@@ -249,6 +249,7 @@ fn spawn_layout_entity(
                         align_items: AlignItems::Center,
                         ..default()
                     },
+                    background_color: Color::WHITE.into(),
                     ..default()
                 },
                 UiImage::new(image_handle),
