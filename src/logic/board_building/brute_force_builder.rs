@@ -40,10 +40,8 @@ pub fn brute_force_generate_game_board(
                 shift_tracker,
                 &mut rng
             )?.0;
-            if move_registered{
-                
-            }else{
-                
+            if !move_registered{
+                return Err(BoardGenerationError::CouldntFindADirectionToMoveEmptyTileIn);
             }
         }
     }
@@ -72,6 +70,11 @@ fn determine_next_shift_direction(
     let empty_tile_location = shift_tracker.empty_location;
     let mut optional_directions=
         board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
+
+    //could be that a mischevious player trapped the first available tiles with walls
+    if optional_directions.len() == 0 {
+        return Ok(MoveDecidedAndRegistered(false));
+    }
 
     // don't want to shift back and forth,
     // unless it's a dead end in which it has to turn back

@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[derive(Debug, Clone, Copy)]
 pub enum BoardGenerationError {
     VectorPermutationGenerationFailed,
+    CouldntFindADirectionToMoveEmptyTileIn,
     DirectionCouldntBeFlipped,
     DirectionNotInMap(DataStructError<BasicDirection>),
     CircleCheckError(DataStructError<GridLocation>),
