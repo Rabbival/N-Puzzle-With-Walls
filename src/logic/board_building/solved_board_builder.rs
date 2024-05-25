@@ -77,7 +77,7 @@ pub fn empty_tile_board_to_solved(
 -> Result<(), BoardGenerationError>
 {
     wrap_if_error(&solved_board.spawn_walls_in_locations(&wall_locations))?;
-    wrap_if_error(&solved_board.spawn_empty_tiles(&applied_props, &grid_side_length))?;
+    wrap_if_error(&solved_board.spawn_empty_tiles(applied_props, &grid_side_length))?;
     wrap_if_error(&solved_board.spawn_numbered_uninitialized_tiles(&grid_side_length))?;
 
     solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;

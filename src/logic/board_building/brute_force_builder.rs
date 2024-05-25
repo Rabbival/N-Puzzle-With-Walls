@@ -1,9 +1,11 @@
 use rand::prelude::ThreadRng;
-use crate::prelude::*;
+use crate::{logic::data_structure::util_functions, prelude::*};
 
 use rand::Rng;
 
-struct MoveDecidedAndRegistered(pub bool);
+struct MoveDecidedAndRegistered{
+    direction_to_avoid_next_attempt: Option<BasicDirection>
+}
 
 pub fn brute_force_generate_game_board(
     solved_board: &TileBoard,
@@ -35,13 +37,19 @@ pub fn brute_force_generate_game_board(
 
     for _shift in 0..location_shift_count{
         for shift_tracker in &mut location_shift_trackers{
-            let move_registered = determine_next_shift_direction(
-                &mut board,
-                shift_tracker,
-                &mut rng
-            )?.0;
-            if !move_registered{
-                return Err(BoardGenerationError::CouldntFindADirectionToMoveEmptyTileIn);
+            let mut directions_to_avoid = vec![];
+            let mut direction_determined = false;
+            while !direction_determined {
+                if let Some(new_direction_to_avoid) = determine_next_shift_direction(
+                    &mut board,
+                    &mut directions_to_avoid,
+                    shift_tracker,
+                    &mut rng
+                )?.direction_to_avoid_next_attempt{
+                    directions_to_avoid.push(new_direction_to_avoid);
+                }else{
+                    direction_determined = true;
+                }
             }
         }
     }
@@ -63,6 +71,7 @@ pub fn brute_force_generate_game_board(
 
 fn determine_next_shift_direction(
     board: &mut TileBoard,
+    directions_to_avoid: &mut Vec<BasicDirection>,
     shift_tracker: &mut LocationShiftTracker,
     rng: &mut ThreadRng
 ) -> Result<MoveDecidedAndRegistered, BoardGenerationError>
@@ -71,9 +80,14 @@ fn determine_next_shift_direction(
     let mut optional_directions=
         board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
 
+    util_functions::remove_all_items_with_keys(
+        &mut optional_directions, 
+        directions_to_avoid
+    );
+
     //could be that a mischevious player trapped the first available tiles with walls
-    if optional_directions.len() == 0 {
-        return Ok(MoveDecidedAndRegistered(false));
+    if optional_directions.is_empty() {
+        return Err(BoardGenerationError::CouldntFindADirectionToMoveEmptyTileIn);
     }
 
     // don't want to shift back and forth,
@@ -99,7 +113,8 @@ fn determine_next_shift_direction(
     match tile_swap_result {
         Err(error) => {
             match error{
-                TileMoveError::TriedToSwitchEmptyWithEmpty => Ok(MoveDecidedAndRegistered(false)),
+                TileMoveError::TriedToSwitchEmptyWithEmpty => 
+                    Ok(MoveDecidedAndRegistered{direction_to_avoid_next_attempt: Some(chosen_shift_direction)}),
                 _ => Err(BoardGenerationError::TileMoveError(error))
             }
         },
@@ -109,7 +124,7 @@ fn determine_next_shift_direction(
                 chosen_new_empty_tile_location,
                 chosen_shift_direction
             );
-            Ok(MoveDecidedAndRegistered(true))
+            Ok(MoveDecidedAndRegistered{direction_to_avoid_next_attempt: None})
         }
     }
 }
