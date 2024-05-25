@@ -8,6 +8,9 @@ const SOLVED_BOARD_WITH_WALLS_MAX_GENERATION_ATTEMPTS: u8 = 20;
 
 struct WallLocationChosen(pub bool);
 
+#[derive(Component)]
+pub struct SolvedBoard;
+
 pub struct SolvedBoardPlugin;
 
 impl Plugin for SolvedBoardPlugin{
@@ -53,7 +56,7 @@ pub fn generate_solved_board_inner(
     let mut new_board_wall_locations= vec![];
     let grid_side_length_u32 = applied_props.size.to_grid_side_length() as u32;
 
-    if applied_props.generation_method == BoardGenerationMethod::Auto && applied_props.wall_count > 0 {
+    if applied_props.wall_count > 0 {
         determine_wall_locations(
             applied_props,
             &mut new_board_wall_locations

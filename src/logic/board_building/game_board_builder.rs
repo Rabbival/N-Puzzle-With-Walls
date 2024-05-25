@@ -1,18 +1,16 @@
 use crate::prelude::*;
 
 #[derive(Component)]
-pub struct SolvedBoard;
-#[derive(Component)]
 pub struct GameBoard;
 
-pub struct BoardBuilderPlugin;
+pub struct GameBoardBuilderPlugin;
 
-impl Plugin for BoardBuilderPlugin {
+impl Plugin for GameBoardBuilderPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(
                 OnEnter(GameState::SolvedBoardGenerated),
-                    build_a_new_board
+                    build_a_new_game_board
             )
             .add_systems(
                 OnEnter(GameState::PostGameBoardGenerationChangesDone),
@@ -22,7 +20,7 @@ impl Plugin for BoardBuilderPlugin {
     }
 }
 
-fn build_a_new_board(
+fn build_a_new_game_board(
     mut generation_error_event_writer: EventWriter<ShowGenerationError>,
     solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
     mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,

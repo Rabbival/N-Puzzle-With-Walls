@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub mod board_builder;
+pub mod game_board_builder;
 pub mod board_entities_spawner;
 pub mod brute_force_builder;
 pub mod solved_board_builder;
@@ -10,6 +10,6 @@ pub struct BoardBuildingPlugin;
 
 impl Plugin for BoardBuildingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((BoardEntitiesSpawnerPlugin, BoardBuilderPlugin, SolvedBoardPlugin));
+        app.add_plugins((BoardEntitiesSpawnerPlugin, GameBoardBuilderPlugin, SolvedBoardPlugin));
     }
 }
