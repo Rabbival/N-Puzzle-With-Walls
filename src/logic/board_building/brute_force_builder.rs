@@ -3,9 +3,7 @@ use crate::{logic::data_structure::util_functions, prelude::*};
 
 use rand::Rng;
 
-struct MoveDecidedAndRegistered{
-    direction_to_avoid_next_attempt: Option<BasicDirection>
-}
+struct DirectionToAvoidNextAttempt(Option<BasicDirection>);
 
 pub fn brute_force_generate_game_board(
     solved_board: &TileBoard,
@@ -45,7 +43,7 @@ pub fn brute_force_generate_game_board(
                     &mut directions_to_avoid,
                     shift_tracker,
                     &mut rng
-                )?.direction_to_avoid_next_attempt{
+                )?.0{
                     directions_to_avoid.push(new_direction_to_avoid);
                 }else{
                     direction_determined = true;
@@ -74,7 +72,7 @@ fn determine_next_shift_direction(
     directions_to_avoid: &mut Vec<BasicDirection>,
     shift_tracker: &mut LocationShiftTracker,
     rng: &mut ThreadRng
-) -> Result<MoveDecidedAndRegistered, BoardGenerationError>
+) -> Result<DirectionToAvoidNextAttempt, BoardGenerationError>
 {
     let empty_tile_location = shift_tracker.empty_location;
     let mut optional_directions=
@@ -91,7 +89,7 @@ fn determine_next_shift_direction(
     }
 
     // don't want to shift back and forth,
-    // unless it's a dead end in which it has to turn back
+    // unless it's a dead end in which case turning back is necessary
     if optional_directions.len() > 1 {
         remove_opposite_of_previous_shift_direction_from_possible_shift_locations(
             shift_tracker,
@@ -114,7 +112,7 @@ fn determine_next_shift_direction(
         Err(error) => {
             match error{
                 TileMoveError::TriedToSwitchEmptyWithEmpty => 
-                    Ok(MoveDecidedAndRegistered{direction_to_avoid_next_attempt: Some(chosen_shift_direction)}),
+                    Ok(DirectionToAvoidNextAttempt(Some(chosen_shift_direction))),
                 _ => Err(BoardGenerationError::TileMoveError(error))
             }
         },
@@ -124,7 +122,7 @@ fn determine_next_shift_direction(
                 chosen_new_empty_tile_location,
                 chosen_shift_direction
             );
-            Ok(MoveDecidedAndRegistered{direction_to_avoid_next_attempt: None})
+            Ok(DirectionToAvoidNextAttempt(None))
         }
     }
 }
