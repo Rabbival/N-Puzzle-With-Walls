@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Event)]
-pub struct SaveToDB(pub DomainBoard);
+pub struct SaveToDB(pub DomainBoard, pub DomainBoardName);
 
 #[derive(Event)]
 pub struct RemoveFromDB(pub SavedLayoutIndexInDifficultyVec);
@@ -18,6 +18,13 @@ pub struct SuccessRemovingFromDB(pub SavedLayoutIndexInDifficultyVec);
 #[derive(Event)]
 pub struct SuccessClearingDB;
 
+#[derive(Event)]
+pub struct AllowPlayerToSetBoardName;
+
+
+#[derive(Event)]
+pub struct UpdateNewbornBoardName(pub DomainBoardName);
+
 pub struct DataBaseEventPlugin;
 
 impl Plugin for DataBaseEventPlugin {
@@ -29,6 +36,8 @@ impl Plugin for DataBaseEventPlugin {
             .add_event::<SuccessSavingToDB>()
             .add_event::<SuccessRemovingFromDB>()
             .add_event::<SuccessClearingDB>()
+            .add_event::<AllowPlayerToSetBoardName>()
+            .add_event::<UpdateNewbornBoardName>()
         ;
     }
 }

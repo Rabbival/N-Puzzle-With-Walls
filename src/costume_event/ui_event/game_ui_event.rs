@@ -7,9 +7,7 @@ pub struct SaveWallsLayoutButtonPressed;
 pub struct ResetTextAboveSaveButton;
 
 #[derive(Event)]
-pub struct VictoryButtonPressed {
-    pub action: VictoryButtonAction,
-}
+pub struct VictoryButtonPressed(pub VictoryButtonAction);
 
 pub struct GameUiEventPlugin;
 

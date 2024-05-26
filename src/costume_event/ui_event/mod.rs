@@ -21,8 +21,8 @@ pub struct SetEntityVisibility {
 }
 
 #[derive(Event)]
-pub struct AreYouSureMessageButtonEvent {
-    pub action: AreYouSureMessageButtonAction
+pub struct PopUpMessageButtonEvent {
+    pub action: PopUpMessageButtonAction
 }
 
 pub struct UiEventPlugin;
@@ -39,6 +39,6 @@ impl Plugin for UiEventPlugin {
             .add_event::<DismissIrrelevantAlerts>()
             .add_event::<ToggleButton>()
             .add_event::<SetEntityVisibility>()
-            .add_event::<AreYouSureMessageButtonEvent>();
+            .add_event::<PopUpMessageButtonEvent>();
     }
 }

@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 pub mod start_button_and_above_text_logic;
 pub mod save_button_and_above_text_logic;
-pub mod are_you_sure_message_logic;
+pub mod pop_up_message_logic;
 
 
 pub struct MessagesGraphicsPlugin;
@@ -13,7 +13,7 @@ impl Plugin for MessagesGraphicsPlugin {
 			.add_plugins((
                 TextAboveStartButtonLogicPlugin,
                 TextAboveSaveButtonLogicPlugin,
-                AreYouSureMessageLogicPlugin
+                PopUpMessageLogicPlugin
             ))
         ;
     }

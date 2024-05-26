@@ -115,7 +115,7 @@ fn spawn_bottom_line(
                                 background_color: NORMAL_BUTTON_COLOR.into(),
                                 ..default()
                             },
-                            LoaderScreenAction::WarnBeforeDeletion(AreYouSureMessageType::DeleteBoard(None))
+                            LoaderScreenAction::WarnBeforeDeletion(PopUpMessageType::DeleteBoard(None))
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle::from_section(
@@ -337,7 +337,7 @@ fn spawn_delete_all_layouts_button(
                                 background_color: super::NORMAL_BUTTON_COLOR.into(),
                                 ..default()
                             },
-                            LoaderScreenAction::WarnBeforeDeletion(AreYouSureMessageType::DeleteAllBoards)
+                            LoaderScreenAction::WarnBeforeDeletion(PopUpMessageType::DeleteAllBoards)
                         ))
                             .with_children(|parent| {
                                 parent.spawn((

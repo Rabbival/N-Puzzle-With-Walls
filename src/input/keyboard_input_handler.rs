@@ -14,7 +14,7 @@ impl Plugin for KeyboardInputHandlerPlugin {
                         listen_for_board_reset,
                     ).run_if(in_state(AppState::Game)),
                     move_between_loader_screens.run_if(in_state(AppState::Loader)),
-                    close_are_you_sure_message,
+                    close_pop_up_message,
                     open_menu,
 
 
@@ -82,13 +82,13 @@ fn open_menu(
     }
 }
 
-fn close_are_you_sure_message(
-    mut are_you_sure_action_event_writer: EventWriter<AreYouSureMessageButtonEvent>,
+fn close_pop_up_message(
+    mut pop_up_action_event_writer: EventWriter<PopUpMessageButtonEvent>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        are_you_sure_action_event_writer.send(AreYouSureMessageButtonEvent{
-            action: AreYouSureMessageButtonAction::Cancel
+        pop_up_action_event_writer.send(PopUpMessageButtonEvent{
+            action: PopUpMessageButtonAction::Cancel
         });
     }
 }

@@ -31,7 +31,7 @@ pub mod prelude {
             ui_spawn_event::*,
             UiEventPlugin,
             SetEntityVisibility,
-            AreYouSureMessageButtonEvent,
+            PopUpMessageButtonEvent,
         }
     };
     pub use crate::data_base::{
@@ -40,6 +40,7 @@ pub mod prelude {
         domain_board::*,
         saved_layout_index::*,
         domain_board_name::*,
+        newborn_board_name::*,
         DataBasePlugin,
         DataBaseManager,
     };
@@ -80,14 +81,15 @@ pub mod prelude {
             },
             tile_type::*,
             ui_enum::{
-                are_you_sure_message_type::*,
+                pop_up_message_type::*,
                 button_actions::{
                     eternal_button_action::*,
                     victory_button_action::*,
-                    are_you_sure_message_button_action::*,
+                    pop_up_message_button_action::*,
                 },
                 text_above_save_button_type::*,
                 text_above_start_button_type::*,
+                text_above_pop_up_buttons_type::*,
                 screen_change_request_type::*,
                 loader_screen_action::*,
             },
@@ -104,7 +106,7 @@ pub mod prelude {
         ui_logic::{eternal_ui_logic::*, loader_ui_logic::*, menu_ui_logic::*, UiLogicPlugin, victory_ui_logic::*, active_loader_slot_updater::*,
         messages_logic::{
             MessagesGraphicsPlugin,
-            are_you_sure_message_logic::*,
+            pop_up_message_logic::*,
             save_button_and_above_text_logic::*,
             start_button_and_above_text_logic::*,
         }},
@@ -144,8 +146,8 @@ pub mod prelude {
                 button_and_text_styles::*, ButtonText,
                 eternal_buttons_spawner::*,
                 loader_screen_spawner::*, menu_spawner::*,
-                messages_spawners::{
-                    are_you_sure_message_spawner::*,
+                messages::{
+                    pop_up_message::*,
                     MessagesSpawnersPlugin,
                     victory_message::*,
                 },

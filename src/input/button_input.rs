@@ -12,7 +12,7 @@ impl Plugin for ButtonInputPlugin {
                 handle_save_walls_layout_button.run_if(in_state(AppState::Game)),
                 handle_loader_buttons.run_if(in_state(AppState::Loader)),
                 handle_eternal_buttons,
-                handle_are_you_sure_message_buttons,
+                handle_pop_up_message_buttons,
             )
                 .in_set(InputSystemSets::InputListening),
         );
@@ -96,10 +96,7 @@ fn handle_victory_buttons(
     for (interaction, game_button_action) in &interaction_query
     {
         if *interaction == Interaction::Pressed {
-            button_event_writer.send(VictoryButtonPressed {
-                action: *game_button_action
-            });
-
+            button_event_writer.send(VictoryButtonPressed(*game_button_action));
             reset_button_text_color_event_writer.send(DismissIrrelevantAlerts);
         }
     }
@@ -131,15 +128,15 @@ fn handle_loader_buttons(
     }
 }
 
-fn handle_are_you_sure_message_buttons(
-    mut are_you_sure_action_event_writer: EventWriter<AreYouSureMessageButtonEvent>,
-    are_you_sure_message_actions_query: Query<(&Interaction, &AreYouSureMessageButtonAction), Changed<Interaction>>,
+fn handle_pop_up_message_buttons(
+    mut pop_up_action_event_writer: EventWriter<PopUpMessageButtonEvent>,
+    pop_up_message_actions_query: Query<(&Interaction, &PopUpMessageButtonAction), Changed<Interaction>>,
 ){
-    for (interaction, are_you_sure_action) in &are_you_sure_message_actions_query
+    for (interaction, pop_up_action) in &pop_up_message_actions_query
     {
         if *interaction == Interaction::Pressed {
-            are_you_sure_action_event_writer.send(AreYouSureMessageButtonEvent{
-                action: *are_you_sure_action
+            pop_up_action_event_writer.send(PopUpMessageButtonEvent{
+                action: *pop_up_action
             });
         }
     }

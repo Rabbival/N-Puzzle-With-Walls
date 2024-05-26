@@ -1,5 +1,5 @@
 pub mod victory_message;
-pub mod are_you_sure_message_spawner;
+pub mod pop_up_message;
 
 use crate::prelude::*;
 
@@ -10,7 +10,7 @@ impl Plugin for MessagesSpawnersPlugin {
         app
 			.add_plugins((
                 VictoryMessagePlugin,
-                AreYouSureMessageSpawnerPlugin
+                PopUpMessagePlugin
             ))
         ;
     }

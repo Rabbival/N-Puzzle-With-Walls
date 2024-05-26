@@ -3,7 +3,7 @@ use crate::prelude::*;
 pub mod eternal_buttons_spawner;
 pub mod menu_spawner;
 pub mod button_and_text_styles;
-pub mod messages_spawners;
+pub mod messages;
 pub mod save_walls_layout_button_spawner;
 pub mod loader_screen_spawner;
 pub mod hide_by_chosen_generation_method;

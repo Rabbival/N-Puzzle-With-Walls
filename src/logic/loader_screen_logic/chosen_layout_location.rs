@@ -66,7 +66,7 @@ fn update_bottom_line_to_fit_new_chosen(
             LoaderScreenAction::GenerateBoard(optional_entity) => {
                 *optional_entity = updated_optional_entity;
             },
-            LoaderScreenAction::WarnBeforeDeletion(AreYouSureMessageType::DeleteBoard(optional_tuple)) => {
+            LoaderScreenAction::WarnBeforeDeletion(PopUpMessageType::DeleteBoard(optional_tuple)) => {
                 if updated_optional_index.is_none() {
                     *optional_tuple = None;
                 }else{

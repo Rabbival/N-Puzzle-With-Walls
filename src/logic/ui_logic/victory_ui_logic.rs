@@ -19,7 +19,7 @@ fn listen_for_victory_button_press(
 	mut spawn_board_event_writer: EventWriter<BuildNewBoard>,
 ){
 	for button_event in button_event_reader.read(){
-		match button_event.action{
+		match button_event.0{
 			VictoryButtonAction::ResetBoard => {
 				spawn_board_event_writer.send(BuildNewBoard(BoardBuildingRequest::ShuffleExistingBoard));
 			}

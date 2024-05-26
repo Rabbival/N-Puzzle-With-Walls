@@ -2,28 +2,60 @@ use crate::output::graphics::ui::NORMAL_BUTTON_COLOR;
 use crate::prelude::*;
 
 #[derive(Component)]
-pub struct AreYouSureMessageTextTag;
+pub struct PopUpMessageTextTag;
 
+#[derive(Component)]
+pub struct PopUpMessageDynamicTextTag;
 
-pub struct AreYouSureMessageSpawnerPlugin;
+#[derive(Component)]
+pub struct TextAbovePopUpMessageButtons;
 
-impl Plugin for AreYouSureMessageSpawnerPlugin{
+pub struct PopUpMessagePlugin;
+
+impl Plugin for PopUpMessagePlugin{
     fn build(&self, app: &mut App) {
         app
             .add_systems(
                 Startup,
-                spawn_are_you_sure_message
+                spawn_pop_up_message
+            )
+            .add_systems(
+                Update,
+                set_pop_up_dynamic_text_box_color
             );
     }
 }
 
-fn spawn_are_you_sure_message(
+pub fn set_are_you_sure_message_type_and_text(
+    requested_new_type: PopUpMessageType,
+    text_ref: &mut String,
+    type_ref: &mut PopUpMessageType
+) {
+    *text_ref = requested_new_type.to_string();
+    *type_ref = requested_new_type;
+}
+
+fn set_pop_up_dynamic_text_box_color(
+    mut reset_text_event_reader: EventReader<AllowPlayerToSetBoardName>,
+    mut set_text_event_reader: EventReader<UpdateNewbornBoardName>,
+    mut pop_up_dynamic_text_entity_query: Query<&mut BackgroundColor, With<PopUpMessageDynamicTextTag>>,
+){
+    for _reset_request in reset_text_event_reader.read(){
+        pop_up_dynamic_text_entity_query.single_mut().0 = Color::DARK_GRAY;
+    }
+    for _set_request in set_text_event_reader.read(){
+        pop_up_dynamic_text_entity_query.single_mut().0 = Color::NONE;
+    }
+}
+
+fn spawn_pop_up_message(
     mut spawn_event_reader: EventReader<SpawnTextsAndButtons>,
     mut commands: Commands,
 ) {
     for spawn_request in spawn_event_reader.read() {
         let text_style = &spawn_request.medium_text_style;
         let button_style = &spawn_request.big_button_style;
+        let tiny_red_text_style = &spawn_request.tiny_red_text_style;
         commands
             .spawn((
                 build_node_bundle_with_full_percentage_style(
@@ -32,7 +64,7 @@ fn spawn_are_you_sure_message(
                     Visibility::Hidden,
                     Some(FlexDirection::Column)
                 ),
-                AreYouSureMessageType::DeleteAllBoards,
+                PopUpMessageType::DeleteAllBoards,
             ))
             .with_children(|parent| {
                 parent
@@ -65,13 +97,31 @@ fn spawn_are_you_sure_message(
                             })
                             .with_children(|parent| {
                                 parent.spawn((TextBundle::from_section(
-                                        AreYouSureMessageType::DeleteAllBoards.to_string(),
+                                        PopUpMessageType::DeleteAllBoards.to_string(),
                                         text_style.clone(),
                                     ).with_text_justify(JustifyText::Center),
                                   ButtonText,
-                                  AreYouSureMessageTextTag
+                                  PopUpMessageTextTag
                                 ));
-                                parent.spawn(are_you_sure_message_ui_gap());
+                                parent.spawn(pop_up_message_ui_gap());
+                                parent.spawn((
+                                    TextBundle::from_section(
+                                        String::default(),
+                                        text_style.clone(),
+                                    ).with_text_justify(JustifyText::Center)
+                                        .with_background_color(Color::DARK_GRAY.into(),),
+                                  ButtonText,
+                                  PopUpMessageDynamicTextTag
+                                ));
+                                parent.spawn(pop_up_message_ui_gap());
+                                parent.spawn((
+                                    TextBundle::from_section(
+                                        "",
+                                        tiny_red_text_style.clone()
+                                    ),
+                                    TextAbovePopUpMessageButtons
+                                ));
+                                parent.spawn(pop_up_message_ui_gap());
                                 parent.spawn(NodeBundle {
                                     style: Style {
                                         width: Val::Percent(95.0),
@@ -91,7 +141,7 @@ fn spawn_are_you_sure_message(
                                                 background_color: NORMAL_BUTTON_COLOR.into(),
                                                 ..default()
                                             },
-                                            AreYouSureMessageButtonAction::Confirm
+                                            PopUpMessageButtonAction::Confirm
                                         ))
                                         .with_children(|parent| {
                                             parent.spawn(TextBundle::from_section(
@@ -99,7 +149,7 @@ fn spawn_are_you_sure_message(
                                                 text_style.clone(),
                                             ));
                                         });
-                                    parent.spawn(are_you_sure_message_ui_gap());
+                                    parent.spawn(pop_up_message_ui_gap());
                                     parent
                                         .spawn((
                                             ButtonBundle {
@@ -107,7 +157,7 @@ fn spawn_are_you_sure_message(
                                                 background_color: NORMAL_BUTTON_COLOR.into(),
                                                 ..default()
                                             },
-                                            AreYouSureMessageButtonAction::Cancel
+                                            PopUpMessageButtonAction::Cancel
                                         ))
                                         .with_children(|parent| {
                                             parent.spawn(TextBundle::from_section(
@@ -118,12 +168,12 @@ fn spawn_are_you_sure_message(
                                 });
                             });
                         });
-                parent.spawn(are_you_sure_message_ui_gap());
+                parent.spawn(pop_up_message_ui_gap());
             });
     }
 }
 
-fn are_you_sure_message_ui_gap() -> NodeBundle{
+fn pop_up_message_ui_gap() -> NodeBundle{
     NodeBundle {
         style: Style {
             width: Val::Percent(40.0),

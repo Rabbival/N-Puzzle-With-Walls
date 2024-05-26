@@ -6,6 +6,7 @@ pub mod saved_layout_index;
 pub mod domain_board_name;
 pub mod data_base_direct_functions;
 pub mod data_base_request_handler;
+pub mod newborn_board_name;
 
 pub struct DataBasePlugin;
 
@@ -14,7 +15,8 @@ impl Plugin for DataBasePlugin{
 		app.init_resource::<DataBaseManager>()
 			.add_plugins((
 				DataBaseStartupPlugin,
-				DataBaseRequestHandlerPlugin
+				DataBaseRequestHandlerPlugin,
+				NewbornBoardNamePlugin
 			));
 	}
 }
