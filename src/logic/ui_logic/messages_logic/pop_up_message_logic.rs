@@ -22,10 +22,10 @@ impl Plugin for PopUpMessageLogicPlugin{
 fn listen_for_allow_player_to_set_board_name_requests(
     mut visibility_toggle_event_writer: EventWriter<SetEntityVisibility>,
     mut event_reader: EventReader<AllowPlayerToSetBoardName>,
-    mut text_above_pop_up_buttons_query: Query<&mut Text, With<TextAbovePopUpMessageButtons>>,
     mut pop_up_message_query: Query<(Entity, &mut PopUpMessageType)>,
     pop_up_dynamic_text_entity_query: Query<Entity, With<PopUpMessageDynamicTextTag>>,
-    mut pop_up_text_query: Query<&mut Text, With<PopUpMessageTextTag>>,
+    mut text_above_pop_up_buttons_query: Query<&mut Text, (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageTextTag>)>,
+    mut pop_up_text_query: Query<&mut Text, (With<PopUpMessageTextTag>, Without<TextAbovePopUpMessageButtons>)>,
 ){
     for _event in event_reader.read(){
         set_pop_up_message_text_and_type(
@@ -49,10 +49,10 @@ fn listen_for_allow_player_to_set_board_name_requests(
 fn listen_for_loader_screen_actions(
     mut visibility_toggle_event_writer: EventWriter<SetEntityVisibility>,
     mut event_reader: EventReader<LoaderScreenActionEvent>,
-    mut text_above_pop_up_buttons_query: Query<&mut Text, With<TextAbovePopUpMessageButtons>>,
     mut pop_up_message_query: Query<(Entity, &mut PopUpMessageType)>,
     pop_up_dynamic_text_entity_query: Query<Entity, With<PopUpMessageDynamicTextTag>>,
-    mut pop_up_text_query: Query<&mut Text, With<PopUpMessageTextTag>>,
+    mut text_above_pop_up_buttons_query: Query<&mut Text, (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageTextTag>)>,
+    mut pop_up_text_query: Query<&mut Text, (With<PopUpMessageTextTag>, Without<TextAbovePopUpMessageButtons>)>,
 ){
     for loader_screen_action in event_reader.read(){
         if let LoaderScreenAction::WarnBeforeDeletion(pop_up_message_requested_type) =
@@ -81,7 +81,7 @@ fn set_pop_up_message_text_and_type(
     requested_type: PopUpMessageType,
     visibility_toggle_event_writer: &mut EventWriter<SetEntityVisibility>,
     pop_up_message_query: &mut Query<(Entity, &mut PopUpMessageType)>,
-    pop_up_text_query: &mut Query<&mut Text, With<PopUpMessageTextTag>>,
+    pop_up_text_query: &mut Query<&mut Text, (With<PopUpMessageTextTag>, Without<TextAbovePopUpMessageButtons>)>,
 ){
     let pop_up_text_ref =
         &mut pop_up_text_query.single_mut().sections[0].value;

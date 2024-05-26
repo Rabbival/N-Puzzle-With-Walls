@@ -17,8 +17,10 @@ impl Plugin for NewbornBoardNamePlugin{
 }
 
 fn generate_default(
+    mut entity_visibility_event_writer: EventWriter<SetEntityVisibility>,
     mut event_reader: EventReader<AllowPlayerToSetBoardName>,
     domain_board_names_query: Query<&DomainBoardName>,
+    text_above_pop_up_buttons_entity_query: Query<Entity, With<TextAbovePopUpMessageButtons>>,
     mut pop_up_dynamic_text_query: Query<&mut Text, With<PopUpMessageDynamicTextTag>>,
     mut newborn_board_name: ResMut<NewbornBoardName>,
     db_manager: Res<DataBaseManager>
@@ -31,6 +33,10 @@ fn generate_default(
             &mut pop_up_dynamic_text_query.single_mut(),
             &mut newborn_board_name.0,
         );
+        entity_visibility_event_writer.send(SetEntityVisibility{
+            entity: text_above_pop_up_buttons_entity_query.single(),
+            visibility: Visibility::Hidden
+        });
     }
 }
 
@@ -41,7 +47,7 @@ fn set_newborn_board_name(
     domain_board_names_query: Query<&DomainBoardName>,
     mut pop_up_dynamic_text_query: Query<&mut Text, With<PopUpMessageDynamicTextTag>>,
     mut newborn_board_name: ResMut<NewbornBoardName>,
-    text_above_pop_up_buttons_query: Query<Entity, With<TextAbovePopUpMessageButtons>>,
+    text_above_pop_up_buttons_entity_query: Query<Entity, With<TextAbovePopUpMessageButtons>>,
     pop_up_buttons_query: Query<(Entity, &PopUpMessageButtonAction)>
 ){
     for name_request in event_reader.read(){
@@ -51,7 +57,7 @@ fn set_newborn_board_name(
             &domain_board_names_query,
             &mut pop_up_dynamic_text_query.single_mut(),
             &mut newborn_board_name,
-            text_above_pop_up_buttons_query.single(),
+            text_above_pop_up_buttons_entity_query.single(),
             &pop_up_buttons_query
         ) {
             print_entity_related_error(entity_error);
