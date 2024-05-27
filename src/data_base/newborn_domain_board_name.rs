@@ -126,5 +126,9 @@ fn set_displayed_and_saved_newborn_name(
     saved_newborn_name: &mut Option<DomainBoardName>
 ){
     *saved_newborn_name = Some(name_to_set_to.clone());
-    displayed_newborn_name.sections[0].value = name_to_set_to.0.clone();
+    set_text_section_value_and_color(
+        &mut displayed_newborn_name.sections[0],
+        None,
+        Some(name_to_set_to.0.clone())
+    );
 }

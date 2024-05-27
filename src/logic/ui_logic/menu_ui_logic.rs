@@ -39,8 +39,11 @@ fn update_wall_tiles_count_visuals(
     unapplied_menu_wall_count: Res<UnappliedMenuWallCount>,
     mut wall_count_text_query: Query<&mut Text, With<WallCountTextTag>>,
 ) {
-    let mut text = wall_count_text_query.single_mut();
-    text.sections[0].value = unapplied_menu_wall_count.0.to_string();
+    set_text_section_value_and_color(
+        &mut wall_count_text_query.single_mut().sections[0],
+        None,
+        Some(unapplied_menu_wall_count.0.to_string())
+    );
 }
 
 fn listen_for_applied_tag_change_requests(

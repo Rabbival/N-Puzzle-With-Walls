@@ -71,7 +71,11 @@ fn set_slot_text_inner(
                     if let Ok(mut slot_text) = layout_slot_text_result {
                         let new_button_text = domain_board_name_to_set_text_to.0.clone() + "\n"
                             + &domain_board_to_set_text_to.to_string_for_button();
-                        slot_text.sections[0].value = new_button_text;
+                        set_text_section_value_and_color(
+                            &mut slot_text.sections[0],
+                            None,
+                            Some(new_button_text)
+                        );
                         return Ok(());
                     }
                 }

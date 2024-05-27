@@ -8,12 +8,53 @@ impl Plugin for PopUpMessageLogicPlugin{
             .add_systems(
                 Update,
                 (
+                    listen_to_newborn_domain_board_change_requests.run_if(in_state(AppState::Game)),
                     listen_for_allow_player_to_set_board_name_requests,
                     listen_for_loader_screen_actions,
                     listen_for_delete_related_button_events,
                     listen_for_db_related_button_events
                 )
             );
+    }
+}
+
+fn listen_to_newborn_domain_board_change_requests(
+    mut event_writer: EventWriter<UpdateNewbornDomainBoardName>,
+    mut event_reader: EventReader<KeyboardKeyTypedEvent>,
+    mut text_above_pop_up_buttons_query: Query<
+        &mut Text,
+        (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageDynamicTextTag>)
+    >,
+    pop_up_dynamic_text_query: Query<
+        &Text,
+        (With<PopUpMessageDynamicTextTag>, Without<TextAbovePopUpMessageButtons>)
+    >,
+){
+    for key_typed in event_reader.read(){
+        let pop_up_dynamic_text = &mut pop_up_dynamic_text_query.single().sections[0].value;
+        match key_typed.0{
+            KeyCode::Backspace => {
+                if pop_up_dynamic_text.len() > 0 {
+                    event_writer.send(UpdateNewbornDomainBoardName(
+                        DomainBoardName(String::from(&pop_up_dynamic_text[..pop_up_dynamic_text.len()-1]))
+                    ));
+                }
+            }
+            keycode if valid_key_for_name(keycode) => {
+                if pop_up_dynamic_text.len() < MAX_DOMAIN_BOARD_NAME_LENGTH {
+                    event_writer.send(UpdateNewbornDomainBoardName(
+                        DomainBoardName(format!("{}{:?}",pop_up_dynamic_text,keycode))
+                    ));
+                }else{
+                    set_text_section_value_and_color(
+                        &mut text_above_pop_up_buttons_query.single_mut().sections[0],
+                        None,
+                        Some(TextAbovePopUpButtonsType::CantHaveALongerName.to_string())
+                    );
+                }
+            }
+            _ => {}
+        }
     }
 }
 

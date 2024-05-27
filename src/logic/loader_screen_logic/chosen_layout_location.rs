@@ -60,7 +60,11 @@ fn update_bottom_line_to_fit_new_chosen(
         }
     }
 
-    chosen_layout_text_query.single_mut().sections[0].value = updated_chosen_layout_text;
+    set_text_section_value_and_color(
+        &mut chosen_layout_text_query.single_mut().sections[0],
+        None,
+        Some(updated_chosen_layout_text)
+    );
     for mut action_carrier in &mut loader_screen_action_query{
         match action_carrier.as_mut(){
             LoaderScreenAction::GenerateBoard(optional_entity) => {
