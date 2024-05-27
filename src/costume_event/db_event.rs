@@ -23,7 +23,7 @@ pub struct AllowPlayerToSetBoardName;
 
 
 #[derive(Event)]
-pub struct UpdateNewbornBoardName(pub DomainBoardName);
+pub struct UpdateNewbornDomainBoardName(pub DomainBoardName);
 
 pub struct DataBaseEventPlugin;
 
@@ -37,7 +37,7 @@ impl Plugin for DataBaseEventPlugin {
             .add_event::<SuccessRemovingFromDB>()
             .add_event::<SuccessClearingDB>()
             .add_event::<AllowPlayerToSetBoardName>()
-            .add_event::<UpdateNewbornBoardName>()
+            .add_event::<UpdateNewbornDomainBoardName>()
         ;
     }
 }

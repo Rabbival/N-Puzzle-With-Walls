@@ -26,12 +26,12 @@ pub mod prelude {
             game_ui_event::*,
             loader_ui_event::*,
             menu_ui_event::*,
+            ui_spawn_event::*,
+            pop_up_message_event::*,
             DismissIrrelevantAlerts,
             ToggleButton,
-            ui_spawn_event::*,
             UiEventPlugin,
             SetEntityVisibility,
-            PopUpMessageButtonEvent,
         }
     };
     pub use crate::data_base::{
@@ -40,7 +40,7 @@ pub mod prelude {
         domain_board::*,
         saved_layout_index::*,
         domain_board_name::*,
-        newborn_board_name::*,
+        newborn_domain_board_name::*,
         DataBasePlugin,
         DataBaseManager,
     };

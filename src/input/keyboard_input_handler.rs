@@ -12,6 +12,7 @@ impl Plugin for KeyboardInputHandlerPlugin {
                     (
                         move_tiles_with_keyboard,
                         listen_for_board_reset,
+                        listen_to_keyboard_typing_for_newborn_domain_board_name
                     ).run_if(in_state(AppState::Game)),
                     move_between_loader_screens.run_if(in_state(AppState::Loader)),
                     close_pop_up_message,
@@ -30,10 +31,29 @@ impl Plugin for KeyboardInputHandlerPlugin {
     }
 }
 
+fn listen_to_keyboard_typing_for_newborn_domain_board_name(
+    mut event_writer: EventWriter<KeyboardKeyTypedEvent>,
+    pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+){
+    if let Visibility::Hidden = *pop_up_message_visibility.single(){
+        return;
+    }
+    
+    for key_pressed in keyboard_input.get_just_pressed(){
+        event_writer.send(KeyboardKeyTypedEvent(*key_pressed));
+    }
+}
+
 fn move_tiles_with_keyboard(
     mut logic_event_writer: EventWriter<SwitchTilesLogic>,
+    pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
+    if let Visibility::Inherited = *pop_up_message_visibility.single(){
+        return;
+    }
+    
     let move_requests = keyboard_input
         .get_just_pressed()
         .map(MoveRequest::new);
@@ -51,8 +71,13 @@ fn move_tiles_with_keyboard(
 
 fn move_between_loader_screens(
     mut event_writer: EventWriter<LoaderScreenActionEvent>,
+    pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
+    if let Visibility::Inherited = *pop_up_message_visibility.single(){
+        return;
+    }
+    
     let screen_change_requests = keyboard_input
         .get_just_pressed()
         .map(BasicDirection::from_keycode);
@@ -95,8 +120,13 @@ fn close_pop_up_message(
 
 fn listen_for_board_reset(
     mut input_event_writer: EventWriter<BuildNewBoard>,
+    pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
+    if let Visibility::Inherited = *pop_up_message_visibility.single(){
+        return;
+    }
+    
     if keyboard_input.just_pressed(KeyCode::KeyR) {
         input_event_writer.send(BuildNewBoard(
             if keyboard_input.pressed(KeyCode::ShiftLeft){
@@ -116,7 +146,6 @@ fn listen_for_app_closing(
         end_game_event_writer.send(EndGame);
     }
 }
-
 
 
 

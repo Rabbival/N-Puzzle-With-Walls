@@ -4,6 +4,7 @@ pub mod button_input;
 pub mod keyboard_input_handler;
 pub mod mouse_input_handler;
 pub mod move_request;
+pub mod keyboard_utilities;
 
 pub struct InputPlugin;
 

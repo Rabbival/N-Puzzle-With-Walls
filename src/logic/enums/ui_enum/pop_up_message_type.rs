@@ -5,7 +5,7 @@ use crate::prelude::*;
 pub enum PopUpMessageType {
     DeleteAllBoards,
     DeleteBoard(Option<(DomainBoardName, SavedLayoutIndexInDifficultyVec)>),
-    ChooseNewbornBoardName
+    ChooseNewbornDomainBoardName
 }
 
 impl Display for PopUpMessageType{
@@ -13,7 +13,7 @@ impl Display for PopUpMessageType{
         let pop_up_string = String::from("Are you sure you want to\n");
         let message =
             match self{
-                Self::ChooseNewbornBoardName => {
+                Self::ChooseNewbornDomainBoardName => {
                     String::from("Choose a name\nto save the board under:")
                 },
                 Self::DeleteAllBoards => {

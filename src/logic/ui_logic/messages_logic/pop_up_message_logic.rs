@@ -1,6 +1,4 @@
-use crate::costume_event::ui_event::PopUpMessageButtonEvent;
 use crate::prelude::*;
-
 
 pub struct PopUpMessageLogicPlugin;
 
@@ -29,7 +27,7 @@ fn listen_for_allow_player_to_set_board_name_requests(
 ){
     for _event in event_reader.read(){
         set_pop_up_message_text_and_type(
-            PopUpMessageType::ChooseNewbornBoardName,
+            PopUpMessageType::ChooseNewbornDomainBoardName,
             &mut visibility_toggle_event_writer,
             &mut pop_up_message_query,
             &mut pop_up_text_query,
@@ -138,20 +136,20 @@ fn listen_for_db_related_button_events(
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     pop_up_message_query: Query<&PopUpMessageType>,
     mut game_board_query: Query<&mut TileBoard, With<GameBoard>>,
-    newborn_board_name_res: Res<NewbornBoardName>,
+    newborn_domain_board_name_res: Res<NewbornDomainBoardName>,
 ){
     for action_request in event_reader.read(){
         let pop_up_message_type = pop_up_message_query.single();
         match pop_up_message_type{
-            PopUpMessageType::ChooseNewbornBoardName => {
+            PopUpMessageType::ChooseNewbornDomainBoardName => {
                 if let PopUpMessageButtonAction::Confirm = action_request.action{
-                    if let Some(newborn_board_name) = &newborn_board_name_res.0{
+                    if let Some(newborn_domain_board_name) = &newborn_domain_board_name_res.0{
                         save_to_db_event_writer.send(SaveToDB(
                             DomainBoard{
                                 board_props: *applied_board_props_query.single(),
                                 grid: game_board_query.single().grid.clone()
                             },
-                            newborn_board_name.clone()
+                            newborn_domain_board_name.clone()
                         ));
                     }
                 }

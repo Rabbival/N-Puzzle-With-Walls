@@ -20,9 +20,47 @@ impl Plugin for PopUpMessagePlugin{
                 spawn_pop_up_message
             )
             .add_systems(
-                Update,
-                set_pop_up_dynamic_text_box_color
-            );
+                Update,(
+                    set_pop_up_dynamic_text_box_color,
+                    listen_to_newborn_domain_board_change_requests.run_if(in_state(AppState::Game)),
+                ));
+    }
+}
+
+fn listen_to_newborn_domain_board_change_requests(
+    mut event_reader: EventReader<KeyboardKeyTypedEvent>,
+    mut text_above_pop_up_buttons_query: Query<
+        &mut Text, 
+        (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageDynamicTextTag>)
+    >,
+    mut pop_up_dynamic_text_query: Query<
+        &mut Text,
+        (With<PopUpMessageDynamicTextTag>, Without<TextAbovePopUpMessageButtons>)
+    >,
+){
+    for key_typed in event_reader.read(){
+        let pop_up_dynamic_text = &mut pop_up_dynamic_text_query.single_mut().sections[0].value;
+        match key_typed.0{
+            KeyCode::Backspace => {
+                if pop_up_dynamic_text.len() > 0 {
+                    *pop_up_dynamic_text =
+                        String::from(&pop_up_dynamic_text[..pop_up_dynamic_text.len()-1]);
+                }
+            }
+            keycode if valid_key_for_name(keycode) => {
+                if pop_up_dynamic_text.len() < MAX_DOMAIN_BOARD_NAME_LENGTH {
+                    *pop_up_dynamic_text =
+                        format!("{}{:?}",pop_up_dynamic_text,keycode)
+                }else{
+                    set_text_section_value_and_color(
+                        &mut text_above_pop_up_buttons_query.single_mut().sections[0],
+                        None,
+                        Some(TextAbovePopUpButtonsType::CantHaveALongerName.to_string())
+                    );
+                }
+            }
+            _ => {}
+        }
     }
 }
 
@@ -37,7 +75,7 @@ pub fn set_are_you_sure_message_type_and_text(
 
 fn set_pop_up_dynamic_text_box_color(
     mut reset_text_event_reader: EventReader<AllowPlayerToSetBoardName>,
-    mut set_text_event_reader: EventReader<UpdateNewbornBoardName>,
+    mut set_text_event_reader: EventReader<UpdateNewbornDomainBoardName>,
     mut pop_up_dynamic_text_entity_query: Query<&mut BackgroundColor, With<PopUpMessageDynamicTextTag>>,
 ){
     for _reset_request in reset_text_event_reader.read(){

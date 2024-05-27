@@ -1,17 +1,20 @@
 use crate::prelude::*;
 
+
+pub const MAX_DOMAIN_BOARD_NAME_LENGTH: usize = 16;
+
 #[derive(Resource, Default)]
-pub struct NewbornBoardName(pub Option<DomainBoardName>);
+pub struct NewbornDomainBoardName(pub Option<DomainBoardName>);
 
-pub struct NewbornBoardNamePlugin;
+pub struct NewbornDomainBoardNamePlugin;
 
-impl Plugin for NewbornBoardNamePlugin{
+impl Plugin for NewbornDomainBoardNamePlugin{
     fn build(&self, app: &mut App) {
         app
-            .init_resource::<NewbornBoardName>()
+            .init_resource::<NewbornDomainBoardName>()
             .add_systems(Update, (
                 generate_default,
-                set_newborn_board_name
+                set_newborn_domain_board_name
             ));
     }
 }
@@ -22,7 +25,7 @@ fn generate_default(
     domain_board_names_query: Query<&DomainBoardName>,
     text_above_pop_up_buttons_entity_query: Query<Entity, With<TextAbovePopUpMessageButtons>>,
     mut pop_up_dynamic_text_query: Query<&mut Text, With<PopUpMessageDynamicTextTag>>,
-    mut newborn_board_name: ResMut<NewbornBoardName>,
+    mut newborn_domain_board_name: ResMut<NewbornDomainBoardName>,
     db_manager: Res<DataBaseManager>
 ){
     for _event in event_reader.read(){
@@ -31,7 +34,7 @@ fn generate_default(
         set_displayed_and_saved_newborn_name(
             default_name,
             &mut pop_up_dynamic_text_query.single_mut(),
-            &mut newborn_board_name.0,
+            &mut newborn_domain_board_name.0,
         );
         entity_visibility_event_writer.send(SetEntityVisibility{
             entity: text_above_pop_up_buttons_entity_query.single(),
@@ -41,22 +44,22 @@ fn generate_default(
 }
 
 //TODO: call it every time the requested name is changed
-fn set_newborn_board_name(
+fn set_newborn_domain_board_name(
     mut entity_visibility_event_writer: EventWriter<SetEntityVisibility>,
-    mut event_reader: EventReader<UpdateNewbornBoardName>,
+    mut event_reader: EventReader<UpdateNewbornDomainBoardName>,
     domain_board_names_query: Query<&DomainBoardName>,
     mut pop_up_dynamic_text_query: Query<&mut Text, With<PopUpMessageDynamicTextTag>>,
-    mut newborn_board_name: ResMut<NewbornBoardName>,
+    mut newborn_domain_board_name: ResMut<NewbornDomainBoardName>,
     text_above_pop_up_buttons_entity_query: Query<Entity, With<TextAbovePopUpMessageButtons>>,
     pop_up_buttons_query: Query<(Entity, &PopUpMessageButtonAction)>
 ){
     for name_request in event_reader.read(){
-        if let Err(entity_error) = set_newborn_board_name_inner(
+        if let Err(entity_error) = set_newborn_domain_board_name_inner(
             &mut entity_visibility_event_writer,
             &name_request.0,
             &domain_board_names_query,
             &mut pop_up_dynamic_text_query.single_mut(),
-            &mut newborn_board_name,
+            &mut newborn_domain_board_name,
             text_above_pop_up_buttons_entity_query.single(),
             &pop_up_buttons_query
         ) {
@@ -65,12 +68,12 @@ fn set_newborn_board_name(
     }
 }
 
-fn set_newborn_board_name_inner(
+fn set_newborn_domain_board_name_inner(
     entity_visibility_event_writer: &mut EventWriter<SetEntityVisibility>,
     requested_name: &DomainBoardName,
     domain_board_names_query: &Query<&DomainBoardName>,
     mut pop_up_dynamic_text: &mut Text,
-    newborn_board_name: &mut ResMut<NewbornBoardName>,
+    newborn_domain_board_name: &mut ResMut<NewbornDomainBoardName>,
     text_above_pop_up_buttons_entity: Entity,
     pop_up_buttons_query: &Query<(Entity, &PopUpMessageButtonAction)>
 ) -> Result<(), EntityRelatedCostumeError>{
@@ -96,7 +99,7 @@ fn set_newborn_board_name_inner(
                     entity: text_above_pop_up_buttons_entity,
                     visibility: Visibility::Inherited
                 });
-                newborn_board_name.0 = None;
+                newborn_domain_board_name.0 = None;
             }else{
                 entity_visibility_event_writer.send(SetEntityVisibility{
                     entity: confirm_button_entity,
@@ -109,7 +112,7 @@ fn set_newborn_board_name_inner(
                 set_displayed_and_saved_newborn_name(
                     requested_name.clone(),
                     &mut pop_up_dynamic_text,
-                    &mut newborn_board_name.0,
+                    &mut newborn_domain_board_name.0,
                 );
             }
             Ok(())

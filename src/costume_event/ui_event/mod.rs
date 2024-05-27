@@ -4,6 +4,7 @@ pub mod ui_spawn_event;
 pub mod menu_ui_event;
 pub mod loader_ui_event;
 pub mod game_ui_event;
+pub mod pop_up_message_event;
 
 
 #[derive(Event)]
@@ -20,11 +21,6 @@ pub struct SetEntityVisibility {
     pub visibility: Visibility
 }
 
-#[derive(Event)]
-pub struct PopUpMessageButtonEvent {
-    pub action: PopUpMessageButtonAction
-}
-
 pub struct UiEventPlugin;
 
 impl Plugin for UiEventPlugin {
@@ -35,10 +31,10 @@ impl Plugin for UiEventPlugin {
                 MenuUiEventPlugin,
                 LoaderUiEventPlugin,
                 GameUiEventPlugin,
+                PopUpMessageEventPlugin
             ))
             .add_event::<DismissIrrelevantAlerts>()
             .add_event::<ToggleButton>()
-            .add_event::<SetEntityVisibility>()
-            .add_event::<PopUpMessageButtonEvent>();
+            .add_event::<SetEntityVisibility>();
     }
 }

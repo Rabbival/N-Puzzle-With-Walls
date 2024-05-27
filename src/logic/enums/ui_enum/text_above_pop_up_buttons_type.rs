@@ -4,7 +4,8 @@ use enum_iterator::Sequence;
 #[derive(Debug, Sequence, PartialEq, Eq, Hash, PartialOrd, Clone, Copy)]
 pub enum TextAbovePopUpButtonsType {
     NoText,
-    BoardNameAlreadyExists
+    BoardNameAlreadyExists,
+    CantHaveALongerName
 }
 
 impl Display for TextAbovePopUpButtonsType{
@@ -16,6 +17,9 @@ impl Display for TextAbovePopUpButtonsType{
                 },
                 Self::BoardNameAlreadyExists => {
                     " This board name already exists "
+                },
+                Self::CantHaveALongerName => {
+                    " Can't have a longer name "
                 }
             })?;
         Ok(())
