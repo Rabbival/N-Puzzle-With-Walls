@@ -19,7 +19,7 @@ pub struct SuccessRemovingFromDB(pub SavedLayoutIndexInDifficultyVec);
 pub struct SuccessClearingDB;
 
 #[derive(Event)]
-pub struct AllowPlayerToSetBoardName;
+pub struct SetNewbornDomainBoardNameToDefault;
 
 
 #[derive(Event)]
@@ -36,7 +36,7 @@ impl Plugin for DataBaseEventPlugin {
             .add_event::<SuccessSavingToDB>()
             .add_event::<SuccessRemovingFromDB>()
             .add_event::<SuccessClearingDB>()
-            .add_event::<AllowPlayerToSetBoardName>()
+            .add_event::<SetNewbornDomainBoardNameToDefault>()
             .add_event::<UpdateNewbornDomainBoardName>()
         ;
     }

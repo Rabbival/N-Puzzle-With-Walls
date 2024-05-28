@@ -1,5 +1,6 @@
 pub mod victory_message;
 pub mod pop_up_message;
+pub mod confirm_allowed;
 
 use crate::prelude::*;
 

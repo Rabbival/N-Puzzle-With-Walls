@@ -5,7 +5,8 @@ use enum_iterator::Sequence;
 pub enum TextAbovePopUpButtonsType {
     NoText,
     BoardNameAlreadyExists,
-    CantHaveALongerName
+    CantHaveALongerName,
+    MustGiveAName
 }
 
 impl Display for TextAbovePopUpButtonsType{
@@ -20,6 +21,9 @@ impl Display for TextAbovePopUpButtonsType{
                 },
                 Self::CantHaveALongerName => {
                     " Can't have a longer name "
+                },
+                Self::MustGiveAName => {
+                    " Please provide a name for the board "
                 }
             })?;
         Ok(())

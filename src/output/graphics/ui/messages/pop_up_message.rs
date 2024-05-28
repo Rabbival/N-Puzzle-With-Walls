@@ -36,7 +36,7 @@ pub fn set_are_you_sure_message_type_and_text(
 }
 
 pub fn set_pop_up_dynamic_text_box_color(
-    mut reset_text_event_reader: EventReader<AllowPlayerToSetBoardName>,
+    mut reset_text_event_reader: EventReader<SetNewbornDomainBoardNameToDefault>,
     mut set_text_event_reader: EventReader<UpdateNewbornDomainBoardName>,
     mut pop_up_dynamic_text_entity_query: Query<(&mut BackgroundColor, &mut Text), With<PopUpMessageDynamicTextTag>>,
 ){
@@ -85,6 +85,7 @@ fn spawn_pop_up_message(
                     Some(FlexDirection::Column)
                 ),
                 PopUpMessageType::DeleteAllBoards,
+                ConfirmAllowed::default(),
             ))
             .with_children(|parent| {
                 parent

@@ -9,18 +9,92 @@ impl Plugin for PopUpMessageLogicPlugin{
             .add_systems(
                 Update,
                 (
-                    listen_to_newborn_domain_board_change_requests.run_if(in_state(AppState::Game)),
-                    listen_for_allow_player_to_set_board_name_requests,
+                    listen_for_set_confirm_allowed_requests,
+                    (
+                        listen_for_show_pop_up_to_set_newborn_board_name_requests,
+                        (
+                            listen_for_newborn_domain_board_change_requests,
+                            set_newborn_board_displayed_name_and_message
+                                .before(set_pop_up_dynamic_text_box_color)
+                        ).chain()
+                    ).run_if(in_state(AppState::Game)),
                     listen_for_loader_screen_actions,
                     listen_for_delete_related_button_events,
-                    listen_for_db_related_button_events
+                    listen_for_db_related_button_events,
                 )
             );
     }
 }
 
-pub fn listen_to_newborn_domain_board_change_requests(
-    mut event_writer: EventWriter<UpdateNewbornDomainBoardName>,
+fn listen_for_set_confirm_allowed_requests(
+    mut entity_visibility_event_writer: EventWriter<SetEntityVisibility>,
+    mut event_reader: EventReader<SetConfirmAllowed>,
+    pop_up_buttons_query: Query<(Entity, &PopUpMessageButtonAction)>,
+    mut confirm_allowed_query: Query<&mut ConfirmAllowed, With<PopUpMessageType>>,
+    pop_up_dynamic_text_query: Query<&Text, With<PopUpMessageDynamicTextTag>>,
+    mut newborn_domain_board_name: ResMut<NewbornDomainBoardName>,
+){
+    for request in event_reader.read(){
+        if let Err(entity_error) =
+            listen_for_set_confirm_allowed_requests_inner(
+                request,
+                &mut entity_visibility_event_writer,
+                &pop_up_buttons_query,
+                &mut confirm_allowed_query,
+                &pop_up_dynamic_text_query,
+                &mut newborn_domain_board_name,
+            ) {
+                print_entity_related_error(entity_error);
+            }
+    }
+}
+
+fn listen_for_set_confirm_allowed_requests_inner(
+    set_confirm_allowed_request: &SetConfirmAllowed,
+    entity_visibility_event_writer: &mut EventWriter<SetEntityVisibility>,
+    pop_up_buttons_query: &Query<(Entity, &PopUpMessageButtonAction)>,
+    confirm_allowed_query: &mut Query<&mut ConfirmAllowed, With<PopUpMessageType>>,
+    pop_up_dynamic_text_query: &Query<&Text, With<PopUpMessageDynamicTextTag>>,
+    newborn_domain_board_name: &mut ResMut<NewbornDomainBoardName>,
+) -> Result<(), EntityRelatedCostumeError>{
+    let optional_confirm_button =
+        try_get_confirm_button_entity(pop_up_buttons_query);
+    match optional_confirm_button {
+        None => Err(EntityRelatedCostumeError::EntityNotInQuery),
+        Some(confirm_button_entity) => {
+            confirm_allowed_query.single_mut().0 = set_confirm_allowed_request.0;
+            if set_confirm_allowed_request.0 {
+                entity_visibility_event_writer.send(SetEntityVisibility{
+                    entity: confirm_button_entity,
+                    visibility: Visibility::Inherited
+                });
+                set_newborn_domain_board_name_res_to_displayed(
+                    pop_up_dynamic_text_query,
+                    newborn_domain_board_name
+                );
+            }else{
+                entity_visibility_event_writer.send(SetEntityVisibility{
+                    entity: confirm_button_entity,
+                    visibility: Visibility::Hidden
+                });
+                newborn_domain_board_name.0 = None;
+            }
+            Ok(())
+        }
+    }
+}
+
+fn set_newborn_domain_board_name_res_to_displayed(
+    pop_up_dynamic_text_query: &Query<&Text, With<PopUpMessageDynamicTextTag>>,
+    newborn_domain_board_name: &mut ResMut<NewbornDomainBoardName>,
+){
+    let currently_displayed_name =
+        DomainBoardName(pop_up_dynamic_text_query.single().sections[0].value.clone());
+    newborn_domain_board_name.0 = Some(currently_displayed_name);
+}
+
+fn listen_for_newborn_domain_board_change_requests(
+    mut update_name_event_writer: EventWriter<UpdateNewbornDomainBoardName>,
     mut event_reader: EventReader<KeyboardKeyTypedEvent>,
     mut text_above_pop_up_buttons_query: Query<
         &mut Text,
@@ -36,25 +110,13 @@ pub fn listen_to_newborn_domain_board_change_requests(
         match key_typed.keycode{
             KeyCode::Backspace | KeyCode::Delete => {
                 if pop_up_dynamic_text.len() > 0 {
-                    set_text_section_value_and_color(
-                        &mut text_above_pop_up_buttons_query.single_mut().sections[0],
-                        None,
-                        Some(TextAbovePopUpButtonsType::NoText.to_string())
-                    );
-                    event_writer.send(UpdateNewbornDomainBoardName(
-                        DomainBoardName(String::from(&pop_up_dynamic_text[..pop_up_dynamic_text.len()-1]))
-                    ));
+                    shorten_name(&mut update_name_event_writer, pop_up_dynamic_text, );
                 }
             }
             keycode => {
                 if let Some(parsed_keycode) = try_get_string_from_keycode(keycode, key_typed.shift_pressed){
                     if pop_up_dynamic_text.len() < MAX_DOMAIN_BOARD_NAME_LENGTH {
-                        set_text_section_value_and_color(
-                            &mut text_above_pop_up_buttons_query.single_mut().sections[0],
-                            None,
-                            Some(TextAbovePopUpButtonsType::NoText.to_string())
-                        );
-                        event_writer.send(UpdateNewbornDomainBoardName(
+                        update_name_event_writer.send(UpdateNewbornDomainBoardName(
                             DomainBoardName(format!("{}{}",pop_up_dynamic_text,parsed_keycode))
                         ));
                     }else{
@@ -70,9 +132,68 @@ pub fn listen_to_newborn_domain_board_change_requests(
     }
 }
 
-fn listen_for_allow_player_to_set_board_name_requests(
+fn shorten_name(
+    update_name_event_writer: &mut EventWriter<UpdateNewbornDomainBoardName>,
+    pop_up_dynamic_text: &String,
+){
+    let shortened_name = &pop_up_dynamic_text[..pop_up_dynamic_text.len()-1];
+    update_name_event_writer.send(UpdateNewbornDomainBoardName(
+        DomainBoardName(String::from(shortened_name))
+    ));
+}
+
+
+fn set_newborn_board_displayed_name_and_message(
+    mut event_writer: EventWriter<SetConfirmAllowed>,
+    mut event_reader: EventReader<UpdateNewbornDomainBoardName>,
+    domain_board_names_query: Query<&DomainBoardName>,
+    mut pop_up_dynamic_text_query: Query<&mut Text, (With<PopUpMessageDynamicTextTag>, Without<TextAbovePopUpMessageButtons>)>,
+    mut text_above_pop_up_buttons_entity_query: Query<&mut Text, (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageDynamicTextTag>)>,
+){
+    for name_request in event_reader.read() {
+        let requested_name = name_request.0.clone();
+        let pop_up_dynamic_text =
+            &mut pop_up_dynamic_text_query.single_mut().sections[0];
+        let text_above_pop_up_buttons =
+            &mut text_above_pop_up_buttons_entity_query.single_mut().sections[0];
+
+        set_text_section_value_and_color(
+            pop_up_dynamic_text,
+            None,
+            Some(requested_name.0.clone())
+        );
+
+        if requested_name.0.len() == 0{
+            set_text_section_value_and_color(
+                text_above_pop_up_buttons,
+                None,
+                Some(TextAbovePopUpButtonsType::MustGiveAName.to_string())
+            );
+            event_writer.send(SetConfirmAllowed(false));
+        }else if DataBaseManager::domain_board_name_already_exists(
+            &requested_name,
+            &domain_board_names_query
+        ){
+            set_text_section_value_and_color(
+                text_above_pop_up_buttons,
+                None,
+                Some(TextAbovePopUpButtonsType::BoardNameAlreadyExists.to_string())
+            );
+            event_writer.send(SetConfirmAllowed(false));
+        }else{
+            set_text_section_value_and_color(
+                text_above_pop_up_buttons,
+                None,
+                Some(TextAbovePopUpButtonsType::NoText.to_string())
+            );
+            event_writer.send(SetConfirmAllowed(true));
+        }
+    }
+}
+
+fn listen_for_show_pop_up_to_set_newborn_board_name_requests(
     mut visibility_toggle_event_writer: EventWriter<SetEntityVisibility>,
-    mut event_reader: EventReader<AllowPlayerToSetBoardName>,
+    mut event_reader: EventReader<SetNewbornDomainBoardNameToDefault>,
     mut pop_up_message_query: Query<(Entity, &mut PopUpMessageType)>,
     pop_up_dynamic_text_entity_query: Query<Entity, With<PopUpMessageDynamicTextTag>>,
     mut text_above_pop_up_buttons_query: Query<&mut Text, (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageTextTag>)>,
@@ -92,12 +213,13 @@ fn listen_for_allow_player_to_set_board_name_requests(
         set_text_section_value_and_color(
             &mut text_above_pop_up_buttons_query.single_mut().sections[0],
             None,
-            Some(TextAbovePopUpButtonsType::BoardNameAlreadyExists.to_string())
+            Some(TextAbovePopUpButtonsType::NoText.to_string())
         );
     }
 }
 
 fn listen_for_loader_screen_actions(
+    mut allow_board_name_setting_event_writer: EventWriter<SetConfirmAllowed>,
     mut visibility_toggle_event_writer: EventWriter<SetEntityVisibility>,
     mut event_reader: EventReader<LoaderScreenActionEvent>,
     mut pop_up_message_query: Query<(Entity, &mut PopUpMessageType)>,
@@ -124,6 +246,7 @@ fn listen_for_loader_screen_actions(
                 None,
                 Some(TextAbovePopUpButtonsType::NoText.to_string())
             );
+            allow_board_name_setting_event_writer.send(SetConfirmAllowed(true));
         }
     }
 }
@@ -211,4 +334,13 @@ fn listen_for_db_related_button_events(
             _ => {}
         }
     }
+}
+
+fn try_get_confirm_button_entity(buttons_query: &Query<(Entity, &PopUpMessageButtonAction)>) -> Option<Entity>{
+    for (button_entity, button_action) in buttons_query{
+        if let PopUpMessageButtonAction::Confirm = button_action{
+            return Some(button_entity);
+        }
+    }
+    None
 }

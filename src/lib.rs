@@ -148,6 +148,7 @@ pub mod prelude {
                 loader_screen_spawner::*, menu_spawner::*,
                 messages::{
                     pop_up_message::*,
+                    confirm_allowed::*,
                     MessagesSpawnersPlugin,
                     victory_message::*,
                 },

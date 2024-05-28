@@ -16,7 +16,7 @@ impl Plugin for DataBaseRequestHandlerPlugin {
 
 fn listen_for_save_requests(
     mut save_outcome_event_writer: EventWriter<LayoutSaveAttemptOutcomeEvent>,
-    mut allow_player_to_set_board_name_event_writer: EventWriter<AllowPlayerToSetBoardName>,
+    mut allow_player_to_set_board_name_event_writer: EventWriter<SetNewbornDomainBoardNameToDefault>,
     mut event_reader: EventReader<SaveWallsLayoutButtonPressed>,
     domain_boards_query: Query<(&DomainBoard, &DomainBoardName)>,
     mut game_board_query: Query<&mut TileBoard, With<GameBoard>>,
@@ -40,7 +40,7 @@ fn listen_for_save_requests(
                 ));
             }else{
                 game_board_query.single_mut().ignore_player_input = true;
-                allow_player_to_set_board_name_event_writer.send(AllowPlayerToSetBoardName);
+                allow_player_to_set_board_name_event_writer.send(SetNewbornDomainBoardNameToDefault);
             }
         }
     }
