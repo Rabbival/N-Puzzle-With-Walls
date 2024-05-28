@@ -6,7 +6,10 @@ pub struct PopUpMessageButtonEvent {
 }
 
 #[derive(Event)]
-pub struct KeyboardKeyTypedEvent(pub KeyCode);
+pub struct KeyboardKeyTypedEvent{
+    pub keycode: KeyCode,
+    pub shift_pressed: bool
+}
 
 pub struct PopUpMessageEventPlugin;
 

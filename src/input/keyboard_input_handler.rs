@@ -15,7 +15,8 @@ impl Plugin for KeyboardInputHandlerPlugin {
                         listen_to_keyboard_typing_for_newborn_domain_board_name
                     ).run_if(in_state(AppState::Game)),
                     move_between_loader_screens.run_if(in_state(AppState::Loader)),
-                    close_pop_up_message,
+                    confirm_pop_up_message,
+                    cancel_pop_up_message,
                     open_menu,
 
 
@@ -39,9 +40,13 @@ fn listen_to_keyboard_typing_for_newborn_domain_board_name(
     if let Visibility::Hidden = *pop_up_message_visibility.single(){
         return;
     }
-    
+
     for key_pressed in keyboard_input.get_just_pressed(){
-        event_writer.send(KeyboardKeyTypedEvent(*key_pressed));
+        let shift_is_pressed = keyboard_input.pressed(KeyCode::ShiftLeft);
+        event_writer.send(KeyboardKeyTypedEvent{
+            keycode: *key_pressed,
+            shift_pressed: shift_is_pressed
+        });
     }
 }
 
@@ -98,26 +103,6 @@ fn move_between_loader_screens(
     }
 }
 
-fn open_menu(
-    mut menu_toggle_event_writer: EventWriter<ToggleMenu>,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-) {
-    if keyboard_input.just_pressed(KeyCode::Space) {
-        menu_toggle_event_writer.send(ToggleMenu::default());
-    }
-}
-
-fn close_pop_up_message(
-    mut pop_up_action_event_writer: EventWriter<PopUpMessageButtonEvent>,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-) {
-    if keyboard_input.just_pressed(KeyCode::Escape) {
-        pop_up_action_event_writer.send(PopUpMessageButtonEvent{
-            action: PopUpMessageButtonAction::Cancel
-        });
-    }
-}
-
 fn listen_for_board_reset(
     mut input_event_writer: EventWriter<BuildNewBoard>,
     pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
@@ -126,7 +111,7 @@ fn listen_for_board_reset(
     if let Visibility::Inherited = *pop_up_message_visibility.single(){
         return;
     }
-    
+
     if keyboard_input.just_pressed(KeyCode::KeyR) {
         input_event_writer.send(BuildNewBoard(
             if keyboard_input.pressed(KeyCode::ShiftLeft){
@@ -137,6 +122,48 @@ fn listen_for_board_reset(
         ));
     }
 }
+
+fn cancel_pop_up_message(
+    mut pop_up_action_event_writer: EventWriter<PopUpMessageButtonEvent>,
+    pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if let Visibility::Inherited = *pop_up_message_visibility.single(){
+        return;
+    }
+    
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        pop_up_action_event_writer.send(PopUpMessageButtonEvent{
+            action: PopUpMessageButtonAction::Cancel
+        });
+    }
+}
+
+fn confirm_pop_up_message(
+    mut pop_up_action_event_writer: EventWriter<PopUpMessageButtonEvent>,
+    pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if let Visibility::Inherited = *pop_up_message_visibility.single(){
+        return;
+    }
+    
+    if keyboard_input.just_pressed(KeyCode::Enter) || keyboard_input.just_pressed(KeyCode::NumpadEnter) {
+        pop_up_action_event_writer.send(PopUpMessageButtonEvent{
+            action: PopUpMessageButtonAction::Confirm
+        });
+    }
+}
+
+fn open_menu(
+    mut menu_toggle_event_writer: EventWriter<ToggleMenu>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Space) {
+        menu_toggle_event_writer.send(ToggleMenu::default());
+    }
+}
+
 
 fn listen_for_app_closing(
     mut end_game_event_writer: EventWriter<EndGame>,

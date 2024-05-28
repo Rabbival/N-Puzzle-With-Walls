@@ -11,6 +11,22 @@
         grid_side_length: 4,
         grid: [
             Some((
+                index: 6,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 2,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 9,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 0,
+                tile_type: Numbered,
+            )),
+            Some((
                 index: 1,
                 tile_type: Numbered,
             )),
@@ -19,39 +35,7 @@
                 tile_type: Numbered,
             )),
             Some((
-                index: 2,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 6,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 0,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 11,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 0,
-                tile_type: Empty,
-            )),
-            Some((
-                index: 7,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 12,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 13,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 4,
+                index: 8,
                 tile_type: Numbered,
             )),
             Some((
@@ -59,19 +43,35 @@
                 tile_type: Numbered,
             )),
             Some((
-                index: 10,
+                index: 12,
                 tile_type: Numbered,
             )),
             Some((
-                index: 8,
+                index: 4,
                 tile_type: Numbered,
             )),
             Some((
-                index: 9,
+                index: 11,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 7,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 13,
                 tile_type: Numbered,
             )),
             Some((
                 index: 14,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 0,
+                tile_type: Empty,
+            )),
+            Some((
+                index: 10,
                 tile_type: Numbered,
             )),
         ],

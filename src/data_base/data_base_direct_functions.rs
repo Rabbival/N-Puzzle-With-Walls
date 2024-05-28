@@ -118,10 +118,10 @@ impl DataBaseManager {
 
     pub fn generate_unique_default_name_for_board(&self, domain_board_names_query: &Query<&DomainBoardName>) -> DomainBoardName {
         let mut new_layout_number = self.get_saved_layouts_of_all_difficulties_count();
-        let mut new_board_name = DomainBoardName(format!("layout_{:?}", new_layout_number));
+        let mut new_board_name = DomainBoardName(format!("layout-{:?}", new_layout_number));
         while DataBaseManager::domain_board_name_already_exists(&new_board_name, domain_board_names_query){
             new_layout_number += 1;
-            new_board_name = DomainBoardName(format!("layout_{:?}", new_layout_number));
+            new_board_name = DomainBoardName(format!("layout-{:?}", new_layout_number));
         }
         new_board_name
     }

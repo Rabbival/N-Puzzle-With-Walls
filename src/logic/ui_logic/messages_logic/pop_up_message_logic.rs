@@ -1,3 +1,4 @@
+use crate::input::keyboard_utilities::try_get_string_from_keycode;
 use crate::prelude::*;
 
 pub struct PopUpMessageLogicPlugin;
@@ -18,7 +19,7 @@ impl Plugin for PopUpMessageLogicPlugin{
     }
 }
 
-fn listen_to_newborn_domain_board_change_requests(
+pub fn listen_to_newborn_domain_board_change_requests(
     mut event_writer: EventWriter<UpdateNewbornDomainBoardName>,
     mut event_reader: EventReader<KeyboardKeyTypedEvent>,
     mut text_above_pop_up_buttons_query: Query<
@@ -31,29 +32,40 @@ fn listen_to_newborn_domain_board_change_requests(
     >,
 ){
     for key_typed in event_reader.read(){
-        let pop_up_dynamic_text = &mut pop_up_dynamic_text_query.single().sections[0].value;
-        match key_typed.0{
-            KeyCode::Backspace => {
+        let pop_up_dynamic_text = &pop_up_dynamic_text_query.single().sections[0].value;
+        match key_typed.keycode{
+            KeyCode::Backspace | KeyCode::Delete => {
                 if pop_up_dynamic_text.len() > 0 {
+                    set_text_section_value_and_color(
+                        &mut text_above_pop_up_buttons_query.single_mut().sections[0],
+                        None,
+                        Some(TextAbovePopUpButtonsType::NoText.to_string())
+                    );
                     event_writer.send(UpdateNewbornDomainBoardName(
                         DomainBoardName(String::from(&pop_up_dynamic_text[..pop_up_dynamic_text.len()-1]))
                     ));
                 }
             }
-            keycode if valid_key_for_name(keycode) => {
-                if pop_up_dynamic_text.len() < MAX_DOMAIN_BOARD_NAME_LENGTH {
-                    event_writer.send(UpdateNewbornDomainBoardName(
-                        DomainBoardName(format!("{}{:?}",pop_up_dynamic_text,keycode))
-                    ));
-                }else{
-                    set_text_section_value_and_color(
-                        &mut text_above_pop_up_buttons_query.single_mut().sections[0],
-                        None,
-                        Some(TextAbovePopUpButtonsType::CantHaveALongerName.to_string())
-                    );
+            keycode => {
+                if let Some(parsed_keycode) = try_get_string_from_keycode(keycode, key_typed.shift_pressed){
+                    if pop_up_dynamic_text.len() < MAX_DOMAIN_BOARD_NAME_LENGTH {
+                        set_text_section_value_and_color(
+                            &mut text_above_pop_up_buttons_query.single_mut().sections[0],
+                            None,
+                            Some(TextAbovePopUpButtonsType::NoText.to_string())
+                        );
+                        event_writer.send(UpdateNewbornDomainBoardName(
+                            DomainBoardName(format!("{}{}",pop_up_dynamic_text,parsed_keycode))
+                        ));
+                    }else{
+                        set_text_section_value_and_color(
+                            &mut text_above_pop_up_buttons_query.single_mut().sections[0],
+                            None,
+                            Some(TextAbovePopUpButtonsType::CantHaveALongerName.to_string())
+                        );
+                    }
                 }
             }
-            _ => {}
         }
     }
 }

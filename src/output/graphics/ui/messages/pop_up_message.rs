@@ -35,16 +35,36 @@ pub fn set_are_you_sure_message_type_and_text(
     *type_ref = requested_new_type;
 }
 
-fn set_pop_up_dynamic_text_box_color(
+pub fn set_pop_up_dynamic_text_box_color(
     mut reset_text_event_reader: EventReader<AllowPlayerToSetBoardName>,
     mut set_text_event_reader: EventReader<UpdateNewbornDomainBoardName>,
-    mut pop_up_dynamic_text_entity_query: Query<&mut BackgroundColor, With<PopUpMessageDynamicTextTag>>,
+    mut pop_up_dynamic_text_entity_query: Query<(&mut BackgroundColor, &mut Text), With<PopUpMessageDynamicTextTag>>,
 ){
     for _reset_request in reset_text_event_reader.read(){
-        pop_up_dynamic_text_entity_query.single_mut().0 = Color::DARK_GRAY;
+        *pop_up_dynamic_text_entity_query.single_mut().0.as_mut() = Color::DARK_GRAY.into();
     }
-    for _set_request in set_text_event_reader.read(){
-        pop_up_dynamic_text_entity_query.single_mut().0 = Color::NONE;
+    for set_request in set_text_event_reader.read(){
+        reset_text_and_color_if_first_after_default(
+            set_request.0.0.clone(),
+            &mut pop_up_dynamic_text_entity_query
+        )
+    }
+}
+
+fn reset_text_and_color_if_first_after_default(
+    set_request_string: String,
+    pop_up_dynamic_text_entity_query: &mut Query<(&mut BackgroundColor, &mut Text), With<PopUpMessageDynamicTextTag>>,
+){
+    let (mut background_color, mut text) = pop_up_dynamic_text_entity_query.single_mut();
+    let background_color_ref =  background_color.as_mut();
+    let first_input_since_default = background_color_ref.0 == Color::DARK_GRAY;
+    if first_input_since_default {
+        *background_color = Color::NONE.into();
+        set_text_section_value_and_color(
+            &mut text.sections[0],
+            None,
+            Some(String::from(&set_request_string.clone()[set_request_string.len()-1..]))
+        );
     }
 }
 
