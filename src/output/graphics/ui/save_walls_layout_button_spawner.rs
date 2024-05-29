@@ -58,7 +58,7 @@ fn spawn_save_walls_layout_button(
                             ))
                             .with_children(|parent| {
                                 parent.spawn((TextBundle::from_section(
-                                    "Save Walls Layout",
+                                    "Save Board To Disc",
                                     button_text_style.clone(),
                                 ), 
                                     ButtonText,
