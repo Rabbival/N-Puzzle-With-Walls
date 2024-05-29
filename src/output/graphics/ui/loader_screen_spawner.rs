@@ -41,6 +41,7 @@ fn spawn_bottom_line(
     for spawn_request in spawn_event_reader.read() {
         let text_style = &spawn_request.medium_text_style;
         let button_style = &spawn_request.common_button_style;
+        let chosen_slot_text_style = &spawn_request.small_text_style;
         let chosen_slot_button_style = &spawn_request.space_bar_looking_button_style;
         
         commands
@@ -78,7 +79,7 @@ fn spawn_bottom_line(
                     .with_children(|parent| {
                         parent.spawn((TextBundle::from_section(
                             "no chosen board",
-                                text_style.clone(),
+                                chosen_slot_text_style.clone(),
                             ),
                             ChosenLayoutTextTag
                          ));
