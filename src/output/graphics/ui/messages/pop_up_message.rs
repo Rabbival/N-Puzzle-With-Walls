@@ -130,7 +130,7 @@ fn spawn_pop_up_message(
                                         String::default(),
                                         text_style.clone(),
                                     ).with_text_justify(JustifyText::Center)
-                                        .with_background_color(Color::DARK_GRAY.into(),),
+                                        .with_background_color(Color::DARK_GRAY,),
                                   ButtonText,
                                   PopUpMessageDynamicTextTag
                                 ));

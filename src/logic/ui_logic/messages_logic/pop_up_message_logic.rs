@@ -109,7 +109,7 @@ fn listen_for_newborn_domain_board_change_requests(
         let pop_up_dynamic_text = &pop_up_dynamic_text_query.single().sections[0].value;
         match key_typed.keycode{
             KeyCode::Backspace | KeyCode::Delete => {
-                if pop_up_dynamic_text.len() > 0 {
+                if !pop_up_dynamic_text.is_empty() {
                     shorten_name(&mut update_name_event_writer, pop_up_dynamic_text, );
                 }
             }
@@ -134,7 +134,7 @@ fn listen_for_newborn_domain_board_change_requests(
 
 fn shorten_name(
     update_name_event_writer: &mut EventWriter<UpdateNewbornDomainBoardName>,
-    pop_up_dynamic_text: &String,
+    pop_up_dynamic_text: &str,
 ){
     let shortened_name = &pop_up_dynamic_text[..pop_up_dynamic_text.len()-1];
     update_name_event_writer.send(UpdateNewbornDomainBoardName(
@@ -163,7 +163,7 @@ fn set_newborn_board_displayed_name_and_message(
             Some(requested_name.0.clone())
         );
 
-        if requested_name.0.len() == 0{
+        if requested_name.0.is_empty(){
             set_text_section_value_and_color(
                 text_above_pop_up_buttons,
                 None,

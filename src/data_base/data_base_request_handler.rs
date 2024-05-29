@@ -28,20 +28,18 @@ fn listen_for_save_requests(
                 LayoutSaveAttemptOutcomeEvent(SaveAttemptOutcome::DataBaseAtCapacity)
             );
         }
-        else{
-            if let Some(existing_board_name) = 
-                DataBaseManager::domain_board_already_exists(
-                    &domain_boards_query,
-                    &game_board_query.single().grid.clone()
-                )
-            {
-                save_outcome_event_writer.send(LayoutSaveAttemptOutcomeEvent(
-                    SaveAttemptOutcome::BoardAlreadyExistsInMemory(existing_board_name)
-                ));
-            }else{
-                game_board_query.single_mut().ignore_player_input = true;
-                allow_player_to_set_board_name_event_writer.send(SetNewbornDomainBoardNameToDefault);
-            }
+        else if let Some(existing_board_name) = 
+            DataBaseManager::domain_board_already_exists(
+                &domain_boards_query,
+                &game_board_query.single().grid.clone()
+            )
+        {
+            save_outcome_event_writer.send(LayoutSaveAttemptOutcomeEvent(
+                SaveAttemptOutcome::BoardAlreadyExistsInMemory(existing_board_name)
+            ));
+        }else{
+            game_board_query.single_mut().ignore_player_input = true;
+            allow_player_to_set_board_name_event_writer.send(SetNewbornDomainBoardNameToDefault);
         }
     }
 }
