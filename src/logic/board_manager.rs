@@ -187,9 +187,6 @@ mod tests {
         tile_board.ignore_player_input = false;
         let direction_check_outcome =
             move_tile_logic_inner(graphics_writer, check_writer, from_dir, 0, &mut tile_board);
-        match direction_check_outcome {
-            Err(TileMoveError::NoOccupiedTileInThatDirection(_)) => true,
-            _ => false,
-        }
+        matches!(direction_check_outcome, Err(TileMoveError::NoOccupiedTileInThatDirection(_)))
     }
 }

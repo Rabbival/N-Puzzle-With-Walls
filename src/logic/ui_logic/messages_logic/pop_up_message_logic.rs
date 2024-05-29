@@ -291,10 +291,8 @@ fn listen_for_delete_related_button_events(
                 PopUpMessageType::DeleteAllBoards => {
                     clear_db_event_writer.send(ClearDB);
                 },
-                PopUpMessageType::DeleteBoard(optional_domain_board_to_delete) => {
-                    if let Some((_ , saved_layout_index)) = optional_domain_board_to_delete {
-                        remove_from_db_event_writer.send(RemoveFromDB(*saved_layout_index));
-                    }
+                PopUpMessageType::DeleteBoard(Some((_ , saved_layout_index))) => {
+                    remove_from_db_event_writer.send(RemoveFromDB(*saved_layout_index));
                 },
                 _ => {}
             }
@@ -315,23 +313,19 @@ fn listen_for_db_related_button_events(
     newborn_domain_board_name_res: Res<NewbornDomainBoardName>,
 ){
     for action_request in event_reader.read(){
-        let pop_up_message_type = pop_up_message_query.single();
-        match pop_up_message_type{
-            PopUpMessageType::ChooseNewbornDomainBoardName => {
-                if let PopUpMessageButtonAction::Confirm = action_request.action{
-                    if let Some(newborn_domain_board_name) = &newborn_domain_board_name_res.0{
-                        save_to_db_event_writer.send(SaveToDB(
-                            DomainBoard{
-                                board_props: *applied_board_props_query.single(),
-                                grid: game_board_query.single().grid.clone()
-                            },
-                            newborn_domain_board_name.clone()
-                        ));
-                    }
+        if *pop_up_message_query.single() == PopUpMessageType::ChooseNewbornDomainBoardName{
+            if let PopUpMessageButtonAction::Confirm = action_request.action{
+                if let Some(newborn_domain_board_name) = &newborn_domain_board_name_res.0{
+                    save_to_db_event_writer.send(SaveToDB(
+                        DomainBoard{
+                            board_props: *applied_board_props_query.single(),
+                            grid: game_board_query.single().grid.clone()
+                        },
+                        newborn_domain_board_name.clone()
+                    ));
                 }
-                game_board_query.single_mut().ignore_player_input = false;
             }
-            _ => {}
+            game_board_query.single_mut().ignore_player_input = false;
         }
     }
 }

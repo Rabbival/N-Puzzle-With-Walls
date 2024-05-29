@@ -306,15 +306,17 @@ mod tests {
         smaller_board_size: BoardSize,
         bigger_board_size: BoardSize,
     ) -> bool {
-        let mut planned_board_prop = BoardProperties::default();
-        planned_board_prop.size = smaller_board_size;
+        let mut planned_board_prop = BoardProperties{
+            size: smaller_board_size,
+            ..default()
+        };
         let smaller_size_wall_count_upper_bound = planned_board_prop.size.wall_count_upper_bound();
         let mut current_unapplied_wall_count =
             UnappliedMenuWallCount(smaller_size_wall_count_upper_bound);
 
         update_wall_count_unapplied_inner(
             &INCREASE_REQUEST,
-            &mut planned_board_prop,
+            &planned_board_prop,
             &mut current_unapplied_wall_count,
         );
         let first_check = current_unapplied_wall_count.0 == smaller_size_wall_count_upper_bound;
@@ -322,7 +324,7 @@ mod tests {
         planned_board_prop.size = bigger_board_size;
         update_wall_count_unapplied_inner(
             &INCREASE_REQUEST,
-            &mut planned_board_prop,
+            &planned_board_prop,
             &mut current_unapplied_wall_count,
         );
         let second_check = current_unapplied_wall_count.0 > smaller_size_wall_count_upper_bound;
@@ -354,8 +356,10 @@ mod tests {
         bigger_board_size: BoardSize,
         button_event_writer_for_apply: &mut EventWriter<ApplyButtonPressed>,
     ) -> bool {
-        let mut planned_board_prop = BoardProperties::default();
-        planned_board_prop.size = bigger_board_size;
+        let mut planned_board_prop = BoardProperties {
+            size: bigger_board_size,
+            ..default()
+        };
         let bigger_size_wall_count_upper_bound = planned_board_prop.size.wall_count_upper_bound();
         let mut current_unapplied_wall_count =
             UnappliedMenuWallCount(bigger_size_wall_count_upper_bound);

@@ -132,13 +132,12 @@ mod tests {
         position_to_check: Vec2,
         event_writer: &mut EventWriter<SwitchTilesLogic>,
     ) -> bool {
-        let mut board = TileBoard::default();
-        board.ignore_player_input = false;
+        let board = TileBoard {
+            ignore_player_input: false,
+            ..default()
+        };
         let location_search_outcome = handle_mouse_click(event_writer, position_to_check, &board);
-        match location_search_outcome {
-            Err(TileMoveError::GridError(_)) => true,
-            _ => false,
-        }
+        matches!(location_search_outcome, Err(TileMoveError::GridError(_)))
     }
 
     #[test]
@@ -161,10 +160,7 @@ mod tests {
             Vec2::default(),
             &TileBoard::default(), //locked by default
         );
-        match location_validation_outcome {
-            Err(TileMoveError::BoardFrozenToPlayer) => true,
-            _ => false,
-        }
+        matches!(location_validation_outcome, Err(TileMoveError::BoardFrozenToPlayer))
     }
 
     #[test]
@@ -186,21 +182,22 @@ mod tests {
     fn test_no_tile_in_cell(
         event_writer: &mut EventWriter<SwitchTilesLogic>,
     ) -> bool {
-        let mut board = TileBoard::default();
-        board.ignore_player_input = false;
+        let board = TileBoard {
+            ignore_player_input: false,
+            ..default()
+        };
         let location_validation_outcome = handle_mouse_click(event_writer, Vec2::default(), &board);
-        match location_validation_outcome {
-            Err(TileMoveError::TileBoardError(TileBoardError::NoTileInCell(_))) => true,
-            _ => false,
-        }
+        matches!(location_validation_outcome, Err(TileMoveError::TileBoardError(TileBoardError::NoTileInCell(_))))
     }
 
     fn test_empty_slot(
         event_writer: &mut EventWriter<SwitchTilesLogic>,
     ) -> bool
     {
-        let mut board = TileBoard::default();
-        board.ignore_player_input = false;
+        let mut board = TileBoard {
+            ignore_player_input: false,
+            ..default()
+        };
         board.set(
             &GridLocation::new(0, 0),
             Tile {
@@ -209,10 +206,7 @@ mod tests {
             },
         ).unwrap();
         let location_validation_outcome = handle_mouse_click(event_writer, Vec2::default(), &board);
-        match location_validation_outcome {
-            Err(TileMoveError::PressedEmptySlot) => true,
-            _ => false,
-        }
+        matches!(location_validation_outcome, Err(TileMoveError::PressedEmptySlot))
     }
 
     fn test_no_empty_neighbor(event_writer: &mut EventWriter<SwitchTilesLogic>, ) -> bool
@@ -237,9 +231,6 @@ mod tests {
         }
 
         let location_validation_outcome = handle_mouse_click(event_writer, Vec2::default(), &tile_board);
-        match location_validation_outcome {
-            Err(TileMoveError::NoEmptyNeighbor) => true,
-            _ => false,
-        }
+        matches!(location_validation_outcome, Err(TileMoveError::NoEmptyNeighbor))
     }
 }
