@@ -43,7 +43,7 @@ pub fn append_to_file(
     let file_path = PathBuf::from(&folder_where_the_file_is.to_string())
         .join(full_file_name.name_with_postfix.clone());
     let mut data_file = OpenOptions::new().append(true).open(file_path)?;
-    data_file.write(string_to_append.as_bytes())?;
+    data_file.write_all(string_to_append.as_bytes())?;
     print_system_log(SystemLog::AppendedToFile(full_file_name.name_with_postfix));
     Ok(())
 }
