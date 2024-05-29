@@ -1,3 +1,4 @@
+use crate::output::game_session_log::append_to_game_session_log_file;
 use crate::prelude::*;
 
 const PRINT_GRID_ERROR_RELATED_TILE_MOVE_ERRORS : bool = false;
@@ -31,7 +32,10 @@ pub fn print_tile_move_error(move_error: TileMoveError) {
             warn!("no occupied tile in direction: {:?}", direction);
         }
         TileMoveError::TriedToSwitchEmptyWithEmpty => {
-            info!("tried to switch empty with empty, hence no swap was performed");
+            let empty_with_empty_info_string =
+                String::from("tried to switch empty with empty, hence no swap was performed");
+            append_to_game_session_log_file(empty_with_empty_info_string);
+            info!(empty_with_empty_info_string);
         },
         TileMoveError::GridError(grid_error) => {
             if PRINT_GRID_ERROR_RELATED_TILE_MOVE_ERRORS{

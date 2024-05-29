@@ -6,6 +6,8 @@ pub enum SystemLog{
     FolderExists(String),
     WroteToFile(String),
     FileDeleted(String),
+    FileCreated(String),
+    AppendedToFile(String),
 }
 
 pub fn print_system_log(system_log: SystemLog){

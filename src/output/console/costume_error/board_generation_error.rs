@@ -1,3 +1,4 @@
+use crate::output::game_session_log::append_to_game_session_log_file;
 use crate::prelude::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -15,5 +16,7 @@ pub enum BoardGenerationError {
 }
 
 pub fn print_board_generation_error(error: BoardGenerationError) {
-    error!("board generation failed! error: {:?}", error);
+    let error_string = format!("board generation failed! error: {:?}", error);
+    append_to_game_session_log_file(error_string);
+    error!(error_string);
 }

@@ -112,6 +112,7 @@ pub mod prelude {
         }},
     };
     pub use crate::output::{
+        game_session_log,
         console::{
             costume_error::{
                 board_generation_error::*,

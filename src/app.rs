@@ -1,6 +1,7 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
 use crate::prelude::*;
+use crate::prelude::game_session_log::GameSessionLogPlugin;
 
 #[bevy_main]
 pub fn main() {
@@ -23,6 +24,7 @@ pub fn main() {
             BoardPlugin,
             GraphicsPlugin,
             TileDictionaryPlugin,
+            GameSessionLogPlugin
         ));
 
     app.run();

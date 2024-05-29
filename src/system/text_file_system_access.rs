@@ -1,6 +1,21 @@
-use std::fs;
 use crate::prelude::*;
+use std::fs::{self, File, OpenOptions};
 use std::path::PathBuf;
+use std::io::Write;
+
+pub fn create_file(
+    folder_to_create_in: FolderToAccess,
+    file_name: String
+) -> std::io::Result<()>
+{
+    create_folder_if_none_exists_yet(folder_to_create_in);
+    let full_file_name = SystemFileName::from_name(file_name, SystemFileType::TextFile);
+    let file_path = PathBuf::from(&folder_to_create_in.to_string())
+        .join(full_file_name.name_with_postfix.clone());
+    File::create(file_path)?;
+    print_system_log(SystemLog::FileCreated(full_file_name.name_with_postfix));
+    Ok(())
+}
 
 pub fn write_to_file(
     folder_to_put_file_in: FolderToAccess,
@@ -17,13 +32,29 @@ pub fn write_to_file(
     Ok(())
 }
 
+pub fn append_to_file(
+    folder_where_the_file_is: FolderToAccess,
+    file_name: String,
+    string_to_append: String
+) -> std::io::Result<()>
+{
+    create_folder_if_none_exists_yet(folder_where_the_file_is);
+    let full_file_name = SystemFileName::from_name(file_name, SystemFileType::TextFile);
+    let file_path = PathBuf::from(&folder_where_the_file_is.to_string())
+        .join(full_file_name.name_with_postfix.clone());
+    let mut data_file = OpenOptions::new().append(true).open(file_path)?;
+    data_file.write(string_to_append.as_bytes())?;
+    print_system_log(SystemLog::AppendedToFile(full_file_name.name_with_postfix));
+    Ok(())
+}
+
 pub fn delete_text_file(
-    folder_to_put_file_in: FolderToAccess,
+    folder_to_delete_from: FolderToAccess,
     file_name: String,
 ) -> std::io::Result<()>
 {
     let full_file_name = SystemFileName::from_name(file_name, SystemFileType::TextFile);
-    let file_path = PathBuf::from(&folder_to_put_file_in.to_string())
+    let file_path = PathBuf::from(&folder_to_delete_from.to_string())
         .join(full_file_name.name_with_postfix.clone());
     fs::remove_file(file_path)?;
     print_system_log(SystemLog::FileDeleted(full_file_name.name_with_postfix));
