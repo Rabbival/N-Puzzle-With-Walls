@@ -16,7 +16,7 @@ pub fn game_log(game_log: GameLog) {
 }
 
 
-impl Display for GameLog{
+impl Display for GameLog<'_>{
     fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
         let message_string =  match self {
             GameLog::NewBoardGenerated => {

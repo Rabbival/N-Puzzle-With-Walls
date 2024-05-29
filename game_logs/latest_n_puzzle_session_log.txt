@@ -1,1 +1,6 @@
-one lineanother line
+new setting set: ChangeSize(Medium)
+new setting set: ChangeSize(Tiny)
+
+a new board was generated!
+
+Tile { type: Numbered, number: 3 } moved to GridLocation { row: 2, col: 1 }

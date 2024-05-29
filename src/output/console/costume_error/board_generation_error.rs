@@ -17,6 +17,6 @@ pub enum BoardGenerationError {
 
 pub fn print_board_generation_error(error: BoardGenerationError) {
     let error_string = format!("board generation failed! error: {:?}", error);
-    append_to_game_session_log_file(error_string);
+    append_to_game_session_log_file(error_string.clone());
     error!(error_string);
 }

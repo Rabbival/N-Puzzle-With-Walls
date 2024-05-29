@@ -34,7 +34,7 @@ pub fn print_tile_move_error(move_error: TileMoveError) {
         TileMoveError::TriedToSwitchEmptyWithEmpty => {
             let empty_with_empty_info_string =
                 String::from("tried to switch empty with empty, hence no swap was performed");
-            append_to_game_session_log_file(empty_with_empty_info_string);
+            append_to_game_session_log_file(empty_with_empty_info_string.clone());
             info!(empty_with_empty_info_string);
         },
         TileMoveError::GridError(grid_error) => {
