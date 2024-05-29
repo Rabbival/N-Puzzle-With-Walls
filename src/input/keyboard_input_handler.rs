@@ -158,7 +158,7 @@ fn cancel_pop_up_message(
     pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
-    if let Visibility::Inherited = *pop_up_message_visibility.single(){
+    if let Visibility::Hidden = *pop_up_message_visibility.single(){
         return;
     }
     
@@ -175,7 +175,7 @@ fn confirm_pop_up_message(
     pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
-    if let Visibility::Inherited = *pop_up_message_visibility.single(){
+    if let Visibility::Hidden = *pop_up_message_visibility.single(){
         return;
     }
     if !confirm_allowed_query.single().0{
