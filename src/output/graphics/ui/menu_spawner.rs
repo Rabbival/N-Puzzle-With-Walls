@@ -106,7 +106,7 @@ fn spawn_generate_button(
                             new(vec!(BoardGenerationMethod::Load)),
                        CustomOnScreenTag{
                            screen: AppState::Menu,
-                           on_own_screen_visibility: Some(Visibility::Hidden)
+                           on_own_screen_visibility: Some(Visibility::Visible)
                        },
                        LowerTextAboveStartButton
                     ));
@@ -120,7 +120,7 @@ fn spawn_generate_button(
                             new(vec!(BoardGenerationMethod::Load)),
                         CustomOnScreenTag{
                           screen: AppState::Menu,
-                            on_own_screen_visibility: Some(Visibility::Hidden)
+                            on_own_screen_visibility: Some(Visibility::Visible)
                         },
                         UpperTextAboveStartButton
                     ));
