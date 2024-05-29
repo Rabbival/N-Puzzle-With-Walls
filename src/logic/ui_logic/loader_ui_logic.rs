@@ -20,7 +20,8 @@ impl Plugin for LoaderUiLogicPlugin {
                     (
                         update_slots_info_after_change.run_if(resource_changed::<DataBaseManager>
                                 .or_else(resource_changed::<DisplayedLoaderScreenNumber>)),
-                        update_arrows_after_change.run_if(resource_changed::<DataBaseManager>),
+                        update_arrows_after_change.run_if(resource_changed::<DataBaseManager>
+                            .or_else(resource_changed::<DisplayedLoaderScreenNumber>))
                     )
                         .in_set(InputSystemSets::MainChanges),
                     update_chosen_mark_after_change.run_if(resource_changed::<ChosenLayoutLocation>
