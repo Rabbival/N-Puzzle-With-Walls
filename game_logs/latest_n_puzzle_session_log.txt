@@ -1,3 +1,7 @@
-
-a new board was generated!
-
+new setting set: ChangeGenerationMethod(Load)
+new setting set: ChangeBoardDifficulty(Easy)
+new setting set: ChangeBoardDifficulty(Easy)
+new setting set: ChangeBoardDifficulty(Medium)
+new setting set: ChangeBoardDifficulty(Medium)
+new setting set: ChangeBoardDifficulty(Easy)
+new setting set: ChangeBoardDifficulty(Medium)

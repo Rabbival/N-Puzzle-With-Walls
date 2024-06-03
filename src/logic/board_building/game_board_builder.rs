@@ -39,7 +39,10 @@ fn build_a_new_game_board(
         }
         Ok(newborn_board) => {
             let attempt_result =
-                brute_force_generate_game_board(&newborn_board, applied_props.get_random_turns_range());
+                brute_force_generate_game_board(
+                    &newborn_board, 
+                    applied_props.get_random_turns_range()
+                );
             match attempt_result {
                 Ok(board) => {
                     game_state.set(GameState::GameBoardGenerated);

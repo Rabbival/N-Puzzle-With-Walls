@@ -12,11 +12,11 @@ impl Plugin for VictoryMessagePlugin {
             .add_systems(Startup, spawn_victory_message)
             .add_systems(
                 OnEnter(GameState::Victory),
-                toggle_victory_message_visibilities,
+                show_victory_message,
             )
             .add_systems(
                 OnExit(GameState::Victory),
-                toggle_victory_message_visibilities,
+                hide_victory_message,
             );
     }
 }
@@ -83,22 +83,42 @@ fn spawn_victory_message(
         });
 }
 
-/// toggles both actual visibility and on_own_screen one
-fn toggle_victory_message_visibilities(
-    mut victory_message_query: Query<
+
+fn show_victory_message(    
+    mut victory_message_visibilities_query: Query<
         (&mut Visibility, &mut CustomOnScreenTag),
         With<VictoryAnnouncementTag>,
     >,
 ){
+    set_victory_message_visibilities(
+        &mut victory_message_visibilities_query, 
+        Visibility::Visible
+    );
+}
+
+fn hide_victory_message(
+    mut victory_message_visibilities_query: Query<
+        (&mut Visibility, &mut CustomOnScreenTag),
+        With<VictoryAnnouncementTag>,
+    >,
+){
+    set_victory_message_visibilities(
+        &mut victory_message_visibilities_query, 
+        Visibility::Hidden
+    );
+}
+
+fn set_victory_message_visibilities(
+    victory_message_visibilities_query: &mut Query<
+        (&mut Visibility, &mut CustomOnScreenTag),
+        With<VictoryAnnouncementTag>,
+    >,
+    visibility_to_set_to: Visibility
+){
     let (mut victory_message_vis, mut custom_on_screen_tag) =
-        victory_message_query.single_mut();
+        victory_message_visibilities_query.single_mut();
     if let Some(own_screen_vis_for_toggle) = &mut custom_on_screen_tag.on_own_screen_visibility{
-        if *victory_message_vis == Visibility::Visible {
-            *victory_message_vis = Visibility::Hidden;
-            *own_screen_vis_for_toggle = Visibility::Hidden;
-        } else {
-            *victory_message_vis = Visibility::Visible;
-            *own_screen_vis_for_toggle = Visibility::Visible;
-        }
+        *victory_message_vis = visibility_to_set_to;
+        *own_screen_vis_for_toggle = visibility_to_set_to;
     }
 }

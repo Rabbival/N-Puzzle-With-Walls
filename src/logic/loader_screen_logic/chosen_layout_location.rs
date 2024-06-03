@@ -22,8 +22,9 @@ impl Plugin for ChosenLayoutLocationPlugin {
 }
 
 fn update_bottom_line_to_fit_new_chosen(
+    mut visibility_set_event_writer: EventWriter<SetEntityVisibility>,
     optional_chosen_layout_location: Res<ChosenLayoutLocation>,
-    mut loader_screen_action_query: Query<&mut LoaderScreenAction>,
+    mut loader_screen_action_query: Query<(&mut LoaderScreenAction, Entity)>,
     applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut chosen_layout_text_query: Query<&mut Text, With<ChosenLayoutTextTag>>,
     domain_board_name_query: Query<(Entity, &DomainBoardName)>,
@@ -65,10 +66,22 @@ fn update_bottom_line_to_fit_new_chosen(
         None,
         Some(updated_chosen_layout_text)
     );
-    for mut action_carrier in &mut loader_screen_action_query{
+
+    for (mut action_carrier, entity) 
+        in &mut loader_screen_action_query
+    {
         match action_carrier.as_mut(){
             LoaderScreenAction::GenerateBoard(optional_entity) => {
                 *optional_entity = updated_optional_entity;
+                if optional_entity.is_some(){
+                    visibility_set_event_writer.send(
+                        SetEntityVisibility{entity, visibility: Visibility::Visible}
+                    );
+                }else{
+                    visibility_set_event_writer.send(
+                        SetEntityVisibility{entity, visibility: Visibility::Hidden}
+                    );
+                }
             },
             LoaderScreenAction::WarnBeforeDeletion(PopUpMessageType::DeleteBoard(optional_tuple)) => {
                 if updated_optional_index.is_none() {

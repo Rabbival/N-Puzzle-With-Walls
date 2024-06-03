@@ -49,22 +49,23 @@ fn update_wall_tiles_count_visuals(
 fn listen_for_applied_tag_change_requests(
     mut event_reader: EventReader<SetAppliedTagForProperty>,
     selected_options_query: Query<(Entity, &MenuButtonAction), With<AppliedOptionTag>>,
-    not_selected_options_query: Query<(Entity, &MenuButtonAction), Without<AppliedOptionTag>>,
     mut commands: Commands
 ){
     for applied_tag_set_event in event_reader.read(){
         let variant_to_select = applied_tag_set_event.give_tag_to_variant;
-        let discriminant_to_select = mem::discriminant(&variant_to_select);
+        let type_of_button_to_set = mem::discriminant(&variant_to_select);
         for (menu_button_entity, button_action) in &selected_options_query{
-            if mem::discriminant(button_action) == discriminant_to_select{
-                commands
-                    .entity(menu_button_entity)
-                    .remove::<AppliedOptionTag>();
-            }
-        }
-        for (menu_button_entity, button_action) in &not_selected_options_query{
-            if variant_to_select == *button_action{
-                commands.entity(menu_button_entity).insert(AppliedOptionTag);
+            if mem::discriminant(button_action) == type_of_button_to_set{
+
+                //TODO: print it
+
+                if *button_action == variant_to_select{
+                    commands.entity(menu_button_entity).insert(AppliedOptionTag);
+                }else{
+                    commands
+                        .entity(menu_button_entity)
+                        .remove::<AppliedOptionTag>();
+                }
             }
         }
     }
