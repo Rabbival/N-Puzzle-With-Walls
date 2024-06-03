@@ -29,9 +29,9 @@ fn spawn_save_walls_layout_button(
             .spawn(
                 (build_node_bundle_with_full_percentage_style(
                     AlignItems::Center,
-                    JustifyContent::End,
+                    JustifyContent::Start,
                     Visibility::Hidden,
-                    Some(FlexDirection::ColumnReverse)
+                    Some(FlexDirection::Column)
                 ),
                  simple_on_screen_tag(AppState::Game)
                 ))
