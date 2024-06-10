@@ -3,13 +3,25 @@ use std::hash::Hash;
 use bevy::utils::HashMap;
 use rand::Rng;
 
-pub fn remove_all_items_with_keys<T: PartialEq + Eq + Hash + Copy, S>(map_to_remove_from: &mut HashMap<T, S>, other_vec: &Vec<T>){
+pub fn remove_all_items_with_keys<T: PartialEq + Eq + Hash + Copy, S>
+    (map_to_remove_from: &mut HashMap<T, S>, other_vec: &Vec<T>)
+{
     let mut keys: Vec<T> = map_to_remove_from.keys().copied().collect();
     for item in other_vec{
         if remove_by_value(item, &mut keys).is_some(){
             map_to_remove_from.remove(item);
         }
     }
+}
+
+pub fn get_single_key_value<T: PartialEq + Eq + Hash + Copy, S>
+    (map_with_single_entry: &HashMap<T, S>) -> Option<(&T,&S)>
+{
+    let keys: Vec<T> = map_with_single_entry.keys().copied().collect();
+    for key in keys{
+        return map_with_single_entry.get_key_value(&key)
+    }
+    None
 }
 
 pub fn remove_all_similar_items_from_former<T: PartialEq>(vec_to_remove_from: &mut Vec<T>, other_vec: &Vec<T>){

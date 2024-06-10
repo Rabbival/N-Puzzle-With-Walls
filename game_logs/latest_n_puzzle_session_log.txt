@@ -1,7 +1,8 @@
 new setting set: ChangeGenerationMethod(Load)
 new setting set: ChangeBoardDifficulty(Easy)
-new setting set: ChangeBoardDifficulty(Easy)
-new setting set: ChangeBoardDifficulty(Medium)
 new setting set: ChangeBoardDifficulty(Medium)
 new setting set: ChangeBoardDifficulty(Easy)
 new setting set: ChangeBoardDifficulty(Medium)
+new setting set: ChangeBoardDifficulty(Easy)
+Tile { type: Numbered, number: 12 } moved to GridLocation { row: 3, col: 3 }
+Tile { type: Numbered, number: 15 } moved to GridLocation { row: 3, col: 3 }

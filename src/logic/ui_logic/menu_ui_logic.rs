@@ -48,23 +48,18 @@ fn update_wall_tiles_count_visuals(
 
 fn listen_for_applied_tag_change_requests(
     mut event_reader: EventReader<SetAppliedTagForProperty>,
-    selected_options_query: Query<(Entity, &MenuButtonAction), With<AppliedOptionTag>>,
+    menu_buttons: Query<(Entity, &MenuButtonAction)>,
     mut commands: Commands
 ){
     for applied_tag_set_event in event_reader.read(){
         let variant_to_select = applied_tag_set_event.give_tag_to_variant;
         let type_of_button_to_set = mem::discriminant(&variant_to_select);
-        for (menu_button_entity, button_action) in &selected_options_query{
+        for (menu_button_entity, button_action) in &menu_buttons{
             if mem::discriminant(button_action) == type_of_button_to_set{
-
-                //TODO: print it
-
                 if *button_action == variant_to_select{
                     commands.entity(menu_button_entity).insert(AppliedOptionTag);
                 }else{
-                    commands
-                        .entity(menu_button_entity)
-                        .remove::<AppliedOptionTag>();
+                    commands.entity(menu_button_entity).remove::<AppliedOptionTag>();
                 }
             }
         }
@@ -83,16 +78,14 @@ fn set_chosen_options_to_fit_current_props(
     >,
     mut commands: Commands,
 ) {
-    for _event in event_reader.read() {
-        // remove from previously chosen and not applied
+    for _event in event_reader.read(){
         for (chosen_not_applied, mut not_applied_button_color, _) in &mut currently_chosen {
             set_color_to_normal(&mut not_applied_button_color);
             commands
                 .entity(chosen_not_applied)
                 .remove::<SelectedOptionTag>();
         }
-
-        // put the chosen mark in the currently applied ones
+    
         for (should_be_marked_chosen, mut should_be_marked_button_color) in
             &mut currently_applied
         {

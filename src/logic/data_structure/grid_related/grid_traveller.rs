@@ -58,7 +58,7 @@ impl<'a, T: Clone> Iterator for GridTraveller<'a, T> {
             Some(next_tile_to_visit) => {
                 let next_tile_neighbors = self
                     .grid
-                    .get_all_occupied_neighbor_locations(&next_tile_to_visit);
+                    .get_all_initialized_neighbor_locations(&next_tile_to_visit);
                 let new_locations_to_visit: VecDeque<GridLocation> = next_tile_neighbors
                     .values()
                     //only add the ones not yet visited

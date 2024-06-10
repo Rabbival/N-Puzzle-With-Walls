@@ -118,7 +118,7 @@ impl<'a, T: Clone> GridCycleChecker<'a, T>{
         grid: &Grid<T>
     ) -> Result<Vec<GridLocation>,DataStructError<GridLocation>> {
         let neighbors_and_directions_of_last_visited_location =
-            grid.get_all_occupied_neighbor_locations(&location_and_unadded_neighbors.just_visited_location);
+            grid.get_all_initialized_neighbor_locations(&location_and_unadded_neighbors.just_visited_location);
         let neighbors_of_just_visited_location : Vec<GridLocation> =
             neighbors_and_directions_of_last_visited_location.values().copied().collect();
         let mut unadded_neighbors_of_last_visited_location = neighbors_of_just_visited_location;

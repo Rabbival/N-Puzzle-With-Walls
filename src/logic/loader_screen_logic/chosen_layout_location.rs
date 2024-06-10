@@ -30,8 +30,7 @@ fn update_bottom_line_to_fit_new_chosen(
     domain_board_name_query: Query<(Entity, &DomainBoardName)>,
     data_base_manager: Res<DataBaseManager>,
 ){
-    let applied_board_properties = applied_board_properties_query.single();
-    let currently_shown_difficulty = applied_board_properties.board_difficulty;
+    let currently_shown_difficulty = applied_board_properties_query.single().board_difficulty;
     
     let mut updated_chosen_layout_text = String::from("no chosen board");
     let mut updated_optional_entity = None;

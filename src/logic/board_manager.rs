@@ -67,7 +67,7 @@ fn move_tile_logic_inner(
         empty_tile_neighbors.get(&move_neighbor_from_direction) 
     {
         let optional_occupied_tile = 
-            wrap_if_error(game_board.get(&occupied_tile_original_location))?;
+            wrap_grid_error_in_tile_move_error(game_board.get(&occupied_tile_original_location))?;
         if optional_occupied_tile.is_none() {
             return Err(TileMoveError::TileBoardError
                 (TileBoardError::NoTileInCell(occupied_tile_original_location)));
@@ -79,7 +79,7 @@ fn move_tile_logic_inner(
 
         let empty_tile_original_location = *game_board.get_empty_tile_location(empty_tile_index);
         let empty_tile =
-            *wrap_if_error(game_board.get_empty_tile(empty_tile_index))?.unwrap();
+            *wrap_grid_error_in_tile_move_error(game_board.get_empty_tile(empty_tile_index))?.unwrap();
         game_board.swap_tiles_by_location(&empty_tile_original_location, &occupied_tile_original_location)?;
 
         // reminder that from this point the logic locations are swapped
@@ -118,18 +118,6 @@ fn check_if_solved(
             game_log(GameLog::Victory);
             game_board_query.single_mut().ignore_player_input = true;
         }
-    }
-}
-
-/// I don't use it automatically inside the get set etc functions
-/// since they might have nothing to do with moving tiles
-fn wrap_if_error<T>(result: Result<T, GridError>)
--> Result<T, TileMoveError>{
-    match result {
-        Err(grid_error) => {
-            Err(TileMoveError::GridError(grid_error))
-        },
-        Ok(value) => Ok(value)
     }
 }
 

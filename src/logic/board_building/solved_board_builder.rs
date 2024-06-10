@@ -79,9 +79,9 @@ pub fn empty_tile_board_to_solved(
 )
 -> Result<(), BoardGenerationError>
 {
-    wrap_if_error(&solved_board.spawn_walls_in_locations(&wall_locations))?;
-    wrap_if_error(&solved_board.spawn_empty_tiles(applied_props, &grid_side_length))?;
-    wrap_if_error(&solved_board.spawn_numbered_uninitialized_tiles(&grid_side_length))?;
+    wrap_grid_error_in_tile_board_gen_error(&solved_board.spawn_walls_in_locations(&wall_locations))?;
+    wrap_grid_error_in_tile_board_gen_error(&solved_board.spawn_empty_tiles(applied_props, &grid_side_length))?;
+    wrap_grid_error_in_tile_board_gen_error(&solved_board.spawn_numbered_uninitialized_tiles(&grid_side_length))?;
 
     solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;
     solved_board.index_all_tile_types();
@@ -123,7 +123,7 @@ fn determine_wall_locations_inner(
     let neighbor_count_grid_result =
         initialize_neighbor_count_grid(&mut possible_spawn_locations, grid_side_length);
     let mut neighbor_count_grid =
-        wrap_if_error_owned(neighbor_count_grid_result)?;
+        wrap_grid_error_in_tile_board_gen_error_owned(neighbor_count_grid_result)?;
     let grid_tree_result = 
         neighbor_count_grid.get_spanning_tree(applied_props.tree_traveller_type);
     let mut grid_tree;
@@ -172,7 +172,7 @@ fn determine_wall_location(
     if wall_location_found {
         wall_spawn_locations.push(chosen_wall_location);
         let neighbors_of_chosen_wall_location =
-            neighbor_count_grid.get_all_occupied_neighbor_locations(&chosen_wall_location);
+            neighbor_count_grid.get_all_initialized_neighbor_locations(&chosen_wall_location);
         for neighbor in neighbors_of_chosen_wall_location {
             let neighbor_location = neighbor.1;
             let neighbor_value = neighbor_count_grid.get_mut(&neighbor_location).unwrap().unwrap();
@@ -265,8 +265,8 @@ fn put_cell_back_in_place(
 -> Result<(), BoardGenerationError>
 {
     let chosen_tile_value= 
-        wrap_if_error(chosen_tile_value_result_ref)?;
-        wrap_if_error
+        wrap_grid_error_in_tile_board_gen_error(chosen_tile_value_result_ref)?;
+        wrap_grid_error_in_tile_board_gen_error
             (&neighbor_count_grid_ref_mut.set
                 (chosen_wall_location_ref, chosen_tile_value.unwrap()))
 }
@@ -303,31 +303,11 @@ fn forbid_spawn_in_neighbors_of_location(
     possible_spawn_locations: &mut Vec<GridLocation>,
     neighbor_count_grid: &Grid<u8>,
 ) {
-    for neighbor_to_forbid in neighbor_count_grid.get_all_occupied_neighbor_locations(location) {
+    for neighbor_to_forbid in neighbor_count_grid.get_all_initialized_neighbor_locations(location) {
         remove_by_value::<GridLocation>(
             &neighbor_to_forbid.1,
             possible_spawn_locations,
         );
-    }
-}
-
-fn wrap_if_error<T: Copy>(result: &Result<T, GridError>)
--> Result<T, BoardGenerationError>{
-    match result {
-        Err(grid_error) => {
-            Err(BoardGenerationError::GridError(*grid_error))
-        },
-        Ok(value) => Ok(*value)
-    }
-}
-
-fn wrap_if_error_owned<T>(result: Result<T, GridError>)
-    -> Result<T, BoardGenerationError>{
-    match result {
-        Err(grid_error) => {
-            Err(BoardGenerationError::GridError(grid_error))
-        },
-        Ok(value) => Ok(value)
     }
 }
 

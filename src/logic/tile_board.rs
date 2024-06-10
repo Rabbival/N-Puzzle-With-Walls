@@ -245,40 +245,27 @@ impl TileBoard {
         if empty_tile_index >= empty_locations_count {
             empty_tile_index = empty_locations_count - 1;
         }
-        self.grid.get_all_occupied_neighbor_locations(
+        self.grid.get_all_initialized_neighbor_locations(
             self.empty_tile_locations.get(empty_tile_index).unwrap(),
         )
     }
 
-    pub fn move_request_from_clicked_tile(
-        &self,
-        origin: &GridLocation,
-    ) -> Result<Option<MoveRequest>, TileMoveError> {
-        let direct_neighbor_locations_walls_excluded = 
-            self.get_direct_neighbor_locations_walls_excluded(origin);
-        for (neighbor_direction, neighbor_location)
-            in direct_neighbor_locations_walls_excluded
-        {
-            if let Some(tile_in_cell) = self.get(&neighbor_location).unwrap() {
-                if tile_in_cell.tile_type == TileType::Empty {
-                    return Ok(Some(MoveRequest {
-                        move_neighbor_from_direction: neighbor_direction.opposite_direction(),
-                        empty_tile_index: Some(tile_in_cell.index),
-                    }));
-                }
-            }
-        }
-        Ok(None)
+    pub fn move_request_from_clicked_tile(&self, origin: &GridLocation) -> FoundEmptyNeighbors {
+        let empty_neighbors =
+            self.get_neighbor_locations_of_type(origin, TileType::Empty);
+        FoundEmptyNeighbors::from_empty_neighbors_map(empty_neighbors)
     }
 
-    pub fn get_direct_neighbor_locations_walls_excluded(
+    pub fn get_neighbor_locations_of_type(
         &self,
         origin: &GridLocation,
-    ) -> HashMap<BasicDirection, GridLocation> {
-        let mut direct_neighbor_locations = self.grid.get_all_occupied_neighbor_locations(origin);
-        for (dir, loc) in self.grid.get_all_occupied_neighbor_locations(origin) {
+        type_to_return: TileType
+    ) -> HashMap<BasicDirection, GridLocation> 
+    {
+        let mut direct_neighbor_locations = self.grid.get_all_initialized_neighbor_locations(origin);
+        for (dir, loc) in self.grid.get_all_initialized_neighbor_locations(origin) {
             if let Some(value_in_cell) = self.get(&loc).unwrap() {
-                if TileType::Wall == value_in_cell.tile_type {
+                if value_in_cell.tile_type != type_to_return {
                     direct_neighbor_locations.remove(&dir);
                 }
             }

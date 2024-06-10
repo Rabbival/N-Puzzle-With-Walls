@@ -20,7 +20,7 @@ impl Display for GameLog<'_>{
     fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
         let message_string =  match self {
             GameLog::NewBoardGenerated => {
-                String::from("\na new board was generated!\n")
+                String::from("\n\na new board was generated!")
             }
             GameLog::WallCountSet(count) => {
                 format!("wall count set: {:?}", count)

@@ -40,21 +40,21 @@ impl<T: Clone> Grid<T> {
 }
 
 impl<T: Clone> Grid<T> {
-    pub fn get_all_occupied_neighbor_locations(
+    pub fn get_all_initialized_neighbor_locations(
         &self,
         origin: &GridLocation,
     ) -> HashMap<BasicDirection, GridLocation> 
     {
         let mut valid_neighbors: HashMap<BasicDirection, GridLocation> = HashMap::new();
         for dir in all::<BasicDirection>() {
-            if let Some(neighbor_location) = self.occupied_neighbor_location(origin, &dir) {
+            if let Some(neighbor_location) = self.get_value_in_neighbor_location(origin, &dir) {
                 valid_neighbors.insert(dir, neighbor_location);
             }
         }
         valid_neighbors
     }
 
-    fn occupied_neighbor_location(
+    fn get_value_in_neighbor_location(
         &self,
         origin: &GridLocation,
         dir: &BasicDirection,

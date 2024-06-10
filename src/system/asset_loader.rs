@@ -3,7 +3,7 @@ use bevy::prelude::*;
 pub const ATLAS_CELL_SQUARE_SIZE: f32 = 64.0;
 
 #[derive(Resource, Clone, Default)]
-pub struct SpriteAtlas {
+pub struct TileSpriteAtlas {
     pub atlas_handle: Handle<TextureAtlasLayout>,
     pub image_handle: Handle<Image>
 }
@@ -15,7 +15,7 @@ pub struct AssetLoaderPlugin;
 
 impl Plugin for AssetLoaderPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PreStartup, (sprite_atlas_setup, tile_text_font_setup));
+        app.add_systems(PreStartup, (tile_sprite_atlas_setup, tile_text_font_setup));
     }
 }
 
@@ -24,12 +24,12 @@ fn tile_text_font_setup(mut commands: Commands, asset_server: Res<AssetServer>) 
     commands.insert_resource(TileTextFont(font_handle));
 }
 
-fn sprite_atlas_setup(
+fn tile_sprite_atlas_setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    let image_handle = asset_server.load("sprite_atlas.png");
+    let image_handle = asset_server.load("tile_sprite_atlas.png");
     let texture_atlas = TextureAtlasLayout::from_grid(
         Vec2::new(ATLAS_CELL_SQUARE_SIZE, ATLAS_CELL_SQUARE_SIZE),
         2,
@@ -38,7 +38,7 @@ fn sprite_atlas_setup(
         None,
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    commands.insert_resource(SpriteAtlas { 
+    commands.insert_resource(TileSpriteAtlas {
         atlas_handle: texture_atlas_handle,
         image_handle
     });

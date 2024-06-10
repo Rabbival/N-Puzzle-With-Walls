@@ -2,6 +2,8 @@ use bevy::render::view::RenderLayers;
 use crate::prelude::*;
 use bevy::utils::HashMap;
 
+const CHOICE_PENDING_ATLAS_INDEX : usize = 3;
+
 #[derive(Component)]
 pub struct StayForNextBoardTag;
 
@@ -14,6 +16,7 @@ impl Plugin for TileGraphicsPlugin {
                 Update,
                 (
                     update_tile_entity_positions.in_set(InputSystemSets::PostInitialChanges),
+                    set_possible_possible_empties_sprites.run_if(resource_changed::<MultipleEmptyTilesChoiceManager>),
                     (
                         move_loader_slot_existing_tiles,
                         despawn_loader_slot_unused_tiles_and_clear_tag,
@@ -187,7 +190,7 @@ fn despawn_unused_tiles_and_clear_tag_inner(
 fn spawn_game_board_new_tiles(
     mut event_reader: EventReader<SpawnTileInLocation>,
     mut tile_dictionary_query: Query<&mut TileDictionary, Without<LoaderScreenSlot>>,
-    sprite_atlas: Res<SpriteAtlas>,
+    tile_sprite_atlas: Res<TileSpriteAtlas>,
     tile_text_font: Res<TileTextFont>,
     mut commands: Commands,
 ) {
@@ -198,7 +201,7 @@ fn spawn_game_board_new_tiles(
                 spawn_request,
                 tile_dictionary,
                 None,
-                &sprite_atlas,
+                &tile_sprite_atlas,
                 &tile_text_font,
                 &mut commands
             )
@@ -209,7 +212,7 @@ fn spawn_game_board_new_tiles(
 fn spawn_loader_slot_new_tiles(
     mut event_reader: EventReader<SpawnTileInLocation>,
     mut tile_dictionary_query: Query<(&mut TileDictionary, &LoaderScreenSlot)>,
-   sprite_atlas: Res<SpriteAtlas>,
+   tile_sprite_atlas: Res<TileSpriteAtlas>,
    tile_text_font: Res<TileTextFont>,
     mut commands: Commands,
 ) {
@@ -221,7 +224,7 @@ fn spawn_loader_slot_new_tiles(
                         spawn_request,
                         &mut tile_dictionary.entity_by_tile,
                         Some(*loader_slot),
-                        &sprite_atlas,
+                        &tile_sprite_atlas,
                         &tile_text_font,
                         &mut commands
                     )
@@ -235,7 +238,7 @@ fn spawn_tile_in_location(
     spawn_request: &SpawnTileInLocation,
     tile_dictionary: &mut HashMap<Tile, Option<Entity>>,
     optional_loader_slot: Option<LoaderScreenSlot>,
-    sprite_atlas: &SpriteAtlas,
+    tile_sprite_atlas: &TileSpriteAtlas,
     tile_text_font: &TileTextFont,
     commands: &mut Commands
 ){
@@ -256,10 +259,10 @@ fn spawn_tile_in_location(
         .spawn((
             SpriteSheetBundle {
                 atlas: TextureAtlas{
-                    layout: sprite_atlas.atlas_handle.clone(),
+                    layout: tile_sprite_atlas.atlas_handle.clone(),
                     index: tile_to_spawn.tile_type.to_atlas_index()
                 },
-                texture: sprite_atlas.image_handle.clone(),
+                texture: tile_sprite_atlas.image_handle.clone(),
                 transform: Transform::from_translation(spawn_location),
                 ..default()
             },
@@ -390,4 +393,50 @@ fn extract_tile_entity(
             Some(entity) => Ok(*entity),
         },
     }
+}
+
+
+fn set_possible_possible_empties_sprites(
+    tile_sprite_atlas: Res<TileSpriteAtlas>,
+    multiple_empty_tiles_choice_manager: Res<MultipleEmptyTilesChoiceManager>,
+    tile_dictionary: Query<&TileDictionary, Without<LoaderScreenSlot>>,
+    game_board: Query<&TileBoard, With<GameBoard>>
+){
+    if let Some(empty_tile_locations) =
+        &multiple_empty_tiles_choice_manager.possible_empty_tiles_locations_and_directions
+    {
+        let atlas_index = if multiple_empty_tiles_choice_manager.choice_pending {
+                CHOICE_PENDING_ATLAS_INDEX
+            }else{
+                TileType::Empty.to_atlas_index()
+            };
+        for (_, empty_tile_location) in empty_tile_locations{
+            if let Err(move_error) = update_tile_sprite(
+                &tile_sprite_atlas,
+                atlas_index,
+                empty_tile_location,
+                &game_board.single(),
+                &tile_dictionary.single().entity_by_tile,
+            ) {
+                print_tile_move_error(move_error);
+            }
+        }
+    }
+}
+
+fn update_tile_sprite(
+    tile_sprite_atlas: &TileSpriteAtlas,
+    atlas_index: usize,
+    empty_tile_location: &GridLocation,
+    game_board: &TileBoard,
+    tile_dictionary: &HashMap<Tile, Option<Entity>>,
+) -> Result<(), TileMoveError> {
+    let optional_empty_tile = 
+        wrap_grid_error_in_tile_move_error(game_board.get(empty_tile_location))?;
+    if let Some(empty_tile) = optional_empty_tile{
+        let tile_entity = extract_tile_entity(tile_dictionary, empty_tile)?;
+        
+        //TODO: get sprites mut query in here, fetch the entity and change its sprite
+    }
+    Ok(())
 }

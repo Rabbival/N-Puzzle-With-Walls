@@ -76,7 +76,7 @@ fn determine_next_shift_direction(
 {
     let empty_tile_location = shift_tracker.empty_location;
     let mut optional_directions=
-        board.get_direct_neighbor_locations_walls_excluded(&empty_tile_location);
+        board.get_neighbor_locations_of_type(&empty_tile_location, TileType::Numbered);
 
     util_functions::remove_all_items_with_keys(
         &mut optional_directions, 
@@ -109,13 +109,7 @@ fn determine_next_shift_direction(
     let tile_swap_result =
         board.swap_tiles_by_location(&empty_tile_location, &chosen_new_empty_tile_location);
     match tile_swap_result {
-        Err(error) => {
-            match error{
-                TileMoveError::TriedToSwitchEmptyWithEmpty => 
-                    Ok(DirectionToAvoidNextAttempt(Some(chosen_shift_direction))),
-                _ => Err(BoardGenerationError::TileMoveError(error))
-            }
-        },
+        Err(error) => Err(BoardGenerationError::TileMoveError(error)),
         Ok(_) => {
             prepare_shift_tracker_for_next_iteration(
                 shift_tracker,
