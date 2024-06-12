@@ -1,16 +1,16 @@
 use crate::output::graphics::ui::{GREEN_TEXT_COLOR, NORMAL_TEXT_COLOR, RED_TEXT_COLOR};
 use crate::prelude::*;
 
-const TIME_UNTIL_TEXT_ABOVE_SAVE_GOES_BACK_AFTER_SUCCESS: f32 = 2.0;
-const TIME_UNTIL_TEXT_ABOVE_SAVE_GOES_BACK_AFTER_FAILURE: f32 = 8.0;
+const GAME_SCREEN_TEXT_SHORT_TIME: f32 = 2.0;
+const GAME_SCREEN_TEXT_LONG_TIME: f32 = 8.0;
 
 
 #[derive(Component)]
-pub struct SaveWallsLayoutTextResetTimer(pub Timer);
+pub struct GameScreenTextResetTimer(pub Timer);
 
-pub struct TextAboveSaveButtonLogicPlugin;
+pub struct GameScreenTextLogicPlugin;
 
-impl Plugin for TextAboveSaveButtonLogicPlugin {
+impl Plugin for GameScreenTextLogicPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(
@@ -18,7 +18,9 @@ impl Plugin for TextAboveSaveButtonLogicPlugin {
                 (
                     show_walls_layout_save_attempt_outcome,
                     tick_text_reset_timer,
-                    reset_text_above_save_button_when_timer_is_done
+                    reset_text_above_save_button_when_timer_is_done,
+                    show_board_couldnt_be_generated,
+                    set_choose_empty_message_visibility
                 )
                     .run_if(in_state(AppState::Game)),
             )
@@ -31,8 +33,8 @@ impl Plugin for TextAboveSaveButtonLogicPlugin {
 }
 
 fn reset_text_above_save_button_when_exiting_game_screen(
-    mut text_above_save_button_query: Query<&mut Text, (With<TextAboveSaveButton>, Without<SaveWallsLayoutTextTag>)>,
-    mut save_button_text_query: Query<&mut Text, (With<SaveWallsLayoutTextTag>, Without<TextAboveSaveButton>)>,
+    mut text_above_save_button_query: Query<&mut Text, (With<GameScreenTextType>, Without<SaveWallsLayoutTextTag>)>,
+    mut save_button_text_query: Query<&mut Text, (With<SaveWallsLayoutTextTag>, Without<GameScreenTextType>)>,
 ){
     reset_text_above_save_button_inner(
         &mut text_above_save_button_query.single_mut().sections[0],
@@ -42,8 +44,8 @@ fn reset_text_above_save_button_when_exiting_game_screen(
 
 fn reset_text_above_save_button_when_timer_is_done(
     mut text_reset_event_reader: EventReader<ResetTextAboveSaveButton>,
-    mut text_above_save_button_query: Query<&mut Text, (With<TextAboveSaveButton>, Without<SaveWallsLayoutTextTag>)>,
-    mut save_button_text_query: Query<&mut Text, (With<SaveWallsLayoutTextTag>, Without<TextAboveSaveButton>)>,
+    mut text_above_save_button_query: Query<&mut Text, (With<GameScreenTextType>, Without<SaveWallsLayoutTextTag>)>,
+    mut save_button_text_query: Query<&mut Text, (With<SaveWallsLayoutTextTag>, Without<GameScreenTextType>)>,
 ){
     for _timer_reset in text_reset_event_reader.read(){
         reset_text_above_save_button_inner(
@@ -60,7 +62,7 @@ fn reset_text_above_save_button_inner(
     set_text_section_value_and_color(
         text_above_save_button_section,
         Some(RED_TEXT_COLOR),
-        Some(TextAboveSaveButtonType::NoText.to_string())
+        Some(GameScreenTextType::NoText.to_string())
     );
     set_text_section_value_and_color(
         save_button_text_section,
@@ -71,8 +73,8 @@ fn reset_text_above_save_button_inner(
 
 fn show_walls_layout_save_attempt_outcome(
     mut event_reader: EventReader<LayoutSaveAttemptOutcomeEvent>,
-    mut text_above_save_button_query: Query<&mut Text, (With<TextAboveSaveButton>, Without<SaveWallsLayoutTextTag>)>,
-    mut save_button_text_query: Query<&mut Text, (With<SaveWallsLayoutTextTag>, Without<TextAboveSaveButton>)>,
+    mut text_above_save_button_query: Query<&mut Text, (With<GameScreenTextType>, Without<SaveWallsLayoutTextTag>)>,
+    mut save_button_text_query: Query<&mut Text, (With<SaveWallsLayoutTextTag>, Without<GameScreenTextType>)>,
     mut commands: Commands,
 ){
     for layout_attempt_outcome in event_reader.read(){
@@ -83,7 +85,7 @@ fn show_walls_layout_save_attempt_outcome(
         let text_above_save_button_section = 
             &mut text_above_save_button_query.single_mut().sections[0];
         let text_above_button_new_value = 
-            TextAboveSaveButtonType::from_save_attempt_outcome(layout_attempt_outcome.0.clone()).to_string();
+            GameScreenTextType::from_save_attempt_outcome(layout_attempt_outcome.0.clone()).to_string();
         let save_button_text_section = 
             &mut save_button_text_query.single_mut().sections[0];
         let save_button_text_new_value = None;
@@ -92,12 +94,12 @@ fn show_walls_layout_save_attempt_outcome(
             text_above_button_new_color = Some(GREEN_TEXT_COLOR);
             save_button_text_new_color = Some(GREEN_TEXT_COLOR);
             save_button_reset_timer = 
-                Timer::from_seconds(TIME_UNTIL_TEXT_ABOVE_SAVE_GOES_BACK_AFTER_SUCCESS, TimerMode::Once);
+                Timer::from_seconds(GAME_SCREEN_TEXT_SHORT_TIME, TimerMode::Once);
         }else{
             text_above_button_new_color = Some(RED_TEXT_COLOR);
             save_button_text_new_color = Some(RED_TEXT_COLOR);
             save_button_reset_timer =
-                Timer::from_seconds(TIME_UNTIL_TEXT_ABOVE_SAVE_GOES_BACK_AFTER_FAILURE, TimerMode::Once);
+                Timer::from_seconds(GAME_SCREEN_TEXT_LONG_TIME, TimerMode::Once);
         };
         set_text_section_value_and_color(
             text_above_save_button_section,
@@ -109,14 +111,52 @@ fn show_walls_layout_save_attempt_outcome(
             save_button_text_new_color,
             save_button_text_new_value
         );
-        commands.spawn(SaveWallsLayoutTextResetTimer(save_button_reset_timer));
+        commands.spawn(GameScreenTextResetTimer(save_button_reset_timer));
+    }
+}
+
+fn show_board_couldnt_be_generated(
+    mut event_reader: EventReader<ShowGenerationError>,
+    mut game_screen_text_query: Query<&mut Text, With<GameScreenTextType>>,
+    mut commands: Commands,
+) {
+    for _ in event_reader.read() {
+        set_text_section_value_and_color(
+            &mut game_screen_text_query.single_mut().sections[0],
+            Some(RED_TEXT_COLOR),
+            Some(GameScreenTextType::CouldntGenerateBoard.to_string())
+        );
+        commands.spawn(GameScreenTextResetTimer(
+            Timer::from_seconds(GAME_SCREEN_TEXT_LONG_TIME, TimerMode::Once))
+        );
+    }
+}
+
+fn set_choose_empty_message_visibility(
+    mut multiple_empty_tiles_choice_manager_event_reader: EventReader<SetMultipleEmptyTilesChoiceManager>,
+    mut game_screen_text_query: Query<&mut Text, With<GameScreenTextType>>,
+){
+    for set_request in multiple_empty_tiles_choice_manager_event_reader.read(){
+        if set_request.new_config.choice_pending {
+            set_text_section_value_and_color(
+                &mut game_screen_text_query.single_mut().sections[0],
+                Some(GRAY_TEXT_COLOR),
+                Some(GameScreenTextType::EmptyTileChoicePending.to_string())
+            );
+        } else{
+            set_text_section_value_and_color(
+                &mut game_screen_text_query.single_mut().sections[0],
+                None,
+                Some(GameScreenTextType::NoText.to_string())
+            );
+        }
     }
 }
 
 fn tick_text_reset_timer(
     mut text_reset_event_writer: EventWriter<ResetTextAboveSaveButton>,
     time: Res<Time>,
-    mut save_button_timer_query: Query<(&mut SaveWallsLayoutTextResetTimer, Entity)>,
+    mut save_button_timer_query: Query<(&mut GameScreenTextResetTimer, Entity)>,
     mut commands: Commands
 ){
     let query_length = save_button_timer_query.iter().len();

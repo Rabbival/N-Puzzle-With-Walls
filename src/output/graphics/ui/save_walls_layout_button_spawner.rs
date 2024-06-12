@@ -4,9 +4,6 @@ use crate::prelude::*;
 pub struct SaveWallsLayoutButton;
 
 #[derive(Component)]
-pub struct TextAboveSaveButton;
-
-#[derive(Component)]
 pub struct SaveWallsLayoutTextTag;
 
 pub struct GameScreenButtonSpawnerPlugin;
@@ -43,7 +40,7 @@ fn spawn_save_walls_layout_button(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        background_color: Color::DARK_GRAY.into(),
+                        background_color: GRAY_TEXT_COLOR.into(),
                         ..default()
                     })
                     .with_children(|parent| {
@@ -72,7 +69,7 @@ fn spawn_save_walls_layout_button(
                             "",
                             tiny_red_text_style.clone()
                         ),
-                        TextAboveSaveButton
+                        GameScreenTextType::NoText
                     ));
             });
     }

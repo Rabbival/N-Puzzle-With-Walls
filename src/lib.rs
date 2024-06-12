@@ -90,7 +90,7 @@ pub mod prelude {
                 pop_up_message_type::*,
                 screen_change_request_type::*,
                 text_above_pop_up_buttons_type::*,
-                text_above_save_button_type::*,
+                game_screen_text::*,
                 text_above_start_button_type::*,
             },
         },
@@ -107,7 +107,7 @@ pub mod prelude {
         ui_logic::{active_loader_slot_updater::*, eternal_ui_logic::*, loader_ui_logic::*, menu_ui_logic::*, messages_logic::{
             MessagesGraphicsPlugin,
             pop_up_message_logic::*,
-            save_button_and_above_text_logic::*,
+            game_screen_text_logic::*,
             start_button_and_above_text_logic::*,
         }, UiLogicPlugin,
                    victory_ui_logic::*},
@@ -146,6 +146,8 @@ pub mod prelude {
             GraphicsPlugin,
             tile_graphics::*,
             ui::{
+                INDIGO_TEXT_COLOR,
+                GRAY_TEXT_COLOR,
                 build_node_bundle_with_full_percentage_style,
                 button_and_text_styles::*, ButtonText,
                 eternal_buttons_spawner::*,
@@ -153,7 +155,6 @@ pub mod prelude {
                 loader_screen_spawner::*,
                 menu_spawner::*,
                 messages::{
-                    confirm_allowed::*,
                     MessagesSpawnersPlugin,
                     pop_up_message::*,
                     victory_message::*,

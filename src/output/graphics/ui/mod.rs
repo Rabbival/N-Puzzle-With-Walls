@@ -16,6 +16,8 @@ pub const PRESSED_BUTTON_COLOR: Color = Color::rgb(0.3, 0.3, 0.3);
 pub const NORMAL_TEXT_COLOR: Color = Color::WHITE;
 pub const RED_TEXT_COLOR: Color = Color::ORANGE_RED;
 pub const GREEN_TEXT_COLOR: Color = Color::LIME_GREEN;
+pub const INDIGO_TEXT_COLOR: Color = Color::INDIGO;
+pub const GRAY_TEXT_COLOR: Color = Color::DARK_GRAY;
 
 #[derive(Component)]
 pub struct ImagedButtonTag;

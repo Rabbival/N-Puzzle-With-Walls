@@ -23,6 +23,7 @@ impl Plugin for BoardPlugin {
             BoardManagerPlugin,
             UiLogicPlugin,
             LoaderScreenLogicPlugin,
+            MultipleEmptyTilesChoiceManagerPlugin,
         ));
     }
 }

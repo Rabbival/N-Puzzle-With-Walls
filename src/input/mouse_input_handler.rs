@@ -121,17 +121,34 @@ fn handle_request_when_empty_choice_pending(
         }
     );
     if let Some(empty_tiles) = &multiple_empty_tiles_choice_manager.possible_empty_tiles_locations_and_directions{
-        for (empty_tile_direction, empty_tile_location) in empty_tiles{
-            if *empty_tile_location == clicked_grid_location{
-                send_simple_move_request(
-                    tile_switch_event_writer,
-                    MoveRequest {
-                        move_neighbor_from_direction: empty_tile_direction.opposite_direction(),
-                        empty_tile_index: game_board.get(&empty_tile_location).unwrap().map(|t| t.index)
-                    }
-                );
-            }
+        for (empty_tile_direction, empty_tile) in empty_tiles{
+            send_move_request_if_empty_tile_was_clicked(
+                tile_switch_event_writer,
+                clicked_grid_location,
+                empty_tile_direction,
+                empty_tile,
+                game_board
+            );
         } 
+    }
+}
+
+fn send_move_request_if_empty_tile_was_clicked(
+    tile_switch_event_writer: &mut EventWriter<SwitchTilesLogic>,
+    clicked_grid_location: GridLocation,
+    empty_tile_direction: &BasicDirection,
+    empty_tile: &Tile,
+    game_board: &TileBoard,
+){
+    let empty_tile_location = game_board.get_empty_tile_location(empty_tile.index);
+    if *empty_tile_location == clicked_grid_location{
+        send_simple_move_request(
+            tile_switch_event_writer,
+            MoveRequest {
+                move_neighbor_from_direction: empty_tile_direction.opposite_direction(),
+                empty_tile_index: Some(empty_tile.index)
+            }
+        );
     }
 }
 
@@ -146,13 +163,13 @@ fn handle_request_no_choice_pending(
     match found_empty_neighbors {
         FoundEmptyNeighbors::OneEmptyNeighbor(
             empty_neighbor_direction,
-            empty_neighbor_location
+            empty_neighbor
         ) => {
             send_simple_move_request(
                 tile_switch_event_writer,
                 MoveRequest {
                     move_neighbor_from_direction: empty_neighbor_direction.opposite_direction(),
-                    empty_tile_index: game_board.get(&empty_neighbor_location).unwrap().map(|t| t.index)
+                    empty_tile_index: Some(empty_neighbor.index)
                 }
             );
             Ok(())
@@ -189,7 +206,7 @@ fn get_empty_neighbors_if_numbered(
         }
     };
 
-    Ok(game_board.move_request_from_clicked_tile(&numbered_tile_location?))
+    Ok(game_board.get_empty_neighbors(&numbered_tile_location?))
 }
 
 fn send_simple_move_request(

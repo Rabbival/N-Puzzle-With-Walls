@@ -3,13 +3,13 @@ use crate::prelude::*;
 
 #[derive(Debug)]
 pub enum FoundEmptyNeighbors{
-    OneEmptyNeighbor(BasicDirection, GridLocation),
-    MoreThanOneEmptyNeighbor(HashMap<BasicDirection, GridLocation>),
+    OneEmptyNeighbor(BasicDirection, Tile),
+    MoreThanOneEmptyNeighbor(HashMap<BasicDirection, Tile>),
     NoEmptyNeighbors
 }
 
 impl FoundEmptyNeighbors{
-    pub fn from_empty_neighbors_map(empty_neighbors: HashMap<BasicDirection, GridLocation>) -> Self{
+    pub fn from_empty_neighbors_map(empty_neighbors: HashMap<BasicDirection, Tile>) -> Self{
         match empty_neighbors.len(){
             2.. => Self::MoreThanOneEmptyNeighbor(empty_neighbors),
             1 => {

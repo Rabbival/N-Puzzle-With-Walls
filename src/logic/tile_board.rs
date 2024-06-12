@@ -250,10 +250,14 @@ impl TileBoard {
         )
     }
 
-    pub fn move_request_from_clicked_tile(&self, origin: &GridLocation) -> FoundEmptyNeighbors {
+    pub fn get_empty_neighbors(&self, origin: &GridLocation) -> FoundEmptyNeighbors {
         let empty_neighbors =
             self.get_neighbor_locations_of_type(origin, TileType::Empty);
-        FoundEmptyNeighbors::from_empty_neighbors_map(empty_neighbors)
+        let empty_neighbors_as_tiles: HashMap<BasicDirection, Tile> = 
+            empty_neighbors.iter().map(|(direction, location)|{
+                (*direction, *self.get(location).unwrap().unwrap())
+            }).collect();
+        FoundEmptyNeighbors::from_empty_neighbors_map(empty_neighbors_as_tiles)
     }
 
     pub fn get_neighbor_locations_of_type(

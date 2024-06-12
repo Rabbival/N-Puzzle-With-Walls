@@ -297,8 +297,8 @@ fn spawn_text_for_tile(
 ){
     let text_spawn_loc_relative = Vec3::Z;
     let text_color = match tile_to_spawn.tile_type {
-        TileType::Numbered => Color::INDIGO,
-        TileType::Empty => Color::DARK_GRAY,
+        TileType::Numbered => INDIGO_TEXT_COLOR,
+        TileType::Empty => GRAY_TEXT_COLOR,
         _ => Color::NONE,
     };
     let mut number_to_display = tile_to_spawn.index;
@@ -397,10 +397,9 @@ fn extract_tile_entity(
 
 
 fn set_possible_possible_empties_sprites(
-    tile_sprite_atlas: Res<TileSpriteAtlas>,
     multiple_empty_tiles_choice_manager: Res<MultipleEmptyTilesChoiceManager>,
     tile_dictionary: Query<&TileDictionary, Without<LoaderScreenSlot>>,
-    game_board: Query<&TileBoard, With<GameBoard>>
+    mut tile_sprites_query: Query<&mut TextureAtlas, With<Tile>>,
 ){
     if let Some(empty_tile_locations) =
         &multiple_empty_tiles_choice_manager.possible_empty_tiles_locations_and_directions
@@ -410,12 +409,11 @@ fn set_possible_possible_empties_sprites(
             }else{
                 TileType::Empty.to_atlas_index()
             };
-        for (_, empty_tile_location) in empty_tile_locations{
+        for (_, empty_tile) in empty_tile_locations{
             if let Err(move_error) = update_tile_sprite(
-                &tile_sprite_atlas,
                 atlas_index,
-                empty_tile_location,
-                &game_board.single(),
+                &mut tile_sprites_query,
+                empty_tile,
                 &tile_dictionary.single().entity_by_tile,
             ) {
                 print_tile_move_error(move_error);
@@ -425,18 +423,15 @@ fn set_possible_possible_empties_sprites(
 }
 
 fn update_tile_sprite(
-    tile_sprite_atlas: &TileSpriteAtlas,
     atlas_index: usize,
-    empty_tile_location: &GridLocation,
-    game_board: &TileBoard,
+    tile_sprites_query: &mut Query<&mut TextureAtlas, With<Tile>>,
+    empty_tile: &Tile,
     tile_dictionary: &HashMap<Tile, Option<Entity>>,
 ) -> Result<(), TileMoveError> {
-    let optional_empty_tile = 
-        wrap_grid_error_in_tile_move_error(game_board.get(empty_tile_location))?;
-    if let Some(empty_tile) = optional_empty_tile{
-        let tile_entity = extract_tile_entity(tile_dictionary, empty_tile)?;
-        
-        //TODO: get sprites mut query in here, fetch the entity and change its sprite
+    let tile_entity = extract_tile_entity(tile_dictionary, empty_tile)?;
+    let possible_texture_atlas = tile_sprites_query.get_mut(tile_entity);
+    if let Ok(mut texture_atlas) = possible_texture_atlas{
+        texture_atlas.index = atlas_index;
     }
     Ok(())
 }

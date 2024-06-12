@@ -18,10 +18,11 @@ pub fn get_single_key_value<T: PartialEq + Eq + Hash + Copy, S>
     (map_with_single_entry: &HashMap<T, S>) -> Option<(&T,&S)>
 {
     let keys: Vec<T> = map_with_single_entry.keys().copied().collect();
-    for key in keys{
-        return map_with_single_entry.get_key_value(&key)
+    if let Some(key) = keys.into_iter().next(){
+        map_with_single_entry.get_key_value(&key)
+    }else{
+        None
     }
-    None
 }
 
 pub fn remove_all_similar_items_from_former<T: PartialEq>(vec_to_remove_from: &mut Vec<T>, other_vec: &Vec<T>){

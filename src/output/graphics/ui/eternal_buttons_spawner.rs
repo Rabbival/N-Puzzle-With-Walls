@@ -41,7 +41,7 @@ fn spawn_exit_button(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        background_color: Color::DARK_GRAY.into(),
+                        background_color: GRAY_TEXT_COLOR.into(),
                         ..default()
                     })
                     .with_children(|parent| {
@@ -89,7 +89,7 @@ fn spawn_menu_toggling_button(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        background_color: Color::DARK_GRAY.into(),
+                        background_color: GRAY_TEXT_COLOR.into(),
                         ..default()
                     })
                     .with_children(|parent| {

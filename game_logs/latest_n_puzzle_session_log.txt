@@ -1,8 +1,15 @@
-new setting set: ChangeGenerationMethod(Load)
-new setting set: ChangeBoardDifficulty(Easy)
-new setting set: ChangeBoardDifficulty(Medium)
-new setting set: ChangeBoardDifficulty(Easy)
-new setting set: ChangeBoardDifficulty(Medium)
-new setting set: ChangeBoardDifficulty(Easy)
-Tile { type: Numbered, number: 12 } moved to GridLocation { row: 3, col: 3 }
-Tile { type: Numbered, number: 15 } moved to GridLocation { row: 3, col: 3 }
+new setting set: ChangeEmptyTilesCount(2)
+wall count set: 3
+
+
+a new board was generated!
+Tile { type: Numbered, number: 2 } moved to GridLocation { row: 2, col: 2 }
+Tile { type: Numbered, number: 4 } moved to GridLocation { row: 1, col: 2 }
+Tile { type: Numbered, number: 1 } moved to GridLocation { row: 1, col: 1 }
+Tile { type: Numbered, number: 1 } moved to GridLocation { row: 0, col: 1 }
+Tile { type: Numbered, number: 4 } moved to GridLocation { row: 1, col: 1 }
+Tile { type: Numbered, number: 4 } moved to GridLocation { row: 1, col: 0 }
+Tile { type: Numbered, number: 8 } moved to GridLocation { row: 1, col: 2 }
+Tile { type: Numbered, number: 8 } moved to GridLocation { row: 1, col: 1 }
+Tile { type: Numbered, number: 2 } moved to GridLocation { row: 1, col: 2 }
+Tile { type: Numbered, number: 2 } moved to GridLocation { row: 0, col: 2 }

@@ -169,7 +169,7 @@ fn spawn_generation_options(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: Color::INDIGO.into(),
+                                background_color: INDIGO_TEXT_COLOR.into(),
                                 ..default()
                             })
                             .with_children(|parent| {
@@ -205,7 +205,7 @@ fn spawn_generation_options(
                                     align_items: AlignItems::Center,
                                     ..default()
                                 },
-                                background_color: Color::INDIGO.into(),
+                                background_color: INDIGO_TEXT_COLOR.into(),
                                 ..default()
                             })
                             .with_children(|parent| {
@@ -275,7 +275,7 @@ fn spawn_size_options(
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        background_color: Color::INDIGO.into(),
+                        background_color: INDIGO_TEXT_COLOR.into(),
                         ..default()
                     })
                     .with_children(|parent| {
@@ -355,7 +355,7 @@ fn spawn_tile_counter(
                                 align_items: AlignItems::Center,
                                 ..default()
                             },
-                            background_color: Color::INDIGO.into(),
+                            background_color: INDIGO_TEXT_COLOR.into(),
                             ..default()
                         })
                             .with_children(|parent| {
@@ -414,7 +414,7 @@ fn spawn_tile_counter(
                                                 justify_content: JustifyContent::Center,
                                                 ..default()
                                             },
-                                            background_color: Color::INDIGO.into(),
+                                            background_color: INDIGO_TEXT_COLOR.into(),
                                             visibility: Visibility::Hidden,
                                             ..default()
                                         },
@@ -465,7 +465,7 @@ fn spawn_tile_counter(
                                             align_items: AlignItems::Center,
                                             ..default()
                                         },
-                                        background_color: Color::INDIGO.into(),
+                                        background_color: INDIGO_TEXT_COLOR.into(),
                                         ..default()
                                     })
                                     .with_children(|parent| {

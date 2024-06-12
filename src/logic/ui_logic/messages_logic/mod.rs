@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub mod start_button_and_above_text_logic;
-pub mod save_button_and_above_text_logic;
+pub mod game_screen_text_logic;
 pub mod pop_up_message_logic;
 
 
@@ -12,7 +12,7 @@ impl Plugin for MessagesGraphicsPlugin {
         app
 			.add_plugins((
                 TextAboveStartButtonLogicPlugin,
-                TextAboveSaveButtonLogicPlugin,
+                GameScreenTextLogicPlugin,
                 PopUpMessageLogicPlugin
             ))
         ;

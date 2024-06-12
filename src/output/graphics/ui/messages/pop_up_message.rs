@@ -10,6 +10,9 @@ pub struct PopUpMessageDynamicTextTag;
 #[derive(Component)]
 pub struct TextAbovePopUpMessageButtons;
 
+#[derive(Component, Debug, Default)]
+pub struct ConfirmAllowed(pub bool);
+
 pub struct PopUpMessagePlugin;
 
 impl Plugin for PopUpMessagePlugin{
@@ -41,7 +44,7 @@ pub fn set_pop_up_dynamic_text_box_color(
     mut pop_up_dynamic_text_entity_query: Query<(&mut BackgroundColor, &mut Text), With<PopUpMessageDynamicTextTag>>,
 ){
     for _reset_request in reset_text_event_reader.read(){
-        *pop_up_dynamic_text_entity_query.single_mut().0.as_mut() = Color::DARK_GRAY.into();
+        *pop_up_dynamic_text_entity_query.single_mut().0.as_mut() = GRAY_TEXT_COLOR.into();
     }
     for set_request in set_text_event_reader.read(){
         reset_text_and_color_if_first_after_default(
@@ -57,7 +60,7 @@ fn reset_text_and_color_if_first_after_default(
 ){
     let (mut background_color, mut text) = pop_up_dynamic_text_entity_query.single_mut();
     let background_color_ref =  background_color.as_mut();
-    let first_input_since_default = background_color_ref.0 == Color::DARK_GRAY;
+    let first_input_since_default = background_color_ref.0 == GRAY_TEXT_COLOR;
     if first_input_since_default {
         *background_color = Color::NONE.into();
         set_text_section_value_and_color(
@@ -98,7 +101,7 @@ fn spawn_pop_up_message(
                             justify_content: JustifyContent::Center,
                             ..default()
                         },
-                        background_color: Color::DARK_GRAY.into(),
+                        background_color: GRAY_TEXT_COLOR.into(),
                         z_index: ZIndex::Global(1),
                         ..default()
                     })
@@ -130,7 +133,7 @@ fn spawn_pop_up_message(
                                         String::default(),
                                         text_style.clone(),
                                     ).with_text_justify(JustifyText::Center)
-                                        .with_background_color(Color::DARK_GRAY,),
+                                        .with_background_color(GRAY_TEXT_COLOR,),
                                   ButtonText,
                                   PopUpMessageDynamicTextTag
                                 ));
@@ -152,7 +155,7 @@ fn spawn_pop_up_message(
                                         justify_content: JustifyContent::Center,
                                         ..default()
                                     },
-                                    background_color: Color::INDIGO.into(),
+                                    background_color: INDIGO_TEXT_COLOR.into(),
                                     ..default()
                                 }).with_children(|parent| {
                                     parent

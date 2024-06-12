@@ -63,7 +63,7 @@ fn spawn_bottom_line(
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                background_color: Color::INDIGO.into(),
+                background_color: INDIGO_TEXT_COLOR.into(),
                 ..default()
             }).with_children(|parent| {
                 //chosen
@@ -327,7 +327,7 @@ fn spawn_delete_all_layouts_button(
                                 justify_content: JustifyContent::Start,
                                 ..default()
                             },
-                            background_color: Color::INDIGO.into(),
+                            background_color: INDIGO_TEXT_COLOR.into(),
                             ..default()
                         },
                     ))
@@ -407,7 +407,7 @@ fn spawn_load_screen_arrow(
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                background_color: Color::INDIGO.into(),
+                background_color: INDIGO_TEXT_COLOR.into(),
                 ..default()
             })
                 .with_children(|parent| {
