@@ -86,11 +86,11 @@ pub mod prelude {
                     pop_up_message_button_action::*,
                     victory_button_action::*,
                 },
+                game_screen_text::*,
                 loader_screen_action::*,
                 pop_up_message_type::*,
                 screen_change_request_type::*,
                 text_above_pop_up_buttons_type::*,
-                game_screen_text::*,
                 text_above_start_button_type::*,
             },
         },
@@ -105,9 +105,9 @@ pub mod prelude {
         tile_board::*,
         tile_dictionary::*,
         ui_logic::{active_loader_slot_updater::*, eternal_ui_logic::*, loader_ui_logic::*, menu_ui_logic::*, messages_logic::{
+            game_screen_text_logic::*,
             MessagesGraphicsPlugin,
             pop_up_message_logic::*,
-            game_screen_text_logic::*,
             start_button_and_above_text_logic::*,
         }, UiLogicPlugin,
                    victory_ui_logic::*},
@@ -116,7 +116,6 @@ pub mod prelude {
     pub use crate::output::{
         console::{
             costume_error::{
-                error_wrappers::*,
                 board_generation_error::*,
                 data_base_error::*,
                 data_struct_error::{
@@ -127,6 +126,7 @@ pub mod prelude {
                 },
                 entity_related_costume_error::*,
                 error_handler::*,
+                error_wrappers::*,
                 menu_error::*,
                 MismatchError,
                 system_access_error::*,
@@ -144,14 +144,19 @@ pub mod prelude {
         graphics::{
             camera::*,
             GraphicsPlugin,
-            tile_graphics::*,
+            tile_graphics::{
+                TileGraphicsPlugin,
+                board_spawning_tile_graphics::*, 
+                tile_addons_spawner::*,
+                in_game_tile_graphics::*,
+            },
             ui::{
-                INDIGO_TEXT_COLOR,
-                GRAY_TEXT_COLOR,
                 build_node_bundle_with_full_percentage_style,
-                button_and_text_styles::*, ButtonText,
-                eternal_buttons_spawner::*,
-                hide_by_chosen_generation_method::*, ImagedButtonTag,
+                button_and_text_styles::*,
+                ButtonText,
+                eternal_buttons_spawner::*, GRAY_TEXT_COLOR,
+                hide_by_chosen_generation_method::*,
+                ImagedButtonTag, INDIGO_TEXT_COLOR,
                 loader_screen_spawner::*,
                 menu_spawner::*,
                 messages::{

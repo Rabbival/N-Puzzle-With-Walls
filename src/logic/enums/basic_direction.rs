@@ -1,5 +1,6 @@
-use bevy::input::keyboard::KeyCode;
-use enum_iterator::Sequence;
+use crate::prelude::*;
+use enum_iterator::{all, Sequence};
+use crate::collect_all;
 
 pub const BASIC_DIRECTION_COUNT: u8 = 4;
 
@@ -12,6 +13,8 @@ pub enum BasicDirection {
 }
 
 impl BasicDirection {
+    pub fn collect_all() -> Vec<Self> { collect_all!() }
+
     pub fn dir_to_index(&self) -> u8 {
         *self as u8
     }
@@ -23,6 +26,23 @@ impl BasicDirection {
     pub fn opposite_direction_index(&self) -> u8 {
         let index = self.dir_to_index();
         (index + 2) % BASIC_DIRECTION_COUNT
+    }
+    
+    pub fn to_world_direction(&self) -> Vec3{
+        match self{
+            Self::Up=>{
+                
+            },
+            Self::Right=>{
+                
+            },
+            Self::Down=>{
+                
+            },
+            Self::Left=>{
+                
+            }
+        }
     }
 }
 

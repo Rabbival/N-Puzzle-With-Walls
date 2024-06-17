@@ -2,27 +2,21 @@ use bevy::render::view::RenderLayers;
 use crate::prelude::*;
 use bevy::utils::HashMap;
 
-const CHOICE_PENDING_ATLAS_INDEX : usize = 3;
-
 #[derive(Component)]
 pub struct StayForNextBoardTag;
 
-pub struct TileGraphicsPlugin;
+pub struct BoardSpawningTileGraphicsPlugin;
 
-impl Plugin for TileGraphicsPlugin {
+impl Plugin for BoardSpawningTileGraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(
                 Update,
-                (
-                    update_tile_entity_positions.in_set(InputSystemSets::PostInitialChanges),
-                    set_possible_possible_empties_sprites.run_if(resource_changed::<MultipleEmptyTilesChoiceManager>),
                     (
                         move_loader_slot_existing_tiles,
                         despawn_loader_slot_unused_tiles_and_clear_tag,
                         spawn_loader_slot_new_tiles
                     ).chain().after(show_currently_displayed_saved_layouts_screen)
-                ),
             )
             .add_systems(
                 OnEnter(GameState::GameBoardGenerated),
@@ -188,21 +182,21 @@ fn despawn_unused_tiles_and_clear_tag_inner(
 }
 
 fn spawn_game_board_new_tiles(
+    mut spawn_tile_addons_event_writer: EventWriter<SpawnTileAddons>,
     mut event_reader: EventReader<SpawnTileInLocation>,
     mut tile_dictionary_query: Query<&mut TileDictionary, Without<LoaderScreenSlot>>,
     tile_sprite_atlas: Res<TileSpriteAtlas>,
-    tile_text_font: Res<TileTextFont>,
     mut commands: Commands,
 ) {
     let tile_dictionary = &mut tile_dictionary_query.single_mut().entity_by_tile;
     for spawn_request in event_reader.read() {
         if spawn_request.optional_loader_slot.is_none(){
             spawn_tile_in_location(
+                &mut spawn_tile_addons_event_writer,
                 spawn_request,
                 tile_dictionary,
                 None,
                 &tile_sprite_atlas,
-                &tile_text_font,
                 &mut commands
             )
         }
@@ -210,10 +204,10 @@ fn spawn_game_board_new_tiles(
 }
 
 fn spawn_loader_slot_new_tiles(
+    mut spawn_tile_addons_event_writer: EventWriter<SpawnTileAddons>,
     mut event_reader: EventReader<SpawnTileInLocation>,
     mut tile_dictionary_query: Query<(&mut TileDictionary, &LoaderScreenSlot)>,
    tile_sprite_atlas: Res<TileSpriteAtlas>,
-   tile_text_font: Res<TileTextFont>,
     mut commands: Commands,
 ) {
     for spawn_request in event_reader.read() {
@@ -221,11 +215,11 @@ fn spawn_loader_slot_new_tiles(
             if let Some(request_loader_slot) = spawn_request.optional_loader_slot{
                 if request_loader_slot == *loader_slot{
                     spawn_tile_in_location(
-                        spawn_request,
+                        &mut spawn_tile_addons_event_writer,
+                        &spawn_request,
                         &mut tile_dictionary.entity_by_tile,
                         Some(*loader_slot),
                         &tile_sprite_atlas,
-                        &tile_text_font,
                         &mut commands
                     )
                 }
@@ -235,11 +229,11 @@ fn spawn_loader_slot_new_tiles(
 }
 
 fn spawn_tile_in_location(
+    spawn_tile_addons_event_writer: &mut EventWriter<SpawnTileAddons>,
     spawn_request: &SpawnTileInLocation,
     tile_dictionary: &mut HashMap<Tile, Option<Entity>>,
     optional_loader_slot: Option<LoaderScreenSlot>,
     tile_sprite_atlas: &TileSpriteAtlas,
-    tile_text_font: &TileTextFont,
     commands: &mut Commands
 ){
     let tile_to_spawn = spawn_request.tile;
@@ -260,7 +254,7 @@ fn spawn_tile_in_location(
             SpriteSheetBundle {
                 atlas: TextureAtlas{
                     layout: tile_sprite_atlas.atlas_handle.clone(),
-                    index: tile_to_spawn.tile_type.to_atlas_index()
+                    index: tile_to_spawn.to_tiles_atlas_index()
                 },
                 texture: tile_sprite_atlas.image_handle.clone(),
                 transform: Transform::from_translation(spawn_location),
@@ -276,162 +270,18 @@ fn spawn_tile_in_location(
         .id();
 
     if tile_to_spawn.tile_type != TileType::Wall {
-        spawn_text_for_tile(
-            tile_text_font, 
-            &tile_to_spawn, 
-            &tile_entity_id,
-            &loader_slot_ownership_tag,
-            commands
-        );
+        spawn_tile_addons_event_writer.send(SpawnTileAddons{
+            tile_to_add_to: tile_to_spawn,
+            tile_entity_id,
+            tile_loader_slot_ownership_tag: loader_slot_ownership_tag,
+        });
     }
 
     tile_dictionary.insert(tile_to_spawn, Some(tile_entity_id));
-}
-
-fn spawn_text_for_tile(
-    tile_text_font: &TileTextFont,
-    tile_to_spawn: &Tile,
-    tile_entity_id: &Entity,
-    loader_slot_ownership_tag: &LoaderSlotOwnershipTag,
-    commands: &mut Commands
-){
-    let text_spawn_loc_relative = Vec3::Z;
-    let text_color = match tile_to_spawn.tile_type {
-        TileType::Numbered => INDIGO_TEXT_COLOR,
-        TileType::Empty => GRAY_TEXT_COLOR,
-        _ => Color::NONE,
-    };
-    let mut number_to_display = tile_to_spawn.index;
-    if let TileType::Numbered = tile_to_spawn.tile_type {
-        number_to_display += 1;
-    }
-
-    let tile_text_entity_id = commands
-        .spawn((
-            Text2dBundle {
-                text: Text {
-                    sections: vec![TextSection::new(
-                        number_to_display.to_string(),
-                        TextStyle {
-                            font: tile_text_font.0.clone(),
-                            font_size: ATLAS_CELL_SQUARE_SIZE*0.88,
-                            color: text_color,
-                        },
-                    )],
-                    justify: JustifyText::Center,
-                    linebreak_behavior: bevy::text::BreakLineOn::AnyCharacter,
-                },
-                transform: Transform::from_translation(text_spawn_loc_relative),
-                ..default()
-            },
-            RenderLayers::layer(loader_slot_ownership_tag.to_render_layer())
-        ))
-        .id();
-    commands
-        .entity(*tile_entity_id)
-        .add_child(tile_text_entity_id);
 }
 
 fn declare_post_game_board_gen_changes_done(
     mut game_state: ResMut<NextState<GameState>>
 ){
     game_state.set(GameState::PostGameBoardGenerationChangesDone);
-}
-
-fn update_tile_entity_positions(
-    mut graphics_switch_tiles_listener: EventReader<UpdateTileLocationGraphics>,
-    tile_dictionary: Query<&TileDictionary, Without<LoaderScreenSlot>>,
-    mut tile_transforms: Query<&mut Transform, With<Tile>>,
-) {
-    for tile_location_graphic_update_request in graphics_switch_tiles_listener.read() {
-        
-        
-        // info!("got a request: {:?}", tile_location_graphic_update_request);
-        
-        
-        if let Err(move_error) = update_tile_entity_positions_inner(
-            &mut tile_transforms,
-            &tile_dictionary.single().entity_by_tile,
-            tile_location_graphic_update_request.tile,
-            tile_location_graphic_update_request.new_location,
-        ) {
-            print_tile_move_error(move_error);
-        }
-    }
-}
-
-
-fn update_tile_entity_positions_inner(
-    tile_transforms: &mut Query<&mut Transform, With<Tile>>,
-    tile_dictionary: &HashMap<Tile, Option<Entity>>,
-    tile_to_reposition: Tile,
-    new_location_for_tile: GridLocation,
-) -> Result<(), TileMoveError> {
-    let tile_entity = extract_tile_entity(tile_dictionary, &tile_to_reposition)?;
-    if let Ok(mut tile_transform) = tile_transforms.get_mut(tile_entity) {
-        tile_transform.translation = new_location_for_tile.to_world();
-    } else {
-        return Err(TileMoveError::EntityRelated(
-            EntityRelatedCostumeError::EntityNotInQuery,
-        ));
-    }
-    Ok(())
-}
-
-fn extract_tile_entity(
-    tile_dictionary: &HashMap<Tile, Option<Entity>>,
-    tile: &Tile,
-) -> Result<Entity, TileMoveError> {
-    match tile_dictionary.get(tile) {
-        None => Err(TileMoveError::EntityRelated(
-            EntityRelatedCostumeError::DataStructError(DataStructError::ItemNotFound(*tile)),
-        )),
-        Some(optional_entity) => match optional_entity {
-            None => Err(TileMoveError::EntityRelated(
-                EntityRelatedCostumeError::NoEntity,
-            )),
-            Some(entity) => Ok(*entity),
-        },
-    }
-}
-
-
-fn set_possible_possible_empties_sprites(
-    multiple_empty_tiles_choice_manager: Res<MultipleEmptyTilesChoiceManager>,
-    tile_dictionary: Query<&TileDictionary, Without<LoaderScreenSlot>>,
-    mut tile_sprites_query: Query<&mut TextureAtlas, With<Tile>>,
-){
-    if let Some(empty_tile_locations) =
-        &multiple_empty_tiles_choice_manager.possible_empty_tiles_locations_and_directions
-    {
-        let atlas_index = if multiple_empty_tiles_choice_manager.choice_pending {
-                CHOICE_PENDING_ATLAS_INDEX
-            }else{
-                TileType::Empty.to_atlas_index()
-            };
-        for (_, empty_tile) in empty_tile_locations{
-            if let Err(move_error) = update_tile_sprite(
-                atlas_index,
-                &mut tile_sprites_query,
-                empty_tile,
-                &tile_dictionary.single().entity_by_tile,
-            ) {
-                print_tile_move_error(move_error);
-            }
-        }
-    }
-}
-
-fn update_tile_sprite(
-    atlas_index: usize,
-    tile_sprites_query: &mut Query<&mut TextureAtlas, With<Tile>>,
-    empty_tile: &Tile,
-    tile_dictionary: &HashMap<Tile, Option<Entity>>,
-) -> Result<(), TileMoveError> {
-    let tile_entity = extract_tile_entity(tile_dictionary, empty_tile)?;
-    let possible_texture_atlas = tile_sprites_query.get_mut(tile_entity);
-    if let Ok(mut texture_atlas) = possible_texture_atlas{
-        texture_atlas.index = atlas_index;
-    }
-    Ok(())
 }

@@ -16,6 +16,18 @@ impl Tile {
             tile_type,
         }
     }
+
+    pub fn to_tiles_atlas_index(&self) -> usize{
+        self.tile_type.to_tiles_atlas_index()
+    }
+
+    pub fn to_arrows_atlas_index(&self) -> Option<usize>{
+        if self.tile_type == TileType::Empty{
+            Some(self.index * 2)
+        }else{
+            None
+        }
+    }
 }
 
 impl fmt::Debug for Tile {

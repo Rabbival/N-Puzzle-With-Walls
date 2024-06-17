@@ -81,9 +81,6 @@ fn move_tile_logic_inner(
         let empty_tile =
             *wrap_grid_error_in_tile_move_error(game_board.get_empty_tile(empty_tile_index))?.unwrap();
         game_board.swap_tiles_by_location(&empty_tile_original_location, &occupied_tile_original_location)?;
-
-        // reminder that from this point the logic locations are swapped
-
         game_log(GameLog::TilesMoved(&occupied_tile, &empty_tile_original_location));
 
         graphics_event_writer.send(UpdateTileLocationGraphics {

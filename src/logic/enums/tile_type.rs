@@ -10,7 +10,7 @@ pub enum TileType {
 }
 
 impl TileType {
-    pub fn to_atlas_index(&self) -> usize {
+    pub fn to_tiles_atlas_index(&self) -> usize {
         match self {
             TileType::Empty => 0,
             TileType::Numbered => 1,

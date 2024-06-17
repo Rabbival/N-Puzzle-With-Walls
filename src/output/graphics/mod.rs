@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
 
-pub mod tile_graphics;
 pub mod camera;
 pub mod ui;
 pub mod visibility_tags;
+pub mod tile_graphics;
 
 pub struct GraphicsPlugin;
 
