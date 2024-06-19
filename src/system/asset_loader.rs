@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-pub const ATLAS_CELL_SQUARE_SIZE: f32 = 64.0;
+pub const BIG_ATLAS_CELL_SQUARE_SIZE: f32 = 64.0;
+pub const SMALL_ATLAS_CELL_SQUARE_SIZE: f32 = 32.0;
 
 #[derive(Resource, Clone, Default)]
 pub struct TileSpriteAtlas {
@@ -41,7 +42,7 @@ fn tile_sprite_atlas_setup(
 ) {
     let image_handle = asset_server.load("tile_sprite_atlas.png");
     let texture_atlas = TextureAtlasLayout::from_grid(
-        Vec2::new(ATLAS_CELL_SQUARE_SIZE, ATLAS_CELL_SQUARE_SIZE),
+        Vec2::new(BIG_ATLAS_CELL_SQUARE_SIZE, BIG_ATLAS_CELL_SQUARE_SIZE),
         2,
         2,
         None,
@@ -61,14 +62,14 @@ fn arrow_sprite_atlas_setup(
 ){
     let image_handle = asset_server.load("arrow_sprite_atlas.png");
     let texture_atlas = TextureAtlasLayout::from_grid(
-        Vec2::new(ATLAS_CELL_SQUARE_SIZE, ATLAS_CELL_SQUARE_SIZE),
+        Vec2::new(SMALL_ATLAS_CELL_SQUARE_SIZE, SMALL_ATLAS_CELL_SQUARE_SIZE),
         2,
         2,
         None,
         None,
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    commands.insert_resource(TileSpriteAtlas {
+    commands.insert_resource(ArrowSpriteAtlas {
         atlas_handle: texture_atlas_handle,
         image_handle
     });

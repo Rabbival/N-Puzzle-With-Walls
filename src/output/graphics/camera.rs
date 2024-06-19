@@ -115,14 +115,14 @@ fn set_camera_zoom_by_grid_side_length(
     camera_projection: &mut OrthographicProjection
 ){
     let mut new_camera_zoom =
-        grid_side_length as f32 * ATLAS_CELL_SQUARE_SIZE / BOARD_SIZE_IN_PIXELS;
+        grid_side_length as f32 * BIG_ATLAS_CELL_SQUARE_SIZE / BOARD_SIZE_IN_PIXELS;
     if ui_preview_camera{
         new_camera_zoom *= 1.2;
     }
     
     camera_transform.translation.x =
-        (grid_side_length - 1) as f32 / 2.0 * ATLAS_CELL_SQUARE_SIZE;
+        (grid_side_length - 1) as f32 / 2.0 * BIG_ATLAS_CELL_SQUARE_SIZE;
     camera_transform.translation.y =
-        -1.0 * (grid_side_length - 1) as f32 / 2.0 * ATLAS_CELL_SQUARE_SIZE;
+        -1.0 * (grid_side_length - 1) as f32 / 2.0 * BIG_ATLAS_CELL_SQUARE_SIZE;
     camera_projection.scale = new_camera_zoom;
 }

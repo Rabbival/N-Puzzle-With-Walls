@@ -63,9 +63,8 @@ fn start_game_from_loader(
 {
     match saved_layout_query.get(*entity){
         Ok((chosen_domain_board, chosen_tiles_board)) => {
-            applied_board_props.size = chosen_domain_board.board_props.size;
-            applied_board_props.wall_count = chosen_domain_board.board_props.wall_count;
-            applied_board_props.empty_count = chosen_domain_board.board_props.empty_count;
+            *applied_board_props = chosen_domain_board.board_props;
+            applied_board_props.generation_method = BoardGenerationMethod::Load;
             Ok(chosen_tiles_board.clone())
         },
         Err(_) => Err(EntityRelatedCostumeError::EntityNotInQuery)

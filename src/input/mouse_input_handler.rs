@@ -12,7 +12,7 @@ impl Plugin for MouseInputHandlerPlugin {
         app.init_resource::<CursorPosition>().add_systems(
             Update,
             (update_cursor_in_game_world, listen_for_mouse_click_in_game)
-                .run_if(in_state(AppState::Game).or_else(in_state(GameState::Regular)))
+                .run_if(in_state(AppState::Game).and_then(in_state(GameState::Regular)))
                 .chain()
                 .in_set(InputSystemSets::InputListening),
         );
@@ -66,7 +66,6 @@ fn handle_mouse_click(
     game_board: &TileBoard,
 ) -> Result<(), TileMoveError> {
     if game_board.ignore_player_input {
-        println!("ignore player input: {:?}", game_board.ignore_player_input);
         return Err(TileMoveError::BoardFrozenToPlayer);
     }
     let clicked_grid_location = 
@@ -248,8 +247,8 @@ mod tests {
         ));
         assert!(test_index_out_of_bound(
             Vec2::new(
-                BoardSize::default().to_grid_side_length() as f32 * ATLAS_CELL_SQUARE_SIZE,
-                BoardSize::default().to_grid_side_length() as f32 * ATLAS_CELL_SQUARE_SIZE
+                BoardSize::default().to_grid_side_length() as f32 * BIG_ATLAS_CELL_SQUARE_SIZE,
+                BoardSize::default().to_grid_side_length() as f32 * BIG_ATLAS_CELL_SQUARE_SIZE
             ),
             &mut tile_logic_event_writer,
             &mut set_multiple_empty_tiles_choice_manager_event_writer

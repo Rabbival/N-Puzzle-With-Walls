@@ -12,6 +12,7 @@ pub mod tile_board;
 pub mod ui_logic;
 pub mod loader_screen_logic;
 pub mod multiple_empty_tiles_choice_manager;
+pub mod empty_tile_arrow;
 
 pub struct BoardPlugin;
 

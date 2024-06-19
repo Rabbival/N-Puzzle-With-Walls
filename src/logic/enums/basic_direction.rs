@@ -28,21 +28,17 @@ impl BasicDirection {
         (index + 2) % BASIC_DIRECTION_COUNT
     }
     
-    pub fn to_world_direction(&self) -> Vec3{
+    pub fn to_world_direction(&self) -> Vec2{
         match self{
-            Self::Up=>{
-                
-            },
-            Self::Right=>{
-                
-            },
-            Self::Down=>{
-                
-            },
-            Self::Left=>{
-                
-            }
+            Self::Up=> Vec2::Y,
+            Self::Right=> Vec2::X,
+            Self::Down=> Vec2::NEG_Y,
+            Self::Left=> Vec2::NEG_X
         }
+    }
+
+    pub fn to_rotation(&self) -> Quat{
+        Quat::from_rotation_arc_2d(Vec2::Y, self.to_world_direction())
     }
 }
 

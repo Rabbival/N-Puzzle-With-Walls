@@ -69,8 +69,8 @@ fn listen_for_applied_tag_change_requests(
 fn set_chosen_options_to_fit_current_props(
     mut event_reader: EventReader<SetMenuElementsToFitCurrent>,
     mut currently_chosen: Query<
-        (Entity, &mut BackgroundColor, &MenuButtonAction),
-        (With<SelectedOptionTag>, Without<AppliedOptionTag>),
+        (Entity, &mut BackgroundColor),
+        (With<SelectedOptionTag>, With<MenuButtonAction>, Without<AppliedOptionTag>),
     >,
     mut currently_applied: Query<
         (Entity, &mut BackgroundColor),
@@ -79,7 +79,7 @@ fn set_chosen_options_to_fit_current_props(
     mut commands: Commands,
 ) {
     for _event in event_reader.read(){
-        for (chosen_not_applied, mut not_applied_button_color, _) in &mut currently_chosen {
+        for (chosen_not_applied, mut not_applied_button_color) in &mut currently_chosen {
             set_color_to_normal(&mut not_applied_button_color);
             commands
                 .entity(chosen_not_applied)
@@ -146,10 +146,8 @@ fn toggle_options_relevant_to_loader(
         if let MenuButtonAction::ChangeGenerationMethod(new_generation_method) =
             button_event.action
         {
-            let loader_is_chosen = new_generation_method == BoardGenerationMethod::Load;
-
             set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
-                loader_is_chosen,
+                new_generation_method == BoardGenerationMethod::Load,
                 &mut visibility_change_event_writer,
                 &mut menu_nodes
             );
@@ -163,13 +161,11 @@ fn show_options_that_hide_when_loading_if_not_loading(
     mut menu_nodes: Query<(Entity, &mut CustomOnScreenTag, &mut HideByChosenGenerationMethod)>,
 ){
     let applied_board_properties = applied_board_properties_query.single();
-    if applied_board_properties.generation_method != BoardGenerationMethod::Load{
-        set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
-            false,
-            &mut visibility_change_event_writer,
-            &mut menu_nodes
-        );
-    }
+    set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
+        applied_board_properties.generation_method == BoardGenerationMethod::Load,
+        &mut visibility_change_event_writer,
+        &mut menu_nodes
+    );
 }
 
 fn set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(

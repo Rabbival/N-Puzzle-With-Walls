@@ -237,7 +237,7 @@ fn spawn_tile_in_location(
     commands: &mut Commands
 ){
     let tile_to_spawn = spawn_request.tile;
-    let spawn_location = Vec3::new(spawn_request.location.x, spawn_request.location.y, 0.0);
+    let spawn_location = Vec3::from((spawn_request.location.truncate(), 0.0));
     let loader_slot_ownership_tag = LoaderSlotOwnershipTag(optional_loader_slot);
     let on_screen_tags = match optional_loader_slot{
         None => MultipleOnScreenTags(vec!(simple_on_screen_tag(AppState::Game))),

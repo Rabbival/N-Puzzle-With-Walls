@@ -28,12 +28,12 @@ impl GridLocation {
     pub fn from_world<T: Clone>(grid: &Grid<T>, position: Vec2) 
     -> Result<Self, GridError>
     {
-        if position.x<ATLAS_CELL_SQUARE_SIZE*-0.5 || position.y>ATLAS_CELL_SQUARE_SIZE*0.5{
+        if position.x<BIG_ATLAS_CELL_SQUARE_SIZE*-0.5 || position.y>BIG_ATLAS_CELL_SQUARE_SIZE*0.5{
             Err(GridError::InvalidPositionVector(position))
         }else{
             let location = GridLocation {
-                row: (-1.0 * (position.y / ATLAS_CELL_SQUARE_SIZE) + 0.5) as i32,
-                col: (position.x / ATLAS_CELL_SQUARE_SIZE + 0.5) as i32,
+                row: (-1.0 * (position.y / BIG_ATLAS_CELL_SQUARE_SIZE) + 0.5) as i32,
+                col: (position.x / BIG_ATLAS_CELL_SQUARE_SIZE + 0.5) as i32,
             };
             if grid.valid_index(&location) {
                 Ok(location)
@@ -45,8 +45,8 @@ impl GridLocation {
 
     pub fn to_world(&self) -> Vec3 {
         Vec3::new(
-            (self.col as f32) * ATLAS_CELL_SQUARE_SIZE,
-            -1.0 * (self.row as f32) * ATLAS_CELL_SQUARE_SIZE,
+            (self.col as f32) * BIG_ATLAS_CELL_SQUARE_SIZE,
+            -1.0 * (self.row as f32) * BIG_ATLAS_CELL_SQUARE_SIZE,
             0.0,
         )
     }

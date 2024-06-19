@@ -195,7 +195,7 @@ pub fn set_applied_props_and_exit_menu(
 
 /// sets the one that appears in the menu to fit the current configuration
 fn set_planned_props_to_fit_current(
-    mut event_writer: EventWriter<SetMenuElementsToFitCurrent>,
+    mut event_writer: EventWriter<SetMenuElementsToFitCurrent>, 
     mut unapplied_menu_wall_count: ResMut<UnappliedMenuWallCount>,
     applied_board_prop_query: Query<
         &BoardProperties,

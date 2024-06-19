@@ -101,6 +101,7 @@ pub mod prelude {
         },
         multiple_empty_tiles_choice_manager::*,
         states::{app_state::*, game_state::*, StatePlugin},
+        empty_tile_arrow::*,
         tile::*,
         tile_board::*,
         tile_dictionary::*,
