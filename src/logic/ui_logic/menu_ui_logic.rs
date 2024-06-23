@@ -140,14 +140,14 @@ fn update_menu_ui_after_press_general(
 fn toggle_options_relevant_to_loader(
     mut visibility_change_event_writer: EventWriter<SetEntityVisibility>,
     mut button_event_reader: EventReader<MenuButtonPressed>,
-    mut menu_nodes: Query<(Entity, &mut CustomOnScreenTag, &mut HideByChosenGenerationMethod)>,
+    mut menu_nodes: Query<(Entity, &CustomOnScreenTag, &mut HideByChosenGenerationMethod)>,
 ){
     for button_event in button_event_reader.read() {
-        if let MenuButtonAction::ChangeGenerationMethod(new_generation_method) =
+        if let MenuButtonAction::ChangeGenerationMethod(chosen_gen_method_option) =
             button_event.action
         {
             set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
-                new_generation_method == BoardGenerationMethod::Load,
+                chosen_gen_method_option == BoardGenerationMethod::Load,
                 &mut visibility_change_event_writer,
                 &mut menu_nodes
             );
@@ -158,7 +158,7 @@ fn toggle_options_relevant_to_loader(
 fn show_options_that_hide_when_loading_if_not_loading(
     applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut visibility_change_event_writer: EventWriter<SetEntityVisibility>,
-    mut menu_nodes: Query<(Entity, &mut CustomOnScreenTag, &mut HideByChosenGenerationMethod)>,
+    mut menu_nodes: Query<(Entity, &CustomOnScreenTag, &mut HideByChosenGenerationMethod)>,
 ){
     let applied_board_properties = applied_board_properties_query.single();
     set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
@@ -171,11 +171,11 @@ fn show_options_that_hide_when_loading_if_not_loading(
 fn set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
     should_hide_elements_in_question: bool,
     visibility_change_event_writer: &mut EventWriter<SetEntityVisibility>,
-    menu_nodes: &mut Query<(Entity, &mut CustomOnScreenTag, &mut HideByChosenGenerationMethod)>,
+    menu_nodes: &mut Query<(Entity, &CustomOnScreenTag, &mut HideByChosenGenerationMethod)>,
 ){
     for (
         node_entity, 
-        mut on_screen_tag, 
+        on_screen_tag, 
         mut hide_when_choosing_gen_method
     ) in menu_nodes 
     {
@@ -195,7 +195,6 @@ fn set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
                     optional_new_visibility = None;
                 }
                 if let Some(new_visibility) = optional_new_visibility{
-                    on_screen_tag.on_own_screen_visibility = Some(new_visibility);
                     visibility_change_event_writer.send(SetEntityVisibility {
                         entity: node_entity,
                         visibility: new_visibility

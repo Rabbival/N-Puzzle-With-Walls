@@ -1,0 +1,13 @@
+new setting set: ChangeGenerationMethod(Load)
+new setting set: ChangeGenerationMethod(Auto)
+new setting set: ChangeGenerationMethod(Load)
+new setting set: ChangeGenerationMethod(Auto)
+wall count set: 1
+new setting set: ChangeGenerationMethod(Load)
+new setting set: ChangeGenerationMethod(Auto)
+new setting set: ChangeGenerationMethod(Load)
+
+
+a new board was generated!
+new setting set: ChangeGenerationMethod(Auto)
+new setting set: ChangeGenerationMethod(Load)
