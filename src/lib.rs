@@ -145,11 +145,12 @@ pub mod prelude {
         graphics::{
             camera::*,
             GraphicsPlugin,
-            tile_graphics::{
+            tile_board_graphics::{
                 TileGraphicsPlugin,
                 board_spawning_tile_graphics::*, 
                 tile_addons_spawner::*,
                 in_game_tile_graphics::*,
+                in_game_arrows_graphics::*,
             },
             ui::{
                 build_node_bundle_with_full_percentage_style,

@@ -29,7 +29,7 @@ impl TileBoard {
             empty_tile_locations: vec![],
             ignore_player_input: true,
         };
-        newborn_self.determine_empty_tile_locations_from_give_grid(grid);
+        newborn_self.determine_empty_tile_locations_from_given_grid(grid);
         newborn_self
     }
 
@@ -59,7 +59,7 @@ impl TileBoard {
 
 //creation helpers
 impl TileBoard{
-    pub fn determine_empty_tile_locations_from_give_grid(&mut self, grid: &Grid<Tile>){
+    pub fn determine_empty_tile_locations_from_given_grid(&mut self, grid: &Grid<Tile>){
         for (tile_location, new_empty_tile) in grid.iter(){
             if new_empty_tile.tile_type == TileType::Empty{
                 let new_tile_index = new_empty_tile.index;

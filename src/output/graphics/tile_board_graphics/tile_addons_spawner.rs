@@ -91,6 +91,7 @@ fn spawn_arrow_in_direction(
 ){
     let tile_to_spawn = addons_request.tile_to_add_to;
     let tile_entity_id = addons_request.tile_entity_id;
+    let loader_slot_ownership_tag = addons_request.tile_loader_slot_ownership_tag;
     let location_offset =
         Vec3::from((
                      direction.to_world_direction()*(BIG_ATLAS_CELL_SQUARE_SIZE/1.9),
@@ -113,6 +114,7 @@ fn spawn_arrow_in_direction(
                 on_own_screen_visibility: Some(Visibility::Visible)
             },
             EmptyTileArrow(direction),
+            RenderLayers::layer(loader_slot_ownership_tag.to_render_layer()),
         ))
         .id();
     commands

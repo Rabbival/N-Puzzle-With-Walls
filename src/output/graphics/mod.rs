@@ -4,7 +4,7 @@ use crate::prelude::*;
 pub mod camera;
 pub mod ui;
 pub mod visibility_tags;
-pub mod tile_graphics;
+pub mod tile_board_graphics;
 
 pub struct GraphicsPlugin;
 
@@ -22,13 +22,15 @@ impl Plugin for GraphicsPlugin {
                     .run_if(not(resource_changed::<DataBaseManager>)
                         .and_then(not(resource_changed::<DisplayedLoaderScreenNumber>)))
                     .in_set(StateChangeSystemSets::HandleStateChange),
-                show_only_if_has_specified_screen_tag
-                    .run_if(
-                        resource_changed::<DataBaseManager>
-                            .or_else(resource_changed::<DisplayedLoaderScreenNumber>)
-                    )
+                (
+                    show_only_if_has_specified_screen_tag
+                        .run_if(
+                            resource_changed::<DataBaseManager>
+                                .or_else(resource_changed::<DisplayedLoaderScreenNumber>)
+                        ),
+                    set_visibility_for_entity
+                )
                     .in_set(InputSystemSets::PostMainChanges),
-                set_visibility_for_entity
             )
         );
     }

@@ -175,7 +175,7 @@ fn set_visibility_for_buttons_that_dont_appear_when_load_is_chosen(
 ){
     for (
         node_entity, 
-        on_screen_tag, 
+        on_screen_tag,
         mut hide_when_choosing_gen_method
     ) in menu_nodes 
     {

@@ -101,7 +101,11 @@ fn spawn_bottom_line(
                                 background_color: NORMAL_BUTTON_COLOR.into(),
                                 ..default()
                             },
-                            LoaderScreenAction::GenerateBoard(None)
+                            LoaderScreenAction::GenerateBoard(None),
+                            CustomOnScreenTag{
+                                screen: AppState::Loader,
+                                on_own_screen_visibility: Some(Visibility::Hidden)
+                            },
                         ))
                         .with_children(|parent| {
                             parent.spawn(TextBundle::from_section(

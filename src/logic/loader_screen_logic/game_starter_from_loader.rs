@@ -14,6 +14,7 @@ impl Plugin for GameStarterFromLoaderPlugin {
 }
 
 fn listen_to_game_start_from_loader_requests(
+    mut set_applied_tag_event_writer: EventWriter<SetAppliedTagForProperty>,
     mut event_reader: EventReader<LoaderScreenActionEvent>,
     saved_layout_query: Query<(&DomainBoard, &TileBoard), (Without<GameBoard>, Without<SolvedBoard>)>,
     mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
@@ -27,7 +28,8 @@ fn listen_to_game_start_from_loader_requests(
         {
             let applied_board_properties = 
                 &mut applied_board_props_query.single_mut();
-            match start_game_from_loader(
+            match load_chosen_board(
+                &mut set_applied_tag_event_writer,
                 &chosen_layout_entity,
                 &saved_layout_query,
                 applied_board_properties,
@@ -55,7 +57,8 @@ fn listen_to_game_start_from_loader_requests(
     }
 }
 
-fn start_game_from_loader(
+fn load_chosen_board(
+    set_applied_tag_event_writer: &mut EventWriter<SetAppliedTagForProperty>,
     entity: &Entity,
     saved_layout_query: &Query<(&DomainBoard, &TileBoard), (Without<GameBoard>, Without<SolvedBoard>)>,
     applied_board_props: &mut BoardProperties,
@@ -65,9 +68,27 @@ fn start_game_from_loader(
         Ok((chosen_domain_board, chosen_tiles_board)) => {
             *applied_board_props = chosen_domain_board.board_props;
             applied_board_props.generation_method = BoardGenerationMethod::Load;
+            request_applied_option_tags_for_menu_buttons(
+                set_applied_tag_event_writer,
+                applied_board_props
+            );
             Ok(chosen_tiles_board.clone())
         },
         Err(_) => Err(EntityRelatedCostumeError::EntityNotInQuery)
+    }
+}
+
+fn request_applied_option_tags_for_menu_buttons(
+    event_writer: &mut EventWriter<SetAppliedTagForProperty>,
+    loaded_board_properties: &BoardProperties
+){
+    let actions_to_set = vec!(
+        MenuButtonAction::ChangeSize(loaded_board_properties.size),
+        MenuButtonAction::ChangeEmptyTilesCount(loaded_board_properties.empty_count),
+        MenuButtonAction::ChangeSpanningTreeGeneration(loaded_board_properties.tree_traveller_type),
+    );
+    for action_to_set in actions_to_set{
+        event_writer.send(SetAppliedTagForProperty{give_tag_to_variant: action_to_set});
     }
 }
 
