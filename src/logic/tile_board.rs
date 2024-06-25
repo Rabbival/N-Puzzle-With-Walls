@@ -218,13 +218,25 @@ impl TileBoard {
             None => Ok(None)
         }
     }
+    
+    pub fn try_get_all_empty_tiles(&self) -> Result<Vec<&Tile>, TileBoardError>{
+        let mut empty_tiles_vec = vec!();
+        for empty_tile_index in 0..self.empty_tile_locations.len(){
+            empty_tiles_vec.push(self.try_get_empty_tile(empty_tile_index)?)
+        }
+        Ok(empty_tiles_vec)
+    }
 
     /// if it gets an index out of empties bounds, sets the index to the last cell's
-    pub fn get_empty_tile(&self, empty_tile_index: usize)
-    -> Result<Option<&Tile>, GridError>
+    pub fn try_get_empty_tile(&self, empty_tile_index: usize)
+    -> Result<&Tile, TileBoardError>
     {
         let empty_tile_location = self.get_empty_tile_location(empty_tile_index);
-        self.grid.get(empty_tile_location)
+        let cell_content = self.grid.get(empty_tile_location);
+        match cell_content?{
+            Some(tile) => Ok(tile),
+            None => Err(TileBoardError::NoTileInCell(*empty_tile_location))
+        }
     }
 
     /// if it gets an index out of empties bounds, sets the index to the last cell's
@@ -235,19 +247,20 @@ impl TileBoard {
         }
         self.empty_tile_locations.get(empty_tile_index).unwrap()
     }
-
-    /// if it gets an index out of empties bounds, sets the index to the last cell's
+    
     pub fn get_direct_neighbors_of_empty(
         &self,
-        mut empty_tile_index: usize,
-    ) -> HashMap<BasicDirection, GridLocation> {
+        empty_tile_index: usize,
+    ) -> Result<HashMap<BasicDirection, GridLocation>, TileBoardError> {
         let empty_locations_count = self.empty_tile_locations.len();
-        if empty_tile_index >= empty_locations_count {
-            empty_tile_index = empty_locations_count - 1;
+        if empty_tile_index >= empty_locations_count{
+            Err(TileBoardError::TileIndexOutOfBounds(empty_tile_index))
+        }else{
+            Ok(self.get_neighbor_locations_of_type(
+                self.empty_tile_locations.get(empty_tile_index).unwrap(),
+                TileType::Numbered
+            ))
         }
-        self.grid.get_all_initialized_neighbor_locations(
-            self.empty_tile_locations.get(empty_tile_index).unwrap(),
-        )
     }
 
     pub fn get_empty_neighbors(&self, origin: &GridLocation) -> FoundEmptyNeighbors {

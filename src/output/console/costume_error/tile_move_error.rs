@@ -52,3 +52,21 @@ pub fn print_tile_move_error(move_error: TileMoveError) {
         }
     }
 }
+
+impl From<GridError> for TileMoveError{
+    fn from(value: GridError) -> Self {
+        Self::GridError(value)
+    }
+}
+
+impl From<TileBoardError> for TileMoveError{
+    fn from(value: TileBoardError) -> Self {
+        Self::TileBoardError(value)
+    }
+}
+
+impl From<EntityRelatedCostumeError> for TileMoveError{
+    fn from(value: EntityRelatedCostumeError) -> Self {
+        Self::EntityRelated(value)
+    }
+}

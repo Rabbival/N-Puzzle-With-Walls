@@ -25,7 +25,7 @@ fn update_tile_entity_positions(
     for tile_location_graphic_update_request in graphics_switch_tiles_listener.read() {
         if let Err(move_error) = update_tile_entity_positions_inner(
             &mut tile_transforms,
-            &tile_dictionary.single().entity_by_tile,
+            tile_dictionary.single(),
             tile_location_graphic_update_request.tile,
             tile_location_graphic_update_request.new_location,
         ) {
@@ -37,11 +37,11 @@ fn update_tile_entity_positions(
 
 fn update_tile_entity_positions_inner(
     tile_transforms: &mut Query<&mut Transform, With<Tile>>,
-    tile_dictionary: &HashMap<Tile, Option<Entity>>,
+    tile_dictionary: &TileDictionary,
     tile_to_reposition: Tile,
     new_location_for_tile: GridLocation,
 ) -> Result<(), TileMoveError> {
-    let tile_entity = extract_tile_entity(tile_dictionary, &tile_to_reposition)?;
+    let tile_entity = tile_dictionary.extract_tile_entity(&tile_to_reposition)?;
     if let Ok(mut tile_transform) = tile_transforms.get_mut(tile_entity) {
         tile_transform.translation = new_location_for_tile.to_world();
     } else {
@@ -51,24 +51,6 @@ fn update_tile_entity_positions_inner(
     }
     Ok(())
 }
-
-fn extract_tile_entity(
-    tile_dictionary: &HashMap<Tile, Option<Entity>>,
-    tile: &Tile,
-) -> Result<Entity, TileMoveError> {
-    match tile_dictionary.get(tile) {
-        None => Err(TileMoveError::EntityRelated(
-            EntityRelatedCostumeError::DataStructError(DataStructError::ItemNotFound(*tile)),
-        )),
-        Some(optional_entity) => match optional_entity {
-            None => Err(TileMoveError::EntityRelated(
-                EntityRelatedCostumeError::NoEntity,
-            )),
-            Some(entity) => Ok(*entity),
-        },
-    }
-}
-
 
 fn set_possible_empties_sprites(
     multiple_empty_tiles_choice_manager: Res<MultipleEmptyTilesChoiceManager>,
@@ -88,7 +70,7 @@ fn set_possible_empties_sprites(
                 atlas_index,
                 &mut tile_sprites_query,
                 empty_tile,
-                &tile_dictionary.single().entity_by_tile,
+                tile_dictionary.single(),
             ) {
                 print_tile_move_error(move_error);
             }
@@ -100,9 +82,9 @@ fn update_tile_sprite(
     atlas_index: usize,
     tile_sprites_query: &mut Query<&mut TextureAtlas, With<Tile>>,
     empty_tile: &Tile,
-    tile_dictionary: &HashMap<Tile, Option<Entity>>,
+    tile_dictionary: &TileDictionary,
 ) -> Result<(), TileMoveError> {
-    let tile_entity = extract_tile_entity(tile_dictionary, empty_tile)?;
+    let tile_entity = tile_dictionary.extract_tile_entity(empty_tile)?;
     let possible_texture_atlas = tile_sprites_query.get_mut(tile_entity);
     if let Ok(mut texture_atlas) = possible_texture_atlas{
         texture_atlas.index = atlas_index;

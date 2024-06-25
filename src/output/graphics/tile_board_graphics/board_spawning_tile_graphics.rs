@@ -216,7 +216,7 @@ fn spawn_loader_slot_new_tiles(
                 if request_loader_slot == *loader_slot{
                     spawn_tile_in_location(
                         &mut spawn_tile_addons_event_writer,
-                        &spawn_request,
+                        spawn_request,
                         &mut tile_dictionary.entity_by_tile,
                         Some(*loader_slot),
                         &tile_sprite_atlas,

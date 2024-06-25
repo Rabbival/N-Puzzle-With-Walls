@@ -21,12 +21,16 @@ impl Tile {
         self.tile_type.to_tiles_atlas_index()
     }
 
-    pub fn to_arrows_atlas_index(&self) -> Option<usize>{
+    pub fn to_regular_arrows_atlas_index(&self) -> Option<usize>{
         if self.tile_type == TileType::Empty{
             Some(self.index * 2)
         }else{
             None
         }
+    }
+
+    pub fn to_highlighted_arrows_atlas_index(&self) -> Option<usize>{
+        Some(self.to_regular_arrows_atlas_index()?+1)
     }
 }
 

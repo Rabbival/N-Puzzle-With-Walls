@@ -9,6 +9,7 @@ pub enum InputSystemSets {
     PostInitialChanges,
     MainChanges,
     PostMainChanges,
+    LateChanges,
 }
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
@@ -31,6 +32,7 @@ impl Plugin for SystemSetsPlugin {
                 InputSystemSets::PostInitialChanges,
                 InputSystemSets::MainChanges,
                 InputSystemSets::PostMainChanges,
+                InputSystemSets::LateChanges
             )
                 .chain(),
         )

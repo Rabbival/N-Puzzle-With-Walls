@@ -79,9 +79,9 @@ pub fn empty_tile_board_to_solved(
 )
 -> Result<(), BoardGenerationError>
 {
-    wrap_grid_error_in_tile_board_gen_error(&solved_board.spawn_walls_in_locations(&wall_locations))?;
-    wrap_grid_error_in_tile_board_gen_error(&solved_board.spawn_empty_tiles(applied_props, &grid_side_length))?;
-    wrap_grid_error_in_tile_board_gen_error(&solved_board.spawn_numbered_uninitialized_tiles(&grid_side_length))?;
+    solved_board.spawn_walls_in_locations(&wall_locations)?;
+    solved_board.spawn_empty_tiles(applied_props, &grid_side_length)?;
+    solved_board.spawn_numbered_uninitialized_tiles(&grid_side_length)?;
 
     solved_board.empty_locations_to_solved_default(applied_props.empty_count)?;
     solved_board.index_all_tile_types();
@@ -122,8 +122,7 @@ fn determine_wall_locations_inner(
     let mut possible_spawn_locations = vec![];
     let neighbor_count_grid_result =
         initialize_neighbor_count_grid(&mut possible_spawn_locations, grid_side_length);
-    let mut neighbor_count_grid =
-        wrap_grid_error_in_tile_board_gen_error_owned(neighbor_count_grid_result)?;
+    let mut neighbor_count_grid = neighbor_count_grid_result?;
     let grid_tree_result = 
         neighbor_count_grid.get_spanning_tree(applied_props.tree_traveller_type);
     let mut grid_tree;
@@ -239,7 +238,7 @@ fn handle_wall_validation_object(
     let index_to_remove_from_possible_walls = 
         wall_placement_validation.index_to_remove_from_possible_walls;
     let cell_value_in_checked_location_result = 
-        wall_placement_validation.cell_value_in_checked_location_result;
+        wall_placement_validation.cell_value_in_checked_location_result?;
 
     if ! board_is_valid {
         put_cell_back_in_place(
@@ -259,16 +258,16 @@ fn handle_wall_validation_object(
 
 fn put_cell_back_in_place(
     chosen_wall_location_ref: &GridLocation,
-    chosen_tile_value_result_ref: &Result<Option<u8>, GridError>,
+    optional_chosen_tile_value: &Option<u8>,
     neighbor_count_grid_ref_mut: &mut Grid<u8>
 ) 
 -> Result<(), BoardGenerationError>
 {
-    let chosen_tile_value= 
-        wrap_grid_error_in_tile_board_gen_error(chosen_tile_value_result_ref)?;
-        wrap_grid_error_in_tile_board_gen_error
-            (&neighbor_count_grid_ref_mut.set
-                (chosen_wall_location_ref, chosen_tile_value.unwrap()))
+    if let Some(chosen_tile_value) = optional_chosen_tile_value{
+        Ok(neighbor_count_grid_ref_mut.set(chosen_wall_location_ref, *chosen_tile_value)?)
+    }else{
+        Ok(())
+    }
 }
 
 fn initialize_neighbor_count_grid(

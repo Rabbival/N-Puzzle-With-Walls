@@ -1,4 +1,45 @@
-new setting set: ChangeGenerationMethod(Load)
+new setting set: ChangeEmptyTilesCount(2)
+wall count set: 2
 
 
 a new board was generated!
+Tile { type: Numbered, number: 11 } moved to GridLocation { row: 0, col: 2 }
+Tile { type: Numbered, number: 4 } moved to GridLocation { row: 1, col: 2 }
+Tile { type: Numbered, number: 4 } moved to GridLocation { row: 2, col: 2 }
+Tile { type: Numbered, number: 4 } moved to GridLocation { row: 1, col: 2 }
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+Tile { type: Numbered, number: 3 } moved to GridLocation { row: 2, col: 1 }
+Tile { type: Numbered, number: 9 } moved to GridLocation { row: 1, col: 1 }
+Tile { type: Numbered, number: 2 } moved to GridLocation { row: 1, col: 2 }

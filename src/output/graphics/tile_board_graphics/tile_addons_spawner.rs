@@ -11,7 +11,7 @@ impl Plugin for TileAddonsSpawnerPlugin{
                     (
                         spawn_text_for_tile,
                         spawn_arrows_for_tile_if_empty
-                    )
+                    ).in_set(InputSystemSets::PostMainChanges)
             );
     }
 }
@@ -103,7 +103,7 @@ fn spawn_arrow_in_direction(
             SpriteSheetBundle {
                 atlas: TextureAtlas{
                     layout: arrow_sprite_atlas.atlas_handle.clone(),
-                    index: tile_to_spawn.to_arrows_atlas_index().unwrap()
+                    index: tile_to_spawn.to_regular_arrows_atlas_index().unwrap()
                 },
                 texture: arrow_sprite_atlas.image_handle.clone(),
                 transform: Transform::from_translation(location_offset).with_rotation(rotation),
