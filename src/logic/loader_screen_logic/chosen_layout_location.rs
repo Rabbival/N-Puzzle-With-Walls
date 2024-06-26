@@ -24,7 +24,7 @@ impl Plugin for ChosenLayoutLocationPlugin {
 fn update_bottom_line_to_fit_new_chosen(
     mut visibility_set_event_writer: EventWriter<SetEntityVisibility>,
     optional_chosen_layout_location: Res<ChosenLayoutLocation>,
-    mut loader_screen_action_query: Query<(&mut LoaderScreenAction, Entity)>,
+    mut loader_screen_action_query: Query<(&mut LoaderScreenAction, Entity, Option<&mut CustomOnScreenTag>)>,
     applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut chosen_layout_text_query: Query<&mut Text, With<ChosenLayoutTextTag>>,
     domain_board_name_query: Query<(Entity, &DomainBoardName)>,
@@ -66,21 +66,28 @@ fn update_bottom_line_to_fit_new_chosen(
         Some(updated_chosen_layout_text)
     );
 
-    for (mut action_carrier, entity) 
+    for (
+        mut action_carrier, 
+        entity, 
+        optional_screen_tag
+    ) 
         in &mut loader_screen_action_query
     {
         match action_carrier.as_mut(){
             LoaderScreenAction::GenerateBoard(optional_entity) => {
                 *optional_entity = updated_optional_entity;
-                if optional_entity.is_some(){
-                    visibility_set_event_writer.send(
-                        SetEntityVisibility{entity, visibility: Visibility::Visible}
-                    );
-                }else{
-                    visibility_set_event_writer.send(
-                        SetEntityVisibility{entity, visibility: Visibility::Hidden}
-                    );
+                let new_visibility = 
+                    if optional_entity.is_some(){
+                        Visibility::Visible
+                    }else{
+                        Visibility::Hidden                    
+                    };
+                if let Some(mut screen_tag) = optional_screen_tag{
+                    screen_tag.on_own_screen_visibility = Some(new_visibility);
                 }
+                visibility_set_event_writer.send(
+                    SetEntityVisibility{entity, visibility: new_visibility}
+                );
             },
             LoaderScreenAction::WarnBeforeDeletion(PopUpMessageType::DeleteBoard(optional_tuple)) => {
                 if updated_optional_index.is_none() {
