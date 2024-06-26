@@ -23,24 +23,72 @@ impl Plugin for ChosenLayoutLocationPlugin {
 
 fn update_bottom_line_to_fit_new_chosen(
     mut visibility_set_event_writer: EventWriter<SetEntityVisibility>,
-    optional_chosen_layout_location: Res<ChosenLayoutLocation>,
     mut loader_screen_action_query: Query<(&mut LoaderScreenAction, Entity, Option<&mut CustomOnScreenTag>)>,
-    applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut chosen_layout_text_query: Query<&mut Text, With<ChosenLayoutTextTag>>,
+    applied_board_properties_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
+    optional_chosen_layout_location: Res<ChosenLayoutLocation>,
     domain_board_name_query: Query<(Entity, &DomainBoardName)>,
     data_base_manager: Res<DataBaseManager>,
 ){
     let currently_shown_difficulty = applied_board_properties_query.single().board_difficulty;
-    
-    let mut updated_chosen_layout_text = String::from("no chosen board");
-    let mut updated_optional_entity = None;
-    let mut updated_optional_index = None;
-    let mut updated_layout_name = DomainBoardName(String::new());
-    let mut updated_page_number = None;
+    let chosen_layout_config = 
+        determine_chosen_layout_config(
+            currently_shown_difficulty,
+            optional_chosen_layout_location,
+            domain_board_name_query,
+            data_base_manager
+        );
 
-    if let Some(chosen_layout_location) =
-        optional_chosen_layout_location.0
+    set_text_section_value_and_color(
+        &mut chosen_layout_text_query.single_mut().sections[0],
+        None,
+        Some(chosen_layout_config.chosen_layout_button_text)
+    );
+
+    for (
+        mut action_carrier, 
+        button_entity, 
+        optional_screen_tag
+    ) 
+        in &mut loader_screen_action_query
     {
+        match action_carrier.as_mut(){
+            LoaderScreenAction::GenerateBoard(optional_layout_entity) => {
+                *optional_layout_entity = chosen_layout_config.optional_layout_entity;
+                set_load_button_visibility(
+                    &mut visibility_set_event_writer,
+                    button_entity,
+                    optional_layout_entity,
+                    optional_screen_tag
+                );
+            },
+            LoaderScreenAction::WarnBeforeDeletion(PopUpMessageType::DeleteBoard(optional_tuple)) => {
+                *optional_tuple =
+                    chosen_layout_config.optional_index.map(|config_index|
+                        (chosen_layout_config.layout_name.clone(), config_index)
+                    );
+            },
+            LoaderScreenAction::JumpToChosenLayoutScreen(
+                optional_page_to_jump_to, 
+                board_difficulty
+            ) => 
+                {
+                    *optional_page_to_jump_to = chosen_layout_config.optional_page_number;
+                    *board_difficulty = currently_shown_difficulty;
+                },
+            _ => {}
+        }
+    }
+}
+
+fn determine_chosen_layout_config(
+    currently_shown_difficulty: BoardDifficulty,
+    optional_chosen_layout_location: Res<ChosenLayoutLocation>,
+    domain_board_name_query: Query<(Entity, &DomainBoardName)>,
+    data_base_manager: Res<DataBaseManager>,
+) -> LoaderChosenLayoutConfig
+{
+    if let Some(chosen_layout_location) = optional_chosen_layout_location.0 {
         let calculated_db_index =
             SavedLayoutIndexInDifficultyVec::from_screen_and_slot(
                 &currently_shown_difficulty,
@@ -51,62 +99,37 @@ fn update_bottom_line_to_fit_new_chosen(
         if let Some(entity) = new_chosen_ref_value{
             let board_name_query_result = domain_board_name_query.get(*entity);
             if let Ok((layout_entity, board_name)) = board_name_query_result{
-                updated_chosen_layout_text = String::from("chosen: ") + &board_name.to_string();
-                updated_optional_entity = Some(layout_entity);
-                updated_optional_index = Some(calculated_db_index);
-                updated_layout_name = DomainBoardName(board_name.0.clone());
-                updated_page_number = Some(chosen_layout_location.screen_and_slot.screen)
+                return LoaderChosenLayoutConfig{
+                    chosen_layout_button_text: String::from("chosen: ") + &board_name.to_string(),
+                    layout_name: DomainBoardName(board_name.0.clone()),
+                    optional_layout_entity: Some(layout_entity),
+                    optional_index: Some(calculated_db_index),
+                    optional_page_number: Some(chosen_layout_location.screen_and_slot.screen)
+                };
             }
         }
     }
+    LoaderChosenLayoutConfig::default()
+}
 
-    set_text_section_value_and_color(
-        &mut chosen_layout_text_query.single_mut().sections[0],
-        None,
-        Some(updated_chosen_layout_text)
-    );
-
-    for (
-        mut action_carrier, 
-        entity, 
-        optional_screen_tag
-    ) 
-        in &mut loader_screen_action_query
-    {
-        match action_carrier.as_mut(){
-            LoaderScreenAction::GenerateBoard(optional_entity) => {
-                *optional_entity = updated_optional_entity;
-                let new_visibility = 
-                    if optional_entity.is_some(){
-                        Visibility::Visible
-                    }else{
-                        Visibility::Hidden                    
-                    };
-                if let Some(mut screen_tag) = optional_screen_tag{
-                    screen_tag.on_own_screen_visibility = Some(new_visibility);
-                }
-                visibility_set_event_writer.send(
-                    SetEntityVisibility{entity, visibility: new_visibility}
-                );
-            },
-            LoaderScreenAction::WarnBeforeDeletion(PopUpMessageType::DeleteBoard(optional_tuple)) => {
-                if updated_optional_index.is_none() {
-                    *optional_tuple = None;
-                }else{
-                    *optional_tuple = Some((updated_layout_name.clone(), updated_optional_index.unwrap()));
-                }
-            },
-            LoaderScreenAction::JumpToChosenLayoutScreen(
-                optional_page_to_jump_to, 
-                board_difficulty
-            ) => 
-                {
-                    *optional_page_to_jump_to = updated_page_number;
-                    *board_difficulty = currently_shown_difficulty;
-                },
-            _ => {}
-        }
+fn set_load_button_visibility(
+    visibility_set_event_writer: &mut EventWriter<SetEntityVisibility>,
+    button_entity: Entity,
+    optional_layout_entity: &mut Option<Entity>,
+    optional_screen_tag: Option<Mut<CustomOnScreenTag>>
+){
+    let new_visibility =
+        if optional_layout_entity.is_some(){
+            Visibility::Visible
+        }else{
+            Visibility::Hidden
+        };
+    if let Some(mut screen_tag) = optional_screen_tag{
+        screen_tag.on_own_screen_visibility = Some(new_visibility);
     }
+    visibility_set_event_writer.send(
+        SetEntityVisibility{entity: button_entity, visibility: new_visibility}
+    );
 }
 
 fn listen_for_new_layout_picks(

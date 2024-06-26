@@ -5,6 +5,7 @@ pub mod chosen_layout_location;
 pub mod game_starter_from_loader;
 pub mod screen_slot_and_difficulty;
 pub mod loader_slot_ownership_tag;
+pub mod loader_chosen_layout_config;
 
 use crate::prelude::*;
 

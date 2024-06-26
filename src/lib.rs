@@ -98,6 +98,7 @@ pub mod prelude {
             chosen_layout_location::*, displayed_loader_screen::*, game_starter_from_loader::*,
             layout_loader_screen_and_slot::*, loader_screen_layout_text_tag::*,
             loader_slot_ownership_tag::*, LoaderScreenLogicPlugin, screen_slot_and_difficulty::*,
+            loader_chosen_layout_config::*,
         },
         multiple_empty_tiles_choice_manager::*,
         states::{app_state::*, game_state::*, StatePlugin},

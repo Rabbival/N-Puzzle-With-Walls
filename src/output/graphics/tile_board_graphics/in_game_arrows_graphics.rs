@@ -52,16 +52,14 @@ fn check_type_and_toggle_arrows(
     for empty_tile in game_board.try_get_all_empty_tiles()?{
         for (query_tile, mut children, &render_layers) in &mut *tiles_with_children_query{
             for render_layer in render_layers.iter(){
-                if render_layer == 0 {
-                    if *empty_tile == *query_tile {
-                        if let Err(tile_board_error) = show_arrows_in_valid_directions(
-                            empty_tile_arrows,
-                            game_board,
-                            empty_tile.index,
-                            &mut children
-                        ){
-                            print_tile_board_error(tile_board_error);
-                        }
+                if render_layer == 0 && *empty_tile == *query_tile{
+                    if let Err(tile_board_error) = show_arrows_in_valid_directions(
+                        empty_tile_arrows,
+                        game_board,
+                        empty_tile.index,
+                        &mut children
+                    ){
+                        print_tile_board_error(tile_board_error);
                     }
                 }
             }
