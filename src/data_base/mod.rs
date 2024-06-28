@@ -27,13 +27,3 @@ pub const MAX_SAVED_LAYOUTS : u8 = 255;
 pub struct DataBaseManager{
 	saved_layouts: HashMap<BoardDifficulty, Vec<Entity>>,
 }
-
-fn wrap_to_data_base_error<T>(result: Result<T, GridError>) -> Result<T, DataBaseError> {
-	match result {
-		Err(grid_error) => {
-			Err(DataBaseError::CouldntBuildTileBoardFromWallLocations
-				(BoardGenerationError::GridError(grid_error)))
-		},
-		Ok(value) => Ok(value)
-	}
-}

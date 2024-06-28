@@ -9,17 +9,6 @@ pub struct DomainBoard{
 	pub grid: Grid<Tile>
 }
 
-impl DomainBoard{
-	pub fn to_string_for_button(&self) -> String {
-		let props = self.board_props;
-		
-		let mut string_for_button = String::from("Generated: ");
-		string_for_button += &props.generation_method.to_string();
-
-		string_for_button
-	}
-}
-
 impl fmt::Display for DomainBoard{
 	fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
 		fmt.write_str("board_props: ")?;

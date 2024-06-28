@@ -1,4 +1,1 @@
-
-
-a new board was generated!
 new setting set: ChangeGenerationMethod(Load)

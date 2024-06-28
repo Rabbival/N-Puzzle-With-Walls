@@ -8,29 +8,29 @@ impl DataBaseManager {
         new_domain_board: &DomainBoard,
         domain_board_query: &Query<(Entity, &DomainBoardName, &DomainBoard)>,
         commands: &mut Commands
-    ) -> Result<SavedLayoutIndexInDifficultyVec, GridError>
+    ) -> SavedLayoutIndexInDifficultyVec
     {
         let newborn_entity =
-            DataBaseManager::spawn_layout_entity(new_domain_board_name, new_domain_board, commands)?;
-        Ok(self.insert_layout(
+            DataBaseManager::spawn_layout_entity(new_domain_board_name, new_domain_board, commands);
+        self.insert_layout(
             newborn_entity,
             new_domain_board_name,
             &new_domain_board.board_props.board_difficulty,
             domain_board_query,
-        ))
+        )
     }
 
     pub fn spawn_layout_entity(
         domain_board_name: &DomainBoardName,
         domain_board: &DomainBoard,
         commands: &mut Commands
-    ) -> Result<Entity, GridError>
+    ) -> Entity
     {
-        Ok(commands.spawn(SavedLayoutBundle {
+        commands.spawn(SavedLayoutBundle {
             domain_board_name: domain_board_name.clone(),
             domain_board: domain_board.clone(),
             tile_board: TileBoard::from_grid(&domain_board.grid)
-        }).id())
+        }).id()
     }
 
     pub fn insert_layout(

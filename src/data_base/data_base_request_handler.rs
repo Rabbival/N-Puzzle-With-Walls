@@ -53,51 +53,43 @@ fn save_to_data_base_and_system(
     mut commands: Commands
 ){
     for save_request in save_to_db_event_reader.read(){
-        match save_to_data_base_and_system_inner(
-            save_request,
+        let index_saved_to = save_to_data_base_and_system_inner(
+            &save_request.0,
+            &save_request.1,
             &mut db_manager,
             &mut domain_board_query,
-            &save_request.1,
             &mut commands
-        ){
-            Err(data_base_error) => {
-                print_data_base_error(data_base_error);
-            },
-            Ok(index_saved_to) => {
-                event_writer.send(SuccessSavingToDB(index_saved_to));
-                save_outcome_event_writer.send(
-                    LayoutSaveAttemptOutcomeEvent(
-                        SaveAttemptOutcome::LayoutSavedSuccessfully(save_request.1.clone())
-                    )
-                );
-            }
-        }
+        );
+        event_writer.send(SuccessSavingToDB(index_saved_to));
+        save_outcome_event_writer.send(
+            LayoutSaveAttemptOutcomeEvent(
+                SaveAttemptOutcome::LayoutSavedSuccessfully(save_request.1.clone())
+            )
+        );
     }
 }
 
 fn save_to_data_base_and_system_inner(
-    save_request: &SaveToDB,
+    domain_board_to_save: &DomainBoard,
+    new_domain_board_name: &DomainBoardName,
     db_manager: &mut DataBaseManager,
     domain_board_query: &mut Query<(Entity, &DomainBoardName, &DomainBoard)>,
-    new_domain_board_name: &DomainBoardName,
     commands: &mut Commands
-) -> Result<SavedLayoutIndexInDifficultyVec, DataBaseError>
+) -> SavedLayoutIndexInDifficultyVec
 {
     let layout_content_string = ron::ser::to_string_pretty(
-        &save_request.0, ron::ser::PrettyConfig::default()).unwrap();
+        domain_board_to_save, ron::ser::PrettyConfig::default()).unwrap();
     write_to_file(
         FolderToAccess::SavedLayouts,
         new_domain_board_name.0.clone(),
         layout_content_string
     ).unwrap();
 
-    super::wrap_to_data_base_error(
-        db_manager.insert_layout_and_spawn_entity(
-            new_domain_board_name,
-            &save_request.0,
-            domain_board_query,
-            commands
-        )
+    db_manager.insert_layout_and_spawn_entity(
+        new_domain_board_name,
+        domain_board_to_save,
+        domain_board_query,
+        commands
     )
 }
 

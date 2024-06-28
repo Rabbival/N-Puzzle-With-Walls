@@ -237,10 +237,7 @@ fn spawn_layout_entity(
         ));
         layout_button_entity.with_children(|parent| {
             parent.spawn((
-                TextBundle::from_section(
-                    DomainBoard::default().to_string_for_button(),
-                    spawn_request.tiny_text_style.clone(),
-                ),
+                TextBundle::from_section("", spawn_request.tiny_text_style.clone()),
                 ButtonText,
             ));
         });

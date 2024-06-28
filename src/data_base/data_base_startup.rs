@@ -35,14 +35,11 @@ fn read_saved_layout_from_system_inner(commands: &mut Commands) -> Result<(), Da
 			},
 			Ok(parsed_domain_board) => {
 				let file_name_without_postfix = valid_text_file_name.to_name();
-				
-				super::wrap_to_data_base_error(
-					DataBaseManager::spawn_layout_entity(
-						&DomainBoardName(file_name_without_postfix),
-						&parsed_domain_board,
-						commands
-					)
-				)?;
+				DataBaseManager::spawn_layout_entity(
+					&DomainBoardName(file_name_without_postfix),
+					&parsed_domain_board,
+					commands
+				);
 			}
 		}
 	}

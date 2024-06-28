@@ -34,13 +34,12 @@ fn set_slot_text(
     mut event_reader: EventReader<LoaderSlotSetEvent>,
     loader_screen_actions_query: Query<(&LoaderScreenAction, &Children)>,
     mut layout_slot_text_query: Query<&mut Text>,
-    domain_board_query: Query<(&DomainBoard, &DomainBoardName)>,
+    domain_board_query: Query<&DomainBoardName>,
 ){
     for loader_slot_set_request in event_reader.read(){
         match domain_board_query.get(loader_slot_set_request.layout_entity){
-            Ok((domain_board, domain_board_name)) => {
+            Ok(domain_board_name) => {
                 if let Err(entity_error) = set_slot_text_inner(
-                    domain_board,
                     domain_board_name,
                     loader_slot_set_request.slot_to_set,
                     &loader_screen_actions_query,
@@ -55,7 +54,6 @@ fn set_slot_text(
 }
 
 fn set_slot_text_inner(
-    domain_board_to_set_text_to: &DomainBoard,
     domain_board_name_to_set_text_to: &DomainBoardName,
     slot_to_set: LoaderScreenSlot,
     loader_screen_actions_query: &Query<(&LoaderScreenAction, &Children)>,
@@ -69,12 +67,10 @@ fn set_slot_text_inner(
                     let layout_slot_text_result =
                         layout_slot_text_query.get_mut(*child_entity);
                     if let Ok(mut slot_text) = layout_slot_text_result {
-                        let new_button_text = domain_board_name_to_set_text_to.0.clone() + "\n"
-                            + &domain_board_to_set_text_to.to_string_for_button();
                         set_text_section_value_and_color(
                             &mut slot_text.sections[0],
                             None,
-                            Some(new_button_text)
+                            Some(domain_board_name_to_set_text_to.0.clone())
                         );
                         return Ok(());
                     }
