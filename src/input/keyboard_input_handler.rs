@@ -191,10 +191,13 @@ fn confirm_pop_up_message(
 
 fn open_menu(
     mut menu_toggle_event_writer: EventWriter<ToggleMenu>,
+    pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::Space) {
-        menu_toggle_event_writer.send(ToggleMenu::default());
+    if let Visibility::Hidden = *pop_up_message_visibility.single(){
+        if keyboard_input.just_pressed(KeyCode::Space) {
+            menu_toggle_event_writer.send(ToggleMenu::default());
+        }
     }
 }
 

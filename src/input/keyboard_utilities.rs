@@ -43,6 +43,7 @@ fn allowed_special_sign_string(keycode: KeyCode) -> String{
         KeyCode::BracketRight => String::from(")"),
         KeyCode::Minus => String::from("-"),
         KeyCode::NumpadSubtract => String::from("-"),
+        KeyCode::Space => String::from(" "),
         _ => String::default()
     }
 }
@@ -73,5 +74,5 @@ pub fn is_numpad_number(keycode: KeyCode) -> bool{
 
 pub fn is_allowed_special_sign(keycode: KeyCode) -> bool{
     keycode == KeyCode::BracketLeft || keycode == KeyCode::BracketRight ||
-    keycode == KeyCode::Minus || keycode == KeyCode::NumpadSubtract
+    keycode == KeyCode::Minus || keycode == KeyCode::NumpadSubtract || keycode == KeyCode::Space
 }

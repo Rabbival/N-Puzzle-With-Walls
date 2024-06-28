@@ -1,11 +1,3 @@
-new setting set: ChangeGenerationMethod(Load)
-
-
-a new board was generated!
-new setting set: ChangeGenerationMethod(Auto)
-
-
-a new board was generated!
 
 
 a new board was generated!

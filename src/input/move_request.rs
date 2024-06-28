@@ -9,8 +9,7 @@ pub struct MoveRequest {
 impl MoveRequest {
     pub fn new(keycode: &KeyCode) -> Self {
         Self {
-            move_neighbor_from_direction: BasicDirection::from_keycode(keycode)
-                .map(|direction| direction.opposite_direction().unwrap()),
+            move_neighbor_from_direction: BasicDirection::from_keycode(keycode),
             empty_tile_index: Self::empty_tile_index_from_keycode(keycode),
         }
     }

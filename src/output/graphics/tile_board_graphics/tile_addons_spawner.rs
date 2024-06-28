@@ -94,10 +94,10 @@ fn spawn_arrow_in_direction(
     let loader_slot_ownership_tag = addons_request.tile_loader_slot_ownership_tag;
     let location_offset =
         Vec3::from((
-                     direction.to_world_direction()*(BIG_ATLAS_CELL_SQUARE_SIZE/1.9),
+                     direction.to_world_direction()*(BIG_ATLAS_CELL_SQUARE_SIZE/2.4),
                      2.0
                  ));
-    let rotation = direction.opposite_direction().unwrap().to_rotation();
+    let rotation = direction.to_rotation();
     let arrow_entity_id = commands
         .spawn((
             SpriteSheetBundle {
