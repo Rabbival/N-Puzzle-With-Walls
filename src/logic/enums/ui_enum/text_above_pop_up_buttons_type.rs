@@ -17,7 +17,7 @@ impl Display for TextAbovePopUpButtonsType{
                     ""
                 },
                 Self::BoardNameAlreadyExists => {
-                    " This board name already exists "
+                    "Note: This board name already exists,\nSaving will overwrite the existing board"
                 },
                 Self::CantHaveALongerName => {
                     " Can't have a longer name "

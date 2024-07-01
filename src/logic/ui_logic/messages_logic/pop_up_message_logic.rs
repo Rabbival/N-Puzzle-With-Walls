@@ -77,7 +77,7 @@ fn listen_for_set_confirm_allowed_requests_inner(
                     entity: confirm_button_entity,
                     visibility: Visibility::Hidden
                 });
-                newborn_domain_board_name.0 = None;
+                newborn_domain_board_name.optional_name = None;
             }
             Ok(())
         }
@@ -90,7 +90,7 @@ fn set_newborn_domain_board_name_res_to_displayed(
 ){
     let currently_displayed_name =
         DomainBoardName(pop_up_dynamic_text_query.single().sections[0].value.clone());
-    newborn_domain_board_name.0 = Some(currently_displayed_name);
+    newborn_domain_board_name.optional_name = Some(currently_displayed_name);
 }
 
 fn listen_for_newborn_domain_board_change_requests(
@@ -179,7 +179,7 @@ fn set_newborn_board_displayed_name_and_message(
                 None,
                 Some(TextAbovePopUpButtonsType::BoardNameAlreadyExists.to_string())
             );
-            event_writer.send(SetConfirmAllowed(false));
+            event_writer.send(SetConfirmAllowed(true));
         }else{
             set_text_section_value_and_color(
                 text_above_pop_up_buttons,
@@ -315,14 +315,15 @@ fn listen_for_db_related_button_events(
     for action_request in event_reader.read(){
         if *pop_up_message_query.single() == PopUpMessageType::ChooseNewbornDomainBoardName{
             if let PopUpMessageButtonAction::Confirm = action_request.action{
-                if let Some(newborn_domain_board_name) = &newborn_domain_board_name_res.0{
-                    save_to_db_event_writer.send(SaveToDB(
-                        DomainBoard{
+                if let Some(newborn_domain_board_name) = &newborn_domain_board_name_res.optional_name{
+                    save_to_db_event_writer.send(SaveToDB{
+                        board: DomainBoard{
                             board_props: *applied_board_props_query.single(),
                             grid: game_board_query.single().grid.clone()
                         },
-                        newborn_domain_board_name.clone()
-                    ));
+                        name: newborn_domain_board_name.clone(),
+                        name_already_exists: newborn_domain_board_name_res.already_exists
+                    });
                 }
             }
             game_board_query.single_mut().ignore_player_input = false;

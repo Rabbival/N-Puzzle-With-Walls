@@ -103,13 +103,13 @@ fn handle_victory_buttons(
 }
 
 fn handle_save_walls_layout_button(
-    mut button_event_writer: EventWriter<SaveWallsLayoutButtonPressed>,
+    mut button_event_writer: EventWriter<SaveLayoutButtonPressed>,
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<SaveWallsLayoutButton>)>,
 ) {
     for interaction in &interaction_query
     {
         if *interaction == Interaction::Pressed {
-            button_event_writer.send(SaveWallsLayoutButtonPressed);
+            button_event_writer.send(SaveLayoutButtonPressed);
         }
     }
 }

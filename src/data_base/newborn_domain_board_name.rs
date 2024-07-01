@@ -4,7 +4,10 @@ use crate::prelude::*;
 pub const MAX_DOMAIN_BOARD_NAME_LENGTH: usize = 22;
 
 #[derive(Resource, Default)]
-pub struct NewbornDomainBoardName(pub Option<DomainBoardName>);
+pub struct NewbornDomainBoardName{
+    pub optional_name: Option<DomainBoardName>,
+    pub already_exists: bool
+}
 
 pub struct NewbornDomainBoardNamePlugin;
 

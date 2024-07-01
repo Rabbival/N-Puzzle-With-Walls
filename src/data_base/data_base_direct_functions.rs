@@ -11,7 +11,7 @@ impl DataBaseManager {
     ) -> SavedLayoutIndexInDifficultyVec
     {
         let newborn_entity =
-            DataBaseManager::spawn_layout_entity(new_domain_board_name, new_domain_board, commands);
+            Self::spawn_layout_entity(new_domain_board_name, new_domain_board, commands);
         self.insert_layout(
             newborn_entity,
             new_domain_board_name,
@@ -141,6 +141,9 @@ impl DataBaseManager{
         None
     }
 
+    //TODO: look for layout in all difficulties and return Some(SavedLayoutIndexInDifficultyVec) if found
+    // then save that information in NewbornDomainBoardName.already_exists and use that
+    // to call remove_layout_by_index_and_despawn_entity if it's a Some
     pub fn domain_board_name_already_exists(
         domain_board_name_to_check: &DomainBoardName,
         domain_boards_query: &Query<&DomainBoardName>

@@ -1,7 +1,11 @@
 use crate::prelude::*;
 
 #[derive(Event)]
-pub struct SaveToDB(pub DomainBoard, pub DomainBoardName);
+pub struct SaveToDB{
+    pub board: DomainBoard, 
+    pub name: DomainBoardName,
+    pub name_already_exists: bool
+}
 
 #[derive(Event)]
 pub struct RemoveFromDB(pub SavedLayoutIndexInDifficultyVec);

@@ -17,7 +17,7 @@ impl Plugin for DataBaseRequestHandlerPlugin {
 fn listen_for_save_requests(
     mut save_outcome_event_writer: EventWriter<LayoutSaveAttemptOutcomeEvent>,
     mut allow_player_to_set_board_name_event_writer: EventWriter<SetNewbornDomainBoardNameToDefault>,
-    mut event_reader: EventReader<SaveWallsLayoutButtonPressed>,
+    mut event_reader: EventReader<SaveLayoutButtonPressed>,
     domain_boards_query: Query<(&DomainBoard, &DomainBoardName)>,
     mut game_board_query: Query<&mut TileBoard, With<GameBoard>>,
     db_manager: Res<DataBaseManager>
@@ -54,8 +54,7 @@ fn save_to_data_base_and_system(
 ){
     for save_request in save_to_db_event_reader.read(){
         let index_saved_to = save_to_data_base_and_system_inner(
-            &save_request.0,
-            &save_request.1,
+            &save_request,
             &mut db_manager,
             &mut domain_board_query,
             &mut commands
@@ -63,31 +62,34 @@ fn save_to_data_base_and_system(
         event_writer.send(SuccessSavingToDB(index_saved_to));
         save_outcome_event_writer.send(
             LayoutSaveAttemptOutcomeEvent(
-                SaveAttemptOutcome::LayoutSavedSuccessfully(save_request.1.clone())
+                SaveAttemptOutcome::LayoutSavedSuccessfully(save_request.name.clone())
             )
         );
     }
 }
 
 fn save_to_data_base_and_system_inner(
-    domain_board_to_save: &DomainBoard,
-    new_domain_board_name: &DomainBoardName,
+    save_request: &SaveToDB,
     db_manager: &mut DataBaseManager,
     domain_board_query: &mut Query<(Entity, &DomainBoardName, &DomainBoard)>,
     commands: &mut Commands
 ) -> SavedLayoutIndexInDifficultyVec
 {
     let layout_content_string = ron::ser::to_string_pretty(
-        domain_board_to_save, ron::ser::PrettyConfig::default()).unwrap();
+        &save_request.board, ron::ser::PrettyConfig::default()).unwrap();
     write_to_file(
         FolderToAccess::SavedLayouts,
-        new_domain_board_name.0.clone(),
+        save_request.name.0.clone(),
         layout_content_string
     ).unwrap();
+    
+    if save_request.name_already_exists{
+        
+    }
 
     db_manager.insert_layout_and_spawn_entity(
-        new_domain_board_name,
-        domain_board_to_save,
+        &save_request.name,
+        &save_request.board,
         domain_board_query,
         commands
     )
