@@ -23,7 +23,7 @@ impl Plugin for GameBoardBuilderPlugin {
 fn build_a_new_game_board(
     mut generation_error_event_writer: EventWriter<ShowGenerationError>,
     solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
-    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    mut game_board_query: Query<(&mut TileBoard, &mut DomainBoardName),(With<GameBoard>, Without<SolvedBoard>)>,
     applied_board_props_query: Query<&BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<GameState>>,
 ) {
@@ -45,9 +45,11 @@ fn build_a_new_game_board(
                 );
             match attempt_result {
                 Ok(board) => {
-                    game_state.set(GameState::GameBoardGenerated);
-                    let mut game_board = game_board_query.single_mut();
+                    let (mut game_board, mut game_board_name) =
+                        game_board_query.single_mut();
                     *game_board = board;
+                    *game_board_name = DomainBoardName::default();
+                    game_state.set(GameState::GameBoardGenerated);
                 }
                 Err(error) => {
                     game_state.set(GameState::Regular);
