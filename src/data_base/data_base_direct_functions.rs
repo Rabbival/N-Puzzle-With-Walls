@@ -119,7 +119,7 @@ impl DataBaseManager {
     pub fn generate_unique_default_name_for_board(&self, domain_board_names_query: &Query<&DomainBoardName>) -> DomainBoardName {
         let mut new_layout_number = self.get_saved_layouts_of_all_difficulties_count();
         let mut new_board_name = DomainBoardName(format!("layout-{:?}", new_layout_number));
-        while DataBaseManager::domain_board_name_already_exists(&new_board_name, domain_board_names_query){
+        while self.get_existing_board_name_index(&new_board_name, domain_board_names_query).is_some(){
             new_layout_number += 1;
             new_board_name = DomainBoardName(format!("layout-{:?}", new_layout_number));
         }
@@ -140,19 +140,24 @@ impl DataBaseManager{
         }
         None
     }
-
-    //TODO: look for layout in all difficulties and return Some(SavedLayoutIndexInDifficultyVec) if found
-    // then save that information in NewbornDomainBoardName.already_exists and use that
-    // to call remove_layout_by_index_and_despawn_entity if it's a Some
-    pub fn domain_board_name_already_exists(
+    
+    pub fn get_existing_board_name_index(
+        &self,
         domain_board_name_to_check: &DomainBoardName,
         domain_boards_query: &Query<&DomainBoardName>
-    ) -> bool {
-        for domain_board_name in domain_boards_query{
-            if *domain_board_name_to_check == *domain_board_name {
-                return true;
+    ) -> Option<SavedLayoutIndexInDifficultyVec> {
+        for (difficulty, vec) in &self.saved_layouts{
+            for (index, layout_entity) in vec.iter().enumerate(){
+                if let Ok(board_name) = domain_boards_query.get(*layout_entity){
+                    if *domain_board_name_to_check == *board_name {
+                        return Some(SavedLayoutIndexInDifficultyVec{
+                            difficulty: *difficulty,
+                            index_in_own_dif: index,
+                        });
+                    }
+                }
             }
         }
-        false
+        None
     }
 }

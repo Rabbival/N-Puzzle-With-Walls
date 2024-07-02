@@ -6,7 +6,7 @@ pub const MAX_DOMAIN_BOARD_NAME_LENGTH: usize = 22;
 #[derive(Resource, Default)]
 pub struct NewbornDomainBoardName{
     pub optional_name: Option<DomainBoardName>,
-    pub already_exists: bool
+    pub index_of_existing_board_with_name: Option<SavedLayoutIndexInDifficultyVec>
 }
 
 pub struct NewbornDomainBoardNamePlugin;
@@ -15,7 +15,12 @@ impl Plugin for NewbornDomainBoardNamePlugin{
     fn build(&self, app: &mut App) {
         app
             .init_resource::<NewbornDomainBoardName>()
-            .add_systems(Update, generate_default);
+            .add_systems(
+                Update, (
+                    generate_default,
+                    set_index_of_existing_board_with_name.in_set(InputSystemSets::PostInitialChanges)
+                )
+            );
     }
 }
 
@@ -46,5 +51,20 @@ fn generate_default(
             None,
             Some(TextAbovePopUpButtonsType::NoText.to_string())
         );
+    }
+}
+
+fn set_index_of_existing_board_with_name(
+    mut event_reader: EventReader<UpdateNewbornDomainBoardName>,
+    domain_board_names_query: Query<&DomainBoardName>,
+    db_manager: Res<DataBaseManager>,
+    mut newborn_domain_board_name: ResMut<NewbornDomainBoardName>
+){
+    for name_update_request in event_reader.read(){
+        newborn_domain_board_name.index_of_existing_board_with_name = 
+            db_manager.get_existing_board_name_index(
+              &name_update_request.0,
+              &domain_board_names_query
+            );
     }
 }

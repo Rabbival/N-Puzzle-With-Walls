@@ -12,11 +12,10 @@ impl Plugin for PopUpMessageLogicPlugin{
                     listen_for_set_confirm_allowed_requests,
                     (
                         listen_for_show_pop_up_to_set_newborn_board_name_requests,
-                        (
-                            listen_for_newborn_domain_board_change_requests,
-                            set_newborn_board_displayed_name_and_message
-                                .before(set_pop_up_dynamic_text_box_color)
-                        ).chain()
+                        listen_for_newborn_domain_board_change_requests.in_set(InputSystemSets::InitialChanges),
+                        set_newborn_board_displayed_name_and_message
+                            .before(set_pop_up_dynamic_text_box_color)
+                            .in_set(InputSystemSets::MainChanges)
                     ).run_if(in_state(AppState::Game)),
                     listen_for_loader_screen_actions,
                     listen_for_delete_related_button_events,
@@ -101,24 +100,32 @@ fn listen_for_newborn_domain_board_change_requests(
         (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageDynamicTextTag>)
     >,
     pop_up_dynamic_text_query: Query<
-        &Text,
+        (&BackgroundColor, &Text),
         (With<PopUpMessageDynamicTextTag>, Without<TextAbovePopUpMessageButtons>)
     >,
 ){
     for key_typed in event_reader.read(){
-        let pop_up_dynamic_text = &pop_up_dynamic_text_query.single().sections[0].value;
+        let pop_up_dynamic_text = &pop_up_dynamic_text_query.single().1.sections[0].value;
+        let pop_up_text_background_color = pop_up_dynamic_text_query.single().0;
+        let first_set_since_default = pop_up_text_background_color.0 == GRAY_TEXT_COLOR;
         match key_typed.keycode{
             KeyCode::Backspace | KeyCode::Delete => {
                 if !pop_up_dynamic_text.is_empty() {
-                    shorten_name(&mut update_name_event_writer, pop_up_dynamic_text, );
+                    shorten_name(&mut update_name_event_writer, pop_up_dynamic_text, first_set_since_default);
                 }
             }
             keycode => {
                 if let Some(parsed_keycode) = try_get_string_from_keycode(keycode, key_typed.shift_pressed){
                     if pop_up_dynamic_text.len() < MAX_DOMAIN_BOARD_NAME_LENGTH {
-                        update_name_event_writer.send(UpdateNewbornDomainBoardName(
-                            DomainBoardName(format!("{}{}",pop_up_dynamic_text,parsed_keycode))
-                        ));
+                        if first_set_since_default {
+                            update_name_event_writer.send(UpdateNewbornDomainBoardName(
+                                DomainBoardName(parsed_keycode)
+                            ));
+                        }else{
+                            update_name_event_writer.send(UpdateNewbornDomainBoardName(
+                                DomainBoardName(format!("{}{}",pop_up_dynamic_text,parsed_keycode))
+                            ));
+                        }
                     }else{
                         set_text_section_value_and_color(
                             &mut text_above_pop_up_buttons_query.single_mut().sections[0],
@@ -135,8 +142,13 @@ fn listen_for_newborn_domain_board_change_requests(
 fn shorten_name(
     update_name_event_writer: &mut EventWriter<UpdateNewbornDomainBoardName>,
     pop_up_dynamic_text: &str,
+    first_set_since_default: bool
 ){
-    let shortened_name = &pop_up_dynamic_text[..pop_up_dynamic_text.len()-1];
+    let shortened_name = if first_set_since_default{
+        ""
+    }else{
+        &pop_up_dynamic_text[..pop_up_dynamic_text.len()-1]
+    };
     update_name_event_writer.send(UpdateNewbornDomainBoardName(
         DomainBoardName(String::from(shortened_name))
     ));
@@ -146,9 +158,9 @@ fn shorten_name(
 fn set_newborn_board_displayed_name_and_message(
     mut event_writer: EventWriter<SetConfirmAllowed>,
     mut event_reader: EventReader<UpdateNewbornDomainBoardName>,
-    domain_board_names_query: Query<&DomainBoardName>,
     mut pop_up_dynamic_text_query: Query<&mut Text, (With<PopUpMessageDynamicTextTag>, Without<TextAbovePopUpMessageButtons>)>,
     mut text_above_pop_up_buttons_entity_query: Query<&mut Text, (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageDynamicTextTag>)>,
+    newborn_domain_board_name: Res<NewbornDomainBoardName>
 ){
     for name_request in event_reader.read() {
         let requested_name = name_request.0.clone();
@@ -163,6 +175,10 @@ fn set_newborn_board_displayed_name_and_message(
             Some(requested_name.0.clone())
         );
 
+
+        println!("existing board index: {:?}", newborn_domain_board_name.index_of_existing_board_with_name);
+
+
         if requested_name.0.is_empty(){
             set_text_section_value_and_color(
                 text_above_pop_up_buttons,
@@ -170,10 +186,7 @@ fn set_newborn_board_displayed_name_and_message(
                 Some(TextAbovePopUpButtonsType::MustGiveAName.to_string())
             );
             event_writer.send(SetConfirmAllowed(false));
-        }else if DataBaseManager::domain_board_name_already_exists(
-            &requested_name,
-            &domain_board_names_query
-        ){
+        }else if newborn_domain_board_name.index_of_existing_board_with_name.is_some(){
             set_text_section_value_and_color(
                 text_above_pop_up_buttons,
                 None,
@@ -322,7 +335,7 @@ fn listen_for_db_related_button_events(
                             grid: game_board_query.single().grid.clone()
                         },
                         name: newborn_domain_board_name.clone(),
-                        name_already_exists: newborn_domain_board_name_res.already_exists
+                        index_of_existing_board_with_name: newborn_domain_board_name_res.index_of_existing_board_with_name
                     });
                 }
             }

@@ -4,7 +4,7 @@ use crate::prelude::*;
 pub struct SaveToDB{
     pub board: DomainBoard, 
     pub name: DomainBoardName,
-    pub name_already_exists: bool
+    pub index_of_existing_board_with_name: Option<SavedLayoutIndexInDifficultyVec>,
 }
 
 #[derive(Event)]

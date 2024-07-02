@@ -83,8 +83,13 @@ fn save_to_data_base_and_system_inner(
         layout_content_string
     ).unwrap();
     
-    if save_request.name_already_exists{
-        
+    if let Some(existing_board_with_name_index) = 
+        save_request.index_of_existing_board_with_name{
+            db_manager.remove_layout_by_index_and_despawn_entity(
+                &existing_board_with_name_index,
+                &domain_board_query.transmute_lens_filtered::<&DomainBoardName, _>().query(),
+                commands
+            );
     }
 
     db_manager.insert_layout_and_spawn_entity(
