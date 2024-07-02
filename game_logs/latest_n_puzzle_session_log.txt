@@ -1,4 +1,5 @@
+new setting set: ChangeGenerationMethod(Load)
 
 
 a new board was generated!
-new setting set: ChangeGenerationMethod(Load)
+Tile { type: Numbered, number: 9 } moved to GridLocation { row: 3, col: 1 }

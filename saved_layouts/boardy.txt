@@ -4,7 +4,7 @@
         size: Small,
         wall_count: 3,
         empty_count: 1,
-        generation_method: Auto,
+        generation_method: Load,
         tree_traveller_type: BFS,
     ),
     grid: (

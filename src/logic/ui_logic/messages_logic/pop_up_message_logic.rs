@@ -174,11 +174,6 @@ fn set_newborn_board_displayed_name_and_message(
             None,
             Some(requested_name.0.clone())
         );
-
-
-        println!("existing board index: {:?}", newborn_domain_board_name.index_of_existing_board_with_name);
-
-
         if requested_name.0.is_empty(){
             set_text_section_value_and_color(
                 text_above_pop_up_buttons,
@@ -205,6 +200,7 @@ fn set_newborn_board_displayed_name_and_message(
 }
 
 fn listen_for_show_pop_up_to_set_newborn_board_name_requests(
+    mut set_confirm_allowed_event_writer: EventWriter<SetConfirmAllowed>,
     mut visibility_toggle_event_writer: EventWriter<SetEntityVisibility>,
     mut event_reader: EventReader<SetNewbornDomainBoardNameToDefault>,
     mut pop_up_message_query: Query<(Entity, &mut PopUpMessageType)>,
@@ -228,6 +224,7 @@ fn listen_for_show_pop_up_to_set_newborn_board_name_requests(
             None,
             Some(TextAbovePopUpButtonsType::NoText.to_string())
         );
+        set_confirm_allowed_event_writer.send(SetConfirmAllowed(true));
     }
 }
 

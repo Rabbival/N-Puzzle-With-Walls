@@ -17,40 +17,54 @@ impl Plugin for NewbornDomainBoardNamePlugin{
             .init_resource::<NewbornDomainBoardName>()
             .add_systems(
                 Update, (
-                    generate_default,
-                    set_index_of_existing_board_with_name.in_set(InputSystemSets::PostInitialChanges)
-                )
+                    show_suggested_newborn_board_name,
+                    set_index_of_existing_board_with_name
+                ).in_set(InputSystemSets::PostInitialChanges)
             );
     }
 }
 
-fn generate_default(
-    mut event_writer: EventWriter<SetConfirmAllowed>,
+fn show_suggested_newborn_board_name(
     mut event_reader: EventReader<SetNewbornDomainBoardNameToDefault>,
-    domain_board_names_query: Query<&DomainBoardName>,
-    mut text_above_pop_up_buttons_query: Query<&mut Text, (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageDynamicTextTag>)>,
+    mut newborn_domain_board_name: ResMut<NewbornDomainBoardName>,
+    game_board_name_query: Query<&DomainBoardName, With<GameBoard>>,
+    board_name_query: Query<&DomainBoardName>,
     mut pop_up_dynamic_text_query: Query<&mut Text, (With<PopUpMessageDynamicTextTag>, Without<TextAbovePopUpMessageButtons>)>,
     db_manager: Res<DataBaseManager>
 ){
     for _event in event_reader.read(){
         let pop_up_dynamic_text = 
             &mut pop_up_dynamic_text_query.single_mut().sections[0];
-        let text_above_pop_up_buttons = 
-            &mut text_above_pop_up_buttons_query.single_mut().sections[0];
-        event_writer.send(SetConfirmAllowed(true));
-        let default_name =
-            db_manager.generate_unique_default_name_for_board(&domain_board_names_query);
+        let suggested_board_name = determine_suggested_board_name(
+            &mut newborn_domain_board_name,
+            game_board_name_query.single(),
+            &board_name_query,
+            &db_manager
+        );
         set_text_section_value_and_color(
             pop_up_dynamic_text,
             None,
-            Some(default_name.0.clone())
+            Some(suggested_board_name.0.clone())
         );
+    }
+}
 
-        set_text_section_value_and_color(
-            text_above_pop_up_buttons,
-            None,
-            Some(TextAbovePopUpButtonsType::NoText.to_string())
-        );
+fn determine_suggested_board_name(
+    newborn_domain_board_name: &mut NewbornDomainBoardName,
+    game_board_name: &DomainBoardName,
+    board_name_query: &Query<&DomainBoardName>,
+    db_manager: &DataBaseManager
+) -> DomainBoardName
+{
+    if *game_board_name != DomainBoardName::default() {
+        newborn_domain_board_name.index_of_existing_board_with_name =
+            db_manager.get_existing_board_name_index(
+                game_board_name,
+                &board_name_query
+            );
+        game_board_name.clone()
+    }else {
+        db_manager.generate_unique_default_name_for_board(&board_name_query)
     }
 }
 

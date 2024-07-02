@@ -87,7 +87,7 @@ fn save_to_data_base_and_system_inner(
         save_request.index_of_existing_board_with_name{
             db_manager.remove_layout_by_index_and_despawn_entity(
                 &existing_board_with_name_index,
-                &domain_board_query.transmute_lens_filtered::<&DomainBoardName, _>().query(),
+                &domain_board_query.transmute_lens::<&DomainBoardName>().query(),
                 commands
             );
     }

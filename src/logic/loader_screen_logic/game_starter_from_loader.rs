@@ -16,8 +16,11 @@ impl Plugin for GameStarterFromLoaderPlugin {
 fn listen_to_game_start_from_loader_requests(
     mut set_applied_tag_event_writer: EventWriter<SetAppliedTagForProperty>,
     mut event_reader: EventReader<LoaderScreenActionEvent>,
-    saved_layout_query: Query<(&DomainBoard, &TileBoard), (Without<GameBoard>, Without<SolvedBoard>)>,
-    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    saved_layout_query: Query<
+        (&DomainBoard, &TileBoard, &DomainBoardName),
+        (Without<GameBoard>, Without<SolvedBoard>)
+    >,
+    mut game_board_query: Query<(&mut TileBoard, &mut DomainBoardName), (With<GameBoard>, Without<SolvedBoard>)>,
     mut solved_board_query: Query<&mut TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
     mut applied_board_props_query: Query<&mut BoardProperties, With<AppliedBoardProperties>>,
     mut game_state: ResMut<NextState<GameState>>,
@@ -34,15 +37,20 @@ fn listen_to_game_start_from_loader_requests(
                 &saved_layout_query,
                 applied_board_properties,
             ){
-                Ok(saved_layout_tile_board) => {
+                Ok((chosen_layout_board, chosen_layout_name)) => {
                     match try_making_solved_tile_board_from_tile_board(
-                        &saved_layout_tile_board,
+                        &chosen_layout_board,
                         applied_board_properties
                     ) {
                         Ok(solved_board) => {
-                            *game_board_query.single_mut() = saved_layout_tile_board;
-                            *solved_board_query.single_mut() = solved_board;
-                            game_state.set(GameState::GameBoardGenerated)
+                            set_boards_and_begin_game(
+                                solved_board,
+                                chosen_layout_board,
+                                chosen_layout_name,
+                                &mut game_board_query,
+                                &mut solved_board_query,
+                                game_state.as_mut()
+                            );
                         },
                         Err(generation_err) => {
                             print_board_generation_error(generation_err);
@@ -60,19 +68,27 @@ fn listen_to_game_start_from_loader_requests(
 fn load_chosen_board(
     set_applied_tag_event_writer: &mut EventWriter<SetAppliedTagForProperty>,
     entity: &Entity,
-    saved_layout_query: &Query<(&DomainBoard, &TileBoard), (Without<GameBoard>, Without<SolvedBoard>)>,
+    saved_layout_query: &Query<
+        (&DomainBoard, &TileBoard, &DomainBoardName),
+        (Without<GameBoard>, Without<SolvedBoard>)
+    >,
     applied_board_props: &mut BoardProperties,
-) -> Result<TileBoard, EntityRelatedCostumeError>
+) -> Result<(TileBoard, DomainBoardName), EntityRelatedCostumeError>
 {
     match saved_layout_query.get(*entity){
-        Ok((chosen_domain_board, chosen_tiles_board)) => {
+        Ok((
+               chosen_domain_board,
+               chosen_tiles_board,
+               chosen_board_name
+           )) =>
+        {
             *applied_board_props = chosen_domain_board.board_props;
             applied_board_props.generation_method = BoardGenerationMethod::Load;
             request_applied_option_tags_for_menu_buttons(
                 set_applied_tag_event_writer,
                 applied_board_props
             );
-            Ok(chosen_tiles_board.clone())
+            Ok((chosen_tiles_board.clone(), chosen_board_name.clone()))
         },
         Err(_) => Err(EntityRelatedCostumeError::EntityNotInQuery)
     }
@@ -108,4 +124,19 @@ fn try_making_solved_tile_board_from_tile_board(tile_board: &TileBoard, applied_
     )?;
 
     Ok(solved_board)
+}
+
+fn set_boards_and_begin_game(
+    solved_board: TileBoard,
+    saved_layout_tile_board: TileBoard,
+    chosen_layout_name: DomainBoardName,
+    game_board_query: &mut Query<(&mut TileBoard, &mut DomainBoardName), (With<GameBoard>, Without<SolvedBoard>)>,
+    solved_board_query: &mut Query<&mut TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
+    game_state: &mut NextState<GameState>
+){
+    let (mut game_board, mut game_board_name) = game_board_query.single_mut();
+    *game_board = saved_layout_tile_board;
+    *solved_board_query.single_mut() = solved_board;
+    *game_board_name = chosen_layout_name;
+    game_state.set(GameState::GameBoardGenerated);
 }
