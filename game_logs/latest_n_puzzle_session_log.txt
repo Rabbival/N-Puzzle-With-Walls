@@ -1,5 +1,114 @@
+
+
+a new board was generated!
 new setting set: ChangeGenerationMethod(Load)
 
 
 a new board was generated!
-Tile { type: Numbered, number: 9 } moved to GridLocation { row: 3, col: 1 }
+Tile { type: Numbered, number: 5 } moved to GridLocation { row: 1, col: 1 }
+new setting set: ChangeGenerationMethod(Auto)
+new setting set: ChangeSize(Tiny)
+wall count set: 1
+new setting set: ChangeBoardDifficulty(Easy)
+wall count set: 0
+
+
+a new board was generated!
+new setting set: ChangeSize(Small)
+new setting set: ChangeBoardDifficulty(Medium)
+
+
+a new board was generated!
+wall count set: 3
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+new setting set: ChangeGenerationMethod(Load)
+
+
+a new board was generated!
+Tile { type: Numbered, number: 15 } moved to GridLocation { row: 3, col: 2 }
+new setting set: ChangeBoardDifficulty(Easy)
+new setting set: ChangeGenerationMethod(Auto)
+new setting set: ChangeSize(Tiny)
+
+
+a new board was generated!
+new setting set: ChangeGenerationMethod(Load)
+new setting set: ChangeBoardDifficulty(Medium)
+new setting set: ChangeGenerationMethod(Auto)
+new setting set: ChangeSize(Medium)
+new setting set: ChangeSpanningTreeGeneration(DFS)
+wall count set: 5
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+new setting set: ChangeSize(Large)
+new setting set: ChangeSpanningTreeGeneration(BFS)
+new setting set: ChangeBoardDifficulty(Hard)
+wall count set: 8
+
+
+a new board was generated!
+new setting set: ChangeSize(Giant)
+wall count set: 20
+
+
+a new board was generated!

@@ -25,26 +25,23 @@ impl Plugin for NewbornDomainBoardNamePlugin{
 }
 
 fn show_suggested_newborn_board_name(
+    mut newborn_board_name_update_event_writer: EventWriter<UpdateNewbornDomainBoardName>,
     mut event_reader: EventReader<SetNewbornDomainBoardNameToDefault>,
     mut newborn_domain_board_name: ResMut<NewbornDomainBoardName>,
     game_board_name_query: Query<&DomainBoardName, With<GameBoard>>,
     board_name_query: Query<&DomainBoardName>,
-    mut pop_up_dynamic_text_query: Query<&mut Text, (With<PopUpMessageDynamicTextTag>, Without<TextAbovePopUpMessageButtons>)>,
     db_manager: Res<DataBaseManager>
 ){
     for _event in event_reader.read(){
-        let pop_up_dynamic_text = 
-            &mut pop_up_dynamic_text_query.single_mut().sections[0];
+        let game_board_name = game_board_name_query.single();
         let suggested_board_name = determine_suggested_board_name(
             &mut newborn_domain_board_name,
-            game_board_name_query.single(),
+            game_board_name,
             &board_name_query,
             &db_manager
         );
-        set_text_section_value_and_color(
-            pop_up_dynamic_text,
-            None,
-            Some(suggested_board_name.0.clone())
+        newborn_board_name_update_event_writer.send(
+            UpdateNewbornDomainBoardName(suggested_board_name)
         );
     }
 }

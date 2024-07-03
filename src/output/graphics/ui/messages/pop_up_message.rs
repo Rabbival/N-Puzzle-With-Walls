@@ -43,13 +43,13 @@ pub fn set_pop_up_dynamic_text_box_color(
     mut set_text_event_reader: EventReader<UpdateNewbornDomainBoardName>,
     mut pop_up_dynamic_text_entity_query: Query<&mut BackgroundColor, With<PopUpMessageDynamicTextTag>>,
 ){
-    for _reset_request in reset_text_event_reader.read(){
-        *pop_up_dynamic_text_entity_query.single_mut().as_mut() = GRAY_TEXT_COLOR.into();
-    }
     for _set_request in set_text_event_reader.read(){
         reset_text_color_if_first_after_default(
             &mut pop_up_dynamic_text_entity_query
         )
+    }
+    for _reset_request in reset_text_event_reader.read(){
+        *pop_up_dynamic_text_entity_query.single_mut().as_mut() = GRAY_TEXT_COLOR.into();
     }
 }
 

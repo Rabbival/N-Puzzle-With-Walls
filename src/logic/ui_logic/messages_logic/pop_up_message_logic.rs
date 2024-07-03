@@ -160,7 +160,8 @@ fn set_newborn_board_displayed_name_and_message(
     mut event_reader: EventReader<UpdateNewbornDomainBoardName>,
     mut pop_up_dynamic_text_query: Query<&mut Text, (With<PopUpMessageDynamicTextTag>, Without<TextAbovePopUpMessageButtons>)>,
     mut text_above_pop_up_buttons_entity_query: Query<&mut Text, (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageDynamicTextTag>)>,
-    newborn_domain_board_name: Res<NewbornDomainBoardName>
+    newborn_domain_board_name: Res<NewbornDomainBoardName>,
+    game_board_name_query: Query<&DomainBoardName, With<GameBoard>>,
 ){
     for name_request in event_reader.read() {
         let requested_name = name_request.0.clone();
@@ -168,34 +169,41 @@ fn set_newborn_board_displayed_name_and_message(
             &mut pop_up_dynamic_text_query.single_mut().sections[0];
         let text_above_pop_up_buttons =
             &mut text_above_pop_up_buttons_entity_query.single_mut().sections[0];
-
+        let game_board_name = game_board_name_query.single();
+        let (new_pop_up_button_text, confirm_allowed) =
+        if requested_name.0.is_empty(){
+            (
+                TextAbovePopUpButtonsType::MustGiveAName,
+                false
+            )
+        }else if *game_board_name == requested_name{
+            (
+                TextAbovePopUpButtonsType::OverwriteLoadedBoardName,
+                true
+            )
+        }else if newborn_domain_board_name.index_of_existing_board_with_name.is_some(){
+            (
+                TextAbovePopUpButtonsType::BoardNameAlreadyExists,
+                true
+            )
+        }else{
+            (
+                TextAbovePopUpButtonsType::NoText,
+                true
+            )
+        };
+        
         set_text_section_value_and_color(
             pop_up_dynamic_text,
             None,
             Some(requested_name.0.clone())
         );
-        if requested_name.0.is_empty(){
-            set_text_section_value_and_color(
-                text_above_pop_up_buttons,
-                None,
-                Some(TextAbovePopUpButtonsType::MustGiveAName.to_string())
-            );
-            event_writer.send(SetConfirmAllowed(false));
-        }else if newborn_domain_board_name.index_of_existing_board_with_name.is_some(){
-            set_text_section_value_and_color(
-                text_above_pop_up_buttons,
-                None,
-                Some(TextAbovePopUpButtonsType::BoardNameAlreadyExists.to_string())
-            );
-            event_writer.send(SetConfirmAllowed(true));
-        }else{
-            set_text_section_value_and_color(
-                text_above_pop_up_buttons,
-                None,
-                Some(TextAbovePopUpButtonsType::NoText.to_string())
-            );
-            event_writer.send(SetConfirmAllowed(true));
-        }
+        set_text_section_value_and_color(
+            text_above_pop_up_buttons,
+            None,
+            Some(new_pop_up_button_text.to_string())
+        );
+        event_writer.send(SetConfirmAllowed(confirm_allowed));
     }
 }
 

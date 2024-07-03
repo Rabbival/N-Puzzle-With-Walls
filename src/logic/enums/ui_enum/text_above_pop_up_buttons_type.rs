@@ -4,6 +4,7 @@ use enum_iterator::Sequence;
 #[derive(Debug, Sequence, PartialEq, Eq, Hash, PartialOrd, Clone, Copy)]
 pub enum TextAbovePopUpButtonsType {
     NoText,
+    OverwriteLoadedBoardName,
     BoardNameAlreadyExists,
     CantHaveALongerName,
     MustGiveAName
@@ -15,6 +16,9 @@ impl Display for TextAbovePopUpButtonsType{
             match self{
                 Self::NoText => {
                     ""
+                },
+                Self::OverwriteLoadedBoardName => {
+                    "Note: This will overwrite the loaded board"
                 },
                 Self::BoardNameAlreadyExists => {
                     "Note: This board name already exists,\nSaving will overwrite the existing board"
