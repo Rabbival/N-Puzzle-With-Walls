@@ -11,7 +11,8 @@ impl Plugin for PopUpMessageLogicPlugin{
                 (
                     listen_for_set_confirm_allowed_requests,
                     (
-                        listen_for_show_pop_up_to_set_newborn_board_name_requests,
+                        listen_for_show_pop_up_to_set_newborn_board_name_requests
+                            .in_set(InputSystemSets::InitialChanges),
                         listen_for_newborn_domain_board_change_requests.in_set(InputSystemSets::InitialChanges),
                         set_newborn_board_displayed_name_and_message
                             .before(set_pop_up_dynamic_text_box_color)
