@@ -20,7 +20,7 @@ impl Plugin for GameScreenTextLogicPlugin {
                     tick_text_reset_timer,
                     reset_text_above_save_button_when_timer_is_done,
                     show_board_couldnt_be_generated,
-                    set_choose_empty_message_visibility
+                    set_choose_empty_message_visibility.run_if(resource_changed::<MultipleEmptyTilesChoiceManager>),
                 )
                     .run_if(in_state(AppState::Game)),
             )
@@ -133,23 +133,21 @@ fn show_board_couldnt_be_generated(
 }
 
 fn set_choose_empty_message_visibility(
-    mut multiple_empty_tiles_choice_manager_event_reader: EventReader<SetMultipleEmptyTilesChoiceManager>,
+    multiple_empty_tiles_choice_manager: Res<MultipleEmptyTilesChoiceManager>,
     mut game_screen_text_query: Query<&mut Text, With<GameScreenTextType>>,
 ){
-    for set_request in multiple_empty_tiles_choice_manager_event_reader.read(){
-        if set_request.new_config.choice_pending {
-            set_text_section_value_and_color(
-                &mut game_screen_text_query.single_mut().sections[0],
-                Some(GRAY_TEXT_COLOR),
-                Some(GameScreenTextType::EmptyTileChoicePending.to_string())
-            );
-        } else{
-            set_text_section_value_and_color(
-                &mut game_screen_text_query.single_mut().sections[0],
-                None,
-                Some(GameScreenTextType::NoText.to_string())
-            );
-        }
+    if multiple_empty_tiles_choice_manager.choice_pending {
+        set_text_section_value_and_color(
+            &mut game_screen_text_query.single_mut().sections[0],
+            Some(GRAY_TEXT_COLOR),
+            Some(GameScreenTextType::EmptyTileChoicePending.to_string())
+        );
+    } else{
+        set_text_section_value_and_color(
+            &mut game_screen_text_query.single_mut().sections[0],
+            None,
+            Some(GameScreenTextType::NoText.to_string())
+        );
     }
 }
 

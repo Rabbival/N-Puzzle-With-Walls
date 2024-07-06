@@ -39,8 +39,7 @@ fn update_cursor_in_game_world(
 
 fn listen_for_mouse_click_in_game(
     mut logic_event_writer: EventWriter<SwitchTilesLogic>,
-    mut multiple_empty_tiles_choice_manager_event_writer: EventWriter<SetMultipleEmptyTilesChoiceManager>,
-    multiple_empty_tiles_choice_manager: Res<MultipleEmptyTilesChoiceManager>,
+    mut multiple_empty_tiles_choice_manager: ResMut<MultipleEmptyTilesChoiceManager>,
     mouse: Res<ButtonInput<MouseButton>>,
     cursor_position: Res<CursorPosition>,
     game_board_query: Query<&TileBoard, With<GameBoard>>,
@@ -48,8 +47,7 @@ fn listen_for_mouse_click_in_game(
     if mouse.just_pressed(MouseButton::Left) {
         if let Err(input_error) = handle_mouse_click(
             &mut logic_event_writer,
-            &mut multiple_empty_tiles_choice_manager_event_writer,
-            multiple_empty_tiles_choice_manager.as_ref(),
+            &mut multiple_empty_tiles_choice_manager,
             cursor_position.world_position,
             game_board_query.single(),
         ) {
@@ -60,8 +58,7 @@ fn listen_for_mouse_click_in_game(
 
 fn handle_mouse_click(
     tile_switch_event_writer: &mut EventWriter<SwitchTilesLogic>,
-    multiple_empty_tiles_choice_manager_event_writer: &mut EventWriter<SetMultipleEmptyTilesChoiceManager>,
-    multiple_empty_tiles_choice_manager: &MultipleEmptyTilesChoiceManager,
+    multiple_empty_tiles_choice_manager: &mut ResMut<MultipleEmptyTilesChoiceManager>,
     cursor_position: Vec2,
     game_board: &TileBoard,
 ) -> Result<(), TileMoveError> {
@@ -74,7 +71,6 @@ fn handle_mouse_click(
     if multiple_empty_tiles_choice_manager.choice_pending {
         handle_request_when_empty_choice_pending(
             tile_switch_event_writer,
-            multiple_empty_tiles_choice_manager_event_writer,
             multiple_empty_tiles_choice_manager,
             clicked_grid_location,
             game_board
@@ -82,7 +78,7 @@ fn handle_mouse_click(
     }else{
         handle_request_no_choice_pending(
             tile_switch_event_writer,
-            multiple_empty_tiles_choice_manager_event_writer,
+            multiple_empty_tiles_choice_manager,
             clicked_grid_location,
             game_board
         )?;   
@@ -106,19 +102,11 @@ fn clicked_location_to_grid_location(
 
 fn handle_request_when_empty_choice_pending(
     tile_switch_event_writer: &mut EventWriter<SwitchTilesLogic>,
-    multiple_empty_tiles_choice_manager_event_writer: &mut EventWriter<SetMultipleEmptyTilesChoiceManager>,
-    multiple_empty_tiles_choice_manager: &MultipleEmptyTilesChoiceManager,
+    multiple_empty_tiles_choice_manager: &mut ResMut<MultipleEmptyTilesChoiceManager>,
     clicked_grid_location: GridLocation,
     game_board: &TileBoard,
 ){
-    multiple_empty_tiles_choice_manager_event_writer.send(
-        SetMultipleEmptyTilesChoiceManager{
-            new_config: MultipleEmptyTilesChoiceManager{
-                choice_pending: false,
-                possible_empty_tiles_locations_and_directions: multiple_empty_tiles_choice_manager.possible_empty_tiles_locations_and_directions.clone(),
-            }
-        }
-    );
+    multiple_empty_tiles_choice_manager.choice_pending = false;
     if let Some(empty_tiles) = &multiple_empty_tiles_choice_manager.possible_empty_tiles_locations_and_directions{
         for (empty_tile_direction, empty_tile) in empty_tiles{
             send_move_request_if_empty_tile_was_clicked(
@@ -153,7 +141,7 @@ fn send_move_request_if_empty_tile_was_clicked(
 
 fn handle_request_no_choice_pending(
     tile_switch_event_writer: &mut EventWriter<SwitchTilesLogic>,
-    multiple_empty_tiles_choice_manager_event_writer: &mut EventWriter<SetMultipleEmptyTilesChoiceManager>,
+    multiple_empty_tiles_choice_manager: &mut ResMut<MultipleEmptyTilesChoiceManager>,
     clicked_grid_location: GridLocation,
     game_board: &TileBoard,
 )-> Result<(), TileMoveError>{
@@ -174,14 +162,10 @@ fn handle_request_no_choice_pending(
             Ok(())
         },
         FoundEmptyNeighbors::MoreThanOneEmptyNeighbor(empty_neighbors) => {
-            multiple_empty_tiles_choice_manager_event_writer.send(
-                SetMultipleEmptyTilesChoiceManager{
-                    new_config: MultipleEmptyTilesChoiceManager{
+            **multiple_empty_tiles_choice_manager = MultipleEmptyTilesChoiceManager{
                         choice_pending: true,
                         possible_empty_tiles_locations_and_directions: Some(empty_neighbors),
-                    }
-                }
-            );
+                    };
             Ok(())
         },
         FoundEmptyNeighbors::NoEmptyNeighbors => Err(TileMoveError::NoEmptyNeighbor),
@@ -231,19 +215,19 @@ mod tests {
     fn test_input_validation() {
         let mut app = App::new();
         app.add_event::<SwitchTilesLogic>()
-            .add_event::<SetMultipleEmptyTilesChoiceManager>()
+            .init_resource::<MultipleEmptyTilesChoiceManager>()
             .add_systems(Update, test_input_validation_inner);
         app.update();
     }
 
     fn test_input_validation_inner(
         mut tile_logic_event_writer: EventWriter<SwitchTilesLogic>,
-        mut set_multiple_empty_tiles_choice_manager_event_writer: EventWriter<SetMultipleEmptyTilesChoiceManager>
+        mut multiple_empty_tiles_choice_manager: ResMut<MultipleEmptyTilesChoiceManager>
     ) {
         assert!(test_index_out_of_bound(
             Vec2::new(-100.0, -100.0),
             &mut tile_logic_event_writer,
-            &mut set_multiple_empty_tiles_choice_manager_event_writer
+            &mut multiple_empty_tiles_choice_manager
         ));
         assert!(test_index_out_of_bound(
             Vec2::new(
@@ -251,14 +235,14 @@ mod tests {
                 BoardSize::default().to_grid_side_length() as f32 * BIG_ATLAS_CELL_SQUARE_SIZE
             ),
             &mut tile_logic_event_writer,
-            &mut set_multiple_empty_tiles_choice_manager_event_writer
+            &mut multiple_empty_tiles_choice_manager
         ));
     }
 
     fn test_index_out_of_bound(
         position_to_check: Vec2,
         tile_logic_event_writer: &mut EventWriter<SwitchTilesLogic>,
-        set_multiple_empty_tiles_choice_manager_event_writer: &mut EventWriter<SetMultipleEmptyTilesChoiceManager>
+        multiple_empty_tiles_choice_manager: &mut ResMut<MultipleEmptyTilesChoiceManager>
     ) -> bool {
         let board = TileBoard {
             ignore_player_input: false,
@@ -266,8 +250,7 @@ mod tests {
         };
         let location_search_outcome = handle_mouse_click(
             tile_logic_event_writer,
-            set_multiple_empty_tiles_choice_manager_event_writer,
-            &MultipleEmptyTilesChoiceManager::default(),
+            multiple_empty_tiles_choice_manager,
             position_to_check, 
             &board
         );
@@ -278,26 +261,25 @@ mod tests {
     fn test_board_freezing() {
         let mut app = App::new();
         app.add_event::<SwitchTilesLogic>()
-            .add_event::<SetMultipleEmptyTilesChoiceManager>()
+            .init_resource::<MultipleEmptyTilesChoiceManager>()
             .add_systems(Update, test_board_freezing_inner);
         app.update();
     }
 
     fn test_board_freezing_inner(
         mut tile_logic_event_writer: EventWriter<SwitchTilesLogic>,
-        mut set_multiple_empty_tiles_choice_manager_event_writer: EventWriter<SetMultipleEmptyTilesChoiceManager>
+        mut multiple_empty_tiles_choice_manager: ResMut<MultipleEmptyTilesChoiceManager>
     ) {
-        assert!(test_frozen_board(&mut tile_logic_event_writer, &mut set_multiple_empty_tiles_choice_manager_event_writer));
+        assert!(test_frozen_board(&mut tile_logic_event_writer, &mut multiple_empty_tiles_choice_manager));
     }
 
     fn test_frozen_board(
         tile_logic_event_writer: &mut EventWriter<SwitchTilesLogic>,
-        set_multiple_empty_tiles_choice_manager_event_writer: &mut EventWriter<SetMultipleEmptyTilesChoiceManager>
+        multiple_empty_tiles_choice_manager: &mut ResMut<MultipleEmptyTilesChoiceManager>
     ) -> bool {
         let location_validation_outcome = handle_mouse_click(
             tile_logic_event_writer,
-            set_multiple_empty_tiles_choice_manager_event_writer,
-            &MultipleEmptyTilesChoiceManager::default(),
+            multiple_empty_tiles_choice_manager,
             Vec2::default(),
             &TileBoard::default(), //locked by default
         );
@@ -308,23 +290,23 @@ mod tests {
     fn test_valid_location() {
         let mut app = App::new();
         app.add_event::<SwitchTilesLogic>()
-            .add_event::<SetMultipleEmptyTilesChoiceManager>()
+            .init_resource::<MultipleEmptyTilesChoiceManager>()
             .add_systems(Update, test_valid_location_inner);
         app.update();
     }
 
     fn test_valid_location_inner(
         mut tile_logic_event_writer: EventWriter<SwitchTilesLogic>,
-        mut set_multiple_empty_tiles_choice_manager_event_writer: EventWriter<SetMultipleEmptyTilesChoiceManager>
+        mut multiple_empty_tiles_choice_manager: ResMut<MultipleEmptyTilesChoiceManager>
     ) {
-        assert!(test_no_tile_in_cell(&mut tile_logic_event_writer, &mut set_multiple_empty_tiles_choice_manager_event_writer));
-        assert!(test_empty_slot(&mut tile_logic_event_writer, &mut set_multiple_empty_tiles_choice_manager_event_writer));
-        assert!(test_no_empty_neighbor(&mut tile_logic_event_writer, &mut set_multiple_empty_tiles_choice_manager_event_writer));
+        assert!(test_no_tile_in_cell(&mut tile_logic_event_writer, &mut multiple_empty_tiles_choice_manager));
+        assert!(test_empty_slot(&mut tile_logic_event_writer, &mut multiple_empty_tiles_choice_manager));
+        assert!(test_no_empty_neighbor(&mut tile_logic_event_writer, &mut multiple_empty_tiles_choice_manager));
     }
 
     fn test_no_tile_in_cell(
         tile_logic_event_writer: &mut EventWriter<SwitchTilesLogic>,
-        set_multiple_empty_tiles_choice_manager_event_writer: &mut EventWriter<SetMultipleEmptyTilesChoiceManager>
+        multiple_empty_tiles_choice_manager: &mut ResMut<MultipleEmptyTilesChoiceManager>
     ) -> bool {
         let board = TileBoard {
             ignore_player_input: false,
@@ -332,8 +314,7 @@ mod tests {
         };
         let location_validation_outcome = handle_mouse_click(
             tile_logic_event_writer,
-            set_multiple_empty_tiles_choice_manager_event_writer,
-            &MultipleEmptyTilesChoiceManager::default(),
+            multiple_empty_tiles_choice_manager,
             Vec2::default(),
             &board
         );
@@ -342,7 +323,7 @@ mod tests {
 
     fn test_empty_slot(
         tile_logic_event_writer: &mut EventWriter<SwitchTilesLogic>,
-        set_multiple_empty_tiles_choice_manager_event_writer: &mut EventWriter<SetMultipleEmptyTilesChoiceManager>
+        multiple_empty_tiles_choice_manager: &mut ResMut<MultipleEmptyTilesChoiceManager>
     ) -> bool
     {
         let mut board = TileBoard {
@@ -358,8 +339,7 @@ mod tests {
         ).unwrap();
         let location_validation_outcome = handle_mouse_click(
             tile_logic_event_writer,
-            set_multiple_empty_tiles_choice_manager_event_writer,
-            &MultipleEmptyTilesChoiceManager::default(),
+            multiple_empty_tiles_choice_manager,
             Vec2::default(), 
             &board
         );
@@ -368,7 +348,7 @@ mod tests {
 
     fn test_no_empty_neighbor(
         tile_logic_event_writer: &mut EventWriter<SwitchTilesLogic>,
-        set_multiple_empty_tiles_choice_manager_event_writer: &mut EventWriter<SetMultipleEmptyTilesChoiceManager>
+        multiple_empty_tiles_choice_manager: &mut ResMut<MultipleEmptyTilesChoiceManager>
     ) -> bool
     {
         let mut tile_board = TileBoard::default();
@@ -392,8 +372,7 @@ mod tests {
 
         let location_validation_outcome = handle_mouse_click(
             tile_logic_event_writer,
-            set_multiple_empty_tiles_choice_manager_event_writer,
-            &MultipleEmptyTilesChoiceManager::default(),
+            multiple_empty_tiles_choice_manager,
             Vec2::default(), 
             &tile_board
         );
