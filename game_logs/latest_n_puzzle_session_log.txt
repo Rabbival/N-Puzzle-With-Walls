@@ -1,6 +1,87 @@
 new setting set: ChangeGenerationMethod(Load)
-new setting set: ChangeBoardDifficulty(Easy)
+new setting set: ChangeGenerationMethod(Auto)
 
 
 a new board was generated!
-Tile { type: Numbered, number: 6 } moved to GridLocation { row: 2, col: 1 }
+new setting set: ChangeEmptyTilesCount(2)
+
+
+a new board was generated!
+Tile { type: Numbered, number: 9 } moved to GridLocation { row: 3, col: 2 }
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+
+
+a new board was generated!
+Tile { type: Numbered, number: 5 } moved to GridLocation { row: 0, col: 1 }
+Tile { type: Numbered, number: 5 } moved to GridLocation { row: 0, col: 0 }
