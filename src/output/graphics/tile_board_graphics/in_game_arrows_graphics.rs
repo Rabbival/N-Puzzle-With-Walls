@@ -26,12 +26,12 @@ fn refresh_arrows_upon_new_generation(
         &EmptyTileArrow
     )>,
     game_board_query: Query<&TileBoard, With<GameBoard>>,
-    mut tiles_with_children_query: Query<(&Tile, &mut Children, &RenderLayers)>,
+    tiles_with_children_query: Query<(&Tile, &Children, &RenderLayers)>,
 ){
     if let Err(tile_board_error) = check_type_and_toggle_arrows(
         &mut empty_tile_arrows,
         game_board_query.single(),
-        &mut tiles_with_children_query
+        &tiles_with_children_query
     ){
         print_tile_board_error(tile_board_error)
     }
@@ -47,13 +47,13 @@ fn show_arrows_in_valid_directions_if_empty(
         &EmptyTileArrow
     )>,
     game_board_query: Query<&TileBoard, With<GameBoard>>,
-    mut tiles_with_children_query: Query<(&Tile, &mut Children, &RenderLayers)>,
+    tiles_with_children_query: Query<(&Tile, &Children, &RenderLayers)>,
 ){
     for _event in update_tile_graphics_event_reader.read(){
         if let Err(tile_board_error) = check_type_and_toggle_arrows(
             &mut empty_tile_arrows,
             game_board_query.single(),
-            &mut tiles_with_children_query
+            &tiles_with_children_query
         ){
             print_tile_board_error(tile_board_error)
         }
@@ -69,21 +69,19 @@ fn check_type_and_toggle_arrows(
         &EmptyTileArrow
     )>,
     game_board: &TileBoard,
-    tiles_with_children_query: &mut Query<(&Tile, &mut Children, &RenderLayers)>,
+    tiles_with_children_query: &Query<(&Tile, &Children, &RenderLayers)>,
 ) -> Result<(), TileBoardError>{
     for empty_tile in game_board.try_get_all_empty_tiles()?{
-        for (query_tile, mut children, &render_layers) in &mut *tiles_with_children_query{
-            for render_layer in render_layers.iter(){
-                if render_layer == 0 && *empty_tile == *query_tile{
-                    if let Err(tile_board_error) = show_arrows_in_valid_directions(
-                        empty_tile_arrows,
-                        game_board,
-                        empty_tile,
-                        &mut children
-                    ){
-                        print_tile_board_error(tile_board_error);
-                    }
-                }
+        if let Some(empty_tile_children) = 
+            try_get_empty_tile_children_if_from_game_board(empty_tile, tiles_with_children_query)
+        {
+            if let Err(tile_board_error) = show_arrows_in_valid_directions(
+                empty_tile_arrows,
+                game_board,
+                empty_tile,
+                &empty_tile_children
+            ){
+                print_tile_board_error(tile_board_error);
             }
         }
     }
@@ -100,7 +98,7 @@ fn show_arrows_in_valid_directions(
     )>,
     game_board: &TileBoard,
     empty_tile: &Tile,
-    empty_tile_children_entities: &mut Children
+    empty_tile_children_entities: &Children
 ) -> Result<(), TileBoardError>{
     let neighbors = 
         game_board.get_direct_neighbors_of_empty(empty_tile.index)?;
@@ -128,14 +126,16 @@ fn show_arrows_in_valid_directions(
 
 fn show_pressed_arrow_in_just_moved_direction(
     mut event_reader: EventReader<SwitchTilesLogic>,
-    mut empty_tile_arrows: Query<(&mut TextureAtlas,&EmptyTileArrow)>,
+    mut empty_tile_arrows: Query<(Entity, &mut TextureAtlas,&EmptyTileArrow)>,
     game_board_query: Query<&TileBoard, With<GameBoard>>,
+    tiles_with_children_query: Query<(&Tile, &Children, &RenderLayers)>,
 ){
     for tile_switch_request in event_reader.read(){
         if let Err(tile_board_error) = show_pressed_arrow_in_just_moved_direction_inner(
             tile_switch_request,
             &mut empty_tile_arrows,
-            game_board_query.single()
+            game_board_query.single(),
+            &tiles_with_children_query
         ){
             print_tile_board_error(tile_board_error);
         }
@@ -144,16 +144,38 @@ fn show_pressed_arrow_in_just_moved_direction(
 
 fn show_pressed_arrow_in_just_moved_direction_inner(
     tile_switch_request: &SwitchTilesLogic,
-    empty_tile_arrows: &mut Query<(&mut TextureAtlas,&EmptyTileArrow)>,
-    tile_board: &TileBoard
+    empty_tile_arrows: &mut Query<(Entity, &mut TextureAtlas,&EmptyTileArrow)>,
+    tile_board: &TileBoard,
+    tiles_with_children_query: &Query<(&Tile, &Children, &RenderLayers)>,
 )-> Result<(), TileBoardError>{
     let empty_index = tile_switch_request.empty_tile_index;
     let direction_moved_from = tile_switch_request.move_neighbor_from_direction;
     let empty_tile = tile_board.try_get_empty_tile(empty_index)?;
-    for (mut texture_atlas, arrow) in empty_tile_arrows{
-        if arrow.0 == direction_moved_from{
-            texture_atlas.index = empty_tile.to_highlighted_arrows_atlas_index().unwrap();
+    if let Some(empty_tile_children) = 
+        try_get_empty_tile_children_if_from_game_board(empty_tile, tiles_with_children_query)
+    {
+        for (arrow_entity, mut texture_atlas, arrow) in empty_tile_arrows{
+            if empty_tile_children.contains(&arrow_entity){
+                if arrow.0 == direction_moved_from{
+                    texture_atlas.index = empty_tile.to_highlighted_arrows_atlas_index().unwrap();
+                }
+            }
         }
     }
     Ok(())
+}
+
+
+fn try_get_empty_tile_children_if_from_game_board<'a>(
+    empty_tile: &Tile,
+    tiles_with_children_query: &'a Query<(&Tile, &Children, &RenderLayers)>,
+) -> Option<&'a Children>{
+    for (query_tile, children, &render_layers) in tiles_with_children_query{
+        for render_layer in render_layers.iter(){
+            if render_layer == 0 && *empty_tile == *query_tile{
+                return Some(children);
+            }
+        }
+    }
+    None
 }

@@ -1,27 +1,24 @@
-
-
-a new board was generated!
-Tile { type: Numbered, number: 10 } moved to GridLocation { row: 3, col: 0 }
-Tile { type: Numbered, number: 14 } moved to GridLocation { row: 3, col: 1 }
-Tile { type: Numbered, number: 6 } moved to GridLocation { row: 2, col: 1 }
-Tile { type: Numbered, number: 3 } moved to GridLocation { row: 1, col: 1 }
-Tile { type: Numbered, number: 3 } moved to GridLocation { row: 1, col: 2 }
-Tile { type: Numbered, number: 6 } moved to GridLocation { row: 1, col: 1 }
 new setting set: ChangeEmptyTilesCount(2)
 
 
 a new board was generated!
-Tile { type: Numbered, number: 6 } moved to GridLocation { row: 3, col: 2 }
-Tile { type: Numbered, number: 5 } moved to GridLocation { row: 2, col: 2 }
-Tile { type: Numbered, number: 12 } moved to GridLocation { row: 2, col: 1 }
-Tile { type: Numbered, number: 14 } moved to GridLocation { row: 1, col: 3 }
-
-
-a new board was generated!
-Tile { type: Numbered, number: 4 } moved to GridLocation { row: 3, col: 2 }
-Tile { type: Numbered, number: 11 } moved to GridLocation { row: 2, col: 2 }
-Tile { type: Numbered, number: 5 } moved to GridLocation { row: 2, col: 1 }
+Tile { type: Numbered, number: 13 } moved to GridLocation { row: 0, col: 0 }
+Tile { type: Numbered, number: 8 } moved to GridLocation { row: 0, col: 1 }
 Tile { type: Numbered, number: 2 } moved to GridLocation { row: 1, col: 1 }
-Tile { type: Numbered, number: 2 } moved to GridLocation { row: 1, col: 2 }
-Tile { type: Numbered, number: 4 } moved to GridLocation { row: 3, col: 3 }
-Tile { type: Numbered, number: 11 } moved to GridLocation { row: 3, col: 2 }
+Tile { type: Numbered, number: 5 } moved to GridLocation { row: 3, col: 2 }
+Tile { type: Numbered, number: 3 } moved to GridLocation { row: 2, col: 2 }
+Tile { type: Numbered, number: 3 } moved to GridLocation { row: 2, col: 3 }
+Tile { type: Numbered, number: 5 } moved to GridLocation { row: 2, col: 2 }
+Tile { type: Numbered, number: 1 } moved to GridLocation { row: 3, col: 2 }
+Tile { type: Numbered, number: 7 } moved to GridLocation { row: 3, col: 1 }
+Tile { type: Numbered, number: 5 } moved to GridLocation { row: 2, col: 1 }
+Tile { type: Numbered, number: 6 } moved to GridLocation { row: 2, col: 2 }
+Tile { type: Numbered, number: 6 } moved to GridLocation { row: 1, col: 2 }
+Tile { type: Numbered, number: 5 } moved to GridLocation { row: 2, col: 2 }
+Tile { type: Numbered, number: 5 } moved to GridLocation { row: 2, col: 1 }
+Tile { type: Numbered, number: 6 } moved to GridLocation { row: 2, col: 2 }
+Tile { type: Numbered, number: 2 } moved to GridLocation { row: 1, col: 0 }
+Tile { type: Numbered, number: 2 } moved to GridLocation { row: 1, col: 1 }
+Tile { type: Numbered, number: 4 } moved to GridLocation { row: 1, col: 0 }
+Tile { type: Numbered, number: 6 } moved to GridLocation { row: 1, col: 2 }
+Tile { type: Numbered, number: 6 } moved to GridLocation { row: 2, col: 2 }
