@@ -38,13 +38,13 @@ impl Display for GameScreenTextType{
                 String::from("")
             },
             GameScreenTextType::BoardAlreadyExistsInMemory(ExistingWallLayoutName(existing_layout_name)) => {
-                String::from("Wall layout already saved as ") + existing_layout_name
+                String::from("Layout already saved as ") + existing_layout_name
             },
             GameScreenTextType::DataBaseAtCapacity => {
                 String::from("Layouts memory at capacity")
             },
             GameScreenTextType::LayoutSavedSuccessfully(domain_board_name) => {
-                String::from("Walls layout saved successfully as ")+&domain_board_name.0
+                String::from("Layout saved successfully as ")+&domain_board_name.0
             },
             GameScreenTextType::CouldntGenerateBoard => {
                 String::from("Failed to generate a new board")
