@@ -15,7 +15,19 @@
                 tile_type: Numbered,
             )),
             Some((
+                index: 4,
+                tile_type: Numbered,
+            )),
+            Some((
                 index: 2,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 0,
+                tile_type: Empty,
+            )),
+            Some((
+                index: 5,
                 tile_type: Numbered,
             )),
             Some((
@@ -24,18 +36,6 @@
             )),
             Some((
                 index: 0,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 5,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 0,
-                tile_type: Empty,
-            )),
-            Some((
-                index: 4,
                 tile_type: Numbered,
             )),
             Some((

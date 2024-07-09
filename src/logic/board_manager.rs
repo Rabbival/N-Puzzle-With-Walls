@@ -63,7 +63,7 @@ fn move_tile_logic_inner(
     }
  
     let empty_tile_neighbors = 
-        game_board.get_direct_neighbors_of_empty(empty_tile_index)?;
+        game_board.get_direct_neighbors_of_empty(empty_tile_index);
     if let Some(&occupied_tile_original_location) = 
         empty_tile_neighbors.get(&move_neighbor_from_direction) 
     {

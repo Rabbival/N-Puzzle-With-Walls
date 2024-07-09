@@ -248,19 +248,11 @@ impl TileBoard {
         self.empty_tile_locations.get(empty_tile_index).unwrap()
     }
     
-    pub fn get_direct_neighbors_of_empty(
-        &self,
-        empty_tile_index: usize,
-    ) -> Result<HashMap<BasicDirection, GridLocation>, TileBoardError> {
-        let empty_locations_count = self.empty_tile_locations.len();
-        if empty_tile_index >= empty_locations_count{
-            Err(TileBoardError::TileIndexOutOfBounds(empty_tile_index))
-        }else{
-            Ok(self.get_neighbor_locations_of_type(
-                self.empty_tile_locations.get(empty_tile_index).unwrap(),
-                TileType::Numbered
-            ))
-        }
+    pub fn get_direct_neighbors_of_empty(&self, empty_tile_index: usize) -> HashMap<BasicDirection, GridLocation> {
+        self.get_neighbor_locations_of_type(
+            self.get_empty_tile_location(empty_tile_index),
+            TileType::Numbered
+        )
     }
 
     pub fn get_empty_neighbors(&self, origin: &GridLocation) -> FoundEmptyNeighbors {

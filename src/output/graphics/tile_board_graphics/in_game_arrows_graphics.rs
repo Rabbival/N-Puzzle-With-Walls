@@ -75,14 +75,12 @@ fn check_type_and_toggle_arrows(
         if let Some(empty_tile_children) = 
             try_get_empty_tile_children_if_from_game_board(empty_tile, tiles_with_children_query)
         {
-            if let Err(tile_board_error) = show_arrows_in_valid_directions(
+            show_arrows_in_valid_directions(
                 empty_tile_arrows,
                 game_board,
                 empty_tile,
                 empty_tile_children
-            ){
-                print_tile_board_error(tile_board_error);
-            }
+            );
         }
     }
     Ok(())
@@ -99,9 +97,9 @@ fn show_arrows_in_valid_directions(
     game_board: &TileBoard,
     empty_tile: &Tile,
     empty_tile_children_entities: &Children
-) -> Result<(), TileBoardError>{
+){
     let neighbors = 
-        game_board.get_direct_neighbors_of_empty(empty_tile.index)?;
+        game_board.get_direct_neighbors_of_empty(empty_tile.index);
     for (
         arrow_entity,
         mut visibility,
@@ -121,7 +119,6 @@ fn show_arrows_in_valid_directions(
             on_screen_tag.on_own_screen_visibility = Some(new_visibility);
         }
     }
-    Ok(())
 }
 
 fn show_pressed_arrow_in_just_moved_direction(
