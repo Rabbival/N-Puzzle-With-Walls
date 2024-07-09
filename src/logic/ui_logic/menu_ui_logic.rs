@@ -18,8 +18,11 @@ impl Plugin for MenuUiLogicPlugin {
                     update_menu_ui_after_press_general,
                     increase_or_decrease_wall_count_menu_ui_update,
                     show_applied_props,
-                    (toggle_options_relevant_to_loader,
-                    set_tree_generation_options_visibility).chain(),
+                    (
+                        toggle_options_relevant_to_loader,
+                        set_tree_generation_options_visibility
+                            .run_if(resource_changed::<UnappliedMenuWallCount>)
+                    ).chain(),
                 )
                     .in_set(InputSystemSets::InputHandling),
                 apply_wall_count_menu_ui_update.in_set(InputSystemSets::PostMainChanges),
@@ -243,43 +246,48 @@ fn apply_wall_count_menu_ui_update(
 }
 
 fn set_tree_generation_options_visibility(
+    mut visibility_change_event_writer: EventWriter<SetEntityVisibility>,
     unapplied_menu_wall_count: Res<UnappliedMenuWallCount>,
     planned_board_properties: Query<&BoardProperties, With<PlannedBoardProperties>>,
     mut tree_generation_options_query: Query<
-        (&mut Visibility, &mut CustomOnScreenTag, &mut HideByChosenGenerationMethod),
+        (Entity, &mut CustomOnScreenTag, &mut HideByChosenGenerationMethod),
         With<TreeGenerationOptionsTag>,
     >,
 ) {
-    if unapplied_menu_wall_count.is_changed() {
-        let (
-            mut current_visibility, 
-            mut custom_on_screen_tag,
-            mut chosen_methods_to_hide_in
-        ) = tree_generation_options_query.single_mut();
-        if let Some(own_screen_vis_for_toggle) = &mut custom_on_screen_tag.on_own_screen_visibility{
-            let current_generation_method = planned_board_properties.single().generation_method;
-            let mut shouldnt_show_due_to_gen_method = false;
-            for gen_method in chosen_methods_to_hide_in.generation_methods_when_should_hide.iter(){
-                if *gen_method == current_generation_method{
-                    shouldnt_show_due_to_gen_method = true;
-                    break;
+    let (
+        tree_options_entity, 
+        mut custom_on_screen_tag,
+        mut chosen_methods_to_hide_in
+    ) = tree_generation_options_query.single_mut();
+    if let Some(own_screen_vis_for_toggle) = &mut custom_on_screen_tag.on_own_screen_visibility{
+        let current_generation_method = planned_board_properties.single().generation_method;
+        let mut shouldnt_show_due_to_gen_method = false;
+        for gen_method in chosen_methods_to_hide_in.generation_methods_when_should_hide.iter(){
+            if *gen_method == current_generation_method{
+                shouldnt_show_due_to_gen_method = true;
+                break;
+            }
+        }
+        if unapplied_menu_wall_count.0 == 0 || shouldnt_show_due_to_gen_method
+        {
+            chosen_methods_to_hide_in.visibility_otherwise = Some(
+                if unapplied_menu_wall_count.0 == 0{
+                    Visibility::Hidden
+                }else{
+                    Visibility::Visible
                 }
-            }
-            if unapplied_menu_wall_count.0 == 0 || shouldnt_show_due_to_gen_method
-            {
-                chosen_methods_to_hide_in.visibility_otherwise = Some(
-                    if unapplied_menu_wall_count.0 == 0{
-                        Visibility::Hidden
-                    }else{
-                        Visibility::Visible
-                    }
-                );
-                *current_visibility = Visibility::Hidden;
-                *own_screen_vis_for_toggle = Visibility::Hidden;
-            } else {
-                *current_visibility = Visibility::Visible;
-                *own_screen_vis_for_toggle = Visibility::Visible;
-            }
+            );
+            *own_screen_vis_for_toggle = Visibility::Hidden;
+            visibility_change_event_writer.send(SetEntityVisibility {
+                entity: tree_options_entity,
+                visibility: Visibility::Hidden
+            });
+        } else {
+            *own_screen_vis_for_toggle = Visibility::Visible;
+            visibility_change_event_writer.send(SetEntityVisibility {
+                entity: tree_options_entity,
+                visibility: Visibility::Visible
+            });
         }
     }
 }

@@ -269,7 +269,7 @@ fn spawn_tile_in_location(
         ))
         .id();
 
-    if tile_to_spawn.tile_type != TileType::Wall && optional_loader_slot.is_none(){
+    if tile_to_spawn.tile_type != TileType::Wall{
         spawn_tile_addons_event_writer.send(SpawnTileAddons{
             tile_to_add_to: tile_to_spawn,
             tile_entity_id,

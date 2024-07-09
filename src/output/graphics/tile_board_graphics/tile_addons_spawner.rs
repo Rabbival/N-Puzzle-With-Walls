@@ -26,7 +26,6 @@ fn spawn_text_for_tile(
         let tile_to_spawn = addons_request.tile_to_add_to;
         let tile_entity_id = addons_request.tile_entity_id;
         let loader_slot_ownership_tag = addons_request.tile_loader_slot_ownership_tag;
-
         let text_spawn_loc_relative = Vec3::Z;
         let text_color = match tile_to_spawn.tile_type {
             TileType::Numbered => INDIGO_TEXT_COLOR,
@@ -56,7 +55,7 @@ fn spawn_text_for_tile(
                     transform: Transform::from_translation(text_spawn_loc_relative),
                     ..default()
                 },
-                RenderLayers::layer(loader_slot_ownership_tag.to_render_layer())
+                RenderLayers::layer(loader_slot_ownership_tag.to_render_layer()),
             ))
             .id();
         commands
@@ -71,7 +70,11 @@ fn spawn_arrows_for_tile_if_empty(
     mut commands: Commands
 ){
     for addons_request in event_reader.read(){
-        if addons_request.tile_to_add_to.tile_type != TileType::Empty {continue;}
+        if addons_request.tile_loader_slot_ownership_tag.0.is_some() ||
+            addons_request.tile_to_add_to.tile_type != TileType::Empty 
+        {
+            continue;
+        }
         for direction in BasicDirection::collect_all(){
             spawn_arrow_in_direction(
                 direction,
