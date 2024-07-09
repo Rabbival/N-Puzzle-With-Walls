@@ -57,11 +57,11 @@ fn determine_suggested_board_name(
         newborn_domain_board_name.index_of_existing_board_with_name =
             db_manager.get_existing_board_name_index(
                 game_board_name,
-                &board_name_query
+                board_name_query
             );
         game_board_name.clone()
     }else {
-        db_manager.generate_unique_default_name_for_board(&board_name_query)
+        db_manager.generate_unique_default_name_for_board(board_name_query)
     }
 }
 

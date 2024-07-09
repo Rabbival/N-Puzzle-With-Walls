@@ -53,8 +53,13 @@ fn save_to_data_base_and_system(
     mut commands: Commands
 ){
     for save_request in save_to_db_event_reader.read(){
+        
+        
+        println!("save request board name: {:?}", save_request.name);
+        
+        
         let index_saved_to = save_to_data_base_and_system_inner(
-            &save_request,
+            save_request,
             &mut db_manager,
             &mut domain_board_query,
             &mut commands

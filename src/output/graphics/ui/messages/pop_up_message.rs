@@ -59,7 +59,7 @@ fn reset_text_color_if_first_after_default(
     let mut background_color =  pop_up_dynamic_text_entity_query.single_mut();
     let first_input_since_default = background_color.0 == GRAY_TEXT_COLOR;
     if first_input_since_default {
-        background_color.0 = Color::NONE.into();
+        background_color.0 = Color::NONE;
     }
 }
 

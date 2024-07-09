@@ -79,7 +79,7 @@ fn check_type_and_toggle_arrows(
                 empty_tile_arrows,
                 game_board,
                 empty_tile,
-                &empty_tile_children
+                empty_tile_children
             ){
                 print_tile_board_error(tile_board_error);
             }
@@ -155,10 +155,8 @@ fn show_pressed_arrow_in_just_moved_direction_inner(
         try_get_empty_tile_children_if_from_game_board(empty_tile, tiles_with_children_query)
     {
         for (arrow_entity, mut texture_atlas, arrow) in empty_tile_arrows{
-            if empty_tile_children.contains(&arrow_entity){
-                if arrow.0 == direction_moved_from{
-                    texture_atlas.index = empty_tile.to_highlighted_arrows_atlas_index().unwrap();
-                }
+            if empty_tile_children.contains(&arrow_entity) && arrow.0 == direction_moved_from{
+                texture_atlas.index = empty_tile.to_highlighted_arrows_atlas_index().unwrap();
             }
         }
     }

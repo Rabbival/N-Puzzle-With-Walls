@@ -1,3 +1,4 @@
+use crate::data_base::example_boards::ExampleBoardsPlugin;
 use crate::prelude::*;
 
 pub mod domain_board;
@@ -7,6 +8,7 @@ pub mod domain_board_name;
 pub mod data_base_direct_functions;
 pub mod data_base_request_handler;
 pub mod newborn_domain_board_name;
+pub mod example_boards;
 
 pub struct DataBasePlugin;
 
@@ -16,7 +18,8 @@ impl Plugin for DataBasePlugin{
 			.add_plugins((
 				DataBaseStartupPlugin,
 				DataBaseRequestHandlerPlugin,
-				NewbornDomainBoardNamePlugin
+				NewbornDomainBoardNamePlugin,
+				ExampleBoardsPlugin
 			));
 	}
 }

@@ -6,7 +6,7 @@ pub struct DataBaseStartupPlugin;
 impl Plugin for DataBaseStartupPlugin{
 	fn build(&self, app: &mut App) {
 		app
-			.add_systems(Startup, (
+			.add_systems(PreStartup, (
 					read_saved_layout_from_system,
 					insert_saved_layout_entities_to_data_base
 				).chain()

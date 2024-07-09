@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Event)]
+#[derive(Event, Default)]
 pub struct SaveToDB{
     pub board: DomainBoard, 
     pub name: DomainBoardName,

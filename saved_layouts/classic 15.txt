@@ -4,7 +4,7 @@
         size: Small,
         wall_count: 0,
         empty_count: 1,
-        generation_method: Load,
+        generation_method: Auto,
         tree_traveller_type: BFS,
     ),
     grid: (
@@ -15,23 +15,7 @@
                 tile_type: Numbered,
             )),
             Some((
-                index: 5,
-                tile_type: Numbered,
-            )),
-            Some((
                 index: 2,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 10,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 6,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 9,
                 tile_type: Numbered,
             )),
             Some((
@@ -39,7 +23,7 @@
                 tile_type: Numbered,
             )),
             Some((
-                index: 7,
+                index: 6,
                 tile_type: Numbered,
             )),
             Some((
@@ -47,15 +31,7 @@
                 tile_type: Numbered,
             )),
             Some((
-                index: 8,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 11,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 13,
+                index: 10,
                 tile_type: Numbered,
             )),
             Some((
@@ -63,7 +39,19 @@
                 tile_type: Numbered,
             )),
             Some((
-                index: 12,
+                index: 9,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 13,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 0,
+                tile_type: Empty,
+            )),
+            Some((
+                index: 5,
                 tile_type: Numbered,
             )),
             Some((
@@ -71,8 +59,20 @@
                 tile_type: Numbered,
             )),
             Some((
-                index: 0,
-                tile_type: Empty,
+                index: 8,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 12,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 11,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 7,
+                tile_type: Numbered,
             )),
         ],
     ),
