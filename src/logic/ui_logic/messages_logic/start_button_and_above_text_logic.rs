@@ -10,12 +10,12 @@ impl Plugin for TextAboveStartButtonLogicPlugin {
             .add_systems(
                 Update,
                 (
-                    listen_for_apply_button_press,
                     (
                         listen_for_alert_dismissal,
-                        alert_player_of_reached_bounds.before(update_wall_count_unapplied),
-                        alert_player_of_unsaved_changes.in_set(InputSystemSets::InitialChanges),
-                    ).chain(),
+                        alert_player_of_reached_bounds
+                    ).chain().in_set(InputSystemSets::InputHandlingPreparations),
+                    alert_player_of_unsaved_changes.in_set(InputSystemSets::InitialChanges),
+                    listen_for_apply_button_press,
                     show_board_couldnt_be_generated,
                     update_main_button_text_to_show_functionality
                 )

@@ -4,6 +4,7 @@ use crate::prelude::AppState;
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub enum InputSystemSets {
     InputListening,
+    InputHandlingPreparations,
     InputHandling,
     InitialChanges,
     PostInitialChanges,
@@ -27,6 +28,7 @@ impl Plugin for SystemSetsPlugin {
             Update,
             (
                 InputSystemSets::InputListening,
+                InputSystemSets::InputHandlingPreparations,
                 InputSystemSets::InputHandling,
                 InputSystemSets::InitialChanges,
                 InputSystemSets::PostInitialChanges,

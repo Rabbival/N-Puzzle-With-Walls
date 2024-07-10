@@ -17,7 +17,6 @@ impl Plugin for UpdateBoardPropertiesPlugin {
                     update_wall_count_unapplied,
                     set_applied_props_and_exit_menu,
                 )
-                    .chain()
                     .in_set(InputSystemSets::InputHandling),
                 apply_wall_count_to_planned_props.in_set(InputSystemSets::PostMainChanges),
             )

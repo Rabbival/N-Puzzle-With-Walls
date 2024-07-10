@@ -11,7 +11,15 @@
         grid_side_length: 3,
         grid: [
             Some((
+                index: 0,
+                tile_type: Numbered,
+            )),
+            Some((
                 index: 4,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 5,
                 tile_type: Numbered,
             )),
             Some((
@@ -24,15 +32,11 @@
             )),
             Some((
                 index: 0,
-                tile_type: Numbered,
+                tile_type: Empty,
             )),
             Some((
                 index: 3,
                 tile_type: Numbered,
-            )),
-            Some((
-                index: 0,
-                tile_type: Empty,
             )),
             Some((
                 index: 6,
@@ -40,10 +44,6 @@
             )),
             Some((
                 index: 7,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 5,
                 tile_type: Numbered,
             )),
         ],
