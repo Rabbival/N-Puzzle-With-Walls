@@ -1,3 +1,4 @@
+use crate::data_base::example_boards::ExampleBoards;
 use crate::input::keyboard_utilities::try_get_string_from_keycode;
 use crate::prelude::*;
 
@@ -163,6 +164,7 @@ fn set_newborn_board_displayed_name_and_message(
     mut text_above_pop_up_buttons_entity_query: Query<&mut Text, (With<TextAbovePopUpMessageButtons>, Without<PopUpMessageDynamicTextTag>)>,
     newborn_domain_board_name: Res<NewbornDomainBoardName>,
     game_board_name_query: Query<&DomainBoardName, With<GameBoard>>,
+    example_boards: Res<ExampleBoards>
 ){
     for name_request in event_reader.read() {
         let requested_name = name_request.0.clone();
@@ -181,6 +183,11 @@ fn set_newborn_board_displayed_name_and_message(
             (
                 TextAbovePopUpButtonsType::OverwriteLoadedBoardName,
                 true
+            )
+        }else if example_boards.0.contains_key(&requested_name){
+            (
+                TextAbovePopUpButtonsType::BoardNameIsExampleBoardName,
+                false
             )
         }else if newborn_domain_board_name.index_of_existing_board_with_name.is_some(){
             (

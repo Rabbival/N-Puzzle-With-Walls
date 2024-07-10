@@ -108,12 +108,20 @@ fn check_if_solved(
     mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
     solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
 ) {
-    for _check_request in check_if_board_is_solved_listener.read(){
-        if game_board_query.single().grid == solved_board_query.single().grid {
-            set_game_state_to_victory.set(GameState::Victory);
-            game_log(GameLog::Victory);
-            game_board_query.single_mut().ignore_player_input = true;
+    'request_check: for _check_request in check_if_board_is_solved_listener.read(){
+        let game_board_iter = game_board_query.single().grid.iter();
+        let solved_board_iter = solved_board_query.single().grid.iter();
+        for ((_, game_tile), (_, solved_tile)) in game_board_iter.zip(solved_board_iter) {
+            if game_tile.tile_type == TileType::Empty && solved_tile.tile_type == TileType::Empty{
+                continue;
+            }
+            if game_tile != solved_tile {
+                continue 'request_check;
+            }
         }
+        set_game_state_to_victory.set(GameState::Victory);
+        game_log(GameLog::Victory);
+        game_board_query.single_mut().ignore_player_input = true;
     }
 }
 

@@ -24,6 +24,9 @@ fn spawn_text_for_tile(
 ){
     for addons_request in event_reader.read(){
         let tile_to_spawn = addons_request.tile_to_add_to;
+        if tile_to_spawn.tile_type == TileType::Empty{
+            continue;
+        }
         let tile_entity_id = addons_request.tile_entity_id;
         let loader_slot_ownership_tag = addons_request.tile_loader_slot_ownership_tag;
         let text_spawn_loc_relative = Vec3::Z;
@@ -32,10 +35,7 @@ fn spawn_text_for_tile(
             TileType::Empty => GRAY_TEXT_COLOR,
             _ => Color::NONE,
         };
-        let mut number_to_display = tile_to_spawn.index;
-        if let TileType::Numbered = tile_to_spawn.tile_type {
-            number_to_display += 1;
-        }
+        let number_to_display = tile_to_spawn.index + 1;
 
         let tile_text_entity_id = commands
             .spawn((
