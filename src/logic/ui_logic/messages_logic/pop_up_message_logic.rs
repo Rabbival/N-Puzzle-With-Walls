@@ -174,20 +174,20 @@ fn set_newborn_board_displayed_name_and_message(
             &mut text_above_pop_up_buttons_entity_query.single_mut().sections[0];
         let game_board_name = game_board_name_query.single();
         let (new_pop_up_button_text, confirm_allowed) =
-        if requested_name.0.is_empty(){
+        if requested_name.0.is_empty() {
             (
                 TextAbovePopUpButtonsType::MustGiveAName,
+                false
+            )
+        }else if example_boards.0.contains_key(&requested_name){
+            (
+                TextAbovePopUpButtonsType::BoardNameIsExampleBoardName,
                 false
             )
         }else if *game_board_name == requested_name{
             (
                 TextAbovePopUpButtonsType::OverwriteLoadedBoardName,
                 true
-            )
-        }else if example_boards.0.contains_key(&requested_name){
-            (
-                TextAbovePopUpButtonsType::BoardNameIsExampleBoardName,
-                false
             )
         }else if newborn_domain_board_name.index_of_existing_board_with_name.is_some(){
             (
