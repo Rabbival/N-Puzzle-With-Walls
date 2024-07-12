@@ -1,5 +1,5 @@
 use crate::output::game_session_log::append_to_game_session_log_file;
-use crate::prelude::{BoardGenerationError, DomainBoardName, EntityRelatedCostumeError, error, print_system_access_error, SystemAccessError, TileMoveError};
+use crate::prelude::{DomainBoardName, error, print_system_access_error, SystemAccessError};
 
 #[derive(Debug, Clone)]
 pub enum DataBaseError {
