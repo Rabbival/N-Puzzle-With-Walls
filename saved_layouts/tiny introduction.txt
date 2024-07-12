@@ -23,11 +23,11 @@
                 tile_type: Numbered,
             )),
             Some((
-                index: 1,
+                index: 3,
                 tile_type: Numbered,
             )),
             Some((
-                index: 2,
+                index: 7,
                 tile_type: Numbered,
             )),
             Some((
@@ -35,15 +35,15 @@
                 tile_type: Empty,
             )),
             Some((
-                index: 3,
-                tile_type: Numbered,
-            )),
-            Some((
                 index: 6,
                 tile_type: Numbered,
             )),
             Some((
-                index: 7,
+                index: 2,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 1,
                 tile_type: Numbered,
             )),
         ],

@@ -123,7 +123,7 @@ impl TileBoard{
         'outer_for: for i in (0..*grid_side_length_u32).rev() {
             for j in (0..*grid_side_length_u32).rev() {
                 let location = GridLocation::new(i as i32, j as i32);
-                if self.tiletype_in_location(&location)?.is_none() {
+                if self.try_get_tiletype_in_location(&location)?.is_none() {
                     self.set(&location, Tile::new(TileType::Empty))?;
                     empty_tile_counter -= 1;
                     if empty_tile_counter == 0 {
@@ -143,7 +143,7 @@ impl TileBoard{
         for i in 0..*grid_side_length_u32 {
             for j in 0..*grid_side_length_u32 {
                 let location = GridLocation::new(i as i32, j as i32);
-                if self.tiletype_in_location(&location)?.is_none() {
+                if self.try_get_tiletype_in_location(&location)?.is_none() {
                     self.set(&location, Tile::new(TileType::Numbered))?
                 }
             }
@@ -179,14 +179,9 @@ impl TileBoard {
         first: &GridLocation,
         second: &GridLocation,
     ) -> Result<(), TileMoveError> {
-        let first_tile_type = wrap_to_tile_move_error
-            (self.tiletype_in_location_if_none(first))?;
-        let second_tile_type = wrap_to_tile_move_error
-            (self.tiletype_in_location_if_none(second))?;
-
         let empty_tile_index;
-        if let TileType::Empty = first_tile_type {
-            if let TileType::Empty = second_tile_type {
+        if let TileType::Empty = self.tiletype_in_location(first)? {
+            if let TileType::Empty = self.tiletype_in_location(second)? {
                 return Err(TileMoveError::TriedToSwitchEmptyWithEmpty);
             } else {
                 empty_tile_index = self.get(first).unwrap().unwrap().index;
@@ -197,20 +192,19 @@ impl TileBoard {
             self.empty_tile_locations[empty_tile_index] = *first;
         }
 
-        let swap_result = self.grid.swap_by_location(first, second);
-        wrap_to_tile_move_error(wrap_to_tile_board_error(swap_result))
+        Ok(self.grid.swap_by_location(first, second)?)
     }
 
-    pub fn tiletype_in_location_if_none(&self, location: &GridLocation) 
+    pub fn tiletype_in_location(&self, location: &GridLocation)
     -> Result<TileType, TileBoardError>
     {
-        match wrap_to_tile_board_error(self.get(location))?{
+        match self.get(location)?{
             Some(tile_ref) => Ok(tile_ref.tile_type),
             None => Err(TileBoardError::NoTileInCell(*location))
         }
     }
 
-    fn tiletype_in_location(&self, location: &GridLocation) 
+    fn try_get_tiletype_in_location(&self, location: &GridLocation)
     -> Result<Option<TileType>, GridError>
     {
         match self.get(location)?{
@@ -300,7 +294,7 @@ impl TileBoard {
 
 //from grid functions
 impl TileBoard {
-    pub fn get_side_length(&self) -> &u8 {
+    pub fn get_side_length(&self) -> u8 {
         self.grid.get_side_length()
     }
 
@@ -345,7 +339,7 @@ impl TileBoard {
     fn none_check_get(&self, location: &GridLocation) 
     -> Result<&Tile, TileBoardError>
     {
-        match wrap_to_tile_board_error(self.get(location))? {
+        match self.get(location)? {
             None => Err(TileBoardError::NoTileInCell(*location)),
             Some(tile_ref) => Ok(tile_ref),
         }
@@ -355,26 +349,5 @@ impl TileBoard {
 impl Default for TileBoard {
     fn default() -> Self {
         Self::new(BoardSize::default().to_grid_side_length())
-    }
-}
-
-
-fn wrap_to_tile_board_error<T>(result: Result<T, GridError>)
--> Result<T, TileBoardError>{
-    match result {
-        Err(grid_error) => {
-            Err(TileBoardError::GridError(grid_error))
-        },
-        Ok(value) => Ok(value)
-    }
-}
-
-fn wrap_to_tile_move_error<T>(result: Result<T, TileBoardError>)
--> Result<T, TileMoveError>{
-    match result {
-        Err(board_error) => {
-            Err(TileMoveError::TileBoardError(board_error))
-        },
-        Ok(value) => Ok(value)
     }
 }

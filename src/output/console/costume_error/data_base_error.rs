@@ -1,10 +1,10 @@
 use crate::output::game_session_log::append_to_game_session_log_file;
-use crate::prelude::{BoardGenerationError, error, print_system_access_error, SystemAccessError};
+use crate::prelude::{BoardGenerationError, DomainBoardName, EntityRelatedCostumeError, error, print_system_access_error, SystemAccessError, TileMoveError};
 
 #[derive(Debug, Clone)]
 pub enum DataBaseError {
     SystemAccessError(SystemAccessError),
-    CouldntBuildTileBoardFromWallLocations(BoardGenerationError)
+    MismatchedGridAndProperties(DomainBoardName)
 }
 
 pub fn print_data_base_error(data_base_error: DataBaseError) {
@@ -12,11 +12,17 @@ pub fn print_data_base_error(data_base_error: DataBaseError) {
         DataBaseError::SystemAccessError(system_access_error) => {
             print_system_access_error(system_access_error);
         },
-        DataBaseError::CouldntBuildTileBoardFromWallLocations(board_building_error) => {
+        DataBaseError::MismatchedGridAndProperties(board_name) => {
             let error_string =
-                format!("Couldn't build tile board from wall locations due to the following error: {:?}", board_building_error);
+                format!("The board's grid and properties don't match for {:?}", board_name);
             append_to_game_session_log_file(error_string.clone());
             error!(error_string);
         }
+    }
+}
+
+impl From<SystemAccessError> for DataBaseError{
+    fn from(value: SystemAccessError) -> Self {
+        Self::SystemAccessError(value)
     }
 }

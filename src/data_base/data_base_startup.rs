@@ -15,12 +15,6 @@ impl Plugin for DataBaseStartupPlugin{
 }
 
 fn read_saved_layout_from_system(mut commands: Commands){
-	if let Err(data_base_error) = read_saved_layout_from_system_inner(&mut commands) {
-		print_data_base_error(data_base_error);
-	}
-}
-
-fn read_saved_layout_from_system_inner(commands: &mut Commands) -> Result<(), DataBaseError> {
 	create_folder_if_none_exists_yet(FolderToAccess::SavedLayouts);
 	let valid_text_file_names =
 		get_all_valid_text_file_names_in_folder(FolderToAccess::SavedLayouts);
@@ -30,20 +24,27 @@ fn read_saved_layout_from_system_inner(commands: &mut Commands) -> Result<(), Da
 			FolderToAccess::SavedLayouts,
 			valid_text_file_name.clone()
 		){
-			Err(system_access_error) => {
-				return Err(DataBaseError::SystemAccessError(system_access_error));
+			Err(system_error) => {
+				print_system_access_error(system_error);
+				continue;
 			},
 			Ok(parsed_domain_board) => {
-				let file_name_without_postfix = valid_text_file_name.to_name();
-				DataBaseManager::spawn_layout_entity(
-					&DomainBoardName(file_name_without_postfix),
-					&parsed_domain_board,
-					commands
-				);
+				let board_name = DomainBoardName(valid_text_file_name.to_name());
+				if parsed_domain_board.has_valid_counters_and_size(){
+					DataBaseManager::spawn_layout_entity(
+						&board_name,
+						&parsed_domain_board,
+						&mut commands
+					);
+				}else{
+					print_data_base_error(
+						DataBaseError::MismatchedGridAndProperties(board_name)
+					);
+					continue;
+				}
 			}
 		}
 	}
-	Ok(())
 }
 
 fn insert_saved_layout_entities_to_data_base(

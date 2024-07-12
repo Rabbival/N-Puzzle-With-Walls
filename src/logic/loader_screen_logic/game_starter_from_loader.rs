@@ -111,7 +111,7 @@ fn request_applied_option_tags_for_menu_buttons(
 fn try_making_solved_tile_board_from_tile_board(tile_board: &TileBoard, applied_props: &BoardProperties)
     -> Result<TileBoard, BoardGenerationError>
 {
-    let grid_side_length = *tile_board.grid.get_side_length();
+    let grid_side_length = tile_board.get_side_length();
     let mut solved_board = TileBoard::new(grid_side_length);
     let grid_side_length_u32 = grid_side_length as u32;
     let (wall_locations , _) : (Vec<GridLocation>, Vec<&Tile>) = tile_board.walls_iter().unzip();

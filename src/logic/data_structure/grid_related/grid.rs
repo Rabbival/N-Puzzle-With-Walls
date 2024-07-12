@@ -135,8 +135,8 @@ impl<T: Clone> Grid<T> {
         }
     }
 
-    pub fn get_side_length(&self) -> &u8 {
-        &self.grid_side_length
+    pub fn get_side_length(&self) -> u8 {
+        self.grid_side_length
     }
 
     pub fn get(&self, location: &GridLocation) 

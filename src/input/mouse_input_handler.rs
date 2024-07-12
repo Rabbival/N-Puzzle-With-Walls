@@ -162,10 +162,12 @@ fn handle_request_no_choice_pending(
             Ok(())
         },
         FoundEmptyNeighbors::MoreThanOneEmptyNeighbor(empty_neighbors) => {
-            **multiple_empty_tiles_choice_manager = MultipleEmptyTilesChoiceManager{
-                        choice_pending: true,
-                        possible_empty_tiles_locations_and_directions: Some(empty_neighbors),
-                    };
+            if game_board.tiletype_in_location(&clicked_grid_location)? == TileType::Numbered{
+                **multiple_empty_tiles_choice_manager = MultipleEmptyTilesChoiceManager{
+                    choice_pending: true,
+                    possible_empty_tiles_locations_and_directions: Some(empty_neighbors),
+                };
+            }
             Ok(())
         },
         FoundEmptyNeighbors::NoEmptyNeighbors => Err(TileMoveError::NoEmptyNeighbor),

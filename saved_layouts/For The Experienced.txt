@@ -15,20 +15,20 @@
                 tile_type: Wall,
             )),
             Some((
-                index: 7,
-                tile_type: Numbered,
-            )),
-            Some((
                 index: 1,
                 tile_type: Numbered,
             )),
             Some((
-                index: 2,
+                index: 6,
                 tile_type: Numbered,
             )),
             Some((
-                index: 3,
+                index: 0,
                 tile_type: Numbered,
+            )),
+            Some((
+                index: 0,
+                tile_type: Empty,
             )),
             Some((
                 index: 4,
@@ -39,11 +39,11 @@
                 tile_type: Numbered,
             )),
             Some((
-                index: 0,
+                index: 5,
                 tile_type: Numbered,
             )),
             Some((
-                index: 11,
+                index: 7,
                 tile_type: Numbered,
             )),
             Some((
@@ -52,82 +52,10 @@
             )),
             Some((
                 index: 2,
-                tile_type: Wall,
-            )),
-            Some((
-                index: 8,
                 tile_type: Numbered,
-            )),
-            Some((
-                index: 6,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 16,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 20,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 9,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 12,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 14,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 0,
-                tile_type: Empty,
-            )),
-            Some((
-                index: 3,
-                tile_type: Wall,
-            )),
-            Some((
-                index: 25,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 4,
-                tile_type: Wall,
             )),
             Some((
                 index: 13,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 17,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 5,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 5,
-                tile_type: Wall,
-            )),
-            Some((
-                index: 24,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 6,
-                tile_type: Wall,
-            )),
-            Some((
-                index: 18,
-                tile_type: Numbered,
-            )),
-            Some((
-                index: 22,
                 tile_type: Numbered,
             )),
             Some((
@@ -135,24 +63,96 @@
                 tile_type: Numbered,
             )),
             Some((
+                index: 2,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 17,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 22,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 18,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 14,
+                tile_type: Numbered,
+            )),
+            Some((
                 index: 19,
                 tile_type: Numbered,
+            )),
+            Some((
+                index: 3,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 12,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 4,
+                tile_type: Wall,
             )),
             Some((
                 index: 23,
                 tile_type: Numbered,
             )),
             Some((
-                index: 7,
+                index: 9,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 20,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 24,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 11,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 5,
                 tile_type: Wall,
+            )),
+            Some((
+                index: 8,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 3,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 6,
+                tile_type: Wall,
+            )),
+            Some((
+                index: 21,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 16,
+                tile_type: Numbered,
+            )),
+            Some((
+                index: 25,
+                tile_type: Numbered,
             )),
             Some((
                 index: 26,
                 tile_type: Numbered,
             )),
             Some((
-                index: 21,
-                tile_type: Numbered,
+                index: 7,
+                tile_type: Wall,
             )),
         ],
     ),
