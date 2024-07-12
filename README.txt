@@ -8,3 +8,6 @@ Pressing ESC when a pop-up message appears would close it, Enter would confirm i
 Arrow keys may also be used for navigating the Loader screen.
 
 Enjoy!
+
+This project exists thanks to many friends who helped me playtest and rethink along the way.
+I'd also like to thank mwbraynt for making the project that gave me the initial direction as to how to use a clicked grid: https://github.com/mwbryant/logic_management_game/tree/master 
