@@ -4,30 +4,35 @@ pub struct BoardManagerPlugin;
 
 impl Plugin for BoardManagerPlugin {
     fn build(&self, app: &mut App) {
-        app
+        app.add_systems(OnExit(AppState::Game), toggle_board_lock)
+            .add_systems(OnEnter(AppState::Game), toggle_board_lock)
             .add_systems(
-                OnExit(AppState::Game),
-                toggle_board_lock,
-            )
-            .add_systems(
-                OnEnter(AppState::Game),
-                toggle_board_lock
-            )
-            .add_systems(
-            Update,
-            (
-                    move_tile_logic,
-                    check_if_solved
-                )
-                .chain()
-                .in_set(InputSystemSets::InputHandling),
-        );
+                Update,
+                (
+                    (move_tile_logic, check_if_solved)
+                        .chain()
+                        .in_set(InputSystemSets::InputHandling),
+                    listen_for_board_lock_change_requests.in_set(InputSystemSets::LateChanges),
+                ),
+            );
     }
 }
 
-fn toggle_board_lock(mut game_board_query: Query<&mut TileBoard, With<GameBoard>>) {
-    let current_lock_state = &mut game_board_query.single_mut().ignore_player_input;
-    *current_lock_state = !*current_lock_state;
+fn toggle_board_lock(
+    mut event_writer: EventWriter<SetGameBoardLock>,
+    game_board_query: Query<&TileBoard, With<GameBoard>>,
+) {
+    let current_lock_state = game_board_query.single().ignore_player_input;
+    event_writer.send(SetGameBoardLock(!current_lock_state));
+}
+
+fn listen_for_board_lock_change_requests(
+    mut event_reader: EventReader<SetGameBoardLock>,
+    mut game_board_query: Query<&mut TileBoard, With<GameBoard>>,
+) {
+    for lock_change_request in event_reader.read() {
+        game_board_query.single_mut().ignore_player_input = lock_change_request.0;
+    }
 }
 
 /// graphics switched before logic for the sake of graphics function readability
@@ -61,16 +66,16 @@ fn move_tile_logic_inner(
     if game_board.ignore_player_input {
         return Err(TileMoveError::BoardFrozenToPlayer);
     }
- 
-    let empty_tile_neighbors = 
-        game_board.get_direct_neighbors_of_empty(empty_tile_index);
-    if let Some(&occupied_tile_original_location) = 
-        empty_tile_neighbors.get(&move_neighbor_from_direction) 
+
+    let empty_tile_neighbors = game_board.get_direct_neighbors_of_empty(empty_tile_index);
+    if let Some(&occupied_tile_original_location) =
+        empty_tile_neighbors.get(&move_neighbor_from_direction)
     {
         let optional_occupied_tile = game_board.get(&occupied_tile_original_location)?;
         if optional_occupied_tile.is_none() {
-            return Err(TileMoveError::TileBoardError
-                (TileBoardError::NoTileInCell(occupied_tile_original_location)));
+            return Err(TileMoveError::TileBoardError(TileBoardError::NoTileInCell(
+                occupied_tile_original_location,
+            )));
         }
         let occupied_tile = *optional_occupied_tile.unwrap();
         if occupied_tile.tile_type == TileType::Wall {
@@ -79,8 +84,14 @@ fn move_tile_logic_inner(
 
         let empty_tile_original_location = *game_board.get_empty_tile_location(empty_tile_index);
         let empty_tile = *game_board.try_get_empty_tile(empty_tile_index)?;
-        game_board.swap_tiles_by_location(&empty_tile_original_location, &occupied_tile_original_location)?;
-        game_log(GameLog::TilesMoved(&occupied_tile, &empty_tile_original_location));
+        game_board.swap_tiles_by_location(
+            &empty_tile_original_location,
+            &occupied_tile_original_location,
+        )?;
+        game_log(GameLog::TilesMoved(
+            &occupied_tile,
+            &empty_tile_original_location,
+        ));
 
         graphics_event_writer.send(UpdateTileLocationGraphics {
             tile: occupied_tile,
@@ -103,28 +114,28 @@ fn move_tile_logic_inner(
 
 /// also freezes the board if it is solved
 fn check_if_solved(
+    mut lock_toggle_event_writer: EventWriter<SetGameBoardLock>,
     mut check_if_board_is_solved_listener: EventReader<CheckIfBoardIsSolved>,
     mut set_game_state_to_victory: ResMut<NextState<GameState>>,
-    mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
+    game_board_query: Query<&TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
     solved_board_query: Query<&TileBoard, (With<SolvedBoard>, Without<GameBoard>)>,
 ) {
-    'request_check: for _check_request in check_if_board_is_solved_listener.read(){
+    'request_check: for _check_request in check_if_board_is_solved_listener.read() {
         let game_board_iter = game_board_query.single().grid.iter();
         let solved_board_iter = solved_board_query.single().grid.iter();
         for ((_, game_tile), (_, solved_tile)) in game_board_iter.zip(solved_board_iter) {
-            if game_tile.tile_type == TileType::Empty && solved_tile.tile_type == TileType::Empty{
+            if game_tile.tile_type == TileType::Empty && solved_tile.tile_type == TileType::Empty {
                 continue;
             }
             if game_tile != solved_tile {
                 continue 'request_check;
             }
         }
+        lock_toggle_event_writer.send(SetGameBoardLock(true));
         set_game_state_to_victory.set(GameState::Victory);
         game_log(GameLog::Victory);
-        game_board_query.single_mut().ignore_player_input = true;
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -133,8 +144,7 @@ mod tests {
     #[test]
     fn test_valid_request() {
         let mut app = App::new();
-        app
-            .add_event::<UpdateTileLocationGraphics>()
+        app.add_event::<UpdateTileLocationGraphics>()
             .add_event::<CheckIfBoardIsSolved>()
             .add_systems(Update, test_valid_request_inner);
         app.update();
@@ -172,13 +182,13 @@ mod tests {
         check_writer: &mut EventWriter<CheckIfBoardIsSolved>,
     ) -> bool {
         let mut tile_board = TileBoard::default();
-        generate_solved_board_inner(
-            &BoardProperties::default(),
-            &mut tile_board
-        ).unwrap();
+        generate_solved_board_inner(&BoardProperties::default(), &mut tile_board).unwrap();
         tile_board.ignore_player_input = false;
         let direction_check_outcome =
             move_tile_logic_inner(graphics_writer, check_writer, from_dir, 0, &mut tile_board);
-        matches!(direction_check_outcome, Err(TileMoveError::NoOccupiedTileInThatDirection(_)))
+        matches!(
+            direction_check_outcome,
+            Err(TileMoveError::NoOccupiedTileInThatDirection(_))
+        )
     }
 }

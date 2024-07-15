@@ -2,6 +2,9 @@ use crate::logic::enums::board_building_request::BoardBuildingRequest;
 use crate::prelude::*;
 
 #[derive(Event)]
+pub struct SetGameBoardLock(pub bool);
+
+#[derive(Event)]
 pub struct BuildNewBoard(pub BoardBuildingRequest);
 
 #[derive(Event, Default)]
@@ -12,7 +15,7 @@ pub struct SpawnTileInLocation {
 }
 
 #[derive(Event)]
-pub struct SpawnTileAddons{
+pub struct SpawnTileAddons {
     pub tile_to_add_to: Tile,
     pub tile_entity_id: Entity,
     pub tile_loader_slot_ownership_tag: LoaderSlotOwnershipTag,
@@ -24,6 +27,7 @@ impl Plugin for ResetEventPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<BuildNewBoard>()
             .add_event::<SpawnTileInLocation>()
-            .add_event::<SpawnTileAddons>();
+            .add_event::<SpawnTileAddons>()
+            .add_event::<SetGameBoardLock>();
     }
 }

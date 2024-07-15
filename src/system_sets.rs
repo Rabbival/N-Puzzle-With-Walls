@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::prelude::AppState;
+use bevy::prelude::*;
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub enum InputSystemSets {
@@ -11,6 +11,7 @@ pub enum InputSystemSets {
     MainChanges,
     PostMainChanges,
     LateChanges,
+    LatestChanges,
 }
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
@@ -34,7 +35,8 @@ impl Plugin for SystemSetsPlugin {
                 InputSystemSets::PostInitialChanges,
                 InputSystemSets::MainChanges,
                 InputSystemSets::PostMainChanges,
-                InputSystemSets::LateChanges
+                InputSystemSets::LateChanges,
+                InputSystemSets::LatestChanges,
             )
                 .chain(),
         )
