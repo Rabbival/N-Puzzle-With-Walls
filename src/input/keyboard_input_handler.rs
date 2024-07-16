@@ -23,7 +23,6 @@ impl Plugin for KeyboardInputHandlerPlugin {
                     confirm_pop_up_message,
                     cancel_pop_up_message,
                     open_menu,
-                    listed_for_debug_key_which_is_k,
                 )
                     .chain()
                     .in_set(InputSystemSets::InputListening),
@@ -204,8 +203,4 @@ fn listen_for_app_closing(
     if keyboard_input.just_pressed(KeyCode::Escape) && keyboard_input.pressed(KeyCode::ShiftLeft) {
         end_game_event_writer.send(EndGame);
     }
-}
-
-fn listed_for_debug_key_which_is_k(keyboard_input: Res<ButtonInput<KeyCode>>) {
-    if keyboard_input.just_pressed(KeyCode::KeyK) {}
 }

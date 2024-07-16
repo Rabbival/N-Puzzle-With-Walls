@@ -4,26 +4,16 @@ pub struct BoardManagerPlugin;
 
 impl Plugin for BoardManagerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnExit(AppState::Game), toggle_board_lock)
-            .add_systems(OnEnter(AppState::Game), toggle_board_lock)
-            .add_systems(
-                Update,
-                (
-                    (move_tile_logic, check_if_solved)
-                        .chain()
-                        .in_set(InputSystemSets::InputHandling),
-                    listen_for_board_lock_change_requests.in_set(InputSystemSets::LateChanges),
-                ),
-            );
+        app.add_systems(
+            Update,
+            (
+                (move_tile_logic, check_if_solved)
+                    .chain()
+                    .in_set(InputSystemSets::InputHandling),
+                listen_for_board_lock_change_requests.in_set(InputSystemSets::LateChanges),
+            ),
+        );
     }
-}
-
-fn toggle_board_lock(
-    mut event_writer: EventWriter<SetGameBoardLock>,
-    game_board_query: Query<&TileBoard, With<GameBoard>>,
-) {
-    let current_lock_state = game_board_query.single().ignore_player_input;
-    event_writer.send(SetGameBoardLock(!current_lock_state));
 }
 
 fn listen_for_board_lock_change_requests(
@@ -31,6 +21,8 @@ fn listen_for_board_lock_change_requests(
     mut game_board_query: Query<&mut TileBoard, With<GameBoard>>,
 ) {
     for lock_change_request in event_reader.read() {
+        println!("lock change request: {:?}", lock_change_request.0);
+
         game_board_query.single_mut().ignore_player_input = lock_change_request.0;
     }
 }

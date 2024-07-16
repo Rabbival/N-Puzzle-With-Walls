@@ -69,10 +69,9 @@ fn declare_board_generation_done(
     // the board's input ignorance won't be toggled
     if AppState::Game != *current_app_state.get() {
         app_state.set(AppState::Game);
-    } else {
-        lock_toggle_event_writer.send(SetGameBoardLock(false));
     }
 
+    lock_toggle_event_writer.send(SetGameBoardLock(false));
     game_log(GameLog::NewBoardGenerated);
     game_state.set(GameState::Regular);
 }
