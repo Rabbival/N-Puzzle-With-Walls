@@ -1,7 +1,7 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
-use crate::prelude::*;
 use crate::prelude::game_session_log::GameSessionLogPlugin;
+use crate::prelude::*;
 
 #[bevy_main]
 pub fn main() {
@@ -9,14 +9,14 @@ pub fn main() {
     app
         //bevy basics
         .add_plugins(ScreenSetupPlugin)
-        //costume basics
+        //custom basics
         .add_plugins((
             SystemSetsPlugin,
             EventPlugin,
             StatePlugin,
             ErrorHandlerPlugin,
         ))
-        //costume
+        //custom
         .add_plugins((
             DataBasePlugin,
             InputPlugin,
@@ -24,7 +24,7 @@ pub fn main() {
             BoardPlugin,
             GraphicsPlugin,
             TileDictionaryPlugin,
-            GameSessionLogPlugin
+            GameSessionLogPlugin,
         ));
 
     app.run();

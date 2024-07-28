@@ -1,7 +1,7 @@
 use crate::output::game_session_log::append_to_game_session_log_file;
 use crate::prelude::*;
 
-const PRINT_GRID_ERROR_RELATED_TILE_MOVE_ERRORS : bool = false;
+const PRINT_GRID_ERROR_RELATED_TILE_MOVE_ERRORS: bool = false;
 
 #[derive(Debug, Clone, Copy)]
 pub enum TileMoveError {
@@ -10,11 +10,11 @@ pub enum TileMoveError {
     NoEmptyNeighbor,
     PressedEmptySlot,
     NoOccupiedTileInThatDirection(BasicDirection),
-    EntityRelated(EntityRelatedCostumeError),
+    EntityRelated(EntityRelatedCustomError),
     TriedToSwitchWithAWall,
     TriedToSwitchEmptyWithEmpty,
     TriedToSwitchBetweenTwoOccupied(Tile, Tile),
-    GridError(GridError)
+    GridError(GridError),
 }
 
 pub fn print_tile_move_error(move_error: TileMoveError) {
@@ -36,37 +36,40 @@ pub fn print_tile_move_error(move_error: TileMoveError) {
                 String::from("tried to switch empty with empty, hence no swap was performed");
             append_to_game_session_log_file(empty_with_empty_info_string.clone());
             info!(empty_with_empty_info_string);
-        },
+        }
         TileMoveError::GridError(grid_error) => {
-            if PRINT_GRID_ERROR_RELATED_TILE_MOVE_ERRORS{
-                match grid_error{
+            if PRINT_GRID_ERROR_RELATED_TILE_MOVE_ERRORS {
+                match grid_error {
                     GridError::InvalidPositionVector(position) => {
-                        warn!("clicked position {:?} can't be converted to a valid grid location", position)
-                    },
-                    _ => error!("{:?}", grid_error)
+                        warn!(
+                            "clicked position {:?} can't be converted to a valid grid location",
+                            position
+                        )
+                    }
+                    _ => error!("{:?}", grid_error),
                 }
             }
-        },
+        }
         _ => {
             error!("{:?}", move_error)
         }
     }
 }
 
-impl From<GridError> for TileMoveError{
+impl From<GridError> for TileMoveError {
     fn from(value: GridError) -> Self {
         Self::GridError(value)
     }
 }
 
-impl From<TileBoardError> for TileMoveError{
+impl From<TileBoardError> for TileMoveError {
     fn from(value: TileBoardError) -> Self {
         Self::TileBoardError(value)
     }
 }
 
-impl From<EntityRelatedCostumeError> for TileMoveError{
-    fn from(value: EntityRelatedCostumeError) -> Self {
+impl From<EntityRelatedCustomError> for TileMoveError {
+    fn from(value: EntityRelatedCustomError) -> Self {
         Self::EntityRelated(value)
     }
 }

@@ -110,20 +110,20 @@ pub mod prelude {
     };
     pub use crate::output::{
         console::{
-            costume_error::{
+            custom_error::{
                 board_generation_error::*,
                 data_base_error::*,
                 data_struct_error::{
                     grid_error::*, grid_tree_error::*, tile_board_error::*, DataStructError,
                 },
-                entity_related_costume_error::*,
+                entity_related_custom_error::*,
                 error_handler::*,
                 menu_error::*,
                 system_access_error::*,
                 tile_move_error::*,
                 MismatchError,
             },
-            costume_print::{
+            custom_print::{
                 game_log::*, print_display_deriver_vec, solution_printer::*, system_log::*,
                 BevyPrintType,
             },

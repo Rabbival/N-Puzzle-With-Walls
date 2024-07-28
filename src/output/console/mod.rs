@@ -1,2 +1,2 @@
-pub mod costume_error;
-pub mod costume_print;
+pub mod custom_error;
+pub mod custom_print;

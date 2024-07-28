@@ -57,10 +57,10 @@ fn listen_for_set_confirm_allowed_requests_inner(
     confirm_allowed_query: &mut Query<&mut ConfirmAllowed, With<PopUpMessageType>>,
     pop_up_dynamic_text_query: &Query<&Text, With<PopUpMessageDynamicTextTag>>,
     newborn_domain_board_name: &mut ResMut<NewbornDomainBoardName>,
-) -> Result<(), EntityRelatedCostumeError> {
+) -> Result<(), EntityRelatedCustomError> {
     let optional_confirm_button = try_get_confirm_button_entity(pop_up_buttons_query);
     match optional_confirm_button {
-        None => Err(EntityRelatedCostumeError::EntityNotInQuery),
+        None => Err(EntityRelatedCustomError::EntityNotInQuery),
         Some(confirm_button_entity) => {
             confirm_allowed_query.single_mut().0 = set_confirm_allowed_request.0;
             if set_confirm_allowed_request.0 {
