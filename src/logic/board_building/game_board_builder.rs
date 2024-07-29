@@ -60,6 +60,7 @@ fn build_a_new_game_board(
 }
 
 fn declare_board_generation_done(
+    mut check_if_board_is_solved_writer: EventWriter<CheckIfBoardIsSolved>,
     mut lock_toggle_event_writer: EventWriter<SetGameBoardLock>,
     mut app_state: ResMut<NextState<AppState>>,
     current_app_state: Res<State<AppState>>,
@@ -74,4 +75,5 @@ fn declare_board_generation_done(
     lock_toggle_event_writer.send(SetGameBoardLock(false));
     game_log(GameLog::NewBoardGenerated);
     game_state.set(GameState::Regular);
+    check_if_board_is_solved_writer.send(CheckIfBoardIsSolved);
 }

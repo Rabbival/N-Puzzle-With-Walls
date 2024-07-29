@@ -17,6 +17,7 @@ pub struct GameStatePlugin;
 impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<GameState>()
+			.add_systems(OnEnter(GameState::Victory), send_board_lock_event)
 			.add_systems(
 				Update,
 					set_game_state_according_to_board_gen_request
@@ -24,6 +25,10 @@ impl Plugin for GameStatePlugin {
 						.after(set_applied_props_and_exit_menu)
 			);
 	}
+}
+
+fn send_board_lock_event(mut lock_toggle_event_writer: EventWriter<SetGameBoardLock>){
+	lock_toggle_event_writer.send(SetGameBoardLock(true));
 }
 
 fn set_game_state_according_to_board_gen_request(

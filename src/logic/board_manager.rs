@@ -21,8 +21,6 @@ fn listen_for_board_lock_change_requests(
     mut game_board_query: Query<&mut TileBoard, With<GameBoard>>,
 ) {
     for lock_change_request in event_reader.read() {
-        println!("lock change request: {:?}", lock_change_request.0);
-
         game_board_query.single_mut().ignore_player_input = lock_change_request.0;
     }
 }
@@ -104,9 +102,7 @@ fn move_tile_logic_inner(
     }
 }
 
-/// also freezes the board if it is solved
 fn check_if_solved(
-    mut lock_toggle_event_writer: EventWriter<SetGameBoardLock>,
     mut check_if_board_is_solved_listener: EventReader<CheckIfBoardIsSolved>,
     mut set_game_state_to_victory: ResMut<NextState<GameState>>,
     game_board_query: Query<&TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
@@ -123,7 +119,6 @@ fn check_if_solved(
                 continue 'request_check;
             }
         }
-        lock_toggle_event_writer.send(SetGameBoardLock(true));
         set_game_state_to_victory.set(GameState::Victory);
         game_log(GameLog::Victory);
     }

@@ -371,6 +371,7 @@ fn listen_for_db_related_button_events(
     pop_up_message_query: Query<&PopUpMessageType>,
     game_board_query: Query<&TileBoard, With<GameBoard>>,
     newborn_domain_board_name_res: Res<NewbornDomainBoardName>,
+    game_state: Res<State<GameState>>
 ) {
     for action_request in event_reader.read() {
         if *pop_up_message_query.single() == PopUpMessageType::ChooseNewbornDomainBoardName {
@@ -389,7 +390,9 @@ fn listen_for_db_related_button_events(
                     });
                 }
             }
-            lock_toggle_event_writer.send(SetGameBoardLock(false));
+            if *game_state != GameState::Victory {
+                lock_toggle_event_writer.send(SetGameBoardLock(false));
+            }
         }
     }
 }
