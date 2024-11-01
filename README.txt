@@ -1,6 +1,6 @@
 A link to the game on itch: https://rabbival.itch.io/n-puzzle-with-walls
 
-#### How to play
+####How to play
 Try and get the numbers in the correct order, starting on the top left corner by rows.
 Use WASD/Arrows to move the empty spaces around.
 Alternatively, click the tile you'd like to move into the empty space with the mouse.
@@ -13,7 +13,7 @@ Arrow keys may also be used for navigating the Loader screen.
 Enjoy!
 
 
-#### Some cool things I did here:
+####Some cool things I did here:
 * Each grid can spawn attached data structures, such as "travellers" and a random tree graph based on them
     * The grid tree has a smart iterator so that it's exposed as a regular iterator but actually takes some smart steps in randomly choosing the next leaf
 * While connectivity is ensured by using the tree subgraph (and full O(n) runs when it fails), I also ensured that:
@@ -23,6 +23,6 @@ Enjoy!
     * This means that going down from a very large board to another large one is very efficient without damaging all other transitions
 
 
-#### Acknowledgements
+####Acknowledgements
 This project exists thanks to many friends who helped me playtest and rethink along the way.
 I'd also like to thank mwbraynt for making the project that gave me the initial direction as to how to use a clicked grid: https://github.com/mwbryant/logic_management_game/tree/master 
