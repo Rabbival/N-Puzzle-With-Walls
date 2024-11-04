@@ -21,6 +21,7 @@ Enjoy!
     * Each numbered cell is a part of a cycle (for the sake of movability, so that the number can be moved out of its original cell)
 * Smart despawn and respawn - I tag all the numbers that get to stay in the next board and only remove the rest
     * This means that going down from a very large board to another large one is very efficient without damaging all other transitions
+* Responsive and informative UI system- Errors are printed to the screen when managing saved boards and board generation. Only usable buttons show at any given time.
 
 
 #### Acknowledgements
