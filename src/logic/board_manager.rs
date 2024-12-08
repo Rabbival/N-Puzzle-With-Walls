@@ -32,12 +32,11 @@ fn move_tile_logic(
     mut logic_event_reader: EventReader<ShiftTilesInDirectionRequest>,
     mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
 ) {
-    for switch_tile_request in logic_event_reader.read() {
+    for shift_tiles_request in logic_event_reader.read() {
         if let Err(move_error) = move_tile_logic_inner(
             &mut graphics_event_writer,
             &mut check_if_board_is_solved_writer,
-            switch_tile_request.move_neighbor_from_direction,
-            switch_tile_request.empty_tile_index,
+            shift_tiles_request,
             &mut game_board_query.single_mut(),
         ) {
             print_tile_move_error(move_error);
@@ -49,13 +48,14 @@ fn move_tile_logic(
 fn move_tile_logic_inner(
     graphics_event_writer: &mut EventWriter<UpdateTileLocationGraphics>,
     check_if_board_is_solved_writer: &mut EventWriter<CheckIfBoardIsSolved>,
-    move_neighbor_from_direction: BasicDirection,
-    empty_tile_index: usize,
+    shift_tiles_request: &ShiftTilesInDirectionRequest,
     game_board: &mut TileBoard,
 ) -> Result<(), TileMoveError> {
     if game_board.ignore_player_input {
         return Err(TileMoveError::BoardFrozenToPlayer);
     }
+    let empty_tile_index = shift_tiles_request.empty_tile_index;
+    let move_neighbor_from_direction = shift_tiles_request.move_neighbor_from_direction;
 
     let empty_tile_neighbors = game_board.get_direct_neighbors_of_empty(empty_tile_index);
     if let Some(&occupied_tile_original_location) =
@@ -169,10 +169,19 @@ mod tests {
         check_writer: &mut EventWriter<CheckIfBoardIsSolved>,
     ) -> bool {
         let mut tile_board = TileBoard::default();
+        let tile_shift_request = ShiftTilesInDirectionRequest {
+            empty_tile_index: 0,
+            move_neighbor_from_direction: from_dir,
+            steps_count: 0,
+        };
         generate_solved_board_inner(&BoardProperties::default(), &mut tile_board).unwrap();
         tile_board.ignore_player_input = false;
-        let direction_check_outcome =
-            move_tile_logic_inner(graphics_writer, check_writer, from_dir, 0, &mut tile_board);
+        let direction_check_outcome = move_tile_logic_inner(
+            graphics_writer,
+            check_writer,
+            &tile_shift_request,
+            &mut tile_board,
+        );
         matches!(
             direction_check_outcome,
             Err(TileMoveError::NoOccupiedTileInThatDirection(_))
