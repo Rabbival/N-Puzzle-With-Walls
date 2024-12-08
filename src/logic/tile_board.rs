@@ -1,5 +1,5 @@
-use enum_iterator::all;
 use crate::prelude::*;
+use enum_iterator::all;
 
 #[derive(Component, Clone, Debug)]
 pub struct TileBoard {
@@ -23,7 +23,7 @@ impl TileBoard {
         }
     }
 
-    pub fn from_grid(grid: &Grid<Tile>) -> Self{
+    pub fn from_grid(grid: &Grid<Tile>) -> Self {
         let mut newborn_self = Self {
             grid: grid.clone(),
             empty_tile_locations: vec![],
@@ -58,21 +58,22 @@ impl TileBoard {
 }
 
 //creation helpers
-impl TileBoard{
-    pub fn determine_empty_tile_locations_from_given_grid(&mut self, grid: &Grid<Tile>){
-        for (tile_location, new_empty_tile) in grid.iter(){
-            if new_empty_tile.tile_type == TileType::Empty{
+impl TileBoard {
+    pub fn determine_empty_tile_locations_from_given_grid(&mut self, grid: &Grid<Tile>) {
+        for (tile_location, new_empty_tile) in grid.iter() {
+            if new_empty_tile.tile_type == TileType::Empty {
                 let new_tile_index = new_empty_tile.index;
-                let new_tile_index = self.empty_tile_locations.partition_point(
-                    |empty_tile_location| {
-                        if let Ok(Some(existing_tile)) = grid.get(empty_tile_location){
-                            existing_tile.index < new_tile_index
-                        }else{
-                            false
-                        }
-                    }
-                );
-                self.empty_tile_locations.insert(new_tile_index, tile_location);
+                let new_tile_index =
+                    self.empty_tile_locations
+                        .partition_point(|empty_tile_location| {
+                            if let Ok(Some(existing_tile)) = grid.get(empty_tile_location) {
+                                existing_tile.index < new_tile_index
+                            } else {
+                                false
+                            }
+                        });
+                self.empty_tile_locations
+                    .insert(new_tile_index, tile_location);
             }
         }
     }
@@ -85,7 +86,7 @@ impl TileBoard{
         self.empty_tile_locations = self.available_locations_from_the_end(empty_tiles_count)?;
         Ok(())
     }
-    
+
     fn available_locations_from_the_end(
         &self,
         empty_tiles_count: u8,
@@ -103,10 +104,11 @@ impl TileBoard{
         empty_tile_locations.reverse();
         Ok(empty_tile_locations)
     }
-    
-    pub fn spawn_walls_in_locations(&mut self, locations: &Vec<GridLocation>) 
-        -> Result<(), GridError>
-    {
+
+    pub fn spawn_walls_in_locations(
+        &mut self,
+        locations: &Vec<GridLocation>,
+    ) -> Result<(), GridError> {
         for location in locations {
             self.set(location, Tile::new(TileType::Wall))?;
         }
@@ -117,8 +119,7 @@ impl TileBoard{
         &mut self,
         applied_props: &BoardProperties,
         grid_side_length_u32: &u32,
-    ) -> Result<(), GridError>
-    {
+    ) -> Result<(), GridError> {
         let mut empty_tile_counter = applied_props.empty_count;
         'outer_for: for i in (0..*grid_side_length_u32).rev() {
             for j in (0..*grid_side_length_u32).rev() {
@@ -138,8 +139,7 @@ impl TileBoard{
     pub fn spawn_numbered_uninitialized_tiles(
         &mut self,
         grid_side_length_u32: &u32,
-    ) -> Result<(), GridError>
-    {
+    ) -> Result<(), GridError> {
         for i in 0..*grid_side_length_u32 {
             for j in 0..*grid_side_length_u32 {
                 let location = GridLocation::new(i as i32, j as i32);
@@ -195,41 +195,41 @@ impl TileBoard {
         Ok(self.grid.swap_by_location(first, second)?)
     }
 
-    pub fn tiletype_in_location(&self, location: &GridLocation)
-    -> Result<TileType, TileBoardError>
-    {
-        match self.get(location)?{
+    pub fn tiletype_in_location(
+        &self,
+        location: &GridLocation,
+    ) -> Result<TileType, TileBoardError> {
+        match self.get(location)? {
             Some(tile_ref) => Ok(tile_ref.tile_type),
-            None => Err(TileBoardError::NoTileInCell(*location))
+            None => Err(TileBoardError::NoTileInCell(*location)),
         }
     }
 
-    fn try_get_tiletype_in_location(&self, location: &GridLocation)
-    -> Result<Option<TileType>, GridError>
-    {
-        match self.get(location)?{
+    fn try_get_tiletype_in_location(
+        &self,
+        location: &GridLocation,
+    ) -> Result<Option<TileType>, GridError> {
+        match self.get(location)? {
             Some(tile_ref) => Ok(Some(tile_ref.tile_type)),
-            None => Ok(None)
+            None => Ok(None),
         }
     }
-    
-    pub fn try_get_all_empty_tiles(&self) -> Result<Vec<&Tile>, TileBoardError>{
-        let mut empty_tiles_vec = vec!();
-        for empty_tile_index in 0..self.empty_tile_locations.len(){
+
+    pub fn try_get_all_empty_tiles(&self) -> Result<Vec<&Tile>, TileBoardError> {
+        let mut empty_tiles_vec = vec![];
+        for empty_tile_index in 0..self.empty_tile_locations.len() {
             empty_tiles_vec.push(self.try_get_empty_tile(empty_tile_index)?)
         }
         Ok(empty_tiles_vec)
     }
 
     /// if it gets an index out of empties bounds, sets the index to the last cell's
-    pub fn try_get_empty_tile(&self, empty_tile_index: usize)
-    -> Result<&Tile, TileBoardError>
-    {
+    pub fn try_get_empty_tile(&self, empty_tile_index: usize) -> Result<&Tile, TileBoardError> {
         let empty_tile_location = self.get_empty_tile_location(empty_tile_index);
         let cell_content = self.grid.get(empty_tile_location);
-        match cell_content?{
+        match cell_content? {
             Some(tile) => Ok(tile),
-            None => Err(TileBoardError::NoTileInCell(*empty_tile_location))
+            None => Err(TileBoardError::NoTileInCell(*empty_tile_location)),
         }
     }
 
@@ -241,31 +241,62 @@ impl TileBoard {
         }
         self.empty_tile_locations.get(empty_tile_index).unwrap()
     }
-    
-    pub fn get_direct_neighbors_of_empty(&self, empty_tile_index: usize) -> HashMap<BasicDirection, GridLocation> {
+
+    pub fn get_direct_neighbors_of_empty(
+        &self,
+        empty_tile_index: usize,
+    ) -> HashMap<BasicDirection, GridLocation> {
         self.get_neighbor_locations_of_type(
             self.get_empty_tile_location(empty_tile_index),
-            TileType::Numbered
+            TileType::Numbered,
         )
     }
 
-    pub fn get_empty_neighbors(&self, origin: &GridLocation) -> FoundEmptyNeighbors {
-        let empty_neighbors =
-            self.get_neighbor_locations_of_type(origin, TileType::Empty);
-        let empty_neighbors_as_tiles: HashMap<BasicDirection, Tile> = 
-            empty_neighbors.iter().map(|(direction, location)|{
-                (*direction, *self.get(location).unwrap().unwrap())
-            }).collect();
-        FoundEmptyNeighbors::from_empty_neighbors_map(empty_neighbors_as_tiles)
+    pub fn get_empty_tiles_in_direct_line(&self, origin: &GridLocation) -> Vec<TileInDirectLine> {
+        let mut empty_tiles_in_direct_line = vec![];
+        for direction in BasicDirection::collect_all() {
+            empty_tiles_in_direct_line
+                .append(&mut self.collect_all_empties_until_wall_or_undefined(origin, direction));
+        }
+        empty_tiles_in_direct_line
+    }
+
+    fn collect_all_empties_until_wall_or_undefined(
+        &self,
+        origin: &GridLocation,
+        direction: BasicDirection,
+    ) -> Vec<TileInDirectLine> {
+        let mut empty_tiles_in_direction = vec![];
+        let mut current_location = *origin;
+        loop {
+            match self.get(&current_location) {
+                Ok(Some(tile)) => match tile.tile_type {
+                    TileType::Empty => {
+                        empty_tiles_in_direction.push(TileInDirectLine::from_origin_and_location(
+                            origin,
+                            &current_location,
+                            tile,
+                        ));
+                    }
+                    TileType::Numbered => {}
+                    TileType::Wall => {
+                        break;
+                    }
+                },
+                _ => break,
+            }
+            current_location = self.grid.neighbor_location(&current_location, &direction);
+        }
+        empty_tiles_in_direction
     }
 
     pub fn get_neighbor_locations_of_type(
         &self,
         origin: &GridLocation,
-        type_to_return: TileType
-    ) -> HashMap<BasicDirection, GridLocation> 
-    {
-        let mut direct_neighbor_locations = self.grid.get_all_initialized_neighbor_locations(origin);
+        type_to_return: TileType,
+    ) -> HashMap<BasicDirection, GridLocation> {
+        let mut direct_neighbor_locations =
+            self.grid.get_all_initialized_neighbor_locations(origin);
         for (dir, loc) in self.grid.get_all_initialized_neighbor_locations(origin) {
             if let Some(value_in_cell) = self.get(&loc).unwrap() {
                 if value_in_cell.tile_type != type_to_return {
@@ -284,7 +315,7 @@ impl TileBoard {
             .iter()
             .filter(|(_, tile_reference)| tile_reference.tile_type != TileType::Wall)
     }
-    
+
     pub fn walls_iter(&self) -> impl DoubleEndedIterator<Item = (GridLocation, &Tile)> + '_ {
         self.grid
             .iter()
@@ -298,15 +329,11 @@ impl TileBoard {
         self.grid.get_side_length()
     }
 
-    pub fn get(&self, location: &GridLocation) 
-    -> Result<Option<&Tile>, GridError>
-    {
+    pub fn get(&self, location: &GridLocation) -> Result<Option<&Tile>, GridError> {
         self.grid.get(location)
     }
 
-    pub fn get_mut(&mut self, location: &GridLocation) 
-    -> Result<Option<&mut Tile>, GridError>
-    {
+    pub fn get_mut(&mut self, location: &GridLocation) -> Result<Option<&mut Tile>, GridError> {
         self.grid.get_mut(location)
     }
 
@@ -316,29 +343,23 @@ impl TileBoard {
     }
 
     /// returns an option with the previous value
-    pub fn set_and_get_former(&mut self, location: &GridLocation, content: Tile)
-    -> Result<Option<Tile>,  GridError>
-    {
+    pub fn set_and_get_former(
+        &mut self,
+        location: &GridLocation,
+        content: Tile,
+    ) -> Result<Option<Tile>, GridError> {
         self.grid.set_and_get_former(location, content)
     }
 
-    pub fn is_tile_empty(&self, location: &GridLocation) 
-    -> Result<bool, TileBoardError>
-    {
+    pub fn is_tile_empty(&self, location: &GridLocation) -> Result<bool, TileBoardError> {
         let tile_ref = self.none_check_get(location)?;
         match tile_ref.tile_type {
-            TileType::Empty => {
-                Ok(true)
-            }
-            TileType::Numbered | TileType::Wall => {
-                Ok(false)
-            }
+            TileType::Empty => Ok(true),
+            TileType::Numbered | TileType::Wall => Ok(false),
         }
     }
 
-    fn none_check_get(&self, location: &GridLocation) 
-    -> Result<&Tile, TileBoardError>
-    {
+    fn none_check_get(&self, location: &GridLocation) -> Result<&Tile, TileBoardError> {
         match self.get(location)? {
             None => Err(TileBoardError::NoTileInCell(*location)),
             Some(tile_ref) => Ok(tile_ref),

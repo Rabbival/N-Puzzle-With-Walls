@@ -5,24 +5,19 @@ pub struct ExampleBoards(pub HashMap<DomainBoardName, BoardProperties>);
 
 pub struct ExampleBoardsPlugin;
 
-impl Plugin for ExampleBoardsPlugin{
+impl Plugin for ExampleBoardsPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .init_resource::<ExampleBoards>()
-            .add_systems(
-                Startup,
-                (
-                    initialize_example_boards,
-                    spawn_example_boards
-                ).chain()
-            );
+        app.init_resource::<ExampleBoards>().add_systems(
+            Startup,
+            (initialize_example_boards, spawn_example_boards).chain(),
+        );
     }
 }
 
-fn initialize_example_boards(mut example_boards: ResMut<ExampleBoards>){
+fn initialize_example_boards(mut example_boards: ResMut<ExampleBoards>) {
     example_boards.0.insert(
         DomainBoardName(String::from("Tiny Introduction")),
-        BoardProperties{
+        BoardProperties {
             board_difficulty: BoardDifficulty::Easy,
             size: BoardSize::Tiny,
             wall_count: 0,
@@ -33,7 +28,7 @@ fn initialize_example_boards(mut example_boards: ResMut<ExampleBoards>){
     );
     example_boards.0.insert(
         DomainBoardName(String::from("Classic 15")),
-        BoardProperties{
+        BoardProperties {
             board_difficulty: BoardDifficulty::Medium,
             size: BoardSize::Small,
             wall_count: 0,
@@ -44,7 +39,7 @@ fn initialize_example_boards(mut example_boards: ResMut<ExampleBoards>){
     );
     example_boards.0.insert(
         DomainBoardName(String::from("3 Blocks")),
-        BoardProperties{
+        BoardProperties {
             board_difficulty: BoardDifficulty::Medium,
             size: BoardSize::Small,
             wall_count: 3,
@@ -55,7 +50,7 @@ fn initialize_example_boards(mut example_boards: ResMut<ExampleBoards>){
     );
     example_boards.0.insert(
         DomainBoardName(String::from("For The Experienced")),
-        BoardProperties{
+        BoardProperties {
             board_difficulty: BoardDifficulty::Hard,
             size: BoardSize::Large,
             wall_count: 8,
@@ -66,7 +61,7 @@ fn initialize_example_boards(mut example_boards: ResMut<ExampleBoards>){
     );
     example_boards.0.insert(
         DomainBoardName(String::from("A True Challenge")),
-        BoardProperties{
+        BoardProperties {
             board_difficulty: BoardDifficulty::Hard,
             size: BoardSize::Giant,
             wall_count: 20,
@@ -81,14 +76,14 @@ fn spawn_example_boards(
     mut save_to_board_event_writer: EventWriter<SaveToDB>,
     example_boards: Res<ExampleBoards>,
     db_manager: Res<DataBaseManager>,
-    board_name_query: Query<&DomainBoardName>
-){
+    board_name_query: Query<&DomainBoardName>,
+) {
     if let Err(board_gen_error) = spawn_example_boards_inner(
         &mut save_to_board_event_writer,
         &example_boards,
         &db_manager,
-        &board_name_query
-    ){
+        &board_name_query,
+    ) {
         print_board_generation_error(board_gen_error);
     }
 }
@@ -97,25 +92,22 @@ fn spawn_example_boards_inner(
     save_to_board_event_writer: &mut EventWriter<SaveToDB>,
     example_boards: &ExampleBoards,
     db_manager: &DataBaseManager,
-    board_name_query: &Query<&DomainBoardName>
-) -> Result<(), BoardGenerationError>{
-    for (board_name, board_props) in &example_boards.0{
+    board_name_query: &Query<&DomainBoardName>,
+) -> Result<(), BoardGenerationError> {
+    for (board_name, board_props) in &example_boards.0 {
         let grid_side_length = board_props.size.to_grid_side_length();
         let mut tile_board = TileBoard::new(grid_side_length);
-        generate_solved_board_inner(&board_props, &mut tile_board)?;
+        generate_solved_board_inner(board_props, &mut tile_board)?;
         let shuffled_board =
             brute_force_generate_game_board(&tile_board, board_props.size.to_random_turns_range())?;
-        save_to_board_event_writer.send(SaveToDB{
+        save_to_board_event_writer.send(SaveToDB {
             name: board_name.clone(),
-            board: DomainBoard{
+            board: DomainBoard {
                 board_props: *board_props,
                 grid: shuffled_board.grid,
             },
-            index_of_existing_board_with_name:
-                db_manager.get_existing_board_name_index(
-                    board_name,
-                    board_name_query
-                )
+            index_of_existing_board_with_name: db_manager
+                .get_existing_board_name_index(board_name, board_name_query),
         });
     }
     Ok(())

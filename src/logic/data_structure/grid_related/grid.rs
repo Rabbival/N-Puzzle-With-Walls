@@ -1,6 +1,6 @@
+use crate::prelude::*;
 use enum_iterator::all;
 use serde::{Deserialize, Serialize};
-use crate::prelude::*;
 
 #[derive(Component, Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Grid<T: Clone> {
@@ -10,26 +10,28 @@ pub struct Grid<T: Clone> {
 
 //grid travelling functions
 impl<T: Clone> Grid<T> {
-    pub fn all_nodes_in_cycles(&self) -> Result<bool, DataStructError<GridLocation>>{
+    pub fn all_nodes_in_cycles(&self) -> Result<bool, DataStructError<GridLocation>> {
         let mut grid_cycle_checker = GridCycleChecker::new(self);
         grid_cycle_checker.all_nodes_in_cycles(self)
     }
 
-    pub fn get_spanning_tree(&self, traveller_type: GridTravellerType) -> Result<GridTree, GridTreeError> {
+    pub fn get_spanning_tree(
+        &self,
+        traveller_type: GridTravellerType,
+    ) -> Result<GridTree, GridTreeError> {
         let grid_traveller = GridTraveller::from_grid(self, traveller_type);
         let mut grid_tree = GridTree::from_root(grid_traveller.locations_to_visit[0]);
         for location_and_neighbors in grid_traveller {
             for neighbor in location_and_neighbors.just_added_neighbors {
-                grid_tree.insert_leaf
-                    (neighbor, Some(location_and_neighbors.just_visited_location))?;
+                grid_tree
+                    .insert_leaf(neighbor, Some(location_and_neighbors.just_visited_location))?;
             }
         }
         Ok(grid_tree)
     }
 
     pub fn is_connected_graph(&self) -> bool {
-        let mut traveller = 
-            GridTraveller::from_grid(self, GridTravellerType::default());
+        let mut traveller = GridTraveller::from_grid(self, GridTravellerType::default());
         let mut tile_counter = 0;
         while traveller.next().is_some() {
             tile_counter += 1;
@@ -43,8 +45,7 @@ impl<T: Clone> Grid<T> {
     pub fn get_all_initialized_neighbor_locations(
         &self,
         origin: &GridLocation,
-    ) -> HashMap<BasicDirection, GridLocation> 
-    {
+    ) -> HashMap<BasicDirection, GridLocation> {
         let mut valid_neighbors: HashMap<BasicDirection, GridLocation> = HashMap::new();
         for dir in all::<BasicDirection>() {
             if let Some(neighbor_location) = self.get_value_in_neighbor_location(origin, &dir) {
@@ -139,28 +140,24 @@ impl<T: Clone> Grid<T> {
         self.grid_side_length
     }
 
-    pub fn get(&self, location: &GridLocation) 
-    -> Result<Option<&T>, GridError>
-    {
+    pub fn get(&self, location: &GridLocation) -> Result<Option<&T>, GridError> {
         if self.valid_index(location) {
             let location_index = self.location_to_index(location);
-            match self.grid.get(location_index){
+            match self.grid.get(location_index) {
                 None => Ok(None),
-                Some(cell_value) => Ok(cell_value.as_ref())
+                Some(cell_value) => Ok(cell_value.as_ref()),
             }
         } else {
             Err(GridError::InvalidIndex(*location))
         }
     }
 
-    pub fn get_mut(&mut self, location: &GridLocation)
-    -> Result<Option<&mut T>, GridError>
-    {
+    pub fn get_mut(&mut self, location: &GridLocation) -> Result<Option<&mut T>, GridError> {
         if self.valid_index(location) {
             let location_index = self.location_to_index(location);
-            match self.grid.get_mut(location_index){
+            match self.grid.get_mut(location_index) {
                 None => Ok(None),
-                Some(cell_value) => Ok(cell_value.as_mut())
+                Some(cell_value) => Ok(cell_value.as_mut()),
             }
         } else {
             Err(GridError::InvalidIndex(*location))
@@ -172,15 +169,17 @@ impl<T: Clone> Grid<T> {
         if self.valid_index(location) {
             self.grid[location.to_index(self.grid_side_length)] = Some(value);
             Ok(())
-        }else{
+        } else {
             Err(GridError::InvalidIndex(*location))
         }
     }
 
     /// returns an option with the previous value
-    pub fn set_and_get_former(&mut self, location: &GridLocation, value: T) 
-    -> Result<Option<T>,  GridError>
-    {
+    pub fn set_and_get_former(
+        &mut self,
+        location: &GridLocation,
+        value: T,
+    ) -> Result<Option<T>, GridError> {
         if self.valid_index(location) {
             let former = self.grid[location.to_index(self.grid_side_length)].clone();
             self.set(location, value)?;
@@ -191,9 +190,7 @@ impl<T: Clone> Grid<T> {
     }
 
     /// returns an option with the previous value
-    pub fn set_none_get_former(&mut self, location: &GridLocation) 
-    -> Result<Option<T>, GridError>
-    {
+    pub fn set_none_get_former(&mut self, location: &GridLocation) -> Result<Option<T>, GridError> {
         if self.valid_index(location) {
             let former = self.grid[location.to_index(self.grid_side_length)].clone();
             self.grid[location.to_index(self.grid_side_length)] = None;
@@ -203,14 +200,16 @@ impl<T: Clone> Grid<T> {
         }
     }
 
-    pub fn swap_by_location(&mut self, first: &GridLocation, second: &GridLocation) 
-    -> Result<(), GridError>
-    {
-        if !self.valid_index(first){
+    pub fn swap_by_location(
+        &mut self,
+        first: &GridLocation,
+        second: &GridLocation,
+    ) -> Result<(), GridError> {
+        if !self.valid_index(first) {
             Err(GridError::InvalidIndex(*first))
-        }else if !self.valid_index(second){
+        } else if !self.valid_index(second) {
             Err(GridError::InvalidIndex(*second))
-        }else{
+        } else {
             let first_location_index = self.location_to_index(first);
             let second_location_index = self.location_to_index(second);
             self.grid.swap(first_location_index, second_location_index);

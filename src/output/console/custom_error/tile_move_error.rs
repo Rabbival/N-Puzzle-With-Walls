@@ -7,7 +7,7 @@ const PRINT_GRID_ERROR_RELATED_TILE_MOVE_ERRORS: bool = false;
 pub enum TileMoveError {
     TileBoardError(TileBoardError),
     BoardFrozenToPlayer,
-    NoEmptyNeighbor,
+    NoEmptyTileInDirectLine,
     PressedEmptySlot,
     NoOccupiedTileInThatDirection(BasicDirection),
     EntityRelated(EntityRelatedCustomError),
@@ -22,8 +22,8 @@ pub fn print_tile_move_error(move_error: TileMoveError) {
         TileMoveError::BoardFrozenToPlayer => {
             warn!("board locked");
         }
-        TileMoveError::NoEmptyNeighbor => {
-            warn!("no empty neighbor");
+        TileMoveError::NoEmptyTileInDirectLine => {
+            warn!("there's no empty tile in direct line to the pressed one");
         }
         TileMoveError::PressedEmptySlot => {
             warn!("pressed an empty slot");

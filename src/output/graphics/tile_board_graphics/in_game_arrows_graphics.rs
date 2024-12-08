@@ -62,14 +62,12 @@ fn listen_for_board_lock_changes(
                 *arrow_vis = Visibility::Hidden;
                 arrow_on_screen_vis.on_own_screen_visibility = Some(Visibility::Hidden);
             }
-        } else {
-            if let Err(tile_board_error) = try_get_empties_and_toggle_arrows(
-                &mut empty_tile_arrows,
-                game_board_query.single(),
-                &tiles_with_children_query,
-            ) {
-                print_tile_board_error(tile_board_error)
-            }
+        } else if let Err(tile_board_error) = try_get_empties_and_toggle_arrows(
+            &mut empty_tile_arrows,
+            game_board_query.single(),
+            &tiles_with_children_query,
+        ) {
+            print_tile_board_error(tile_board_error)
         }
     }
 }

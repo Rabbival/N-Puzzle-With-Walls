@@ -24,6 +24,7 @@ pub mod prelude {
         db_event::*,
         move_tile_event::*,
         screen_changing_event::*,
+        shift_tiles_in_direction_request::*,
         system_event::*,
         ui_event::{
             game_ui_event::*, loader_ui_event::*, menu_ui_event::*, pop_up_message_event::*,
@@ -37,10 +38,9 @@ pub mod prelude {
         newborn_domain_board_name::*, saved_layout_index::*, DataBaseManager, DataBasePlugin,
     };
     pub use crate::input::{
-        button_input::*, keyboard_input_handler::*, mouse_input_handler::*, move_request::*,
-        InputPlugin,
+        button_input::*, keyboard_input_handler::*, mouse_input_handler::*, InputPlugin,
     };
-    pub use crate::logic::enums::found_empty_neighbors::*;
+    pub use crate::logic::enums::tile_in_direct_line::*;
     pub use crate::logic::{
         board_building::{
             board_entities_spawner::*, brute_force_builder::*, game_board_builder::*,

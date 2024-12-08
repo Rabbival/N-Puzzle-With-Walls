@@ -29,7 +29,7 @@ fn listen_for_board_lock_change_requests(
 fn move_tile_logic(
     mut graphics_event_writer: EventWriter<UpdateTileLocationGraphics>,
     mut check_if_board_is_solved_writer: EventWriter<CheckIfBoardIsSolved>,
-    mut logic_event_reader: EventReader<SwitchTilesLogic>,
+    mut logic_event_reader: EventReader<ShiftTilesInDirectionRequest>,
     mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
 ) {
     for switch_tile_request in logic_event_reader.read() {

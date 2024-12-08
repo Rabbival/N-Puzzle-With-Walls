@@ -64,11 +64,11 @@ fn set_possible_empties_sprites(
         } else {
             TileType::Empty.to_tiles_atlas_index()
         };
-        for (_, empty_tile) in empty_tile_locations {
+        for tile_in_direct_line in empty_tile_locations {
             if let Err(move_error) = update_tile_sprite(
                 atlas_index,
                 &mut tile_sprites_query,
-                empty_tile,
+                &tile_in_direct_line.tile,
                 tile_dictionary.single(),
             ) {
                 print_tile_move_error(move_error);

@@ -75,7 +75,7 @@ fn send_pressed_key_event(
 }
 
 fn move_tiles_with_keyboard(
-    mut logic_event_writer: EventWriter<SwitchTilesLogic>,
+    mut logic_event_writer: EventWriter<ShiftTilesInDirectionRequest>,
     pop_up_message_visibility: Query<&Visibility, With<PopUpMessageType>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
@@ -83,16 +83,11 @@ fn move_tiles_with_keyboard(
         return;
     }
 
-    let move_requests = keyboard_input.get_just_pressed().map(MoveRequest::new);
-    for request in move_requests {
-        if request.move_neighbor_from_direction.is_none() || request.empty_tile_index.is_none() {
-            continue;
-        } else {
-            logic_event_writer.send(SwitchTilesLogic {
-                move_neighbor_from_direction: request.move_neighbor_from_direction.unwrap(),
-                empty_tile_index: request.empty_tile_index.unwrap(),
-            });
-        }
+    let shift_tiles_in_direction_requests = keyboard_input
+        .get_just_pressed()
+        .filter_map(ShiftTilesInDirectionRequest::new);
+    for request in shift_tiles_in_direction_requests {
+        logic_event_writer.send(request);
     }
 }
 
