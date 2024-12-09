@@ -86,16 +86,7 @@ fn switch_between_tiles(
     occupied_tile_original_location: &GridLocation,
     empty_tile_index: usize,
 ) -> Result<(), TileMoveError> {
-    let occupied_tile = match game_board.get(occupied_tile_original_location)? {
-        Some(occupied_tile) => match occupied_tile.tile_type {
-            TileType::Wall => Err(TileMoveError::TriedToSwitchWithAWall),
-            _ => Ok(*occupied_tile),
-        },
-        None => Err(TileMoveError::TileBoardError(TileBoardError::NoTileInCell(
-            *occupied_tile_original_location,
-        ))),
-    }?;
-
+    let occupied_tile = get_occupied_tile_if_valid(occupied_tile_original_location, game_board)?;
     let empty_tile_original_location = *game_board.get_empty_tile_location(empty_tile_index);
     let empty_tile = *game_board.try_get_empty_tile(empty_tile_index)?;
     game_board.swap_tiles_by_location(
@@ -117,6 +108,21 @@ fn switch_between_tiles(
     });
 
     Ok(())
+}
+
+fn get_occupied_tile_if_valid(
+    occupied_tile_original_location: &GridLocation,
+    game_board: &TileBoard,
+) -> Result<Tile, TileMoveError> {
+    match game_board.get(occupied_tile_original_location)? {
+        Some(occupied_tile) => match occupied_tile.tile_type {
+            TileType::Wall => Err(TileMoveError::TriedToSwitchWithAWall),
+            _ => Ok(*occupied_tile),
+        },
+        None => Err(TileMoveError::TileBoardError(TileBoardError::NoTileInCell(
+            *occupied_tile_original_location,
+        ))),
+    }
 }
 
 fn check_if_solved(
