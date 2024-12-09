@@ -55,28 +55,28 @@ fn listen_for_tile_shift_requests_inner(
         return Err(TileMoveError::BoardFrozenToPlayer);
     }
     let empty_tile_index = shift_tiles_request.empty_tile_index;
-    let direction_to_move_from = shift_tiles_request.move_neighbor_from_direction;
+    let direction_to_move_from = shift_tiles_request.direction_to_shift_from;
 
     for _ in 0..shift_tiles_request.steps_count {
         let empty_tile_neighbors = game_board.get_direct_neighbors_of_empty(empty_tile_index);
-        if let Some(occupied_tile_original_location) =
-            empty_tile_neighbors.get(&direction_to_move_from)
-        {
-            switch_between_tiles(
-                graphics_event_writer,
-                game_board,
-                occupied_tile_original_location,
-                empty_tile_index,
-            )?;
-        } else {
-            return Err(TileMoveError::NoOccupiedTileInThatDirection(
-                direction_to_move_from,
-            ));
+        match empty_tile_neighbors.get(&direction_to_move_from) {
+            Some(occupied_tile_original_location) => {
+                switch_between_tiles(
+                    graphics_event_writer,
+                    game_board,
+                    occupied_tile_original_location,
+                    empty_tile_index,
+                )?;
+            }
+            None => {
+                return Err(TileMoveError::NoOccupiedTileInThatDirection(
+                    direction_to_move_from,
+                ))
+            }
         }
     }
 
     check_if_board_is_solved_writer.send(CheckIfBoardIsSolved);
-
     Ok(())
 }
 
@@ -86,16 +86,15 @@ fn switch_between_tiles(
     occupied_tile_original_location: &GridLocation,
     empty_tile_index: usize,
 ) -> Result<(), TileMoveError> {
-    let optional_occupied_tile = game_board.get(occupied_tile_original_location)?;
-    if optional_occupied_tile.is_none() {
-        return Err(TileMoveError::TileBoardError(TileBoardError::NoTileInCell(
+    let occupied_tile = match game_board.get(occupied_tile_original_location)? {
+        Some(occupied_tile) => match occupied_tile.tile_type {
+            TileType::Wall => Err(TileMoveError::TriedToSwitchWithAWall),
+            _ => Ok(*occupied_tile),
+        },
+        None => Err(TileMoveError::TileBoardError(TileBoardError::NoTileInCell(
             *occupied_tile_original_location,
-        )));
-    }
-    let occupied_tile = *optional_occupied_tile.unwrap();
-    if occupied_tile.tile_type == TileType::Wall {
-        return Err(TileMoveError::TriedToSwitchWithAWall);
-    }
+        ))),
+    }?;
 
     let empty_tile_original_location = *game_board.get_empty_tile_location(empty_tile_index);
     let empty_tile = *game_board.try_get_empty_tile(empty_tile_index)?;
@@ -189,7 +188,7 @@ mod tests {
         let mut tile_board = TileBoard::default();
         let tile_shift_request = ShiftTilesInDirectionRequest {
             empty_tile_index: 0,
-            move_neighbor_from_direction: from_dir,
+            direction_to_shift_from: from_dir,
             steps_count: 0,
         };
         generate_solved_board_inner(&BoardProperties::default(), &mut tile_board).unwrap();

@@ -181,7 +181,7 @@ fn show_pressed_arrow_in_just_moved_direction_inner(
     tiles_with_children_query: &Query<(&Tile, &Children, &RenderLayers)>,
 ) -> Result<(), TileBoardError> {
     let empty_index = tile_switch_request.empty_tile_index;
-    let direction_moved_from = tile_switch_request.move_neighbor_from_direction;
+    let direction_moved_from = tile_switch_request.direction_to_shift_from;
     let empty_tile = tile_board.try_get_empty_tile(empty_index)?;
     if let Some(empty_tile_children) =
         try_get_empty_tile_children_if_from_game_board(empty_tile, tiles_with_children_query)

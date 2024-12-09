@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Debug, Event)]
 pub struct ShiftTilesInDirectionRequest {
-    pub move_neighbor_from_direction: BasicDirection,
+    pub direction_to_shift_from: BasicDirection,
     pub empty_tile_index: usize,
     pub steps_count: usize,
 }
@@ -20,7 +20,7 @@ impl ShiftTilesInDirectionRequest {
         if let Some(direction) = BasicDirection::from_keycode(keycode) {
             if let Some(empty_tile_index) = Self::empty_tile_index_from_keycode(keycode) {
                 return Some(Self {
-                    move_neighbor_from_direction: direction,
+                    direction_to_shift_from: direction,
                     empty_tile_index,
                     steps_count: 1,
                 });

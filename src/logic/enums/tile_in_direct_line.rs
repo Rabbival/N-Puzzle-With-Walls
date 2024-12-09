@@ -47,7 +47,7 @@ impl TileInDirectLine {
         } else {
             if let Some(opposite_direction) = self.direction.opposite_direction() {
                 Some(ShiftTilesInDirectionRequest {
-                    move_neighbor_from_direction: opposite_direction,
+                    direction_to_shift_from: opposite_direction,
                     empty_tile_index: self.tile.index,
                     steps_count: self.distance as usize,
                 })

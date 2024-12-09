@@ -8,7 +8,7 @@ pub struct UpdateTileLocationGraphics {
 
 #[derive(Event)]
 pub struct SwitchTilesLogic {
-    pub move_neighbor_from_direction: BasicDirection,
+    pub direction_to_shift_from: BasicDirection,
     pub empty_tile_index: usize,
 }
 
