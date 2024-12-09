@@ -195,7 +195,7 @@ mod tests {
         let tile_shift_request = ShiftTilesInDirectionRequest {
             empty_tile_index: 0,
             direction_to_shift_from: from_dir,
-            steps_count: 0,
+            steps_count: 1,
         };
         generate_solved_board_inner(&BoardProperties::default(), &mut tile_board).unwrap();
         tile_board.ignore_player_input = false;
