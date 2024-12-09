@@ -181,7 +181,7 @@ fn get_empty_tiles_in_direct_line_if_numbered(
         }
     };
 
-    Ok(game_board.get_empty_tiles_in_direct_line(&numbered_tile_location?))
+    Ok(game_board.get_closest_empty_tiles_in_direct_line(&numbered_tile_location?))
 }
 
 #[cfg(test)]
@@ -192,6 +192,7 @@ mod tests {
     fn test_input_validation() {
         let mut app = App::new();
         app.add_event::<SwitchTilesLogic>()
+            .add_event::<ShiftTilesInDirectionRequest>()
             .init_resource::<MultipleEmptyTilesChoiceManager>()
             .add_systems(Update, test_input_validation_inner);
         app.update();

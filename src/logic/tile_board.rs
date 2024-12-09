@@ -252,27 +252,30 @@ impl TileBoard {
         )
     }
 
-    pub fn get_empty_tiles_in_direct_line(&self, origin: &GridLocation) -> Vec<TileInDirectLine> {
+    pub fn get_closest_empty_tiles_in_direct_line(
+        &self,
+        origin: &GridLocation,
+    ) -> Vec<TileInDirectLine> {
         let mut empty_tiles_in_direct_line = vec![];
         for direction in BasicDirection::collect_all() {
-            empty_tiles_in_direct_line
-                .append(&mut self.collect_all_empties_until_wall_or_undefined(origin, direction));
+            if let Some(empty_tile) = self.closest_empty_tile_in_direction(origin, direction) {
+                empty_tiles_in_direct_line.push(empty_tile);
+            }
         }
         empty_tiles_in_direct_line
     }
 
-    fn collect_all_empties_until_wall_or_undefined(
+    fn closest_empty_tile_in_direction(
         &self,
         origin: &GridLocation,
         direction: BasicDirection,
-    ) -> Vec<TileInDirectLine> {
-        let mut empty_tiles_in_direction = vec![];
+    ) -> Option<TileInDirectLine> {
         let mut current_location = *origin;
         loop {
             match self.get(&current_location) {
                 Ok(Some(tile)) => match tile.tile_type {
                     TileType::Empty => {
-                        empty_tiles_in_direction.push(TileInDirectLine::from_origin_and_location(
+                        return Some(TileInDirectLine::from_origin_and_location(
                             origin,
                             &current_location,
                             tile,
@@ -287,7 +290,7 @@ impl TileBoard {
             }
             current_location = self.grid.neighbor_location(&current_location, &direction);
         }
-        empty_tiles_in_direction
+        None
     }
 
     pub fn get_neighbor_locations_of_type(
