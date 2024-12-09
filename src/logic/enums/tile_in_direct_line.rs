@@ -36,7 +36,7 @@ impl TileInDirectLine {
             TileInDirectLine {
                 tile,
                 direction: BasicDirection::Up,
-                distance: origin.col - location.col,
+                distance: origin.row - location.row,
             }
         }
     }

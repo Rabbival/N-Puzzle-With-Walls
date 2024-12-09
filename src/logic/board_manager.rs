@@ -7,7 +7,7 @@ impl Plugin for BoardManagerPlugin {
         app.add_systems(
             Update,
             (
-                (move_tile_logic, check_if_solved)
+                (listen_for_tile_shift_requests, check_if_solved)
                     .chain()
                     .in_set(InputSystemSets::InputHandling),
                 listen_for_board_lock_change_requests.in_set(InputSystemSets::LateChanges),
@@ -26,14 +26,14 @@ fn listen_for_board_lock_change_requests(
 }
 
 /// graphics switched before logic for the sake of graphics function readability
-fn move_tile_logic(
+fn listen_for_tile_shift_requests(
     mut graphics_event_writer: EventWriter<UpdateTileLocationGraphics>,
     mut check_if_board_is_solved_writer: EventWriter<CheckIfBoardIsSolved>,
     mut logic_event_reader: EventReader<ShiftTilesInDirectionRequest>,
     mut game_board_query: Query<&mut TileBoard, (With<GameBoard>, Without<SolvedBoard>)>,
 ) {
     for shift_tiles_request in logic_event_reader.read() {
-        if let Err(move_error) = move_tile_logic_inner(
+        if let Err(move_error) = listen_for_tile_shift_requests_inner(
             &mut graphics_event_writer,
             &mut check_if_board_is_solved_writer,
             shift_tiles_request,
@@ -45,7 +45,7 @@ fn move_tile_logic(
 }
 
 /// graphics switched before logic for the sake of graphics function readability
-fn move_tile_logic_inner(
+fn listen_for_tile_shift_requests_inner(
     graphics_event_writer: &mut EventWriter<UpdateTileLocationGraphics>,
     check_if_board_is_solved_writer: &mut EventWriter<CheckIfBoardIsSolved>,
     shift_tiles_request: &ShiftTilesInDirectionRequest,
@@ -55,51 +55,70 @@ fn move_tile_logic_inner(
         return Err(TileMoveError::BoardFrozenToPlayer);
     }
     let empty_tile_index = shift_tiles_request.empty_tile_index;
-    let move_neighbor_from_direction = shift_tiles_request.move_neighbor_from_direction;
+    let direction_to_move_from = shift_tiles_request.move_neighbor_from_direction;
 
-    let empty_tile_neighbors = game_board.get_direct_neighbors_of_empty(empty_tile_index);
-    if let Some(&occupied_tile_original_location) =
-        empty_tile_neighbors.get(&move_neighbor_from_direction)
-    {
-        let optional_occupied_tile = game_board.get(&occupied_tile_original_location)?;
-        if optional_occupied_tile.is_none() {
-            return Err(TileMoveError::TileBoardError(TileBoardError::NoTileInCell(
+    for _ in 0..shift_tiles_request.steps_count {
+        let empty_tile_neighbors = game_board.get_direct_neighbors_of_empty(empty_tile_index);
+        if let Some(occupied_tile_original_location) =
+            empty_tile_neighbors.get(&direction_to_move_from)
+        {
+            switch_between_tiles(
+                graphics_event_writer,
+                check_if_board_is_solved_writer,
+                game_board,
                 occupied_tile_original_location,
-            )));
+                empty_tile_index,
+            )?;
+        } else {
+            return Err(TileMoveError::NoOccupiedTileInThatDirection(
+                direction_to_move_from,
+            ));
         }
-        let occupied_tile = *optional_occupied_tile.unwrap();
-        if occupied_tile.tile_type == TileType::Wall {
-            return Err(TileMoveError::TriedToSwitchWithAWall);
-        }
-
-        let empty_tile_original_location = *game_board.get_empty_tile_location(empty_tile_index);
-        let empty_tile = *game_board.try_get_empty_tile(empty_tile_index)?;
-        game_board.swap_tiles_by_location(
-            &empty_tile_original_location,
-            &occupied_tile_original_location,
-        )?;
-        game_log(GameLog::TilesMoved(
-            &occupied_tile,
-            &empty_tile_original_location,
-        ));
-
-        graphics_event_writer.send(UpdateTileLocationGraphics {
-            tile: occupied_tile,
-            new_location: empty_tile_original_location,
-        });
-        graphics_event_writer.send(UpdateTileLocationGraphics {
-            tile: empty_tile,
-            new_location: occupied_tile_original_location,
-        });
-
-        check_if_board_is_solved_writer.send(CheckIfBoardIsSolved);
-
-        Ok(())
-    } else {
-        Err(TileMoveError::NoOccupiedTileInThatDirection(
-            move_neighbor_from_direction,
-        ))
     }
+    Ok(())
+}
+
+fn switch_between_tiles(
+    graphics_event_writer: &mut EventWriter<UpdateTileLocationGraphics>,
+    check_if_board_is_solved_writer: &mut EventWriter<CheckIfBoardIsSolved>,
+    game_board: &mut TileBoard,
+    occupied_tile_original_location: &GridLocation,
+    empty_tile_index: usize,
+) -> Result<(), TileMoveError> {
+    let optional_occupied_tile = game_board.get(occupied_tile_original_location)?;
+    if optional_occupied_tile.is_none() {
+        return Err(TileMoveError::TileBoardError(TileBoardError::NoTileInCell(
+            *occupied_tile_original_location,
+        )));
+    }
+    let occupied_tile = *optional_occupied_tile.unwrap();
+    if occupied_tile.tile_type == TileType::Wall {
+        return Err(TileMoveError::TriedToSwitchWithAWall);
+    }
+
+    let empty_tile_original_location = *game_board.get_empty_tile_location(empty_tile_index);
+    let empty_tile = *game_board.try_get_empty_tile(empty_tile_index)?;
+    game_board.swap_tiles_by_location(
+        &empty_tile_original_location,
+        &occupied_tile_original_location,
+    )?;
+    game_log(GameLog::TilesMoved(
+        &occupied_tile,
+        &empty_tile_original_location,
+    ));
+
+    graphics_event_writer.send(UpdateTileLocationGraphics {
+        tile: occupied_tile,
+        new_location: empty_tile_original_location,
+    });
+    graphics_event_writer.send(UpdateTileLocationGraphics {
+        tile: empty_tile,
+        new_location: *occupied_tile_original_location,
+    });
+
+    check_if_board_is_solved_writer.send(CheckIfBoardIsSolved);
+
+    Ok(())
 }
 
 fn check_if_solved(
@@ -176,7 +195,7 @@ mod tests {
         };
         generate_solved_board_inner(&BoardProperties::default(), &mut tile_board).unwrap();
         tile_board.ignore_player_input = false;
-        let direction_check_outcome = move_tile_logic_inner(
+        let direction_check_outcome = listen_for_tile_shift_requests_inner(
             graphics_writer,
             check_writer,
             &tile_shift_request,
