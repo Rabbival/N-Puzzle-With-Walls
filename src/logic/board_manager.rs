@@ -64,7 +64,6 @@ fn listen_for_tile_shift_requests_inner(
         {
             switch_between_tiles(
                 graphics_event_writer,
-                check_if_board_is_solved_writer,
                 game_board,
                 occupied_tile_original_location,
                 empty_tile_index,
@@ -75,12 +74,14 @@ fn listen_for_tile_shift_requests_inner(
             ));
         }
     }
+
+    check_if_board_is_solved_writer.send(CheckIfBoardIsSolved);
+
     Ok(())
 }
 
 fn switch_between_tiles(
     graphics_event_writer: &mut EventWriter<UpdateTileLocationGraphics>,
-    check_if_board_is_solved_writer: &mut EventWriter<CheckIfBoardIsSolved>,
     game_board: &mut TileBoard,
     occupied_tile_original_location: &GridLocation,
     empty_tile_index: usize,
@@ -115,8 +116,6 @@ fn switch_between_tiles(
         tile: empty_tile,
         new_location: *occupied_tile_original_location,
     });
-
-    check_if_board_is_solved_writer.send(CheckIfBoardIsSolved);
 
     Ok(())
 }
