@@ -1,5 +1,5 @@
-use bevy::render::render_resource::encase::private::RuntimeSizedArray;
 use crate::prelude::*;
+use bevy::render::render_resource::encase::private::RuntimeSizedArray;
 
 impl DataBaseManager {
     pub fn insert_layout_and_spawn_entity(
@@ -7,9 +7,8 @@ impl DataBaseManager {
         new_domain_board_name: &DomainBoardName,
         new_domain_board: &DomainBoard,
         domain_board_query: &Query<(Entity, &DomainBoardName, &DomainBoard)>,
-        commands: &mut Commands
-    ) -> SavedLayoutIndexInDifficultyVec
-    {
+        commands: &mut Commands,
+    ) -> SavedLayoutIndexInDifficultyVec {
         let newborn_entity =
             Self::spawn_layout_entity(new_domain_board_name, new_domain_board, commands);
         self.insert_layout(
@@ -23,14 +22,15 @@ impl DataBaseManager {
     pub fn spawn_layout_entity(
         domain_board_name: &DomainBoardName,
         domain_board: &DomainBoard,
-        commands: &mut Commands
-    ) -> Entity
-    {
-        commands.spawn(SavedLayoutBundle {
-            domain_board_name: domain_board_name.clone(),
-            domain_board: domain_board.clone(),
-            tile_board: TileBoard::from_grid(&domain_board.grid)
-        }).id()
+        commands: &mut Commands,
+    ) -> Entity {
+        commands
+            .spawn(SavedLayoutBundle {
+                domain_board_name: domain_board_name.clone(),
+                domain_board: domain_board.clone(),
+                tile_board: TileBoard::from_grid(&domain_board.grid),
+            })
+            .id()
     }
 
     pub fn insert_layout(
@@ -39,27 +39,29 @@ impl DataBaseManager {
         new_domain_board_name: &DomainBoardName,
         new_domain_board_difficulty: &BoardDifficulty,
         domain_board_query: &Query<(Entity, &DomainBoardName, &DomainBoard)>,
-    ) -> SavedLayoutIndexInDifficultyVec
-    {
+    ) -> SavedLayoutIndexInDifficultyVec {
         let layouts_of_same_difficulty = self.saved_layouts.get(new_domain_board_difficulty);
-        let index_in_dif_vec = if let Some(layouts_of_difficulty) = layouts_of_same_difficulty{
+        let index_in_dif_vec = if let Some(layouts_of_difficulty) = layouts_of_same_difficulty {
             DataBaseManager::get_partition_point_in_vec_by_name(
                 layouts_of_difficulty,
                 new_domain_board_name,
-                domain_board_query
+                domain_board_query,
             )
-        }else{
-            self.saved_layouts.insert(*new_domain_board_difficulty, vec!());
+        } else {
+            self.saved_layouts
+                .insert(*new_domain_board_difficulty, vec![]);
             0
         };
 
-        let layouts_of_same_difficulty_mut =
-            self.saved_layouts.get_mut(new_domain_board_difficulty).unwrap();
+        let layouts_of_same_difficulty_mut = self
+            .saved_layouts
+            .get_mut(new_domain_board_difficulty)
+            .unwrap();
         layouts_of_same_difficulty_mut.insert(index_in_dif_vec, new_board_entity);
 
         SavedLayoutIndexInDifficultyVec {
             difficulty: *new_domain_board_difficulty,
-            index_in_own_dif: index_in_dif_vec
+            index_in_own_dif: index_in_dif_vec,
         }
     }
 
@@ -67,14 +69,11 @@ impl DataBaseManager {
         layouts_of_difficulty: &Vec<Entity>,
         new_domain_board_name: &DomainBoardName,
         domain_board_query: &Query<(Entity, &DomainBoardName, &DomainBoard)>,
-    ) -> usize
-    {
+    ) -> usize {
         layouts_of_difficulty.partition_point(|saved_layout| {
-            if let Ok((_, existing_domain_board_name, _)) =
-                domain_board_query.get(*saved_layout)
-            {
+            if let Ok((_, existing_domain_board_name, _)) = domain_board_query.get(*saved_layout) {
                 existing_domain_board_name < new_domain_board_name
-            }else{
+            } else {
                 false
             }
         })
@@ -84,15 +83,13 @@ impl DataBaseManager {
         &mut self,
         index: &SavedLayoutIndexInDifficultyVec,
         domain_board_name_query: &Query<&DomainBoardName>,
-        commands: &mut Commands
-    )
-        -> Option<DomainBoardName>
-    {
+        commands: &mut Commands,
+    ) -> Option<DomainBoardName> {
         let difficulty_vec = self.saved_layouts.get_mut(&index.difficulty)?;
         let index_in_difficulty = index.index_in_own_dif;
         if index_in_difficulty < difficulty_vec.len() {
             let removed_entity = difficulty_vec.remove(index_in_difficulty);
-            if let Ok(removed_layout_name) = domain_board_name_query.get(removed_entity){
+            if let Ok(removed_layout_name) = domain_board_name_query.get(removed_entity) {
                 commands.entity(removed_entity).despawn_recursive();
                 return Some(removed_layout_name.clone());
             }
@@ -101,25 +98,39 @@ impl DataBaseManager {
     }
 
     pub fn try_get_layout_ref(&self, index: &SavedLayoutIndexInDifficultyVec) -> Option<&Entity> {
-        self.saved_layouts.get(&index.difficulty)?.get(index.index_in_own_dif)
+        self.saved_layouts
+            .get(&index.difficulty)?
+            .get(index.index_in_own_dif)
     }
 
     pub fn get_saved_layouts_of_all_difficulties_count(&self) -> usize {
         let mut combined_length = 0;
-        for (_dif, vec) in &self.saved_layouts{
+        for (_dif, vec) in &self.saved_layouts {
             combined_length += vec.len();
         }
         combined_length
     }
 
-    pub fn get_layouts_count_by_difficulty(&self, board_difficulty: &BoardDifficulty) -> Option<usize> {
+    pub fn get_layouts_count_by_difficulty(
+        &self,
+        board_difficulty: &BoardDifficulty,
+    ) -> Option<usize> {
         Some(self.saved_layouts.get(board_difficulty)?.len())
     }
 
-    pub fn generate_unique_default_name_for_board(&self, domain_board_names_query: &Query<&DomainBoardName>) -> DomainBoardName {
+    pub fn generate_unique_default_name_for_board(
+        &self,
+        domain_board_names_query: &Query<&DomainBoardName>,
+    ) -> DomainBoardName {
         let mut new_layout_number = self.get_saved_layouts_of_all_difficulties_count();
         let mut new_board_name = DomainBoardName(format!("layout-{:?}", new_layout_number));
-        while self.get_existing_board_name_index(&new_board_name, domain_board_names_query).is_some(){
+        while !self
+            .get_existing_boards_with_same_name_and_difficulty(
+                &new_board_name,
+                domain_board_names_query,
+            )
+            .is_empty()
+        {
             new_layout_number += 1;
             new_board_name = DomainBoardName(format!("layout-{:?}", new_layout_number));
         }
@@ -128,29 +139,30 @@ impl DataBaseManager {
 }
 
 //already exists check functions
-impl DataBaseManager{
+impl DataBaseManager {
     pub fn domain_board_already_exists(
         domain_boards_query: &Query<(&DomainBoard, &DomainBoardName)>,
-        game_board_grid: &Grid<Tile>
+        game_board_grid: &Grid<Tile>,
     ) -> Option<ExistingWallLayoutName> {
-        for (domain_board, domain_board_name) in domain_boards_query{
+        for (domain_board, domain_board_name) in domain_boards_query {
             if domain_board.grid == *game_board_grid {
                 return Some(ExistingWallLayoutName(domain_board_name.0.clone()));
             }
         }
         None
     }
-    
-    pub fn get_existing_board_name_index(
+
+    pub fn get_existing_boards_with_same_name_and_difficulty(
         &self,
         domain_board_name_to_check: &DomainBoardName,
-        domain_boards_query: &Query<&DomainBoardName>
-    ) -> Option<SavedLayoutIndexInDifficultyVec> {
-        for (difficulty, vec) in &self.saved_layouts{
-            for (index, layout_entity) in vec.iter().enumerate(){
-                if let Ok(board_name) = domain_boards_query.get(*layout_entity){
+        domain_boards_query: &Query<&DomainBoardName>,
+    ) -> Vec<SavedLayoutIndexInDifficultyVec> {
+        let mut existing_boards = vec![];
+        for (difficulty, vec) in &self.saved_layouts {
+            for (index, layout_entity) in vec.iter().enumerate() {
+                if let Ok(board_name) = domain_boards_query.get(*layout_entity) {
                     if *domain_board_name_to_check == *board_name {
-                        return Some(SavedLayoutIndexInDifficultyVec{
+                        existing_boards.push(SavedLayoutIndexInDifficultyVec {
                             difficulty: *difficulty,
                             index_in_own_dif: index,
                         });
@@ -158,6 +170,6 @@ impl DataBaseManager{
                 }
             }
         }
-        None
+        existing_boards
     }
 }

@@ -106,8 +106,8 @@ fn spawn_example_boards_inner(
                 board_props: *board_props,
                 grid: shuffled_board.grid,
             },
-            index_of_existing_board_with_name: db_manager
-                .get_existing_board_name_index(board_name, board_name_query),
+            existing_boards_with_same_name_and_difficulty: db_manager
+                .get_existing_boards_with_same_name_and_difficulty(board_name, board_name_query),
         });
     }
     Ok(())

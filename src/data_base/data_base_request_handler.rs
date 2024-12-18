@@ -85,9 +85,9 @@ fn save_to_data_base_and_system_inner(
     )
     .unwrap();
 
-    if let Some(existing_board_with_name_index) = save_request.index_of_existing_board_with_name {
+    for index in &save_request.existing_boards_with_same_name_and_difficulty {
         db_manager.remove_layout_by_index_and_despawn_entity(
-            &existing_board_with_name_index,
+            &index,
             &domain_board_query
                 .transmute_lens::<&DomainBoardName>()
                 .query(),

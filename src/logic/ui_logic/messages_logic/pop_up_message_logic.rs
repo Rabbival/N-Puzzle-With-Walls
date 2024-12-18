@@ -206,9 +206,9 @@ fn set_newborn_board_displayed_name_and_message(
             )
         } else if *game_board_name == requested_name {
             (TextAbovePopUpButtonsType::OverwriteLoadedBoardName, true)
-        } else if newborn_domain_board_name
-            .index_of_existing_board_with_name
-            .is_some()
+        } else if !newborn_domain_board_name
+            .existing_boards_with_same_name_and_difficulty
+            .is_empty()
         {
             (TextAbovePopUpButtonsType::BoardNameAlreadyExists, true)
         } else {
@@ -371,7 +371,7 @@ fn listen_for_db_related_button_events(
     pop_up_message_query: Query<&PopUpMessageType>,
     game_board_query: Query<&TileBoard, With<GameBoard>>,
     newborn_domain_board_name_res: Res<NewbornDomainBoardName>,
-    game_state: Res<State<GameState>>
+    game_state: Res<State<GameState>>,
 ) {
     for action_request in event_reader.read() {
         if *pop_up_message_query.single() == PopUpMessageType::ChooseNewbornDomainBoardName {
@@ -385,8 +385,10 @@ fn listen_for_db_related_button_events(
                             grid: game_board_query.single().grid.clone(),
                         },
                         name: newborn_domain_board_name.clone(),
-                        index_of_existing_board_with_name: newborn_domain_board_name_res
-                            .index_of_existing_board_with_name,
+                        existing_boards_with_same_name_and_difficulty:
+                            newborn_domain_board_name_res
+                                .existing_boards_with_same_name_and_difficulty
+                                .clone(),
                     });
                 }
             }
