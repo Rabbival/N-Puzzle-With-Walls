@@ -1,3 +1,6 @@
+
+![15puzzle_showcase](https://github.com/user-attachments/assets/ef2ef801-f15d-4555-8eca-33d48e611117)
+
 A link to the game on itch: https://rabbival.itch.io/n-puzzle-with-walls
 
 #### How to play
